@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
-  // Static HTML for GitHub Pages; there is no server.
+  // Every page is prebuilt HTML; Vercel serves it without running a server.
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
