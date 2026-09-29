@@ -58,7 +58,7 @@ test('a form that grows after filling keeps reusing its cached suggestions',asyn
       await worker.evaluate(tabId=>chrome.action.setTitle({tabId,title:'Waiting for fill completion'}),tabId);
       await cdp.send('Extensions.triggerAction',{id,targetId:target.targetId});
       await expect(website.locator('#project-code')).toHaveValue(expected);
-      await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toMatch(/^Formly: \d+ filled,/);
+      await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toMatch(/^DevFiller: \d+ filled,/);
     }
 
     // Filling reveals "Confirm project code", so the scanned form is no longer the one Gemini saw.

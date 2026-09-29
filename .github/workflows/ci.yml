@@ -27,7 +27,7 @@ jobs:
       - name: Upload unpacked extension
         uses: actions/upload-artifact@v4
         with:
-          name: formly-unpacked
+          name: devfiller-unpacked
           path: dist/
           if-no-files-found: error
       - name: Upload browser diagnostics

@@ -8,7 +8,7 @@ const emptyStatus:CacheStatus={batches:0,suggestions:0,expiresAt:null,lastMessag
 interface Reply { ok:boolean; error?:string; config?:GeminiConfig; status?:CacheStatus; models?:string[] }
 async function send(message:object):Promise<Reply> {
   const reply:Reply=await chrome.runtime.sendMessage(message);
-  if(!reply?.ok) throw new Error(reply?.error || 'The extension did not respond. Reload Formly and try again.');
+  if(!reply?.ok) throw new Error(reply?.error || 'The extension did not respond. Reload DevFiller and try again.');
   return reply;
 }
 
@@ -60,7 +60,7 @@ export function GeminiPanel() {
   return <section className="gemini-panel" aria-label="AI settings">
     <div className="section-heading"><h2>Context for unfamiliar fields</h2><span className="gemini-tag">{PROVIDER_SPECS[config.provider].label.toUpperCase()}</span></div>
     <p className="helper">Your chosen provider reads field labels and writes relevant words and phrases for fields the local generator does not recognize. Suggestions are requested when you click Fill, then reused from the cache until they expire. A quota or rate-limit error switches to local data.</p>
-    {!installed&&<div className="gemini-info">Open Formly’s extension <strong>Options</strong> to connect your key. This webpage is a local UI preview.</div>}
+    {!installed&&<div className="gemini-info">Open DevFiller’s extension <strong>Options</strong> to connect your key. This webpage is a local UI preview.</div>}
     <label className="toggle-row"><span><strong>Use AI for unknown fields</strong><small>Requested when you click Fill, so nothing is generated for forms you never fill.</small></span><input type="checkbox" checked={config.enabled} disabled={disabled} onChange={e=>setConfig({...config,enabled:e.target.checked})}/></label>
     <label className="toggle-row"><span><strong>Prepare ahead of the click</strong><small>Generate as soon as a form appears, so Fill is instant. Uses your quota on every page with a form, including ones you never fill.</small></span><input type="checkbox" checked={config.autoPrepare} disabled={disabled||!config.enabled} onChange={e=>setConfig({...config,autoPrepare:e.target.checked})}/></label>
     <div className="gemini-field"><label htmlFor="gemini-provider">Provider</label><select id="gemini-provider" value={config.provider} disabled={disabled} onChange={e=>{const provider=e.target.value as Provider;setModels([...PROVIDER_SPECS[provider].models]);setConfig({...config,provider,model:PROVIDER_SPECS[provider].defaultModel});setMessage('');setError('');}}>{PROVIDERS.map(provider=><option key={provider} value={provider}>{PROVIDER_SPECS[provider].label}</option>)}</select><small>Each provider needs its own key and its own models. Paste the key for the provider you pick.</small></div>

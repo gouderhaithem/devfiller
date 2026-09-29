@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Formly — Chrome Web Store Readiness</title>
+<title>DevFiller — Chrome Web Store Readiness</title>
 <style>
   @page { size: A4; margin: 16mm 15mm 18mm; }
   * { box-sizing: border-box; }
@@ -84,7 +84,7 @@
   <div class="row">
     <div>
       <h1>Chrome Web Store Readiness</h1>
-      <div class="sub">Formly — browser extension that fills website forms with generated test data</div>
+      <div class="sub">DevFiller — browser extension that fills website forms with generated test data</div>
     </div>
     <div class="meta">
       Version <strong>1.0.0</strong><br>
@@ -131,7 +131,7 @@
 
 <div class="block">
   <h3>1. No privacy policy<span class="tag done">FIXED</span></h3>
-  <p>The Web Store requires a published privacy policy whenever an extension handles user data. Formly
+  <p>The Web Store requires a published privacy policy whenever an extension handles user data. DevFiller
   does, in two ways: it stores an API key in local extension storage, and it transmits form field
   metadata (labels, names, placeholders, constraints) to Google or Groq.</p>
   <p>You must publish the policy at a public URL and complete the data-use disclosures in the developer
@@ -142,7 +142,7 @@
 <div class="block">
   <h3>2. The <code>debugger</code> permission<span class="tag done">FIXED</span></h3>
   <p>Reviewed far more strictly than any other permission in the manifest. It also shows a persistent
-  browser banner — <em>"Formly started debugging this browser"</em> — while recording, which users
+  browser banner — <em>"DevFiller started debugging this browser"</em> — while recording, which users
   report as alarming.</p>
   <p>It exists solely to capture response bodies for the optional Requests inspector. That is an
   auxiliary feature, not the stated purpose of the extension, which is the case reviewers most often
@@ -195,7 +195,7 @@ $5 developer registration fee.</p>
   <li><strong>Write and host a privacy policy.</strong> Cover: what is stored locally (settings, custom
       values, exclusions, API key), what is transmitted (field labels and constraints only, to the
       provider you chose), what is never transmitted (entered values, page URLs, page HTML), and that
-      there is no Formly server and no analytics. GitHub Pages is sufficient hosting.</li>
+      there is no DevFiller server and no analytics. GitHub Pages is sufficient hosting.</li>
   <li><strong>Produce a store build without <code>debugger</code>.</strong> Remove the permission from
       the manifest and hide the Requests and Request Editor tabs. Keep the full build for local use.</li>
   <li><strong>Re-read the description against the single purpose rule.</strong> The listing should
@@ -247,7 +247,7 @@ build, where no store policy applies.</p>
 <p>The dashboard asks for one justification per permission. These drafts match what the code actually
 does; edit only if behaviour changes.</p>
 
-<div class="just"><b>activeTab</b><span>"Formly fills the form on the tab the user is looking at. This
+<div class="just"><b>activeTab</b><span>"DevFiller fills the form on the tab the user is looking at. This
 permission grants access only to that tab and only when the user clicks the toolbar icon, which is the
 extension's single action."</span></div>
 
@@ -266,10 +266,10 @@ user-configurable expiry of 1 to 60 minutes and a browser alarm clears them when
 or skipped and why, so the user can inspect a result, save a custom value, or exclude a field."</span></div>
 
 <div class="just"><b>contextMenus</b><span>"Adds a right-click entry on the extension icon to open the
-Formly panel and the options page."</span></div>
+DevFiller panel and the options page."</span></div>
 
 <div class="just"><b>Host permission — generativelanguage.googleapis.com / api.groq.com</b>
-<span>"When the user enables AI suggestions and supplies their own API key, Formly sends form field
+<span>"When the user enables AI suggestions and supplies their own API key, DevFiller sends form field
 labels and constraints to the provider the user selected in order to generate relevant test values.
 Entered values, page URLs and page content are never sent."</span></div>
 
@@ -279,7 +279,7 @@ forms appear rather than waiting for a click. The user is asked at the moment th
 and may decline; the extension works without it."</span></div>
 
 <footer>
-  Formly 1.0.0 (audit first run on 0.13.1) · Readiness audit performed against the built extension in <code>dist/</code> on
+  DevFiller 1.0.0 (audit first run on 0.13.1) · Readiness audit performed against the built extension in <code>dist/</code> on
   14 September 2026. Store policies and required asset dimensions change over time — confirm current
   requirements in the Chrome Web Store developer documentation before submitting.
 </footer>

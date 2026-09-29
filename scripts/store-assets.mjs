@@ -64,7 +64,7 @@ async function compose(browser, name, size, html) {
   console.log('written', join('docs/store', name));
 }
 
-const profile = await mkdtemp(join(tmpdir(), 'formly-store-'));
+const profile = await mkdtemp(join(tmpdir(), 'devfiller-store-'));
 const context = await chromium.launchPersistentContext(profile, {
   channel: 'chromium', headless: true, viewport: SHOT,
   args: ['--enable-unsafe-extension-debugging', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
@@ -125,7 +125,7 @@ try {
 
   const icon = dataUrl(await readFile(join(DIST, 'icons/icon-128.png')));
   await compose(context, 'promo-small-440x280.jpg', { width: 440, height: 280 },
-    `<div style="height:100%;display:flex;align-items:center;gap:22px;padding:0 34px;background:linear-gradient(135deg,#f4f6fd,#e3e9fa)"><img src="${icon}" width="96" height="96"><div><div style="font-size:40px;font-weight:700;letter-spacing:-1px;color:#23304f">formly</div><div style="font-size:17px;line-height:1.35;color:#4a5680;margin-top:6px">Fill any form with<br>realistic test data<br>in one click.</div></div></div>`);
+    `<div style="height:100%;display:flex;align-items:center;gap:22px;padding:0 34px;background:linear-gradient(135deg,#f4f6fd,#e3e9fa)"><img src="${icon}" width="96" height="96"><div><div style="font-size:40px;font-weight:700;letter-spacing:-1px;color:#23304f">devfiller</div><div style="font-size:17px;line-height:1.35;color:#4a5680;margin-top:6px">Fill any form with<br>realistic test data<br>in one click.</div></div></div>`);
 } finally {
   await context.close();
   await rm(profile, { recursive: true, force: true });

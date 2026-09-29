@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 // Resize the generated master with alpha preserved. No external image requests.
-const source = await readFile(new URL('../docs/brand/formly-icon-source.png', import.meta.url));
+const source = await readFile(new URL('../docs/brand/devfiller-icon-source.png', import.meta.url));
 const output = new URL('../public/icons/', import.meta.url);
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });

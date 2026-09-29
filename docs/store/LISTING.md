@@ -4,7 +4,7 @@ Copy each block into the matching field of the [Chrome Web Store developer dashb
 
 ## Package
 
-- Build the upload file with `npm run package`, which creates `release/formly-<version>.zip` (the demo page is left out).
+- Build the upload file with `npm run package`, which creates `release/devfiller-<version>.zip` (the demo page is left out).
 - Remake the images with `npm run build && npm run store-assets`.
 
 ## Store listing tab
@@ -12,7 +12,7 @@ Copy each block into the matching field of the [Chrome Web Store developer dashb
 **Name** (from the manifest)
 
 ```
-Formly — Fast form filler
+DevFiller — Test data form filler
 ```
 
 **Summary** (manifest `description`, 132 characters max)
@@ -27,11 +27,11 @@ Click the toolbar icon to fill the current website with generated test data.
 **Description**
 
 ```
-Formly fills website forms with realistic, fictional test data in one click, so you can test sign-up flows, checkouts and admin screens without typing the same details again and again.
+DevFiller fills website forms with realistic, fictional test data in one click, so you can test sign-up flows, checkouts and admin screens without typing the same details again and again.
 
 HOW IT WORKS
-• Open any page with a form and click the Formly icon. Every field it recognizes is filled instantly.
-• Formly never submits the form. You review the values and submit when you are ready.
+• Open any page with a form and click the DevFiller icon. Every field it recognizes is filled instantly.
+• DevFiller never submits the form. You review the values and submit when you are ready.
 • Open the side panel (right-click the icon, or press Alt+Shift+F) to see which fields were filled or skipped and why, jump to a field, and undo the last fill.
 
 DATA THAT MAKES SENSE
@@ -49,7 +49,7 @@ OPTIONAL AI FOR UNUSUAL FIELDS
 Fields the local generator doesn't recognize can get relevant suggestions from Groq or Google Gemini, using your own API key. This is off by default. Only field descriptions (labels, names, placeholders and limits) are sent, never the values you type, the page address or the page content. Without a key, everything runs locally.
 
 PRIVACY
-No account, no Formly server, no analytics. Settings stay in your browser.
+No account, no DevFiller server, no analytics. Settings stay in your browser.
 ```
 
 **Store icon:** `public/icons/icon-128.png`
@@ -70,20 +70,20 @@ No account, no Formly server, no analytics. Settings stay in your browser.
 **Single purpose**
 
 ```
-Formly fills the form on the current web page with generated, fictional test data when the user clicks it, so developers and testers can test forms without typing.
+DevFiller fills the form on the current web page with generated, fictional test data when the user clicks it, so developers and testers can test forms without typing.
 ```
 
 **Permission justifications**
 
 | Permission | Justification |
 | --- | --- |
-| `activeTab` | Formly fills the form on the tab the user is looking at. This grants access only to that tab and only after the user clicks the toolbar icon or the side panel's Fill button, or opens the panel with the keyboard shortcut. |
+| `activeTab` | DevFiller fills the form on the tab the user is looking at. This grants access only to that tab and only after the user clicks the toolbar icon or the side panel's Fill button, or opens the panel with the keyboard shortcut. |
 | `scripting` | Filling a form requires running the fill routine in the current page. No script runs until the user clicks Fill, unless they turn on the optional "Prepare ahead of the click" setting. |
 | `storage` | Stores the user's own settings locally: generated-data language, custom field values, field exclusions, and an optional AI API key the user supplies. Nothing is synced and there is no remote server. |
 | `alarms` | Removes expired cached AI suggestions. Suggestions have a user-set expiry of 1 to 60 minutes, and an alarm clears them when they lapse. |
 | `sidePanel` | Shows a panel beside the page listing which fields were filled or skipped and why, so the user can find a field, save a custom value, exclude a field, or undo the fill. |
-| `contextMenus` | Adds "Open Formly panel" to the right-click menu of the toolbar icon. |
-| Host: `generativelanguage.googleapis.com`, `api.groq.com` | When the user turns on AI suggestions and supplies their own API key, Formly sends form field labels and constraints to the provider the user selected, to generate relevant test values. Entered values, page URLs and page content are never sent. |
+| `contextMenus` | Adds "Open DevFiller panel" to the right-click menu of the toolbar icon. |
+| Host: `generativelanguage.googleapis.com`, `api.groq.com` | When the user turns on AI suggestions and supplies their own API key, DevFiller sends form field labels and constraints to the provider the user selected, to generate relevant test values. Entered values, page URLs and page content are never sent. |
 | Optional host: `http://*/*`, `https://*/*` | Requested only if the user turns on "Prepare ahead of the click", which generates AI suggestions as forms appear instead of waiting for a click. The user is asked when they enable the setting and can decline; the extension works fully without it. |
 
 **Remote code:** No, I am not using remote code. (All JavaScript ships in the package.)

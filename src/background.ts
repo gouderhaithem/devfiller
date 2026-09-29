@@ -132,7 +132,7 @@ async function prepareForPage(tabId:number,tab:chrome.tabs.Tab,documentId?:strin
     if(!config.enabled || !config.apiKey || !settings.fillUnknown) return;
     const epoch=cacheEpoch;
     const prepared=await prepareBatch(tabId,{...settings,values:generateValues(settings.locale)},settings,config,epoch,documentId);
-    if(epoch===cacheEpoch) await chrome.storage.session.set({geminiStatus:prepared.batch?`${providerSpec(config.provider).label} suggestions are ready. Click Formly to fill.`:prepared.note});
+    if(epoch===cacheEpoch) await chrome.storage.session.set({geminiStatus:prepared.batch?`${providerSpec(config.provider).label} suggestions are ready. Click DevFiller to fill.`:prepared.note});
   } catch(error) {
     await chrome.storage.session.set({geminiStatus:error instanceof GeminiQuotaError?`${error.message} Local fallback is available.`:error instanceof Error?`${error.message} Fill will retry AI.`:'AI preparation failed. Fill will retry AI.'});
   } finally {
@@ -160,7 +160,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const epoch=cacheEpoch;
     if(config.enabled && config.apiKey && settings.fillUnknown) {
       try {
-        await chrome.action.setTitle({tabId,title:'Formly: waiting for AI data…'});
+        await chrome.action.setTitle({tabId,title:'DevFiller: waiting for AI data…'});
         const prepared=await prepareBatch(tabId,request,settings,config,epoch,undefined,true);
         request.expectedDocument=prepared.scan.documentId;
         note=prepared.note;cacheKey=prepared.cacheKey;batch=prepared.batch;
@@ -182,7 +182,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const responses=await chrome.scripting.executeScript({target:{tabId},func:fillPage,args:[request]});
     const result:FillResult | undefined=responses[0]?.result;
     if(!result) throw new Error('The page did not respond. Click to try again.');
-    if(result.stale) throw new Error('The page changed while generating data. Click Formly again.');
+    if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{
         const latest=liveBatch((await chrome.storage.session.get(cacheKey!))[cacheKey!]);
@@ -197,19 +197,19 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     }
     await chrome.action.setBadgeBackgroundColor({tabId,color:result.filled?'#5370ce':'#80704d'});
     await chrome.action.setBadgeText({tabId,text:String(result.filled)});
-    await chrome.action.setTitle({tabId,title:`Formly: ${result.filled} filled, ${result.preserved} kept, ${result.unmatched} unrecognized, ${result.invalid} incompatible. ${note} Click to fill again. Right-click → Open Formly panel for details.`});
+    await chrome.action.setTitle({tabId,title:`DevFiller: ${result.filled} filled, ${result.preserved} kept, ${result.unmatched} unrecognized, ${result.invalid} incompatible. ${note} Click to fill again. Right-click → Open DevFiller panel for details.`});
   } catch(error) {
     const message=error instanceof Error?error.message:'Could not fill this page.';
     const reason=/cannot access|extensions gallery|chrome:\/\/|edge:\/\//i.test(message)?'This page restricts extensions. Open a regular website with a form.':message;
     await chrome.action.setBadgeBackgroundColor({tabId,color:'#b34c3c'});
     await chrome.action.setBadgeText({tabId,text:'!'});
-    await chrome.action.setTitle({tabId,title:`Formly: ${reason}`});
+    await chrome.action.setTitle({tabId,title:`DevFiller: ${reason}`});
     throw new Error(reason);
   } finally {filling.delete(tabId);}
 }
 
 chrome.runtime.onInstalled.addListener(details=>{
-  chrome.contextMenus.create({id:'formly-panel',title:'Open Formly panel',contexts:['action']},()=>void chrome.runtime.lastError);
+  chrome.contextMenus.create({id:'formly-panel',title:'Open DevFiller panel',contexts:['action']},()=>void chrome.runtime.lastError);
   void chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false});
   if(details.reason==='install') void chrome.tabs.create({url:chrome.runtime.getURL('welcome.html')}).catch(()=>{});
 });
@@ -286,7 +286,7 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     if(msg.type==='panel:highlight' || msg.type==='panel:undo') {
       const action=msg.type==='panel:undo'?'undo':'highlight';
       const result=(await chrome.scripting.executeScript({target:{tabId},func:panelPageAction,args:[action,msg.documentId,msg.fieldId ?? '']}))[0]?.result;
-      if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'Formly: last fill undone. Click to fill again.'});}
+      if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'DevFiller: last fill undone. Click to fill again.'});}
       return {...await inspectTab(tabId),...result};
     }
     if(msg.type==='panel:exclude' || msg.type==='panel:rule') {
@@ -307,7 +307,7 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     throw new Error('Unknown panel action.');
   })().then(data=>sendResponse({ok:true,...data})).catch(error=>{
     const raw=error instanceof Error?error.message:'The panel action failed.';
-    const reason=/chrome:\/\/|edge:\/\/|extensions gallery|chrome web store/i.test(raw)?'This page does not support filling. Open a regular website with a form.':/cannot access|permission/i.test(raw)?'Click the Formly toolbar icon or reopen this panel from its right-click menu to allow access to this website.':raw;
+    const reason=/chrome:\/\/|edge:\/\/|extensions gallery|chrome web store/i.test(raw)?'This page does not support filling. Open a regular website with a form.':/cannot access|permission/i.test(raw)?'Click the DevFiller toolbar icon or reopen this panel from its right-click menu to allow access to this website.':raw;
     sendResponse({ok:false,error:reason});
   });
   return true;
