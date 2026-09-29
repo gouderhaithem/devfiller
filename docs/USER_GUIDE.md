@@ -65,55 +65,25 @@ The list refreshes after tab changes and periodically while open. On a new websi
 
 The panel needs Chrome 118+ or a compatible Edge version. Customize the shortcut in your browser’s extension shortcuts page.
 
-## Request inspector
+## AI suggestions (optional)
 
-Choose **Requests → Start recording** in the side panel before submitting a form. Select a request to inspect the method, endpoint, HTTP status, duration, request headers/body, and response headers/body. Use the endpoint filter and Request/Response tabs to navigate the history. Copy copies the displayed body, including any redactions.
+Local generation works without an account or API key. To add contextual suggestions for fields the local generator does not recognize:
 
-Chrome requires the `debugger` permission in the extension manifest for this feature. Recording itself remains off until started. Chrome displays a debugging notice while the recorder is attached. Stop recording to detach it. Switching tabs in the same window stops recording and preserves the captured history. Closing the recorded tab clears history. A new recording starts a fresh history.
+1. Open **Options → AI** and pick a **Provider**: **Groq** (the default) or **Gemini**.
+2. Paste that provider's key, from the [Groq console](https://console.groq.com/keys) or [Google AI Studio](https://aistudio.google.com/apikey).
+3. Click **Test key** to check which supported models your key can reach. This lists models; it does not generate test data.
+4. Enable **Use AI for unknown fields**, then click **Save settings**.
+5. Click Formly on a website with a form. Suggestions are requested for that click and cached for later fills.
 
-Captures stay in service-worker memory, with no persistence, browser sync, or Gemini transmission. Known credential headers, sensitive query parameters, and named JSON/form fields are hidden. Unstructured bodies may still contain submitted information. History contains at most 50 Fetch, XHR, and document requests. Request and response previews are limited to 64 KB each. Multipart and binary payloads are omitted. Streaming responses, browser-evicted bodies, and separate iframe/worker targets may be unavailable. Headers are those Chrome exposes in its Network events.
+Each provider has its own models, and switching selects the new provider's default. Groq is a useful alternative when Gemini's free tier rate-limits you. **Prepare ahead of the click** is off by default because watching every page and generating in advance spends quota on forms you may never fill. Turn it on, and accept the browser's website-access request, if you would rather trade quota for an instant fill.
 
-Redirects appear as separate rows. Network failures show the browser error. An HTTP 2xx status does not prove that the application accepted the form: inspect its response for validation errors. Requests are not automatically correlated to a particular form submission.
+**With preparation on, forms appearing prepares data; clicking waits for AI if needed.** Late-rendered forms and forms revealed in dialogs are detected automatically. Hidden tabs wait until visible. Fill shares an existing preload and waits for its response. Missing or expired suggestions are generated before filling. Only a quota/rate-limit error switches to local data; other AI errors leave the form untouched. A request asks for up to ten suggestions for each of up to 30 unknown fields. Recognized fields, custom rules, dropdowns, and radio groups use the local engine. Incomplete or invalid AI results show an error instead of silently filling local values.
 
-Opening DevTools, another debugger, or canceling Chrome’s debugging notice can interrupt recording. Start again when the tab is available.
-
-## Edit and resend
-
-1. Select a completed capture and click **Edit & resend**.
-2. Edit the **Method** and **Request URL**. Use **Params** for query parameters, **Headers** for request headers, and **Body** for JSON, text, or URL-encoded form data.
-3. Replace or remove `[hidden]` values in the URL/body. Leave **Website session** selected to use the original tab’s cookies and browser request context. **Reuse captured authentication** restores captured Authorization/CSRF headers without revealing them. You can override a captured header by entering its name and a new value in Headers.
-4. Click **Send** and grant destination website access when Chrome asks. This makes a real request, even if recording is stopped.
-5. Inspect **New response**, status, duration, and **Response headers**. Expand **Sent request** and **Original response** to compare. Use **Resend history** to review the last 10 attempts.
-
-The original capture stays unchanged. Drafts and resend results stay only in the open editor. Closing it, leaving Requests, or clearing history discards them. Entered credentials are kept in the draft while editing; known credential fields in result snapshots are hidden. Nothing is sent to Gemini or saved in extension storage.
-
-**Website session** defaults to including the source tab’s current cookies. Keep the original tab selected and on the captured page. Chrome computes Origin and Referer from that document; page CORS rules apply. The send is pinned to that document so navigation cannot redirect an in-flight operation into a different page. Requests from unsupported frames or a changed page may require a fresh recording.
-
-Captured authentication header values stay only in recorder memory, never in the editor response or extension storage. They are removed when the capture is cleared, evicted, replaced by a new recording, or its tab closes. Stopping recording keeps them available with the capture. Reuse is restricted to the original API origin, including scheme and port. To send elsewhere, turn reuse off and enter credentials for that destination. Expired or rotating tokens need a fresh capture or manually edited header.
-
-**Extension** mode is available for independent API calls and starts with cookies off. Even with cookies enabled, its Origin/Referer can differ and a website may reject it. Forbidden headers such as Cookie, Host, Origin, and Content-Length cannot be manually overridden. Native form navigation and custom per-request referrer policies are not reproduced exactly by Fetch.
-
-GET and HEAD omit the draft body. JSON is validated when Content-Type is JSON. Bodies and response previews are limited to 64 KB; binary responses and multipart uploads are unsupported. If the captured body was unavailable, enter a replacement before sending.
-
-Redirects are stopped rather than followed automatically; Chrome hides some redirect details. Enter the destination URL to send there. Requests time out after 20 seconds and are never automatically retried. **Cancel** stops waiting; it does not undo a request the server already received. HTTP 2xx can still contain an application error, so read the response.
-
-## Gemini (optional)
-
-Local generation works without an account or API key. To add contextual suggestions:
-
-1. Open **Options → Gemini** and enter your key from [Google AI Studio](https://aistudio.google.com/apikey).
-2. Click **Test key** to check which supported models your key can reach. This lists models; it does not generate test data.
-3. Enable **Use Gemini for unknown fields**, then click **Save settings**.
-4. Accept the browser’s website-access request. This lets Formly prepare suggestions automatically when websites load, forms appear later, or you return to a tab.
-5. Open a website or dialog containing a form. Formly prepares data in the background, including on pages that were already open. Click Formly when you want to fill it.
-
-**Forms appearing prepares data; clicking waits for AI if needed.** Late-rendered forms and forms revealed in dialogs are detected automatically. Hidden tabs wait until visible. Fill shares an existing preload and waits for its response. Missing or expired suggestions are generated before filling. Only a quota/rate-limit error switches to local data; other AI errors leave the form untouched. A request asks for up to ten suggestions for each of up to 30 unknown fields. Recognized fields, custom rules, dropdowns, and radio groups use the local engine. Incomplete or invalid AI results show an error instead of silently filling local values.
-
-Gemini uses your Google project’s quota and billing settings. Formly briefly retries temporary errors while the fill waits. A final quota/rate-limit error enables local fallback for one minute; other failures are reported. Model availability depends on your key; use **Test key** to check access.
+AI requests use your provider account's quota and billing settings. Formly briefly retries temporary errors while the fill waits. A final quota/rate-limit error pauses automatic background preparation for one minute, but a fill you click always attempts the provider again, so a short rate limit does not leave later clicks filling unrelated local words. Other failures are reported. Model availability depends on your key: the listing can include models a key cannot generate with, and older models are retired for new accounts, so switch models if one reports as unavailable.
 
 ### Your cache, your timing
 
-In **Options → Gemini → Suggestion cache**:
+In **Options → AI → Suggestion cache**:
 
 | Control | Behavior |
 | --- | --- |

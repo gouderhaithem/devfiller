@@ -24,7 +24,7 @@ function Welcome() {
           <span className="installed-label"><Check size={13}/> YOU’RE ALL SET</span>
           <h1 id="welcome-title">Less typing.<br/><span>More testing.</span></h1>
           <p className="hero-description">Meet your new form-filling sidekick. Fresh names, emails, and meaningful test data for the page you’re on. All in one click.</p>
-          <div className="hero-actions"><a className="welcome-primary" href="#quick-start">Let’s get started <ArrowDown size={17}/></a><span>No account needed.<br/>{' '}Gemini is optional.</span></div>
+          <div className="hero-actions"><a className="welcome-primary" href="#quick-start">Let’s get started <ArrowDown size={17}/></a><span>No account needed.<br/>{' '}AI is optional.</span></div>
           <div className="hero-languages"><Globe2 size={16}/><span>English</span><i/><span>Français</span><i/><span lang="ar" dir="rtl">العربية</span></div>
         </div>
         <div className="preview-stage">
@@ -56,12 +56,12 @@ function Welcome() {
       <section className="make-yours" aria-labelledby="yours-title">
         <div className="section-label"><span>A LITTLE MORE YOU</span><h2 id="yours-title">Your forms. Your rules.</h2><p>Ready out of the box, with room to make it yours.</p></div>
         <div className="feature-links">
-          <a href="./index.html#gemini"><Sparkles size={22}/><h3>Give unfamiliar fields context</h3><p>Add a Gemini key to prepare relevant suggestions as forms appear, including dialogs. Filling still waits for your click.</p><span>Set up Gemini <ArrowUpRight size={16}/></span></a>
+          <a href="./index.html#gemini"><Sparkles size={22}/><h3>Give unfamiliar fields context</h3><p>Add a Groq or Gemini key to get relevant suggestions for fields the local generator does not recognize. Filling still waits for your click.</p><span>Set up AI <ArrowUpRight size={16}/></span></a>
           <a href="./index.html#excluded"><SlidersHorizontal size={22}/><h3>Keep the right fields untouched</h3><p>Search and navigation controls are skipped by default. Add your own exclusions for any website.</p><span>Choose exclusions <ArrowUpRight size={16}/></span></a>
           <a href="./index.html#cache"><Clock3 size={22}/><h3>Set the pace of your cache</h3><p>Keep suggestions for 1–60 minutes, or clear them whenever you like. Five minutes is the starting point.</p><span>Manage your cache <ArrowUpRight size={16}/></span></a>
         </div>
       </section>
-      <aside className="welcome-bottom"><div><ShieldCheck size={24}/><p><strong>You stay in control.</strong><span>Local generation works offline. Gemini shares field descriptions with Google only when you enable it. Filling never submits forms automatically.</span></p></div><a className="welcome-primary" href="./index.html">Make it yours <ArrowRight size={17}/></a></aside>
+      <aside className="welcome-bottom"><div><ShieldCheck size={24}/><p><strong>You stay in control.</strong><span>Local generation works offline. AI shares field descriptions with your chosen provider only when you enable it. Filling never submits forms automatically.</span></p></div><a className="welcome-primary" href="./index.html">Make it yours <ArrowRight size={17}/></a></aside>
     </main>
     <footer className="welcome-footer"><span>Made for the work between “build” and “ship”.</span><span>Formly · Chrome & Edge</span></footer>
   </div>;

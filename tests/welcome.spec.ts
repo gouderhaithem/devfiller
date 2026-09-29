@@ -48,7 +48,7 @@ test('fresh installation opens the guide and extension reload does not reopen it
     });
     expect(iconSizes).toEqual([[16,16,16],[32,32,32],[48,48,48],[128,128,128]]);
     await welcome.getByRole('link',{name:'Open settings',exact:true}).click();
-    await expect(welcome.getByRole('button',{name:'Gemini',exact:true})).toHaveClass('selected');
+    await expect(welcome.getByRole('button',{name:'AI',exact:true})).toHaveClass('selected');
     // CLI loading bypasses Chrome's Developer mode switch. Enable it in this disposable
     // profile so reloading behaves like the documented Load unpacked installation flow.
     const manager=await context.newPage();await manager.goto('chrome://extensions');

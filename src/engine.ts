@@ -4,7 +4,7 @@ import type { FieldSamples } from './samples';
 
 export interface UnknownField { signature?:string; id:string; label:string; name:string; placeholder:string; type:string; min:string; max:string; step:string; minLength:number; maxLength:number }
 export interface SuggestedField { signature:string; values:string[] }
-export interface FillRequest { samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
+export interface FillRequest { aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 export interface FillResult { fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
 
 // This function is serialized by chrome.scripting; keep all runtime dependencies inside it.
@@ -168,6 +168,10 @@ export function fillPage(request: FillRequest): FillResult {
     }
   }
   for (const [controlIndex,el] of Array.from(controls).entries()) {
+    let fillSource='local data';
+    let aiSkipped=false;
+    let aiValue=false;
+    let aiSuggestion:string|undefined;
     const counts={filled:result.filled,preserved:result.preserved,unmatched:result.unmatched,invalid:result.invalid};
     try {
     if (el.disabled || el.matches(':disabled') || ('readOnly' in el && el.readOnly) || el.closest('[inert]') || !el.getClientRects().length || getComputedStyle(el).visibility !== 'visible') continue;
@@ -210,7 +214,8 @@ export function fillPage(request: FillRequest): FillResult {
     let literalCustom = false;
     let matchedKey:keyof Values | undefined;
     const targeted=request.custom.find(c=>c.selector && (!c.site || c.site===location.hostname) && (()=>{try{return el.matches(c.selector!);}catch{return false;}})());
-    if(targeted){value=targeted.value;literalCustom=true;}
+    const customRule=targeted || request.custom.find(c=>!c.selector && c.label.trim() && signals.includes(normalize(c.label)));
+    if(customRule){value=customRule.value;literalCustom=true;fillSource='your custom rule';}
     if (value===undefined && autocomplete[ac]) {matchedKey=autocomplete[ac];value = values[matchedKey];}
     if (value === undefined) {
       // Exact matches outrank longer labels containing a known phrase.
@@ -232,6 +237,12 @@ export function fillPage(request: FillRequest): FillResult {
       if (el.type === 'url') {matchedKey='website';value = values.website;}
       if (el.type === 'password' && request.passwords) {matchedKey='password';value = values.password;}
     }
+    // Contextual text must reach Gemini even when a familiar label matched a local sample.
+    // Explicit rules and coherent identity/contact fields keep their existing generators.
+    const contextual = matchedKey && ['bio','description','message','subject','notes','title','company','jobTitle','department','industry','search'].includes(matchedKey);
+    if(request.aiRequired && !literalCustom && contextual && !(el instanceof HTMLSelectElement) && (el instanceof HTMLTextAreaElement || ['text','search'].includes(el.type))) {
+      value=undefined;matchedKey=undefined;
+    }
     if (value === undefined && request.fillUnknown && !(el instanceof HTMLSelectElement)) {
       const field:UnknownField={id:`field_${controlIndex}`,label:(label || el.getAttribute('aria-label') || labelledBy || '').trim().slice(0,160),name:(el.name || el.id).slice(0,120),placeholder:(el.getAttribute('placeholder') || '').slice(0,160),type:el instanceof HTMLTextAreaElement?'textarea':el.type,min:el.getAttribute('min') || '',max:el.getAttribute('max') || '',step:el.getAttribute('step') || '',minLength:el.minLength,maxLength:el.maxLength};
       field.signature=JSON.stringify(field);
@@ -240,8 +251,14 @@ export function fillPage(request: FillRequest): FillResult {
       } else {
         const supplied=request.suggestions?.[field.id];
         if(supplied?.signature===field.signature && (!request.suggestionsExpireAt || request.suggestionsExpireAt>Date.now())) {
-          value=supplied.values.find(v=>typeof v==='string' && v.trim() && v!==el.value && !machineId.test(v));
-          if(value!==undefined) {genericText=true;if(result.used) result.used[field.id]=value;}
+          const usable=supplied.values.filter(v=>typeof v==='string' && v.trim() && !machineId.test(v));
+          value=usable.find(v=>v!==el.value) ?? usable[0];
+          if(value!==undefined) {genericText=true;aiValue=true;aiSuggestion=value;fillSource='AI data';}
+        }
+        if(request.aiRequired && value===undefined) {
+          if(el.value.trim() && !request.overwrite) result.preserved++;
+          else {aiSkipped=true;result.unmatched++;}
+          continue;
         }
       }
     }
@@ -269,7 +286,7 @@ export function fillPage(request: FillRequest): FillResult {
     } else {
       if (!literalCustom && el instanceof HTMLInputElement && ['number','range'].includes(el.type)) {
         let number = Number(value);
-        if (!Number.isFinite(number)) { if(request.fillUnknown) number=1+random(1000); else {result.invalid++;continue;} }
+        if (!Number.isFinite(number)) { if(request.fillUnknown && !aiValue) number=1+random(1000); else {result.invalid++;continue;} }
         const min = el.min !== '' ? Number(el.min) : el.type === 'range' ? 0 : -Infinity;
         const max = el.max !== '' ? Number(el.max) : el.type === 'range' ? 100 : Infinity;
         number = Math.max(min, Math.min(max, number));
@@ -288,7 +305,7 @@ export function fillPage(request: FillRequest): FillResult {
         if (el.type === 'datetime-local' && /^\d{4}-\d{2}-\d{2}$/.test(value)) value += `T${request.values.time}`;
         if (el.type === 'month') value = value.slice(0,7);
         const formatProbe = el.cloneNode() as HTMLInputElement; formatProbe.value = value;
-        if (!formatProbe.value && request.fillUnknown) {
+        if (!formatProbe.value && request.fillUnknown && !aiValue) {
           value = el.type==='date' ? request.values.date : el.type==='datetime-local' ? `${request.values.date}T${request.values.time}` : el.type==='month' ? request.values.date.slice(0,7) : el.type==='week' ? `${request.values.date.slice(0,4)}-W${String(1+random(52)).padStart(2,'0')}` : request.values.time;
         }
         if (el.min && value < el.min) value = el.min;
@@ -344,14 +361,14 @@ export function fillPage(request: FillRequest): FillResult {
     Object.getOwnPropertyDescriptor(prototype, 'value')?.set?.call(el, value);
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
-    if (el.value === value) {result.filled++;} else result.invalid++;
+    if (el.value === value) {result.filled++;if(aiSuggestion!==undefined && result.used) result.used[`field_${controlIndex}`]=aiSuggestion;} else result.invalid++;
     } finally {
       if(panel) {
         const report=reportFor(el);
         if(report.status==='ready') {
           if(result.invalid>counts.invalid){report.status='incompatible';report.reason='The generated value does not fit this control';}
-          else if(result.filled>counts.filled){report.status='filled';report.reason='Filled with test data';}
-          else {report.status='skipped';report.reason=result.preserved>counts.preserved?'Existing value preserved':result.unmatched>counts.unmatched?'No matching generator':'Radio group handled separately';}
+          else if(result.filled>counts.filled){report.status='filled';report.reason=`Filled with ${fillSource}`;}
+          else {report.status='skipped';report.reason=aiSkipped?'AI data is not ready for this field. Click Fill again.':result.preserved>counts.preserved?'Existing value preserved':result.unmatched>counts.unmatched?'No matching generator':'Radio group handled separately';}
         }
         panel.reports.set(el,report);
       }

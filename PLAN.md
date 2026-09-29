@@ -131,3 +131,47 @@ Migrate older saved settings to replacement and unknown-field filling. Generate 
 - Request missing or expired suggestions, sharing per-page work rather than duplicating preload requests.
 - Fall back to local data only for quota/rate-limit errors; other AI failures leave the form untouched.
 - Remember quota failures for one minute and verify delayed responses, newly appeared fields, and error behavior.
+
+## v0.11.2 contextual AI values
+
+- Include recognized contextual text (description, message, title, company, and related categories) in automatic preparation and awaited fills.
+- Preserve custom rules and coherent local identity/contact generation.
+- Require valid suggestions for AI fields; skip unavailable suggestions instead of silently using local text. Quota/rate-limit errors explicitly re-enable fallback.
+- Show Gemini/local/custom provenance in field reports and verify delayed contextual fills, cache rotation, and unavailable or malformed suggestions.
+
+## v0.11.3 model refresh and quota recovery
+
+- Drop `gemini-2.5-flash`: newer keys receive 404 "no longer available to new users" even though the
+  models endpoint still lists it. Offer 3.5, 3.6 and 3.8, defaulting to 3.6; settings naming a retired
+  model migrate to the default automatically.
+- Keep the one-minute quota cooldown for automatic background preparation only. A fill the user clicks
+  always makes one real attempt, so a single rate limit no longer degrades a whole minute of clicks to
+  unrelated local words. Clear the cooldown as soon as a batch succeeds.
+- Cover the recovery path with a browser test, and stop the preload test from racing an exhausted field.
+
+## v0.12 generate on click by default
+
+- Make automatic preparation opt in (`autoPrepare`, default off): watching every render generated for
+  forms the user never fills and spent their Gemini quota doing it.
+- With it off, register no page watcher and request no standing website access; clicking Fill generates
+  what the form needs and waits for it, then reuses the cache.
+- Keep the prepare-ahead path intact behind the switch, and cover the default with a browser test that
+  asserts two page loads spend nothing and one click spends exactly one request.
+
+## v0.13 Groq as a second provider
+
+- Add a provider choice (Gemini or Groq) with its own key, models, auth header, and key link. Groq
+  speaks the OpenAI chat format, so the response schema travels as a strict `json_schema`.
+- Measured six generations per model: Groq `gpt-oss-20b` and `gpt-oss-120b` answered 6/6, `qwen3.8-27b`
+  4/6 and `qwen3.6-27b` 1/6, so the gpt-oss models lead the list.
+- Validate a saved model against the selected provider so switching never sends a name the other
+  endpoint rejects, and include the provider in the cache key so batches never cross providers.
+- Make runtime messages name the provider in use instead of always saying Gemini.
+
+## v0.13.1 Groq first
+
+- Default new installations to Groq: it answered every measured request and returned a first fill in
+  about 2.5 seconds, where Gemini's free tier rate-limited quickly.
+- Keep settings saved before providers existed on Gemini, so an existing Google key is never sent to
+  Groq's endpoint.
+- Name the provider and model in the save confirmation instead of always saying Gemini.

@@ -13,21 +13,23 @@ test('prepares late forms before clicks and waits for AI before filling',async()
     await worker.evaluate(()=>{
       const state=globalThis as typeof globalThis & {requests:{fields:{id:string;label:string}[]}[];release?:()=>void;errorStatus?:number};state.requests=[];
       globalThis.fetch=async(_input,init)=>{
-        if(!init?.body)return new Response(JSON.stringify({models:[{name:'models/gemini-2.5-flash',supportedGenerationMethods:['generateContent']}]}));
+        if(!init?.body)return new Response(JSON.stringify({models:[{name:'models/gemini-3.6-flash',supportedGenerationMethods:['generateContent']}]}));
         if(state.errorStatus)return new Response('Provider error',{status:state.errorStatus});
         const metadata=JSON.parse(JSON.parse(String(init.body)).contents[0].parts[0].text);state.requests.push(metadata);
-        return new Promise<Response>(done=>{state.release=()=>done(new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify({fields:metadata.fields.map((field:{id:string})=>({id:field.id,values:['Cedar','Maple','Willow','Birch']}))})}]}}]})));});
+        return new Promise<Response>(done=>{state.release=()=>done(new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify({fields:metadata.fields.map((field:{id:string;label:string})=>({id:field.id,values:field.label==='Description'?['A shared garden with seasonal vegetable beds.','A neighborhood greenhouse for growing fresh herbs.','A rooftop plot shared by three local families.']:['Cedar','Maple','Willow','Birch']}))})}]}}]})));});
       };
     });
     const website=await context.newPage();await website.route('**/preload-fixture',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Lazy form</title><main id="app"></main><p id="clock"></p>'}));await website.goto('http://127.0.0.1:5188/preload-fixture');
     const options=await context.newPage();await options.goto(`chrome-extension://${id}/index.html`);
-    await options.getByLabel('API key',{exact:true}).fill('fake-key-for-local-tests');await options.getByLabel('Use Gemini for unknown fields').check();await options.getByRole('button',{name:'Save settings',exact:true}).click();await expect(options.getByRole('status')).toContainText('Suggestions prepare automatically');
+    await options.getByLabel('Provider',{exact:true}).selectOption('gemini');
+    await options.getByLabel('API key',{exact:true}).fill('fake-key-for-local-tests');await options.getByLabel('Use AI for unknown fields').check();await options.getByLabel('Prepare ahead of the click').check();await options.getByRole('button',{name:'Save settings',exact:true}).click();await expect(options.getByRole('status')).toContainText('prepares suggestions automatically');
     await website.bringToFront();
     const requests=()=>worker.evaluate(()=>(globalThis as typeof globalThis & {requests:unknown[]}).requests);
     expect(await requests()).toHaveLength(0);
-    await website.evaluate(()=>{document.querySelector('#app')!.innerHTML='<form><label>Project codename<input id="project" name="projectCode"></label></form>';});
+    await website.evaluate(()=>{document.querySelector('#app')!.innerHTML='<form><label>Project codename<input id="project" name="projectCode"></label><label>Description<textarea id="description"></textarea></label><label>Title<input id="title"></label><label>Message<textarea id="message"></textarea></label></form>';});
     await expect.poll(async()=>(await requests()).length).toBe(1);
     await expect(website.locator('#project')).toHaveValue('');
+    expect((await requests())[0]).toMatchObject({fields:[{label:'Project codename'},{label:'Description'},{label:'Title'},{label:'Message'}]});
     // A second form appears while the first batch is still waiting on Gemini.
     await website.evaluate(()=>{document.querySelector('form')!.insertAdjacentHTML('beforeend','<label>Campaign concept<input id="campaign" name="campaignConcept"></label>');});
     const cdp=await context.browser()!.newBrowserCDPSession();
@@ -38,6 +40,7 @@ test('prepares late forms before clicks and waits for AI before filling',async()
     await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toContain('waiting for AI');
     await website.waitForTimeout(300);
     await expect(website.locator('#project')).toHaveValue('');await expect(website.locator('#campaign')).toHaveValue('');
+    await expect(website.locator('#description')).toHaveValue('');await expect(website.locator('#title')).toHaveValue('');await expect(website.locator('#message')).toHaveValue('');
     expect(await requests()).toHaveLength(1);
     await worker.evaluate(()=>(globalThis as typeof globalThis & {release?:()=>void}).release?.());
     await expect.poll(async()=>(await requests()).length).toBe(2);
@@ -45,10 +48,13 @@ test('prepares late forms before clicks and waits for AI before filling',async()
     // Keep the form untouched until suggestions for the newly appeared field are ready too.
     await expect(website.locator('#project')).toHaveValue('');await expect(website.locator('#campaign')).toHaveValue('');
     await worker.evaluate(()=>(globalThis as typeof globalThis & {release?:()=>void}).release?.());
-    await expect.poll(()=>worker.evaluate(async()=>Object.values(await chrome.storage.session.get(null)).filter((entry:any)=>entry?.values).flatMap((entry:any)=>Object.keys(entry.values)).length)).toBe(2);
+    await expect.poll(()=>worker.evaluate(async()=>Object.values(await chrome.storage.session.get(null)).filter((entry:any)=>entry?.values).flatMap((entry:any)=>Object.keys(entry.values)).length)).toBe(5);
     await expect(website.locator('#project')).toHaveValue('Cedar');
+    await expect(website.locator('#description')).toHaveValue('A shared garden with seasonal vegetable beds.');
+    await expect(website.locator('#title')).toHaveValue('Cedar');await expect(website.locator('#message')).toHaveValue('Cedar');
     await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toMatch(/^Formly: \d+ filled,/);
     await cdp.send('Extensions.triggerAction',{id,targetId:target.targetId});await expect(website.locator('#project')).toHaveValue('Maple');expect(await requests()).toHaveLength(2);
+    await expect(website.locator('#description')).toHaveValue('A neighborhood greenhouse for growing fresh herbs.');
     // Typing or unrelated page activity must not ask Gemini for another batch.
     await website.locator('#project').fill('PRIVATE ENTERED VALUE');
     await website.evaluate(()=>{for(let i=0;i<10;i++)document.querySelector('#clock')!.textContent=String(i);});
@@ -60,7 +66,7 @@ test('prepares late forms before clicks and waits for AI before filling',async()
     await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toContain('rejected');
     await expect(website.locator('#project')).toHaveValue('PRIVATE ENTERED VALUE');
     // Turning Gemini off removes future injections and stops preparation on an already open page.
-    await options.getByLabel('Use Gemini for unknown fields').uncheck();await options.getByRole('button',{name:'Save settings',exact:true}).click();await expect(options.getByRole('status')).toContainText('Local generation is active');
+    await options.getByLabel('Use AI for unknown fields').uncheck();await options.getByRole('button',{name:'Save settings',exact:true}).click();await expect(options.getByRole('status')).toContainText('Local generation is active');
     expect(await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts())).toEqual([]);
     await website.evaluate(()=>{document.querySelector('form')!.insertAdjacentHTML('beforeend','<label>Research direction<input name="researchDirection"></label>');});
     await website.waitForTimeout(1200);expect(await requests()).toHaveLength(2);

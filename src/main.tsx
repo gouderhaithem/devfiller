@@ -63,7 +63,7 @@ function App() {
   return <div className={isExtension()?'extension':'workspace'}>
     <main className="panel">
       <header><div className="brand"><img className="brand-icon" src="./icons/icon-128.png" width="34" height="34" alt=""/>formly<span className="badge">TEST DATA</span></div><button className={`icon ${options?'active':''}`} aria-label="Toggle settings" onClick={()=>setOptions(!options)}><Settings2 size={19}/></button></header>
-      <nav aria-label="Sections"><button className={tab==='gemini'?'selected':''} onClick={()=>setTab('gemini')}><Sparkles size={15}/> Gemini</button><button className={tab==='generate'?'selected':''} onClick={()=>setTab('generate')}><Shuffle size={15}/> Generator</button><button className={tab==='custom'?'selected':''} onClick={()=>setTab('custom')}>Custom fields {settings.custom.length>0&&<span className="count">{settings.custom.length}</span>}</button><button className={tab==='excluded'?'selected':''} onClick={()=>setTab('excluded')}>Excluded fields</button></nav>
+      <nav aria-label="Sections"><button className={tab==='gemini'?'selected':''} onClick={()=>setTab('gemini')}><Sparkles size={15}/> AI</button><button className={tab==='generate'?'selected':''} onClick={()=>setTab('generate')}><Shuffle size={15}/> Generator</button><button className={tab==='custom'?'selected':''} onClick={()=>setTab('custom')}>Custom fields {settings.custom.length>0&&<span className="count">{settings.custom.length}</span>}</button><button className={tab==='excluded'?'selected':''} onClick={()=>setTab('excluded')}>Excluded fields</button></nav>
       <div className="content">
         <div className="eyebrow"><span/> YOUR FORM, FILLED.</div>
         <h1>{tab==='gemini'?'A little context.':tab==='excluded'?'Choose what':'Less typing.'}<br/><span>{tab==='gemini'?'Better test data.':tab==='excluded'?'stays untouched.':'More testing.'}</span></h1>
@@ -88,7 +88,7 @@ function App() {
         {isExtension()&&<p className="helper">To fill a website, switch to its tab and click the Formly toolbar icon. These settings apply automatically. For field details and undo, right-click the icon → Open Formly panel, or press Alt + Shift + F.</p>}
         <p className="footnote">New data with every click. {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
       </div>
-      <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v0.11.1</span></footer>
+      <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v0.11.2</span></footer>
     </main>
     {!isExtension()&&<section className="demo"><div className="demo-header"><FlaskConical size={20}/><div><h2>Try it on a real form</h2><p>This local demo uses the same filling engine as the extension.</p></div><a href="/demo.html" target="_blank" rel="noreferrer">Open form <ArrowUpRight size={14}/></a></div><iframe id="demo-form" title="Mixed-language test form" src="/demo.html"/><p className="demo-tip">Use the generator on the left, then watch the fields fill here.</p></section>}
   </div>;

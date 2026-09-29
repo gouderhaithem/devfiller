@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Formly — Chrome Web Store Readiness</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif;
+    font-size: 9.6pt;
+    line-height: 1.5;
+    color: #1b1f2e;
+  }
+  h1, h2, h3 { margin: 0; line-height: 1.2; }
+  h1 { font-size: 22pt; letter-spacing: -.4pt; }
+  h2 {
+    font-size: 13pt; margin: 18pt 0 7pt; padding-bottom: 4pt;
+    border-bottom: 1.5pt solid #5370ce; color: #23304f;
+  }
+  h3 { font-size: 10.4pt; margin: 11pt 0 3pt; color: #23304f; }
+  p { margin: 0 0 6pt; }
+  ul, ol { margin: 0 0 6pt; padding-left: 14pt; }
+  li { margin-bottom: 3pt; }
+  code {
+    font-family: "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    font-size: 8.4pt; background: #eef0f6; border: .5pt solid #d8dce8;
+    border-radius: 2pt; padding: 0 2.5pt;
+  }
+  a { color: #3f58a8; text-decoration: none; }
+
+  .masthead { border-bottom: 2.5pt solid #5370ce; padding-bottom: 9pt; margin-bottom: 12pt; }
+  .masthead .row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12pt; }
+  .sub { color: #5a6079; font-size: 9pt; margin-top: 3pt; }
+  .meta { text-align: right; font-size: 8.4pt; color: #5a6079; line-height: 1.6; white-space: nowrap; }
+
+  .verdict {
+    border: 1pt solid #d8b23f; background: #fdf6e3; border-left: 4pt solid #d8b23f;
+    padding: 9pt 11pt; margin-bottom: 12pt; page-break-inside: avoid;
+  }
+  .verdict strong { font-size: 11pt; color: #7a5c10; display: block; margin-bottom: 3pt; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 9pt; page-break-inside: avoid; }
+  th, td { text-align: left; padding: 4.5pt 6pt; border-bottom: .5pt solid #dfe2ec; vertical-align: top; }
+  th { background: #f2f4fa; font-size: 8pt; text-transform: uppercase; letter-spacing: .5pt; color: #4a5170; }
+  td.ok { color: #2f6b47; font-weight: bold; white-space: nowrap; }
+  td.no { color: #a8352a; font-weight: bold; white-space: nowrap; }
+  td.warn { color: #8a6a10; font-weight: bold; white-space: nowrap; }
+
+  .block { border: .75pt solid #dfe2ec; border-left: 3.5pt solid #a8352a; padding: 8pt 10pt; margin-bottom: 9pt; page-break-inside: avoid; }
+  .block.med { border-left-color: #d8b23f; }
+  .block h3 { margin-top: 0; }
+  .tag {
+    display: inline-block; font-size: 7.4pt; font-weight: bold; letter-spacing: .5pt;
+    padding: 1pt 5pt; border-radius: 2pt; margin-left: 5pt; vertical-align: 2pt;
+  }
+  .tag.stop { background: #fae6e3; color: #a8352a; }
+  .tag.risk { background: #fdf3d8; color: #8a6a10; }
+  .tag.done { background: #e3f1e8; color: #2f6b47; }
+  .update { border: 1pt solid #9cc7ad; background: #eef7f1; border-left: 4pt solid #2f6b47; padding: 9pt 11pt; margin-bottom: 12pt; page-break-inside: avoid; }
+  .update strong { font-size: 11pt; color: #2f6b47; display: block; margin-bottom: 3pt; }
+
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 17pt; position: relative; margin-bottom: 5pt; page-break-inside: avoid; }
+  .check li::before {
+    content: ""; position: absolute; left: 0; top: 2pt;
+    width: 9pt; height: 9pt; border: 1pt solid #8c93ad; border-radius: 1.5pt;
+  }
+  .phase { background: #f2f4fa; padding: 4pt 8pt; font-weight: bold; font-size: 9pt; color: #23304f; margin: 10pt 0 6pt; border-left: 3pt solid #5370ce; }
+
+  .just { border: .5pt solid #dfe2ec; padding: 7pt 9pt; margin-bottom: 6pt; page-break-inside: avoid; background: #fafbfd; }
+  .just b { display: block; font-family: "DejaVu Sans Mono", monospace; font-size: 8.6pt; color: #23304f; margin-bottom: 2pt; }
+  .just span { display: block; font-style: italic; color: #33384d; }
+
+  footer { margin-top: 14pt; padding-top: 6pt; border-top: .5pt solid #dfe2ec; font-size: 7.8pt; color: #767c94; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="row">
+    <div>
+      <h1>Chrome Web Store Readiness</h1>
+      <div class="sub">Formly — browser extension that fills website forms with generated test data</div>
+    </div>
+    <div class="meta">
+      Version <strong>1.0.0</strong><br>
+      Updated 29 September 2026<br>
+      Manifest V3 · Chrome 118+
+    </div>
+  </div>
+</div>
+
+<div class="update">
+  <strong>Update, 29 September 2026: ready to submit.</strong>
+  Every blocker below has been fixed on the <code>release/chrome-web-store</code> branch. The
+  <code>debugger</code> permission and the request inspector were removed (a full copy is kept for a
+  later release), <code>PRIVACY.md</code> was added, store images were produced at the required sizes,
+  and the ready-to-paste listing, permission reasons and data-use answers are in
+  <code>docs/store/LISTING.md</code>. What remains is account setup and upload, listed at the end of that file.
+  The original audit follows for reference.
+</div>
+
+<div class="verdict">
+  <strong>Original verdict (14 September): not ready to submit — but the code is not the problem.</strong>
+  The build is technically sound and passes the checks that most often cause rejection: no remote code,
+  no bundled keys, correct Manifest V3 structure, complete icons. Publication is blocked by two policy
+  issues — a missing privacy policy and a permission/scope combination that is likely to be refused —
+  plus store listing assets that do not yet meet the required dimensions.
+</div>
+
+<h2>Findings at a glance</h2>
+<table>
+  <tr><th style="width:30%">Area</th><th style="width:12%">Status</th><th>Detail</th></tr>
+  <tr><td>Extension code</td><td class="ok">PASS</td><td>MV3, no remote code, no <code>eval</code>, 228 KB upload zip</td></tr>
+  <tr><td>Icons</td><td class="ok">PASS</td><td>16, 32, 48, 128 px all present and declared</td></tr>
+  <tr><td>Secrets</td><td class="ok">PASS</td><td>No API key bundled; users supply their own</td></tr>
+  <tr><td>Automated tests</td><td class="ok">PASS</td><td>61 unit + 11 browser tests passing (inspector tests removed with the feature)</td></tr>
+  <tr><td>Privacy policy</td><td class="ok">FIXED</td><td><code>PRIVACY.md</code>, linked from the README</td></tr>
+  <tr><td><code>debugger</code> permission</td><td class="ok">FIXED</td><td>Removed with the request inspector</td></tr>
+  <tr><td>Single purpose policy</td><td class="ok">FIXED</td><td>Form filling only</td></tr>
+  <tr><td>Screenshots</td><td class="ok">FIXED</td><td>Five 1280&times;800 screenshots and a 440&times;280 tile in <code>docs/store/</code></td></tr>
+  <tr><td>Listing copy</td><td class="ok">FIXED</td><td>Ready to paste in <code>docs/store/LISTING.md</code></td></tr>
+  <tr><td>Licence file</td><td class="ok">FIXED</td><td>MIT <code>LICENSE</code> added</td></tr>
+</table>
+
+<h2>Blockers</h2>
+
+<div class="block">
+  <h3>1. No privacy policy<span class="tag done">FIXED</span></h3>
+  <p>The Web Store requires a published privacy policy whenever an extension handles user data. Formly
+  does, in two ways: it stores an API key in local extension storage, and it transmits form field
+  metadata (labels, names, placeholders, constraints) to Google or Groq.</p>
+  <p>You must publish the policy at a public URL and complete the data-use disclosures in the developer
+  dashboard. The disclosures must match actual behaviour — state plainly that field labels leave the
+  browser when AI is enabled, and that entered values never do.</p>
+</div>
+
+<div class="block">
+  <h3>2. The <code>debugger</code> permission<span class="tag done">FIXED</span></h3>
+  <p>Reviewed far more strictly than any other permission in the manifest. It also shows a persistent
+  browser banner — <em>"Formly started debugging this browser"</em> — while recording, which users
+  report as alarming.</p>
+  <p>It exists solely to capture response bodies for the optional Requests inspector. That is an
+  auxiliary feature, not the stated purpose of the extension, which is the case reviewers most often
+  refuse. Removing it for the first submission removes the risk entirely.</p>
+</div>
+
+<div class="block">
+  <h3>3. Single purpose policy<span class="tag done">FIXED</span></h3>
+  <p>Store policy requires "a single purpose that is narrow and easy to understand". The current build
+  ships three separable products:</p>
+  <ul>
+    <li><strong>A form filler</strong> — the stated purpose.</li>
+    <li><strong>A network request recorder</strong> — captures a tab's submissions.</li>
+    <li><strong>A request editor that replays authenticated requests</strong> using the site's cookies
+        and captured authorisation headers.</li>
+  </ul>
+  <p>The third is effectively an HTTP client with credential reuse. Combined with <code>debugger</code>,
+  a reviewer may classify the bundle as a security-testing tool rather than a form filler. Appeals are
+  slow, so it is cheaper to avoid the classification than to argue it.</p>
+</div>
+
+<div class="block med">
+  <h3>4. Broad optional host permissions<span class="tag done">JUSTIFIED IN LISTING</span></h3>
+  <p><code>http://*/*</code> and <code>https://*/*</code> are correctly declared as
+  <em>optional</em> and requested at runtime, which is the right design. They still require a written
+  justification in the listing, and they are only needed when "Prepare ahead of the click" is enabled.
+  Say exactly that.</p>
+</div>
+
+
+
+<h2>Store listing assets</h2>
+<p>Screenshot dimensions are enforced. Every current image needs replacing or padding:</p>
+<table>
+  <tr><th style="width:42%">File</th><th style="width:20%">Current</th><th style="width:18%">Required</th><th>Action</th></tr>
+  <tr><td>docs/images/welcome.png</td><td>1280&times;794</td><td>1280&times;800</td><td>Pad 6 px</td></tr>
+  <tr><td>docs/images/generator.png</td><td>1280&times;960</td><td>1280&times;800</td><td>Re-shoot or crop</td></tr>
+  <tr><td>docs/images/sidepanel.png</td><td>420&times;900</td><td>1280&times;800</td><td>Re-shoot on a page background</td></tr>
+  <tr><td>docs/images/requests.png</td><td>420&times;1100</td><td>1280&times;800</td><td>Omit from v1 listing</td></tr>
+  <tr><td>docs/images/request-editor.png</td><td>420&times;1200</td><td>1280&times;800</td><td>Omit from v1 listing</td></tr>
+</table>
+<p>Also required or recommended: at least one screenshot (five maximum), a 128&times;128 store icon
+(already have it), a 440&times;280 small promo tile, a category, a primary language, and a one-time
+$5 developer registration fee.</p>
+
+<h2>What to do before publishing</h2>
+
+<div class="phase">Phase 1 — Remove the blockers</div>
+<ul class="check">
+  <li><strong>Write and host a privacy policy.</strong> Cover: what is stored locally (settings, custom
+      values, exclusions, API key), what is transmitted (field labels and constraints only, to the
+      provider you chose), what is never transmitted (entered values, page URLs, page HTML), and that
+      there is no Formly server and no analytics. GitHub Pages is sufficient hosting.</li>
+  <li><strong>Produce a store build without <code>debugger</code>.</strong> Remove the permission from
+      the manifest and hide the Requests and Request Editor tabs. Keep the full build for local use.</li>
+  <li><strong>Re-read the description against the single purpose rule.</strong> The listing should
+      describe one thing: filling forms with test data.</li>
+  <li><strong>Add a <code>LICENSE</code> file</strong> to the repository.</li>
+</ul>
+
+<div class="phase">Phase 2 — Prepare the listing</div>
+<ul class="check">
+  <li>Create the developer account and pay the $5 registration fee.</li>
+  <li>Produce screenshots at exactly <strong>1280&times;800</strong>, showing: a form before filling, the
+      same form after one click, and the Options page.</li>
+  <li>Write the detailed description — what it does, who it is for, that data is fictional, that it
+      never submits forms, and that AI is optional and uses the user's own key.</li>
+  <li>Write a justification for every permission (drafts overleaf).</li>
+  <li>Complete the data-use disclosures, and confirm they match the privacy policy word for word.</li>
+</ul>
+
+<div class="phase">Phase 3 — Final checks before upload</div>
+<ul class="check">
+  <li>Run <code>npm run build</code>, then both test suites, on a clean checkout.</li>
+  <li>Load the packaged <code>dist/</code> in a fresh Chrome profile and complete a full first run:
+      install, pin, fill a form, open Options, set a key, fill again.</li>
+  <li>Confirm the version number in <code>package.json</code> and <code>public/manifest.json</code>
+      match, and raise it to <code>1.0.0</code>.</li>
+  <li>Rotate any API key that has ever been pasted into a chat, commit, screenshot or test run.</li>
+  <li>Zip the contents of <code>dist/</code> — the files at the archive root, not the folder itself.</li>
+</ul>
+
+<h2>Recommended scope for version 1.0</h2>
+<p>Submit the form filler alone. It is an obviously single-purpose extension with a modest permission
+set, which is a straightforward approval. Reintroduce the inspector later as a considered update with
+its own justification, once the listing has a review history — or keep it as the unpacked developer
+build, where no store policy applies.</p>
+<table>
+  <tr><th style="width:52%">Feature</th><th style="width:22%">Version 1.0</th><th>Reason</th></tr>
+  <tr><td>One-click filling, 42 field categories</td><td class="ok">Ship</td><td>The stated purpose</td></tr>
+  <tr><td>English / French / Arabic recognition</td><td class="ok">Ship</td><td>Core behaviour</td></tr>
+  <tr><td>Custom values and field exclusions</td><td class="ok">Ship</td><td>Configures the core behaviour</td></tr>
+  <tr><td>Side panel, field report, undo</td><td class="ok">Ship</td><td>Explains the core behaviour</td></tr>
+  <tr><td>Optional AI (Groq / Gemini, user key)</td><td class="ok">Ship</td><td>Improves generated values; disclose it</td></tr>
+  <tr><td>Request recorder</td><td class="no">Hold</td><td>Requires <code>debugger</code>; second purpose</td></tr>
+  <tr><td>Request editor and resend</td><td class="no">Hold</td><td>Credential replay; third purpose</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>Appendix — permission justifications</h2>
+<p>The dashboard asks for one justification per permission. These drafts match what the code actually
+does; edit only if behaviour changes.</p>
+
+<div class="just"><b>activeTab</b><span>"Formly fills the form on the tab the user is looking at. This
+permission grants access only to that tab and only when the user clicks the toolbar icon, which is the
+extension's single action."</span></div>
+
+<div class="just"><b>scripting</b><span>"Filling a form requires injecting the fill routine into the
+current page. No script is injected until the user clicks the toolbar icon or the panel's Fill
+button."</span></div>
+
+<div class="just"><b>storage</b><span>"Stores the user's own settings locally: generated-data language,
+custom field values, field exclusions, and an optional AI API key the user supplies. Nothing is synced
+and there is no remote server."</span></div>
+
+<div class="just"><b>alarms</b><span>"Removes expired cached AI suggestions. Cached suggestions have a
+user-configurable expiry of 1 to 60 minutes and a browser alarm clears them when they lapse."</span></div>
+
+<div class="just"><b>sidePanel</b><span>"Shows a panel beside the page listing which fields were filled
+or skipped and why, so the user can inspect a result, save a custom value, or exclude a field."</span></div>
+
+<div class="just"><b>contextMenus</b><span>"Adds a right-click entry on the extension icon to open the
+Formly panel and the options page."</span></div>
+
+<div class="just"><b>Host permission — generativelanguage.googleapis.com / api.groq.com</b>
+<span>"When the user enables AI suggestions and supplies their own API key, Formly sends form field
+labels and constraints to the provider the user selected in order to generate relevant test values.
+Entered values, page URLs and page content are never sent."</span></div>
+
+<div class="just"><b>Optional host permission — http://*/* and https://*/*</b>
+<span>"Requested only if the user turns on 'Prepare ahead of the click', which generates suggestions as
+forms appear rather than waiting for a click. The user is asked at the moment they enable the setting
+and may decline; the extension works without it."</span></div>
+
+<footer>
+  Formly 1.0.0 (audit first run on 0.13.1) · Readiness audit performed against the built extension in <code>dist/</code> on
+  14 September 2026. Store policies and required asset dimensions change over time — confirm current
+  requirements in the Chrome Web Store developer documentation before submitting.
+</footer>
+
+</body>
+</html>
