@@ -9,8 +9,7 @@
     "storage",
     "alarms",
     "sidePanel",
-    "contextMenus",
-    "debugger"
+    "contextMenus"
   ],
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*",

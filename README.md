@@ -28,7 +28,6 @@ Formly is a browser extension for developers and QA testers who repeatedly fill 
 
 | | What you can do |
 | --- | --- |
-| **Request inspector** | Record a tab’s submissions and inspect endpoints, payloads, headers, HTTP status, timing, and responses. |
 | **Side panel** | Inspect filled/skipped fields beside the website, highlight a control, and save a custom value or exclusion. |
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
@@ -83,37 +82,6 @@ Requires Chrome 118+ or an Edge version supporting the Side Panel API. Change a 
 
 <img src="docs/images/sidepanel.png" width="420" alt="Formly native side panel showing individual field results and fill controls" />
 
-### Inspect submitted requests
-
-Open the side panel → **Requests → Start recording**, then submit your form on the website. Select a captured request to see its endpoint, method, submitted data, headers, HTTP status, elapsed time, and response. JSON is formatted for reading, and you can copy the displayed body.
-
-<img src="docs/images/requests.png" width="420" alt="Formly Requests tab showing a POST endpoint, 201 Created status, submitted request, and JSON response" />
-
-Recording is off by default. Chrome requires the **`debugger` permission** for response capture and displays a debugging notice while recording. Recording stops when you click Stop, switch tabs in that window, close the recorded tab, or Chrome detaches the debugger. Opening DevTools or using another debugger can interrupt capture.
-
-- Captures stay in service-worker memory and **never go to Gemini** or extension storage. Closing the recorded tab clears its history. Starting a new recording replaces the previous history.
-- The inspector keeps the latest **50 Fetch, XHR, and document requests**, including redirect hops. It does not identify which request belongs to a form automatically.
-- Request and response text previews are limited to **64 KB each**. Binary responses and multipart payloads are omitted. Streams, browser-evicted bodies, and requests in separate iframe/worker targets may be unavailable.
-- Known credential headers and named JSON/form fields are hidden. Other text or HTML can contain submitted information. Review the displayed data before copying it.
-- HTTP success does not guarantee application success. Read the response for validation errors.
-
-### Edit and resend a request
-
-Select a captured request → **Edit & resend**. Change the method, URL, **Params**, **Headers**, or **Body**, then click **Send**. A send makes a real request; it can create or change server data. Chrome asks for access to the destination host and, in website mode, the source page if needed. Recording can be stopped while you edit and send.
-
-<img src="docs/images/request-editor.png" width="420" alt="Formly request editor using the website session, captured authentication headers, and cookies with a successful authenticated response" />
-
-The editor shows the new response, status, duration, and headers alongside the original status. Expand **Original response** to compare bodies. The latest 10 resend results include a redacted snapshot of what you sent. Closing the editor, leaving Requests, or clearing history discards the draft and results; nothing is saved to disk or sent to Gemini.
-
-- Text, JSON, and URL-encoded bodies up to 64 KB are supported. GET and HEAD send no body. Multipart uploads are not supported.
-- **Website session** is the default for captures with a source page. Keep the original website tab selected and on the captured page. Chrome sends its current cookies and computes Origin/Referer from that website. Page CORS rules still apply; this is a Fetch request, not an exact replay of a document navigation.
-- **Reuse captured authentication** restores captured Authorization/CSRF headers while keeping their values hidden. These values remain only in recorder memory and are discarded with that capture. They can only be reused for the original API origin (scheme, host, and port). Explicitly edited headers override captured values. Expired or rotating tokens may require a fresh recording.
-- Browser-managed headers are not manually copied. Hidden values in URL/body still need replacement; unresolved `[hidden]` values block sending.
-- **Extension** mode remains available for independent API calls. It defaults to omitting cookies and has a different Origin/Referer, so authenticated websites may reject it even when cookies are enabled. In either mode, Chrome’s cookie rules apply.
-- Redirects stop for review instead of being followed automatically. Chrome may hide a redirect’s status and headers. Requests time out after 20 seconds; Cancel stops waiting, but the server may already have received the request. No automatic retries.
-
-The destination access uses Chrome’s existing optional host permissions. See [Chrome’s network request documentation](https://developer.chrome.com/docs/extensions/develop/concepts/network-requests) and [runtime permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions).
-
 ### Optional AI setup (Groq or Gemini)
 
 In the installed extension, open **Options → Gemini**, pick a **Provider**, enter that provider's API key, and click **Test key**. Choose a model, enable **Use AI for unknown fields**, and save.
@@ -151,10 +119,10 @@ A six-slide product walkthrough covers the filling workflow, supported fields, o
 - Gemini is optional. Its prompt contains field metadata, including labels and placeholders, plus the selected language. Entered form values, page URLs, and whole-page HTML are excluded. Labels can still contain website-specific information.
 - Your Gemini key stays in local extension storage, which is **not encrypted**, and is sent to Google for API authentication. No shared key is bundled.
 - Formly fills the **top-level document**. Frames, shadow DOM, rich-text editors, and custom widgets need additional adapters.
-- File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Filling never submits forms automatically. The request editor sends only when you click Send.
+- File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Filling never submits forms automatically.
 - Generated data is fictional. Finite sample pools can repeat, and website-specific validation may reject values. Address and phone regions do not necessarily match the selected language.
 
-The extension uses `activeTab`, `scripting`, `storage`, and `alarms`, plus `sidePanel` and `contextMenus` for the page companion. The `debugger` permission supports opt-in request recording. Automatic Gemini preparation requests optional HTTP/HTTPS website access. [Full privacy and permissions details →](docs/USER_GUIDE.md#privacy--permissions)
+The extension uses `activeTab`, `scripting`, `storage`, and `alarms`, plus `sidePanel` and `contextMenus` for the page companion. Automatic Gemini preparation requests optional HTTP/HTTPS website access. [Privacy policy](PRIVACY.md) · [Full privacy and permissions details →](docs/USER_GUIDE.md#privacy--permissions)
 
 ## Development
 
@@ -178,9 +146,6 @@ Run `npm run build` before the browser tests. CI runs the build and both test su
 | `src/background.ts` | Toolbar action, Gemini preparation, and session cache |
 | `src/gemini.ts` | Gemini and Groq requests, response validation, and cache configuration |
 | `src/form-preload.ts`, `public/form-watch.js` | Detect forms as they appear and prepare Gemini data before filling |
-| `src/RequestsPanel.tsx`, `src/network-recorder.ts` | Request inspector and bounded network capture |
-| `src/RequestEditor.tsx`, `src/request-replay.ts` | Editable requests, explicit resends, and response comparison |
-| `src/session-replay.ts`, `src/website-replay.ts` | Private authentication reuse and resending from the source document |
 | `src/sidepanel.tsx`, `src/panel-page.ts` | Side panel interface, field highlighting, and undo |
 | `src/main.tsx` | Options interface and development preview |
 | `src/welcome.tsx` | First-install guide and interactive example |

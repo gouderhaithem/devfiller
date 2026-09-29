@@ -1,4 +1,3 @@
-import './network-background';
 import {installFormPreload} from './form-preload';
 import { panelPageAction } from './panel-page';
 import { generateIdentities, generateValues, validateSettings, type Settings } from './data';
