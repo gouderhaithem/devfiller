@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* Colors come from the DevFiller icon: indigo tile, ivory sheet, mint sparkle. */
+@theme {
+  --color-tile: #4868dc;
+  --color-tile-deep: #3c60dc;
+  --color-tile-light: #5c7cf4;
+  --color-brand: #5370ce;
+  --color-ink: #1f2a5c;
+  --color-ink-soft: #4d5781;
+  --color-ivory: #f8f8f0;
+  --color-mint: #6ce4b0;
+  --color-mint-pale: #dff8ec;
+  --color-mist: #e6eaf8;
+  --color-paper: #ffffff;
+
+  --font-sans: var(--font-instrument), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  /* Instrument Sans sets tight at text sizes; open it slightly for reading. */
+  letter-spacing: 0.012em;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-mint);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* A field the demo just filled: the mint edge echoes the icon's completion sparkle. */
+@keyframes field-filled {
+  from {
+    background-color: var(--color-mint-pale);
+  }
+  to {
+    background-color: var(--color-paper);
+  }
+}
+.field-filled {
+  animation: field-filled 900ms ease-out both;
+  box-shadow: inset 3px 0 0 var(--color-mint);
+}
+
+/* Long-form documentation and policy text rendered from Markdown. */
+.prose-doc {
+  max-width: 44rem;
+}
+.prose-doc h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+.prose-doc h2 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 650;
+  margin: 2.75rem 0 0.75rem;
+  scroll-margin-top: 6rem;
+}
+.prose-doc h3 {
+  font-size: 1.15rem;
+  font-weight: 650;
+  margin: 2rem 0 0.5rem;
+}
+.prose-doc p,
+.prose-doc ul,
+.prose-doc ol {
+  margin: 0 0 1rem;
+  color: var(--color-ink-soft);
+}
+.prose-doc strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.prose-doc ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.prose-doc ol {
+  list-style: decimal;
+  padding-left: 1.4rem;
+}
+.prose-doc li {
+  margin-bottom: 0.35rem;
+}
+.prose-doc a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.prose-doc code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-mist);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: var(--color-ink);
+}
+.prose-doc pre {
+  background: var(--color-ink);
+  color: var(--color-ivory);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.prose-doc pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.prose-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose-doc th {
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-mist);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+}
+.prose-doc td {
+  border-bottom: 1px solid var(--color-mist);
+  padding: 0.55rem 0.75rem 0.55rem 0;
+  vertical-align: top;
+  color: var(--color-ink-soft);
+}
+.prose-doc blockquote {
+  border-left: 3px solid var(--color-mint);
+  background: var(--color-ivory);
+  padding: 0.75rem 1rem;
+  margin: 0 0 1.25rem;
+  border-radius: 0 8px 8px 0;
+}
+.prose-doc blockquote p:last-child {
+  margin-bottom: 0;
+}
