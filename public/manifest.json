@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Formly — Fast form filler",
-  "version": "0.13.1",
+  "version": "1.0.0",
   "description": "Click the toolbar icon to fill the current website with generated test data.",
   "permissions": [
     "activeTab",

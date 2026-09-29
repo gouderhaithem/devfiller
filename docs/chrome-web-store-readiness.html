@@ -58,6 +58,9 @@
   }
   .tag.stop { background: #fae6e3; color: #a8352a; }
   .tag.risk { background: #fdf3d8; color: #8a6a10; }
+  .tag.done { background: #e3f1e8; color: #2f6b47; }
+  .update { border: 1pt solid #9cc7ad; background: #eef7f1; border-left: 4pt solid #2f6b47; padding: 9pt 11pt; margin-bottom: 12pt; page-break-inside: avoid; }
+  .update strong { font-size: 11pt; color: #2f6b47; display: block; margin-bottom: 3pt; }
 
   .check { list-style: none; padding-left: 0; }
   .check li { padding-left: 17pt; position: relative; margin-bottom: 5pt; page-break-inside: avoid; }
@@ -84,15 +87,25 @@
       <div class="sub">Formly — browser extension that fills website forms with generated test data</div>
     </div>
     <div class="meta">
-      Version <strong>0.13.1</strong><br>
-      14 September 2026<br>
+      Version <strong>1.0.0</strong><br>
+      Updated 29 September 2026<br>
       Manifest V3 · Chrome 118+
     </div>
   </div>
 </div>
 
+<div class="update">
+  <strong>Update, 29 September 2026: ready to submit.</strong>
+  Every blocker below has been fixed on the <code>release/chrome-web-store</code> branch. The
+  <code>debugger</code> permission and the request inspector were removed (a full copy is kept for a
+  later release), <code>PRIVACY.md</code> was added, store images were produced at the required sizes,
+  and the ready-to-paste listing, permission reasons and data-use answers are in
+  <code>docs/store/LISTING.md</code>. What remains is account setup and upload, listed at the end of that file.
+  The original audit follows for reference.
+</div>
+
 <div class="verdict">
-  <strong>Verdict: not ready to submit — but the code is not the problem.</strong>
+  <strong>Original verdict (14 September): not ready to submit — but the code is not the problem.</strong>
   The build is technically sound and passes the checks that most often cause rejection: no remote code,
   no bundled keys, correct Manifest V3 structure, complete icons. Publication is blocked by two policy
   issues — a missing privacy policy and a permission/scope combination that is likely to be refused —
@@ -102,22 +115,22 @@
 <h2>Findings at a glance</h2>
 <table>
   <tr><th style="width:30%">Area</th><th style="width:12%">Status</th><th>Detail</th></tr>
-  <tr><td>Extension code</td><td class="ok">PASS</td><td>MV3, no remote code, no <code>eval</code>, 576 KB package</td></tr>
+  <tr><td>Extension code</td><td class="ok">PASS</td><td>MV3, no remote code, no <code>eval</code>, 228 KB upload zip</td></tr>
   <tr><td>Icons</td><td class="ok">PASS</td><td>16, 32, 48, 128 px all present and declared</td></tr>
   <tr><td>Secrets</td><td class="ok">PASS</td><td>No API key bundled; users supply their own</td></tr>
-  <tr><td>Automated tests</td><td class="ok">PASS</td><td>73 unit + 14 browser tests passing</td></tr>
-  <tr><td>Privacy policy</td><td class="no">BLOCK</td><td>Does not exist; required because user data is handled</td></tr>
-  <tr><td><code>debugger</code> permission</td><td class="no">BLOCK</td><td>High rejection risk; not needed by the core feature</td></tr>
-  <tr><td>Single purpose policy</td><td class="no">BLOCK</td><td>Three distinct products in one extension</td></tr>
-  <tr><td>Screenshots</td><td class="warn">FIX</td><td>None match the required 1280&times;800 or 640&times;400</td></tr>
-  <tr><td>Listing copy</td><td class="warn">FIX</td><td>Description, category and permission justifications needed</td></tr>
-  <tr><td>Licence file</td><td class="warn">FIX</td><td>No <code>LICENSE</code> in the repository</td></tr>
+  <tr><td>Automated tests</td><td class="ok">PASS</td><td>61 unit + 11 browser tests passing (inspector tests removed with the feature)</td></tr>
+  <tr><td>Privacy policy</td><td class="ok">FIXED</td><td><code>PRIVACY.md</code>, linked from the README</td></tr>
+  <tr><td><code>debugger</code> permission</td><td class="ok">FIXED</td><td>Removed with the request inspector</td></tr>
+  <tr><td>Single purpose policy</td><td class="ok">FIXED</td><td>Form filling only</td></tr>
+  <tr><td>Screenshots</td><td class="ok">FIXED</td><td>Five 1280&times;800 screenshots and a 440&times;280 tile in <code>docs/store/</code></td></tr>
+  <tr><td>Listing copy</td><td class="ok">FIXED</td><td>Ready to paste in <code>docs/store/LISTING.md</code></td></tr>
+  <tr><td>Licence file</td><td class="ok">FIXED</td><td>MIT <code>LICENSE</code> added</td></tr>
 </table>
 
 <h2>Blockers</h2>
 
 <div class="block">
-  <h3>1. No privacy policy<span class="tag stop">BLOCKS SUBMISSION</span></h3>
+  <h3>1. No privacy policy<span class="tag done">FIXED</span></h3>
   <p>The Web Store requires a published privacy policy whenever an extension handles user data. Formly
   does, in two ways: it stores an API key in local extension storage, and it transmits form field
   metadata (labels, names, placeholders, constraints) to Google or Groq.</p>
@@ -127,7 +140,7 @@
 </div>
 
 <div class="block">
-  <h3>2. The <code>debugger</code> permission<span class="tag stop">HIGH REJECTION RISK</span></h3>
+  <h3>2. The <code>debugger</code> permission<span class="tag done">FIXED</span></h3>
   <p>Reviewed far more strictly than any other permission in the manifest. It also shows a persistent
   browser banner — <em>"Formly started debugging this browser"</em> — while recording, which users
   report as alarming.</p>
@@ -137,7 +150,7 @@
 </div>
 
 <div class="block">
-  <h3>3. Single purpose policy<span class="tag stop">HIGH REJECTION RISK</span></h3>
+  <h3>3. Single purpose policy<span class="tag done">FIXED</span></h3>
   <p>Store policy requires "a single purpose that is narrow and easy to understand". The current build
   ships three separable products:</p>
   <ul>
@@ -152,7 +165,7 @@
 </div>
 
 <div class="block med">
-  <h3>4. Broad optional host permissions<span class="tag risk">NEEDS JUSTIFICATION</span></h3>
+  <h3>4. Broad optional host permissions<span class="tag done">JUSTIFIED IN LISTING</span></h3>
   <p><code>http://*/*</code> and <code>https://*/*</code> are correctly declared as
   <em>optional</em> and requested at runtime, which is the right design. They still require a written
   justification in the listing, and they are only needed when "Prepare ahead of the click" is enabled.
@@ -266,7 +279,7 @@ forms appear rather than waiting for a click. The user is asked at the moment th
 and may decline; the extension works without it."</span></div>
 
 <footer>
-  Formly 0.13.1 · Readiness audit performed against the built extension in <code>dist/</code> on
+  Formly 1.0.0 (audit first run on 0.13.1) · Readiness audit performed against the built extension in <code>dist/</code> on
   14 September 2026. Store policies and required asset dimensions change over time — confirm current
   requirements in the Chrome Web Store developer documentation before submitting.
 </footer>

@@ -84,7 +84,7 @@ Requires Chrome 118+ or an Edge version supporting the Side Panel API. Change a 
 
 ### Optional AI setup (Groq or Gemini)
 
-In the installed extension, open **Options → Gemini**, pick a **Provider**, enter that provider's API key, and click **Test key**. Choose a model, enable **Use AI for unknown fields**, and save.
+In the installed extension, open **Options → AI**, pick a **Provider**, enter that provider's API key, and click **Test key**. Choose a model, enable **Use AI for unknown fields**, and save.
 
 Two providers are supported, each with its own key and models:
 
@@ -160,6 +160,10 @@ Google responses are simulated in automated tests. Live Gemini access, the nativ
 - [Field guide](FIELD_GUIDE.md): supported categories, aliases, and coverage ideas.
 - [Implementation notes](PLAN.md): project evolution and future ideas.
 - [Brand assets](docs/brand/README.md): icon source and rebuild instructions.
-- [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications. Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
+- [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications ([ready-to-paste listing](docs/store/LISTING.md)). Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
 
 For a bug report, include the browser version, reproduction steps, and a minimal form example with fictional data. Before opening a pull request, run the build and both test suites. Useful next areas include custom widget adapters, regional datasets, and repeatable seeded values.
+
+## License
+
+[MIT](LICENSE)

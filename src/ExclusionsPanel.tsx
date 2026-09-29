@@ -29,7 +29,7 @@ export function ExclusionsPanel({value,onChange,disabled}:Props) {
   }
   return <section className="exclusions-panel" aria-label="Excluded fields">
     <div className="section-heading"><h2>Leave these fields alone</h2><ShieldCheck size={17}/></div>
-    <p className="helper">Excluded fields keep their current values. The local filler and Gemini both skip them.</p>
+    <p className="helper">Excluded fields keep their current values. The local filler and AI suggestions both skip them.</p>
     <label className="toggle-row"><span><strong>Skip search fields</strong><small>Search inputs and search labels in English, French, or Arabic.</small></span><input type="checkbox" disabled={disabled} checked={value.skipSearch} onChange={e=>onChange({...value,skipSearch:e.target.checked})}/></label>
     <label className="toggle-row"><span><strong>Skip headers and navigation</strong><small>Inputs and dropdowns inside page headers and navigation areas.</small></span><input type="checkbox" disabled={disabled} checked={value.skipHeader} onChange={e=>onChange({...value,skipHeader:e.target.checked})}/></label>
     <div className="exclusion-rules"><div className="section-heading"><h2>Your exclusions</h2><span className="subtle">{value.rules.length} rules</span></div>

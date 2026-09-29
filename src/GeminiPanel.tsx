@@ -57,8 +57,8 @@ export function GeminiPanel() {
   const disabled=!installed||!ready||!!busy;
   const seconds=Math.max(0,Math.ceil(((cache.expiresAt || now)-now)/1000));
   const durationValid=validCacheMinutes(Number(cacheMinutes));
-  return <section className="gemini-panel" aria-label="Gemini settings">
-    <div className="section-heading"><h2>Context for unfamiliar fields</h2><span className="gemini-tag">GEMINI</span></div>
+  return <section className="gemini-panel" aria-label="AI settings">
+    <div className="section-heading"><h2>Context for unfamiliar fields</h2><span className="gemini-tag">{PROVIDER_SPECS[config.provider].label.toUpperCase()}</span></div>
     <p className="helper">Your chosen provider reads field labels and writes relevant words and phrases for fields the local generator does not recognize. Suggestions are requested when you click Fill, then reused from the cache until they expire. A quota or rate-limit error switches to local data.</p>
     {!installed&&<div className="gemini-info">Open Formly’s extension <strong>Options</strong> to connect your key. This webpage is a local UI preview.</div>}
     <label className="toggle-row"><span><strong>Use AI for unknown fields</strong><small>Requested when you click Fill, so nothing is generated for forms you never fill.</small></span><input type="checkbox" checked={config.enabled} disabled={disabled} onChange={e=>setConfig({...config,enabled:e.target.checked})}/></label>

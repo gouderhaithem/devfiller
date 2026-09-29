@@ -33,7 +33,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
       };
     });
     const options=await context.newPage();await options.goto(`chrome-extension://${id}/index.html`);
-    await expect(options.getByRole('button',{name:'Gemini',exact:true})).toHaveClass('selected');
+    await expect(options.getByRole('button',{name:'AI',exact:true})).toHaveClass('selected');
     await expect(options.getByLabel('API key',{exact:true})).toBeEnabled();
     await options.getByLabel('Provider',{exact:true}).selectOption('gemini');
     await options.getByLabel('API key',{exact:true}).fill('fake-key-for-local-tests');

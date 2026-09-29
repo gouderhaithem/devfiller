@@ -101,7 +101,7 @@ try {
   // Options sections, captured at full store size.
   await options.bringToFront();
   const optionShots = {};
-  for (const [key, button] of [['generator', 'Generator'], ['ai', 'Gemini'], ['exclusions', 'Excluded fields']]) {
+  for (const [key, button] of [['generator', 'Generator'], ['ai', 'AI'], ['exclusions', 'Excluded fields']]) {
     await options.reload();
     await options.getByRole('button', { name: button, exact: true }).click();
     if (key === 'ai') await options.getByLabel('Use AI for unknown fields').check();
