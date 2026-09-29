@@ -14,3 +14,4 @@ playwright-report/
 .presentation-build/
 .codex-finalizer/
 .DS_Store
+release/
