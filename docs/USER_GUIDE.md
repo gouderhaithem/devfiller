@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="../public/icons/icon-256.png" width="96" height="96" alt="Formly icon" />
+  <img src="../public/icons/icon-256.png" width="96" height="96" alt="DevFiller icon" />
 </p>
-<h1 align="center">Formly</h1>
+<h1 align="center">DevFiller</h1>
 <p align="center"><strong>Less typing. More testing.</strong></p>
 <p align="center">Fresh test data for the form in front of you. One toolbar click.</p>
 <p align="center">Chrome & Edge · Manifest V3 · English / Français / العربية</p>
@@ -12,9 +12,9 @@
   <a href="#development">Development</a>
 </p>
 
-![Formly welcome page with an interactive form preview](images/welcome.png)
+![DevFiller welcome page with an interactive form preview](images/welcome.png)
 
-Formly fills website forms with fictional names, usernames, emails, addresses, and more. Unknown fields get readable words instead of random character strings. Add your own Gemini key for suggestions related to unfamiliar labels.
+DevFiller fills website forms with fictional names, usernames, emails, addresses, and more. Unknown fields get readable words instead of random character strings. Add your own Gemini key for suggestions related to unfamiliar labels.
 
 Click the extension icon to fill the current website. Click again for fresh values. **You control when the form is submitted.**
 
@@ -44,24 +44,24 @@ npm run build
 1. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
 2. Enable **Developer mode** and choose **Load unpacked**.
 3. Select the generated **`dist` folder**. Select the folder itself, not an individual file.
-4. Follow the welcome page and pin Formly from the browser’s Extensions menu.
-5. Open a website with a form and click the Formly toolbar icon.
+4. Follow the welcome page and pin DevFiller from the browser’s Extensions menu.
+5. Open a website with a form and click the DevFiller toolbar icon.
 
-**Already installed?** Rebuild, then click **Reload** on Formly’s extension card. Your saved settings remain. The welcome page opens automatically only on a new installation; you can revisit it from **Options → Welcome guide**.
+**Already installed?** Rebuild, then click **Reload** on DevFiller’s extension card. Your saved settings remain. The welcome page opens automatically only on a new installation; you can revisit it from **Options → Welcome guide**.
 
-Right-click the toolbar icon → **Options** to configure Formly. Gemini is the default tab. The other tabs are **Generator**, **Custom fields**, and **Excluded fields**.
+Right-click the toolbar icon → **Options** to configure DevFiller. Gemini is the default tab. The other tabs are **Generator**, **Custom fields**, and **Excluded fields**.
 
 The toolbar badge shows the number of filled fields. Hover over the icon for details. A `!` badge means filling failed; browser internal pages and extension stores restrict extension access.
 
 ## Side panel
 
-Right-click the toolbar icon → **Open Formly panel**, or press **Alt + Shift + F**. The panel stays beside the website and follows the active tab. Ordinary toolbar clicks fill the page and wait if AI data is still pending.
+Right-click the toolbar icon → **Open DevFiller panel**, or press **Alt + Shift + F**. The panel stays beside the website and follows the active tab. Ordinary toolbar clicks fill the page and wait if AI data is still pending.
 
 Use the field list to inspect filled/skipped results, highlight a control, save a custom value, or exclude a field. Panel custom rules target a CSS selector on the exact hostname and take priority over autocomplete. You can change their values or delete them in **Options → Custom fields**. If the website changes its markup, recreate the rule. Panel exclusions appear in **Options → Excluded fields**.
 
 **Undo last fill** restores the last fill for the current document and preserves controls changed since then. Reloading clears undo. Original values stay in the isolated extension context of the page, never in Gemini prompts or extension storage. Undo cannot reverse other website actions triggered by change events.
 
-The list refreshes after tab changes and periodically while open. On a new website, click Formly or reopen its panel from the icon’s menu if access is needed. Restricted browser pages, frames, and custom widgets retain the existing limitations.
+The list refreshes after tab changes and periodically while open. On a new website, click DevFiller or reopen its panel from the icon’s menu if access is needed. Restricted browser pages, frames, and custom widgets retain the existing limitations.
 
 The panel needs Chrome 118+ or a compatible Edge version. Customize the shortcut in your browser’s extension shortcuts page.
 
@@ -73,13 +73,13 @@ Local generation works without an account or API key. To add contextual suggesti
 2. Paste that provider's key, from the [Groq console](https://console.groq.com/keys) or [Google AI Studio](https://aistudio.google.com/apikey).
 3. Click **Test key** to check which supported models your key can reach. This lists models; it does not generate test data.
 4. Enable **Use AI for unknown fields**, then click **Save settings**.
-5. Click Formly on a website with a form. Suggestions are requested for that click and cached for later fills.
+5. Click DevFiller on a website with a form. Suggestions are requested for that click and cached for later fills.
 
 Each provider has its own models, and switching selects the new provider's default. Groq is a useful alternative when Gemini's free tier rate-limits you. **Prepare ahead of the click** is off by default because watching every page and generating in advance spends quota on forms you may never fill. Turn it on, and accept the browser's website-access request, if you would rather trade quota for an instant fill.
 
 **With preparation on, forms appearing prepares data; clicking waits for AI if needed.** Late-rendered forms and forms revealed in dialogs are detected automatically. Hidden tabs wait until visible. Fill shares an existing preload and waits for its response. Missing or expired suggestions are generated before filling. Only a quota/rate-limit error switches to local data; other AI errors leave the form untouched. A request asks for up to ten suggestions for each of up to 30 unknown fields. Recognized fields, custom rules, dropdowns, and radio groups use the local engine. Incomplete or invalid AI results show an error instead of silently filling local values.
 
-AI requests use your provider account's quota and billing settings. Formly briefly retries temporary errors while the fill waits. A final quota/rate-limit error pauses automatic background preparation for one minute, but a fill you click always attempts the provider again, so a short rate limit does not leave later clicks filling unrelated local words. Other failures are reported. Model availability depends on your key: the listing can include models a key cannot generate with, and older models are retired for new accounts, so switch models if one reports as unavailable.
+AI requests use your provider account's quota and billing settings. DevFiller briefly retries temporary errors while the fill waits. A final quota/rate-limit error pauses automatic background preparation for one minute, but a fill you click always attempts the provider again, so a short rate limit does not leave later clicks filling unrelated local words. Other failures are reported. Model availability depends on your key: the listing can include models a key cannot generate with, and older models are retired for new accounts, so switch models if one reports as unavailable.
 
 ### Your cache, your timing
 
@@ -147,7 +147,7 @@ Generated fields use readable words and phrases, with no appended random identif
 
 Data is fictional and intended for testing. Emails and websites use `example.com`; phone samples use the fictional US 202-555-01xx range. Address and phone regions are not necessarily tied to the selected language. Website-specific validation may still reject generated data.
 
-Formly works in the active page’s **top-level document**. Frames, shadow DOM, rich-text editors, and custom JavaScript controls need separate adapters. File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Some frameworks require trusted user input that a script cannot reproduce.
+DevFiller works in the active page’s **top-level document**. Frames, shadow DOM, rich-text editors, and custom JavaScript controls need separate adapters. File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Some frameworks require trusted user input that a script cannot reproduce.
 
 ## Privacy & permissions
 
@@ -161,7 +161,7 @@ Formly works in the active page’s **top-level document**. Frames, shadow DOM, 
 
 Labels and placeholders are sent as written, so they can contain information specific to the website. **Remove saved key** disables Gemini and clears its cache. No shared API key is bundled, and the development preview does not store Gemini credentials.
 
-Formly requests `activeTab` and `scripting` to fill the clicked page, `storage` for preferences/cache, and `alarms` for cache cleanup. `sidePanel` and `contextMenus` provide the optional page companion. Access to Google’s API endpoint supports Gemini requests. Broad HTTP/HTTPS website access is optional and requested when you enable Gemini’s automatic preparation.
+DevFiller requests `activeTab` and `scripting` to fill the clicked page, `storage` for preferences/cache, and `alarms` for cache cleanup. `sidePanel` and `contextMenus` provide the optional page companion. Access to Google’s API endpoint supports Gemini requests. Broad HTTP/HTTPS website access is optional and requested when you enable Gemini’s automatic preparation.
 
 ## Development
 

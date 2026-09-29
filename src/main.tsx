@@ -62,7 +62,7 @@ function App() {
   const shown = expanded ? fields.filter(([key])=>key!=='password'||settings.passwords) : fields.filter(([key])=>['fullName','username','email','phone'].includes(key));
   return <div className={isExtension()?'extension':'workspace'}>
     <main className="panel">
-      <header><div className="brand"><img className="brand-icon" src="./icons/icon-128.png" width="34" height="34" alt=""/>formly<span className="badge">TEST DATA</span></div><button className={`icon ${options?'active':''}`} aria-label="Toggle settings" onClick={()=>setOptions(!options)}><Settings2 size={19}/></button></header>
+      <header><div className="brand"><img className="brand-icon" src="./icons/icon-128.png" width="34" height="34" alt=""/>devfiller<span className="badge">TEST DATA</span></div><button className={`icon ${options?'active':''}`} aria-label="Toggle settings" onClick={()=>setOptions(!options)}><Settings2 size={19}/></button></header>
       <nav aria-label="Sections"><button className={tab==='gemini'?'selected':''} onClick={()=>setTab('gemini')}><Sparkles size={15}/> AI</button><button className={tab==='generate'?'selected':''} onClick={()=>setTab('generate')}><Shuffle size={15}/> Generator</button><button className={tab==='custom'?'selected':''} onClick={()=>setTab('custom')}>Custom fields {settings.custom.length>0&&<span className="count">{settings.custom.length}</span>}</button><button className={tab==='excluded'?'selected':''} onClick={()=>setTab('excluded')}>Excluded fields</button></nav>
       <div className="content">
         <div className="eyebrow"><span/> YOUR FORM, FILLED.</div>
@@ -85,7 +85,7 @@ function App() {
         {error&&<div className="notice error" role="alert"><span>{error}</span><button className="icon" aria-label="Dismiss error" onClick={()=>setError('')}><X size={15}/></button></div>}
         {result&&<div className="notice success" role="status"><Check size={17}/><div><strong>{result.filled} {result.filled===1?'field':'fields'} filled</strong><small>{result.preserved} kept · {result.unmatched} unrecognized · {result.invalid} incompatible</small>{result.filled===0&&<small>Try enabling “Fill unknown fields” in settings.</small>}</div></div>}
 {!isExtension()&&<button className="fill" onClick={fill} disabled={!ready||busy}><Sparkles size={18}/>{busy?'Filling your form…':'Generate & fill'}<ArrowUpRight size={18}/></button>}
-        {isExtension()&&<p className="helper">To fill a website, switch to its tab and click the Formly toolbar icon. These settings apply automatically. For field details and undo, right-click the icon → Open Formly panel, or press Alt + Shift + F.</p>}
+        {isExtension()&&<p className="helper">To fill a website, switch to its tab and click the DevFiller toolbar icon. These settings apply automatically. For field details and undo, right-click the icon → Open DevFiller panel, or press Alt + Shift + F.</p>}
         <p className="footnote">New data with every click. {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
       </div>
       <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v0.11.2</span></footer>

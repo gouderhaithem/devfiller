@@ -15,7 +15,7 @@ function Welcome() {
   const sample=round<0?null:examples[round%examples.length];
   return <div className="welcome-shell">
     <header className="welcome-header">
-      <a className="welcome-brand" href="./welcome.html" aria-label="Formly welcome"><img src="./icons/icon-128.png" alt="" width="42" height="42"/>formly<span>YOUR FORM, FILLED.</span></a>
+      <a className="welcome-brand" href="./welcome.html" aria-label="DevFiller welcome"><img src="./icons/icon-128.png" alt="" width="42" height="42"/>devfiller<span>YOUR FORM, FILLED.</span></a>
       <a className="settings-link" href="./index.html">Open settings <ArrowUpRight size={16}/></a>
     </header>
     <main>
@@ -30,7 +30,7 @@ function Welcome() {
         <div className="preview-stage">
           <div className="preview-note"><span/> ONE CLICK. A FRESH START.</div>
           <section className="preview-browser" aria-label="Interactive form preview">
-            <div className="preview-toolbar"><div className="window-dots"><i/><i/><i/></div><span>your-next-project.test</span><img src="./icons/icon-32.png" alt="Formly toolbar icon" width="26" height="26"/></div>
+            <div className="preview-toolbar"><div className="window-dots"><i/><i/><i/></div><span>your-next-project.test</span><img src="./icons/icon-32.png" alt="DevFiller toolbar icon" width="26" height="26"/></div>
             <div className="preview-content">
               <span className="preview-eyebrow">A LITTLE PRACTICE</span><h2>Your next great project</h2><p>Try a fill. Click again to change the data.</p>
               <div className={`preview-fields ${sample?'is-filled':''}`}>
@@ -48,9 +48,9 @@ function Welcome() {
       <section id="quick-start" className="quick-start" aria-labelledby="start-title">
         <div className="section-label"><span>THE 20-SECOND SETUP</span><h2 id="start-title">Three steps to your first fill.</h2></div>
         <ol className="steps">
-          <li><div className="step-top"><Pin size={21}/><span>01</span></div><h3>Pin your sidekick</h3><p>Open the browser’s Extensions menu and pin Formly to your toolbar.</p></li>
+          <li><div className="step-top"><Pin size={21}/><span>01</span></div><h3>Pin your sidekick</h3><p>Open the browser’s Extensions menu and pin DevFiller to your toolbar.</p></li>
           <li><div className="step-top"><Globe2 size={21}/><span>02</span></div><h3>Find a form</h3><p>Open a website you’re testing. Names, addresses, dropdowns — bring them on.</p></li>
-          <li><div className="step-top"><MousePointer2 size={21}/><span>03</span></div><h3>Click. Filled.</h3><p>Click the Formly icon. Click again for fresh data. Right-click → Open Formly panel to inspect fields and undo. You decide when to submit.</p></li>
+          <li><div className="step-top"><MousePointer2 size={21}/><span>03</span></div><h3>Click. Filled.</h3><p>Click the DevFiller icon. Click again for fresh data. Right-click → Open DevFiller panel to inspect fields and undo. You decide when to submit.</p></li>
         </ol>
       </section>
       <section className="make-yours" aria-labelledby="yours-title">
@@ -63,7 +63,7 @@ function Welcome() {
       </section>
       <aside className="welcome-bottom"><div><ShieldCheck size={24}/><p><strong>You stay in control.</strong><span>Local generation works offline. AI shares field descriptions with your chosen provider only when you enable it. Filling never submits forms automatically.</span></p></div><a className="welcome-primary" href="./index.html">Make it yours <ArrowRight size={17}/></a></aside>
     </main>
-    <footer className="welcome-footer"><span>Made for the work between “build” and “ship”.</span><span>Formly · Chrome & Edge</span></footer>
+    <footer className="welcome-footer"><span>Made for the work between “build” and “ship”.</span><span>DevFiller · Chrome & Edge</span></footer>
   </div>;
 }
 createRoot(document.getElementById('root')!).render(<Welcome/>);

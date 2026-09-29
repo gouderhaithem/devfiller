@@ -52,7 +52,7 @@ test('prepares late forms before clicks and waits for AI before filling',async()
     await expect(website.locator('#project')).toHaveValue('Cedar');
     await expect(website.locator('#description')).toHaveValue('A shared garden with seasonal vegetable beds.');
     await expect(website.locator('#title')).toHaveValue('Cedar');await expect(website.locator('#message')).toHaveValue('Cedar');
-    await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toMatch(/^Formly: \d+ filled,/);
+    await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getTitle({tabId}),tabId)).toMatch(/^DevFiller: \d+ filled,/);
     await cdp.send('Extensions.triggerAction',{id,targetId:target.targetId});await expect(website.locator('#project')).toHaveValue('Maple');expect(await requests()).toHaveLength(2);
     await expect(website.locator('#description')).toHaveValue('A neighborhood greenhouse for growing fresh herbs.');
     // Typing or unrelated page activity must not ask Gemini for another batch.

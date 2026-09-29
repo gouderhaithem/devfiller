@@ -1,6 +1,6 @@
-# Formly plan
+# DevFiller plan
 
-Project: Formly (`form-filler`)
+Project: DevFiller (`form-filler`)
 
 ## Confirmed requirements
 
@@ -71,7 +71,7 @@ Migrate older saved settings to replacement and unknown-field filling. Generate 
 - Add a saved cache duration of 1–60 whole minutes, retaining five minutes for existing installations. Save expiry independently of API-key settings and clear old batches on change.
 - Make Clear cache visible, show remaining suggestions and time, and retain the original batch deadline when new fields are added.
 - Open a welcome page on the first installation only, with an interactive example, pinning instructions, and links to Gemini, exclusions, and cache settings. Provide a replay link in Options.
-- Replace the generic toolbar icon with generated Formly artwork at 16, 32, 48, and 128 pixels; share the branding across Options, onboarding, and documentation.
+- Replace the generic toolbar icon with generated DevFiller artwork at 16, 32, 48, and 128 pixels; share the branding across Options, onboarding, and documentation.
 - Rewrite the README around installation, everyday use, cache controls, privacy, limitations, and development.
 - Verify migration, chosen expiry, clearing, dynamic forms, welcome lifecycle, icon loading, and responsive layouts.
 
