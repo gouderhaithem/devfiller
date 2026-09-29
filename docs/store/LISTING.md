@@ -62,7 +62,7 @@ No account, no DevFiller server, no analytics. Settings stay in your browser.
 5. `5-welcome.jpg`
 
 **Small promo tile:** `docs/store/promo-small-440x280.jpg`
-**Homepage URL:** `https://github.com/gouderhaithem/form-filler`
+**Homepage URL:** `https://www.devfiller.com`
 **Support URL:** `https://github.com/gouderhaithem/form-filler/issues`
 
 ## Privacy tab
@@ -106,12 +106,12 @@ Certify all three statements:
 **Privacy policy URL**
 
 ```
-https://github.com/gouderhaithem/form-filler/blob/main/PRIVACY.md
+https://www.devfiller.com/privacy/
 ```
 
 ## Before you press Submit
 
-- [ ] The branch is merged to `main`, so the privacy policy URL opens.
+- [ ] https://www.devfiller.com/privacy/ opens without a certificate warning.
 - [ ] `npm run package` was run on the merged `main`.
 - [ ] Install the zip in a fresh Chrome profile (`chrome://extensions` → Developer mode → Load unpacked, after unzipping) and fill a form once.
 - [ ] Rotate any Groq or Gemini key that was ever pasted into a chat, commit, screenshot or test.

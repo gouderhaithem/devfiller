@@ -1,6 +1,6 @@
 export const site = {
   name: "DevFiller",
-  url: "https://devfiller.com",
+  url: "https://www.devfiller.com",
   description:
     "DevFiller fills the form on the page you're testing with realistic, fictional data in one click. Free Chrome extension for developers and testers.",
   repo: "https://github.com/gouderhaithem/form-filler",
