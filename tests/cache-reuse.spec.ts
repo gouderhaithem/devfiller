@@ -24,7 +24,7 @@ test('a form that grows after filling keeps reusing its cached suggestions',asyn
       const state=globalThis as typeof globalThis & {testRequests:string[][]};state.testRequests=[];
       globalThis.fetch=async(input,init)=>{
         if(!String(input).startsWith('https://generativelanguage.googleapis.com/')) throw new Error('Unexpected request');
-        if(!init?.body) return new Response(JSON.stringify({models:[{name:'models/gemini-2.5-flash',supportedGenerationMethods:['generateContent']}]}));
+        if(!init?.body) return new Response(JSON.stringify({models:[{name:'models/gemini-3.6-flash',supportedGenerationMethods:['generateContent']}]}));
         const metadata=JSON.parse(JSON.parse(String(init.body)).contents[0].parts[0].text) as {fields:{id:string;label:string;type:string}[]};
         state.testRequests.push(metadata.fields.map(field=>field.label));
         const words=['Cedar','Maple','Willow','Birch','Oak','Pine','Elm','Ash','Palm','Olive'];
@@ -33,12 +33,14 @@ test('a form that grows after filling keeps reusing its cached suggestions',asyn
     });
     const options=await context.newPage();
     await options.goto(`chrome-extension://${id}/index.html`);
+    await options.getByLabel('Provider',{exact:true}).selectOption('gemini');
     await options.getByLabel('API key',{exact:true}).fill('fake-key-for-local-tests');
     await options.getByRole('button',{name:'Test key',exact:true}).click();
     await expect(options.getByRole('status')).toContainText('Key accepted');
-    await options.getByLabel('Use Gemini for unknown fields').check();
+    await options.getByLabel('Use AI for unknown fields').check();
+    await options.getByLabel('Prepare ahead of the click').check();
     await options.getByRole('button',{name:'Save settings',exact:true}).click();
-    await expect(options.getByRole('status')).toContainText('Suggestions prepare automatically');
+    await expect(options.getByRole('status')).toContainText('prepares suggestions automatically');
 
     const website=await context.newPage();
     await website.goto('http://127.0.0.1:5188/dynamic-form.html');

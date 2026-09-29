@@ -158,6 +158,45 @@ describe('readable unknown text',()=>{
 
 
 describe('Gemini scanning and suggestions',()=>{
+  it('sends recognized contextual text to AI while retaining explicit rules and local identity',()=>{
+    document.body.innerHTML='<textarea id="description"></textarea><input id="title"><input id="company" autocomplete="organization"><textarea id="message"></textarea><input id="firstName"><input type="password" id="password">';
+    const run={...request,aiRequired:true,fillUnknown:true,custom:[{id:'rule',label:'company',value:'My company'}]};
+    const fields=fillPage({...run,mode:'scan'}).unknown!;
+    expect(fields.map(field=>field.name)).toEqual(['description','title','message']);
+    const suggestions=Object.fromEntries(fields.map(field=>[field.id,{signature:field.signature!,values:['A community garden project.']}]));
+    const result=fillPage({...run,suggestions});
+    expect(field('description').value).toBe('A community garden project.');expect(field('title').value).toBe('A community garden project.');
+    expect(field('message').value).toBe('A community garden project.');expect(field('company').value).toBe('My company');
+    expect(field('firstName').value).toBe(values.firstName);expect(field('password').value).toBe('');
+    expect(result.fields!.find(field=>field.label==='description')?.reason).toBe('Filled with AI data');
+  });
+  it.each(['missing','expired','mismatched','empty'])('keeps AI fields untouched for %s suggestions',kind=>{
+    document.body.innerHTML='<textarea id="description"></textarea><input id="project">';
+    const run={...request,aiRequired:true,fillUnknown:true,overwrite:true};
+    const fields=fillPage({...run,mode:'scan'}).unknown!;
+    const suggestions=Object.fromEntries(fields.map(field=>[field.id,{signature:kind==='mismatched'?'old':field.signature!,values:kind==='empty'?[]:['A garden project.']}]));
+    const result=fillPage({...run,suggestions:kind==='missing'?undefined:suggestions,suggestionsExpireAt:kind==='expired'?Date.now()-1:Date.now()+60000});
+    expect(field('description').value).toBe('');expect(field('project').value).toBe('');expect(result.filled).toBe(0);
+    expect(result.fields!.every(field=>field.reason==='AI data is not ready for this field. Click Fill again.')).toBe(true);
+    // Quota handling explicitly disables AI requirements before invoking the local generator.
+    expect(fillPage({...run,aiRequired:false}).filled).toBe(2);
+  });
+  it('reuses a valid AI suggestion if it matches the current value instead of inventing local text',()=>{
+    document.body.innerHTML='<textarea id="description">A garden project.</textarea>';
+    const run={...request,aiRequired:true,fillUnknown:true,overwrite:true};
+    const target=fillPage({...run,mode:'scan'}).unknown![0];
+    fillPage({...run,suggestions:{[target.id]:{signature:target.signature!,values:['A garden project.']}}});
+    expect(field('description').value).toBe('A garden project.');
+  });
+  it('does not replace malformed AI numeric or date data with random local values',()=>{
+    document.body.innerHTML='<input id="measurement" type="number"><input id="appointment" type="date">';
+    const run={...request,aiRequired:true,fillUnknown:true};
+    const fields=fillPage({...run,mode:'scan'}).unknown!;
+    const suggestions=Object.fromEntries(fields.map(field=>[field.id,{signature:field.signature!,values:['not a valid native value']}]));
+    const result=fillPage({...run,suggestions});
+    expect(result.filled).toBe(0);expect(result.invalid).toBe(2);expect(result.used).toEqual({});
+  });
+
   it('skips cached suggestions containing machine ID fragments',()=>{
     document.body.innerHTML='<label for="project">Project code</label><input id="project">';
     const run={...request,overwrite:true,fillUnknown:true};

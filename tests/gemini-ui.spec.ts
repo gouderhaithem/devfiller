@@ -35,6 +35,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     const options=await context.newPage();await options.goto(`chrome-extension://${id}/index.html`);
     await expect(options.getByRole('button',{name:'Gemini',exact:true})).toHaveClass('selected');
     await expect(options.getByLabel('API key',{exact:true})).toBeEnabled();
+    await options.getByLabel('Provider',{exact:true}).selectOption('gemini');
     await options.getByLabel('API key',{exact:true}).fill('fake-key-for-local-tests');
     await expect(options.getByLabel('Cache expiry (minutes)',{exact:true})).toHaveValue('5');
     await options.getByLabel('Cache expiry (minutes)',{exact:true}).fill('0');
@@ -47,9 +48,10 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await expect(options.getByLabel('API key',{exact:true})).toHaveValue('fake-key-for-local-tests');
     await options.getByRole('button',{name:'Test key',exact:true}).click();
     await expect(options.getByRole('status')).toContainText('Key accepted');
-    await options.getByLabel('Use Gemini for unknown fields').check();
+    await options.getByLabel('Use AI for unknown fields').check();
+    await options.getByLabel('Prepare ahead of the click').check();
     await options.getByRole('button',{name:'Save settings',exact:true}).click();
-    await expect(options.getByRole('status')).toContainText('Suggestions prepare automatically');
+    await expect(options.getByRole('status')).toContainText('prepares suggestions automatically');
     await expect.poll(()=>worker.evaluate(()=>chrome.permissions.contains({origins:['http://*/*','https://*/*']}))).toBe(true);
     const website=await context.newPage();
     await website.addInitScript(()=>document.addEventListener('DOMContentLoaded',()=>{const field=document.querySelector<HTMLInputElement>('#project-code');if(field)field.value='Private entered value';const header=document.createElement('header');header.innerHTML='<input id=header-special value=Navigation><select id=header-region><option value=en>English</option><option value=fr>French</option></select>';document.body.prepend(header);}));
@@ -92,7 +94,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     // Open forms can already be preparing the replacement batch with the new duration.
     await options.reload();
     await expect(options.getByLabel('Cache expiry (minutes)',{exact:true})).toHaveValue('2');
-    await expect(options.getByLabel('Use Gemini for unknown fields')).toBeChecked();
+    await expect(options.getByLabel('Use AI for unknown fields')).toBeChecked();
     await expect(options.getByLabel('API key',{exact:true})).toHaveValue('fake-key-for-local-tests');
     await website.reload();
     await expect.poll(async()=>(await requests()).length).toBe(2);
@@ -102,7 +104,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await options.evaluate(()=>chrome.runtime.sendMessage({type:'gemini:status'}));
     await expect.poll(()=>worker.evaluate(async()=>Object.keys(await chrome.storage.session.get(null)).filter(k=>k.startsWith('gemini-cache:')).length)).toBe(0);
     await website.reload();await expect.poll(async()=>(await requests()).length).toBe(3);
-    await options.getByRole('button',{name:'Clear Gemini cache'}).click();
+    await options.getByRole('button',{name:'Clear AI cache'}).click();
     await expect(options.getByText('Cached suggestions cleared.')).toBeVisible();
     await worker.evaluate(()=>{(globalThis as typeof globalThis & {testFail:boolean}).testFail=true;});
     await website.reload();
@@ -113,7 +115,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await options.reload();await expect(options.getByLabel('API key',{exact:true})).toHaveValue('fake-key-for-local-tests');
     await options.getByRole('button',{name:'Remove saved key',exact:true}).click();
     await expect(options.getByLabel('API key',{exact:true})).toHaveValue('');
-    await expect(options.getByLabel('Use Gemini for unknown fields')).not.toBeChecked();
+    await expect(options.getByLabel('Use AI for unknown fields')).not.toBeChecked();
     await options.screenshot({path:'test-results/gemini-options.png',fullPage:true});
     await options.setViewportSize({width:360,height:800});
     await expect.poll(()=>options.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

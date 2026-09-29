@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Formly \u2014 Fast form filler",
-  "version": "0.11.1",
+  "name": "Formly — Fast form filler",
+  "version": "0.13.1",
   "description": "Click the toolbar icon to fill the current website with generated test data.",
   "permissions": [
     "activeTab",
@@ -13,7 +13,8 @@
     "debugger"
   ],
   "host_permissions": [
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*"
   ],
   "optional_host_permissions": [
     "http://*/*",

@@ -103,13 +103,15 @@ Local generation works without an account or API key. To add contextual suggesti
 
 1. Open **Options → Gemini** and enter your key from [Google AI Studio](https://aistudio.google.com/apikey).
 2. Click **Test key** to check which supported models your key can reach. This lists models; it does not generate test data.
+
+Pick a **Provider** first — **Groq** (the default) or **Gemini** — then paste that provider's key. Each provider has its own models, and switching selects the new provider's default. Groq is a useful alternative when Gemini's free tier rate-limits you. AI runs when you click Fill. **Prepare ahead of the click** is off by default because watching every page and generating in advance spends quota on forms you may never fill; turn it on if you would rather trade quota for an instant fill.
 3. Enable **Use Gemini for unknown fields**, then click **Save settings**.
 4. Accept the browser’s website-access request. This lets Formly prepare suggestions automatically when websites load, forms appear later, or you return to a tab.
 5. Open a website or dialog containing a form. Formly prepares data in the background, including on pages that were already open. Click Formly when you want to fill it.
 
 **Forms appearing prepares data; clicking waits for AI if needed.** Late-rendered forms and forms revealed in dialogs are detected automatically. Hidden tabs wait until visible. Fill shares an existing preload and waits for its response. Missing or expired suggestions are generated before filling. Only a quota/rate-limit error switches to local data; other AI errors leave the form untouched. A request asks for up to ten suggestions for each of up to 30 unknown fields. Recognized fields, custom rules, dropdowns, and radio groups use the local engine. Incomplete or invalid AI results show an error instead of silently filling local values.
 
-Gemini uses your Google project’s quota and billing settings. Formly briefly retries temporary errors while the fill waits. A final quota/rate-limit error enables local fallback for one minute; other failures are reported. Model availability depends on your key; use **Test key** to check access.
+Gemini uses your Google project’s quota and billing settings. Formly briefly retries temporary errors while the fill waits. A final quota/rate-limit error pauses automatic background preparation for one minute, but a fill you click always attempts Gemini again, so a short rate limit does not leave later clicks filling unrelated local words. Other failures are reported. Model availability depends on your key: the listing can include models a key cannot generate with, and older models are retired for new accounts, so switch models if one reports as unavailable.
 
 ### Your cache, your timing
 

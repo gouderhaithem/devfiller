@@ -6,12 +6,13 @@
 <p align="center">Fill website forms with fresh, fictional test data in one toolbar click.</p>
 <p align="center">
   <a href="https://github.com/gouderhaithem/form-filler/actions/workflows/ci.yml"><img src="https://github.com/gouderhaithem/form-filler/actions/workflows/ci.yml/badge.svg" alt="Build and tests" /></a>
-  <img src="https://img.shields.io/badge/version-0.11.1-5370ce" alt="Version 0.11.1" />
+  <img src="https://img.shields.io/badge/version-0.11.2-5370ce" alt="Version 0.11.2" />
   <img src="https://img.shields.io/badge/Chrome_%26_Edge-Manifest_V3-527b66" alt="Chrome and Edge, Manifest V3" />
   <img src="https://img.shields.io/badge/TypeScript-React-3178c6" alt="TypeScript and React" />
 </p>
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
+  <a href="docs/getting-started.html">First-run walkthrough</a> ·
   <a href="docs/presentation/README.md">Presentation</a> ·
   <a href="docs/USER_GUIDE.md">User guide</a> ·
   <a href="#development">Development</a>
@@ -35,7 +36,7 @@ Formly is a browser extension for developers and QA testers who repeatedly fill 
 | **English, French & Arabic** | Recognize labels in all three languages and choose a language for generated data. |
 | **Custom values** | Map your own labels to exact test values, such as `Project code` → `PRJ-001`. |
 | **Field exclusions** | Protect fields by label or CSS selector, optionally scoped to a website. Search and navigation controls are skipped by default. |
-| **Optional Gemini** | Prepare contextual suggestions for unfamiliar fields using your own API key, with local fallback. |
+| **Optional AI** | Contextual suggestions for unfamiliar fields using your own **Groq** (default) or **Gemini** key, requested when you click Fill. Quota failures fall back to local data. |
 | **Cache controls** | Keep Gemini suggestions for 1–60 minutes, see their expiry, or clear them immediately. |
 
 ## Quick start
@@ -113,17 +114,32 @@ The editor shows the new response, status, duration, and headers alongside the o
 
 The destination access uses Chrome’s existing optional host permissions. See [Chrome’s network request documentation](https://developer.chrome.com/docs/extensions/develop/concepts/network-requests) and [runtime permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions).
 
-### Optional Gemini setup
+### Optional AI setup (Groq or Gemini)
 
-In the installed extension, open **Options → Gemini**, enter your own API key, and click **Test key**. Choose an available model, enable **Use Gemini for unknown fields**, save, and accept the browser's website-access request.
+In the installed extension, open **Options → Gemini**, pick a **Provider**, enter that provider's API key, and click **Test key**. Choose a model, enable **Use AI for unknown fields**, and save.
 
-Formly prepares AI suggestions as forms appear, including forms rendered later by React/Vue, dialogs, and navigation within an app. Existing open pages are covered when you enable Gemini. Hidden tabs wait until you return to them.
+Two providers are supported, each with its own key and models:
 
-**Clicking Fill waits for AI when data is still loading.** Ready suggestions are used immediately. An in-flight preload is shared with the click; if data is missing or expired, the remaining suggestions are requested before filling. Only a Gemini quota/rate-limit failure switches the AI step to local data. Other AI errors leave the form untouched and show an error. Forms remain untouched until you click. Background preparation deduplicates requests and only sends field descriptions, not entered values. Recognized fields continue to use the local engine. Quota failures are remembered for one minute to avoid retrying on every click. Gemini requests use your Google project's quota and billing settings.
+| Provider | Models | Get a key |
+| --- | --- | --- |
+| **Groq** (default) | `openai/gpt-oss-20b` (default), `openai/gpt-oss-120b`, `qwen/qwen3.8-27b` | [Groq console](https://console.groq.com/keys) |
+| **Gemini** | `gemini-3.6-flash` (default), `gemini-3.5-flash`, `gemini-3.8-flash` | [Google AI Studio](https://aistudio.google.com/apikey) |
+
+Groq leads because its free tier answered every measured request and returned a first fill in about 2.5 seconds, where Gemini's free tier rate-limited quickly. Switching providers selects that provider's default model; paste the matching key. Settings saved before providers existed stay on Gemini, so an existing Google key is never sent to Groq.
+
+A provider listing a model is not a guarantee your key can generate with it — Gemini still lists models that are retired for newer accounts. If filling reports a model as unavailable or repeatedly overloaded, pick another from the list.
+
+By default **Gemini runs only when you click Fill**, so no quota is spent on pages you open but never fill. The first click on a form generates its suggestions and waits for them; later clicks reuse the cache until it expires.
+
+Turn on **Prepare ahead of the click** to trade quota for speed. Formly then watches for forms as they appear — including forms rendered later by React/Vue, dialogs, and navigation within an app — and generates before you click, so filling is instant. This requires standing website access and generates for every page with a form, including ones you never fill. Existing open pages are covered when you enable it, and hidden tabs wait until you return to them.
+
+**Clicking Fill waits for AI.** Ready suggestions are used immediately. When preparation is on, an in-flight preload is shared with the click; if data is missing or expired, the remaining suggestions are requested before filling. Only a Gemini quota/rate-limit failure switches the AI step to local data. Other AI errors leave the form untouched and show an error. Forms remain untouched until you click. Background preparation deduplicates requests and only sends field descriptions, not entered values. Contextual text such as Description, Message, Title, Company, and Job title uses Gemini even when Formly recognizes its label. Identity/contact fields and explicit custom rules retain their existing generators. Missing, expired, or mismatched AI data leaves the affected field unchanged instead of inserting random local text; the panel shows the reason and whether a filled value came from Gemini, local data, or your rule. After a quota failure, automatic background preparation pauses for a minute, but **a fill you click always tries Gemini again**, so a brief rate limit no longer leaves you filling unrelated local words after the API recovers. Gemini requests use your Google project's quota and billing settings.
 
 See the [complete user guide](docs/USER_GUIDE.md#gemini-optional) for cache behavior, settings, permissions, and troubleshooting.
 
-## Presentation
+## Presentation and onboarding
+
+New to Formly? **[docs/getting-started.html](docs/getting-started.html)** is a self-contained first-run walkthrough: build, load, pin, fill, the three settings worth knowing on day one, what Formly deliberately will not do, and the four things that most often trip people up. Open the file in any browser, or hand it to a teammate who just loaded the extension.
 
 A six-slide product walkthrough covers the filling workflow, supported fields, optional Gemini, privacy, and installation.
 
@@ -160,7 +176,7 @@ Run `npm run build` before the browser tests. CI runs the build and both test su
 | `src/engine.ts` | Field detection, constraints, exclusions, and filling |
 | `src/data.ts`, `src/samples.ts` | Fictional values and multilingual samples |
 | `src/background.ts` | Toolbar action, Gemini preparation, and session cache |
-| `src/gemini.ts` | Provider requests, response validation, and cache configuration |
+| `src/gemini.ts` | Gemini and Groq requests, response validation, and cache configuration |
 | `src/form-preload.ts`, `public/form-watch.js` | Detect forms as they appear and prepare Gemini data before filling |
 | `src/RequestsPanel.tsx`, `src/network-recorder.ts` | Request inspector and bounded network capture |
 | `src/RequestEditor.tsx`, `src/request-replay.ts` | Editable requests, explicit resends, and response comparison |
@@ -179,5 +195,6 @@ Google responses are simulated in automated tests. Live Gemini access, the nativ
 - [Field guide](FIELD_GUIDE.md): supported categories, aliases, and coverage ideas.
 - [Implementation notes](PLAN.md): project evolution and future ideas.
 - [Brand assets](docs/brand/README.md): icon source and rebuild instructions.
+- [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications. Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
 
 For a bug report, include the browser version, reproduction steps, and a minimal form example with fictional data. Before opening a pull request, run the build and both test suites. Useful next areas include custom widget adapters, regional datasets, and repeatable seeded values.

@@ -1,0 +1,434 @@
+<title>Your First Fill with Formly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --ground:#f7f5ef;
+    --surface:#fffdf8;
+    --surface-sunk:#efece3;
+    --ink:#161a2b;
+    --muted:#63677d;
+    --line:#ded9cd;
+    --indigo:#5370ce;
+    --indigo-soft:#e5e9f8;
+    --mint:#527b66;
+    --mint-soft:#e2ede6;
+    --amber:#8a6a2f;
+    --amber-soft:#f4ead6;
+    --shadow:0 1px 2px rgba(22,26,43,.06),0 8px 24px rgba(22,26,43,.06);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#13151d;
+      --surface:#1c1f2a;
+      --surface-sunk:#171a23;
+      --ink:#ecebf2;
+      --muted:#9a9eb2;
+      --line:#2e3342;
+      --indigo:#93a9ea;
+      --indigo-soft:#232942;
+      --mint:#85b79a;
+      --mint-soft:#1e2a24;
+      --amber:#d3ad6b;
+      --amber-soft:#2c2618;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#13151d;
+    --surface:#1c1f2a;
+    --surface-sunk:#171a23;
+    --ink:#ecebf2;
+    --muted:#9a9eb2;
+    --line:#2e3342;
+    --indigo:#93a9ea;
+    --indigo-soft:#232942;
+    --mint:#85b79a;
+    --mint-soft:#1e2a24;
+    --amber:#d3ad6b;
+    --amber-soft:#2c2618;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:74rem;margin:0 auto;padding-inline:20px;padding-block:0}
+  h1,h2,h3{font-family:Fraunces,ui-serif,Georgia,"Times New Roman",serif;text-wrap:balance;margin:0;line-height:1.12;letter-spacing:-.012em}
+  p{margin:0}
+  code,kbd,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  code{font-size:.86em;background:var(--surface-sunk);border:1px solid var(--line);border-radius:6px;padding:.1em .38em;white-space:nowrap}
+  kbd{font-size:.8em;background:var(--surface);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:.16em .44em;white-space:nowrap}
+  a{color:var(--indigo)}
+  :focus-visible{outline:2px solid var(--indigo);outline-offset:3px;border-radius:4px}
+  .eyebrow{
+    font-family:"Public Sans",sans-serif;font-size:.7rem;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---------- hero ---------- */
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,64px);align-items:center;padding-block:clamp(40px,7vw,76px) clamp(32px,5vw,56px)}
+  .mark{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+  .mark-tile{width:34px;height:34px;border-radius:9px;background:var(--indigo);display:grid;place-items:center;flex:none}
+  .mark-tile svg{display:block}
+  .mark-name{font-family:Fraunces,serif;font-weight:600;font-size:1.15rem;letter-spacing:-.01em}
+  .hero h1{font-size:clamp(2.3rem,5.4vw,3.6rem);font-weight:600}
+  .hero h1 em{font-style:normal;color:var(--indigo)}
+  .lede{margin-top:16px;font-size:clamp(1.02rem,1.6vw,1.16rem);color:var(--muted);max-width:34ch}
+  .hero-meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px}
+  .pill{font-size:.78rem;font-weight:500;padding:.3em .7em;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+  .pill.on{background:var(--mint-soft);border-color:transparent;color:var(--mint);font-weight:600}
+
+  /* ---------- browser demo ---------- */
+  .demo{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .chrome{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface-sunk);border-bottom:1px solid var(--line)}
+  .dots{display:flex;gap:5px;flex:none}
+  .dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+  .url{flex:1;min-width:0;font-size:.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.25em .8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toolbtn{flex:none;position:relative;width:30px;height:30px;border-radius:8px;background:var(--indigo);border:none;cursor:pointer;display:grid;place-items:center;padding:0}
+  .toolbtn:hover{filter:brightness(1.07)}
+  .badge{
+    position:absolute;right:-5px;bottom:-4px;min-width:17px;height:17px;padding:0 4px;
+    border-radius:5px;background:var(--mint);color:#fff;font-family:"JetBrains Mono",monospace;
+    font-size:.6rem;font-weight:500;display:grid;place-items:center;border:2px solid var(--surface-sunk);
+    font-variant-numeric:tabular-nums;
+  }
+  .form{padding:18px 20px 20px;display:grid;gap:12px}
+  .form-title{font-family:Fraunces,serif;font-size:1rem;font-weight:600;margin-bottom:2px}
+  .row{display:grid;gap:4px}
+  .row label{font-size:.72rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .row .val{
+    font-family:"JetBrains Mono",monospace;font-size:.82rem;
+    background:var(--surface-sunk);border:1px solid var(--line);border-radius:8px;
+    padding:.5em .65em;min-height:2.2em;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    transition:background .35s ease,color .35s ease;
+  }
+  .row .val:empty::before{content:"";display:inline-block}
+  .row .val.flash{background:var(--indigo-soft)}
+  .demo-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 20px 18px}
+  .demo-note{font-size:.76rem;color:var(--muted)}
+  .fillbtn{
+    font-family:"Public Sans",sans-serif;font-size:.83rem;font-weight:600;color:#fff;background:var(--indigo);
+    border:none;border-radius:9px;padding:.55em 1.1em;cursor:pointer;
+  }
+  .fillbtn:hover{filter:brightness(1.07)}
+
+  /* ---------- sections ---------- */
+  section{padding-block:clamp(34px,5vw,58px);border-top:1px solid var(--line)}
+  .sec-head{max-width:56ch;margin-bottom:clamp(24px,3.4vw,36px)}
+  .sec-head h2{font-size:clamp(1.6rem,3.2vw,2.15rem);font-weight:600;margin-top:10px}
+  .sec-head p{margin-top:10px;color:var(--muted)}
+
+  /* ---------- numbered install sequence ---------- */
+  .steps{display:grid;gap:0}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:20px;padding-block:22px;border-top:1px solid var(--line)}
+  .step:first-child{border-top:none;padding-top:0}
+  .step-n{
+    font-family:"JetBrains Mono",monospace;font-size:.78rem;font-weight:500;color:var(--indigo);
+    background:var(--indigo-soft);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;
+    font-variant-numeric:tabular-nums;
+  }
+  .step h3{font-size:1.12rem;font-weight:600}
+  .step p{margin-top:6px;color:var(--muted);max-width:62ch}
+  .step .after{margin-top:12px;font-size:.84rem;color:var(--mint);display:flex;gap:7px;align-items:baseline}
+  .step .after b{font-weight:600}
+  pre{
+    margin:12px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    padding:13px 15px;overflow-x:auto;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.75;color:var(--ink);
+  }
+  pre .c{color:var(--muted)}
+
+  /* ---------- three cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:9px}
+  .card h3{font-size:1.04rem;font-weight:600}
+  .card p{font-size:.9rem;color:var(--muted)}
+  .card .ex{margin-top:auto;padding-top:12px;font-family:"JetBrains Mono",monospace;font-size:.76rem;color:var(--ink);border-top:1px dashed var(--line)}
+  .card .ex span{color:var(--muted)}
+
+  /* ---------- boundaries ---------- */
+  .bounds{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 28px}
+  .bound{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;font-size:.92rem}
+  .bound svg{margin-top:4px;flex:none}
+  .bound b{font-weight:600}
+  .bound span{color:var(--muted)}
+
+  /* ---------- troubleshooting ---------- */
+  .tbl-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:34rem}
+  th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.9rem}
+  th{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  td:first-child{font-weight:600;width:34%}
+  td:last-child{color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);padding-block:26px 40px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.83rem;color:var(--muted)}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;gap:30px}
+    .lede{max-width:none}
+    .cards{grid-template-columns:1fr}
+    .bounds{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div>
+      <div class="mark">
+        <span class="mark-tile" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="3.5" y="2.5" width="13" height="15" rx="2" fill="#fffdf8"/>
+            <rect x="6" y="6" width="8" height="1.6" rx=".8" fill="#5370ce"/>
+            <rect x="6" y="9.4" width="5.5" height="1.6" rx=".8" fill="#5370ce"/>
+            <path d="M13.4 12.1l.72 1.6 1.6.72-1.6.72-.72 1.6-.72-1.6-1.6-.72 1.6-.72z" fill="#7fc0a0"/>
+          </svg>
+        </span>
+        <span class="mark-name">Formly</span>
+      </div>
+
+      <h1>You just installed it.<br>Here's your <em>first fill</em>.</h1>
+      <p class="lede">Formly puts fictional test data into the form in front of you, one toolbar click at a time. This page takes you from a freshly loaded extension to a filled form.</p>
+
+      <div class="hero-meta">
+        <span class="pill on">No account needed</span>
+        <span class="pill">Chrome &amp; Edge</span>
+        <span class="pill">Manifest V3</span>
+        <span class="pill">~2 minutes</span>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="chrome">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="url">your-next-project.test/signup</span>
+        <button class="toolbtn" id="toolbar-fill" aria-label="Fill this page with test data">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3.5" y="2.5" width="13" height="15" rx="2" fill="#fffdf8"/>
+            <rect x="6" y="6" width="8" height="1.6" rx=".8" fill="#5370ce"/>
+            <rect x="6" y="9.4" width="5.5" height="1.6" rx=".8" fill="#5370ce"/>
+          </svg>
+          <span class="badge" id="badge">5</span>
+        </button>
+      </div>
+
+      <div class="form">
+        <p class="form-title">Create your account</p>
+        <div class="row"><label for="d-name">Full name</label><div class="val" id="d-name">Casey Bennett</div></div>
+        <div class="row"><label for="d-mail">Email address</label><div class="val" id="d-mail">casey.bennett@example.com</div></div>
+        <div class="row"><label for="d-tel">Phone</label><div class="val" id="d-tel">+1 555 0142</div></div>
+        <div class="row"><label for="d-dob">Date of birth</label><div class="val" id="d-dob">1994-03-17</div></div>
+        <div class="row"><label for="d-code">Project code name</label><div class="val" id="d-code">Cedar</div></div>
+      </div>
+
+      <div class="demo-foot">
+        <span class="demo-note">A preview of the real thing &mdash; the badge counts filled fields.</span>
+        <button class="fillbtn" id="refill">Fill again</button>
+      </div>
+    </div>
+  </div>
+
+  <section id="install">
+    <div class="sec-head">
+      <span class="eyebrow">The setup</span>
+      <h2>Four steps, in order.</h2>
+      <p>Formly ships as an unpacked extension, so you build it once and point the browser at the output folder. Each step below ends with something you can see.</p>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <span class="step-n">1</span>
+        <div>
+          <h3>Build the extension</h3>
+          <p>Node.js 22 and npm, matching what CI uses. The build type-checks the project and writes the loadable extension into <code>dist/</code>.</p>
+<pre><span class="c">git clone https://github.com/gouderhaithem/form-filler.git</span>
+cd form-filler
+npm ci
+npm run build</pre>
+          <p class="after"><b>You should see</b><span>a <code>dist/</code> folder containing <code>manifest.json</code>.</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-n">2</span>
+        <div>
+          <h3>Load it into your browser</h3>
+          <p>Open <code>chrome://extensions</code> (or <code>edge://extensions</code>), turn on <b>Developer mode</b> in the corner, click <b>Load unpacked</b>, and choose the <code>dist/</code> folder &mdash; the folder itself, not a file inside it.</p>
+          <p class="after"><b>You should see</b><span>a Formly card on the extensions page, and its welcome guide opening in a new tab.</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-n">3</span>
+        <div>
+          <h3>Pin it to the toolbar</h3>
+          <p>Open the browser's puzzle-piece Extensions menu and pin Formly. The toolbar icon is how you fill &mdash; there is no popup to open first, and a click acts on the tab you are looking at.</p>
+          <p class="after"><b>You should see</b><span>the Formly icon sitting in your toolbar.</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-n">4</span>
+        <div>
+          <h3>Fill your first form</h3>
+          <p>Open any page with a form and click the icon. Names, emails, phone numbers, addresses, dates and dropdowns fill together as one coherent fictional person. Click again for a completely new set. Nothing is ever submitted for you &mdash; pressing the submit button stays your decision.</p>
+          <p class="after"><b>You should see</b><span>a number on the icon: how many fields were filled.</span></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="yours">
+    <div class="sec-head">
+      <span class="eyebrow">Make it yours</span>
+      <h2>Three settings worth knowing on day one.</h2>
+      <p>Right-click the icon and choose <b>Options</b>. Everything here is optional &mdash; Formly fills perfectly well before you touch any of it.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Custom values</h3>
+        <p>Some fields need one exact value every time &mdash; a tenant ID, a test account number, a project code your API validates.</p>
+        <p class="ex"><span>Project code &rarr;</span> PRJ-001</p>
+      </div>
+      <div class="card">
+        <h3>Excluded fields</h3>
+        <p>Protect anything that should stay untouched, by label or CSS selector, for one site or everywhere. Search boxes and navigation controls are already skipped.</p>
+        <p class="ex"><span>Skip on this site &rarr;</span> #site-search</p>
+      </div>
+      <div class="card">
+        <h3>Gemini &amp; its cache</h3>
+        <p>Bring your own API key to get sensible text for fields the local generator doesn't recognize, like <i>Why are you interested?</i> Suggestions are cached, and you set for how long.</p>
+        <p class="ex"><span>Cache expiry &rarr;</span> 1&ndash;60 min</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="bounds">
+    <div class="sec-head">
+      <span class="eyebrow">Good to know</span>
+      <h2>What Formly deliberately won't do.</h2>
+      <p>Worth reading once, so nothing surprises you mid-test.</p>
+    </div>
+
+    <div class="bounds">
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M5 8.2l2 2L11 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p><b>Never submits a form.</b> <span>Filling stops at the values. You press submit.</span></p>
+      </div>
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M5.4 5.4l5.2 5.2M10.6 5.4l-5.2 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <p><b>Skips sensitive fields.</b> <span>Payment, one-time codes and consent checkboxes are left alone. So are file uploads and read-only inputs.</span></p>
+      </div>
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M8 4.6v4.2M8 11.2v.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <p><b>Top-level document only.</b> <span>Fields inside iframes, shadow DOM or rich-text editors need adapters that don't exist yet.</span></p>
+      </div>
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M8 4.6v4.2M8 11.2v.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <p><b>The data is fictional.</b> <span>Sample pools are finite, so values repeat eventually, and a site's own validation may still reject one.</span></p>
+      </div>
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M5 8.2l2 2L11 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p><b>Nothing leaves your machine by default.</b> <span>Settings stay in local extension storage. There is no sync and no Formly server.</span></p>
+      </div>
+      <div class="bound">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M8 4.6v4.2M8 11.2v.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <p><b>Gemini sees labels, not answers.</b> <span>Only field descriptions and your chosen language are sent &mdash; never the values in the form.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="trouble">
+    <div class="sec-head">
+      <span class="eyebrow">If something looks wrong</span>
+      <h2>The four things that trip people up.</h2>
+    </div>
+
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Clicking the icon does nothing</td>
+            <td>The page restricts extensions &mdash; browser settings pages, the extension gallery and <code>chrome://</code> URLs all do.</td>
+            <td>Try it on an ordinary website. Hover the icon to read the reason.</td>
+          </tr>
+          <tr>
+            <td>An <b>!</b> badge and an empty form</td>
+            <td>Gemini failed with something other than a quota error, and Formly leaves the form untouched rather than guessing.</td>
+            <td>Click again &mdash; these are usually brief. If it persists, switch off <b>Use Gemini for unknown fields</b> and fill locally.</td>
+          </tr>
+          <tr>
+            <td>The first click takes a few seconds</td>
+            <td>Suggestions are still being prepared, so Fill waits for them instead of filling twice.</td>
+            <td>Nothing. Later clicks come from the cache and are instant until it expires.</td>
+          </tr>
+          <tr>
+            <td>A field keeps its old value</td>
+            <td>It is excluded, read-only, or one of the sensitive types Formly skips on purpose.</td>
+            <td>Open the side panel with <kbd>Alt</kbd>&nbsp;+&nbsp;<kbd>Shift</kbd>&nbsp;+&nbsp;<kbd>F</kbd> to see the reason for every field.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Formly &mdash; fresh test data for the work between <i>build</i> and <i>ship</i>.</span>
+    <span>Every name, address and code on this page is fictional.</span>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var sets=[
+      {name:"Casey Bennett",mail:"casey.bennett@example.com",tel:"+1 555 0142",dob:"1994-03-17",code:"Cedar"},
+      {name:"Jordan Taylor",mail:"jordan.taylor@example.com",tel:"+1 555 0178",dob:"1989-11-02",code:"Olive"},
+      {name:"Amina Rahmani",mail:"amina.rahmani@example.com",tel:"+1 555 0163",dob:"1996-07-24",code:"Willow"},
+      {name:"Mathieu Lefevre",mail:"mathieu.lefevre@example.com",tel:"+1 555 0119",dob:"1991-05-08",code:"Birch"}
+    ];
+    var keys=[["d-name","name"],["d-mail","mail"],["d-tel","tel"],["d-dob","dob"],["d-code","code"]];
+    var at=0, busy=false;
+
+    function fill(){
+      if(busy) return;
+      busy=true;
+      at=(at+1)%sets.length;
+      var set=sets[at];
+      keys.forEach(function(pair,i){
+        var el=document.getElementById(pair[0]);
+        if(!el) return;
+        setTimeout(function(){
+          el.textContent=set[pair[1]];
+          el.classList.add("flash");
+          setTimeout(function(){el.classList.remove("flash");},380);
+          if(i===keys.length-1) busy=false;
+        }, i*70);
+      });
+    }
+
+    var a=document.getElementById("refill");
+    var b=document.getElementById("toolbar-fill");
+    if(a) a.addEventListener("click",fill);
+    if(b) b.addEventListener("click",fill);
+  })();
+</script>

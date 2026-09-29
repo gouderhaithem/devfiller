@@ -8,7 +8,8 @@ export function installFormPreload(prepare:(tabId:number,tab:chrome.tabs.Tab,doc
     updating=updating.catch(()=>{}).then(async()=>{
       const stored=await chrome.storage.local.get(['settings','gemini']);
       const config=validateGemini(stored.gemini);
-      const enabled=config.enabled && !!config.apiKey && validateSettings(stored.settings).fillUnknown;
+      // Without automatic preparation there is nothing to watch: Fill generates on demand instead.
+      const enabled=config.enabled && !!config.apiKey && config.autoPrepare && validateSettings(stored.settings).fillUnknown;
       const matches=enabled?(await chrome.permissions.getAll()).origins?.filter(origin=>/^https?:\/\//.test(origin)) || []:[];
       const registered=(await chrome.scripting.getRegisteredContentScripts({ids:[ID]}))[0];
       if(matches.length){
