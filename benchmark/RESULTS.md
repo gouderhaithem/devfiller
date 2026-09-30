@@ -146,18 +146,50 @@ many there are, a currency means an amount unless the label says price or it's a
 form's words only confirm a type its fields suggest (which also fixed a sign-up and a sign-in
 misread).
 
+## Real-world accuracy work: rotation, validation, widgets, data
 
+The first held-out set had been measured against several times, so its 12 forms joined the main
+fixtures, and a fresh held-out set of 14 forms (`fixtures/holdout/`) was written without access to
+the engine before any of the following was built: exporting forms as fixtures, per-site type
+rules, fitting values to the page's validation, custom ARIA widgets, 1,490 Algerian communes and a
+material type.
+
+| Fresh held-out set | Precision | Recall | Unknown rate | Wrong-type rate | Leaks |
+| --- | --- | --- | --- | --- | --- |
+| Before (native fields only, 248) | 96.3% | 88.0% | 23.4% | 2.8% | 2 |
+| After (native fields and 20 widgets, 268) | 95.5% | 89.4% | 24.6% | 3.4% | 0 |
+
+The two numbers aren't strictly comparable: the second also scores custom widgets, which the
+engine ignored before. Two widget checkboxes the labels call ordinary are now skipped as consent,
+the safe direction. The held-out set found three more kinds of consent the engine missed (an
+Arabic declaration, "Opt me in to … communications" and a switch sharing usage data); each became
+a regression fixture before the fix, so the held-out consent numbers are no longer independent.
+
+On the main fixtures (770 fields, including the rotated forms, which carry their misses with them):
+
+| Check | Result |
+| --- | --- |
+| Precision / recall | 99.0% / 96.7% |
+| Filled values the page accepts (its own rules and aria-invalid) | 509 / 509 |
+| Values with the expected shape | 29 / 29 |
+| Seeded repeats, confirmations, end dates, new passwords, phones | all pass |
+| Sensitive-field leaks, native and widget | 0 |
+
+The baseline was reset to these numbers, since the main set changed.
+
+## Confidence calibration
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.
 
 | Band | Answers | Precision |
 | --- | --- | --- |
-| High (≥ 0.9) | 225 | 100.0% |
-| Medium (0.7–0.89) | 60 | 100.0% |
-| Low (0.5–0.69) | 15 | 100.0% |
+| High (≥ 0.9) | 367 | 100.0% |
+| Medium (0.7–0.89) | 105 | 99.0% |
+| Low (0.5–0.69) | 51 | 94.1% |
 
-The main fixtures can't separate the bands, since every answer is right. The thresholds stay at
-the roadmap's starting values until real-world fixtures give the low band something to measure.
+Now that the main set includes forms the engine wasn't tuned on, the bands separate the way the
+thresholds intend: high-confidence answers are always right, and low-confidence ones, which are
+only filled when **Fill unknown fields** is on, are right 94% of the time.
 
 ## Performance
 
