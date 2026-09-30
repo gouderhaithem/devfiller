@@ -6,6 +6,8 @@ import { fixRejected, runExport, runFillPage, runPanelAction, runWidgets } from 
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
+// Counts fills per tab, so validation retries of an older fill stop when a new one starts.
+const fillGenerations = new Map<number, number>();
 const CACHE_PREFIX='gemini-cache:';
 const ALARM='gemini-cache-expiry';
 // A tab keeps one batch per origin, so cap how many field signatures it may accumulate as the user
@@ -145,6 +147,9 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
   const tabId=tab.id;
   if(tabId===undefined || filling.has(tabId)) throw new Error('A fill is already running. Try again in a moment.');
   filling.add(tabId);
+  const generation=(fillGenerations.get(tabId) ?? 0)+1;
+  fillGenerations.set(tabId,generation);
+  let checkValidation=false;
   try {
     await protectStorage;
     await chrome.action.setBadgeText({tabId,text:'…'});
@@ -184,7 +189,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
     // Custom widgets, then the page's own validation of what was written.
     result.filled+=await runWidgets({tabId},request).catch(()=>0);
-    if(result.filled) await fixRejected({tabId}).catch(()=>0);
+    checkValidation=result.filled>0;
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{
         const latest=liveBatch((await chrome.storage.session.get(cacheKey!))[cacheKey!]);
@@ -208,6 +213,8 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     await chrome.action.setTitle({tabId,title:`DevFiller: ${reason}`});
     throw new Error(reason);
   } finally {filling.delete(tabId);}
+  // The page's own validation is checked after the fill is done, so a second click is never blocked.
+  if(checkValidation) void fixRejected({tabId},()=>fillGenerations.get(tabId)===generation).catch(()=>0);
 }
 
 chrome.runtime.onInstalled.addListener(details=>{

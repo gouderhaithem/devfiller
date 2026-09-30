@@ -30,10 +30,12 @@ export async function runWidgets(target: chrome.scripting.InjectionTarget, reque
 
 // The page's own validation runs after our events, sometimes a moment later: wait, then retry the
 // next way of writing each value the page rejected, for up to four rounds.
-export async function fixRejected(target: chrome.scripting.InjectionTarget): Promise<number> {
+// `current` says whether this fill is still the latest one on the tab; a new click stops the retries.
+export async function fixRejected(target: chrome.scripting.InjectionTarget, current: () => boolean = () => true): Promise<number> {
   let fixed = 0;
   for (let round = 0; round < 4; round++) {
     await new Promise(resolve => setTimeout(resolve, 300));
+    if (!current()) break;
     const [reply] = await chrome.scripting.executeScript({ target, func: () => (globalThis as EngineGlobal).__devfiller?.revalidate() });
     const retried = reply?.result?.retried ?? 0;
     fixed += retried;
