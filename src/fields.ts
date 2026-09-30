@@ -3,6 +3,7 @@
 export const fields = [
   ['username','Username'], ['fullName','Full name'], ['firstName','First name'], ['middleName','Middle name'], ['lastName','Last name'],
   ['email','Email'], ['phone','Phone'], ['password','Password'], ['birthDate','Date of birth'], ['age','Age'], ['gender','Gender'], ['nationality','Nationality'],
+  ['year','Year'], ['experience','Years of experience'],
   ['company','Company'], ['jobTitle','Job title'], ['department','Department'], ['industry','Industry'], ['employeeCount','Employee count'],
   ['address','Street address'], ['address2','Apartment / suite'], ['city','City / commune'], ['district','District / daira'], ['state','State / wilaya'], ['postalCode','Postal code'], ['country','Country'],
   ['website','Website'], ['reference','Reference / order number'], ['bio','Biography'], ['description','Description'], ['message','Message'], ['subject','Subject'], ['notes','Notes'],

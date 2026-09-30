@@ -2,7 +2,7 @@ import type { FieldReport, PanelPageState, Control } from '../panel-types';
 import type { Classification } from './classify';
 import type { FieldKey, TypeRule } from '../data';
 import type { Random } from '../rng';
-import type { CustomField, Values, Exclusions, Identity } from '../data';
+import type { CustomField, Values, Exclusions, Identity, Locale, LocalizedValues } from '../data';
 import type { FieldSamples } from '../samples';
 
 export type { Control };
@@ -11,7 +11,9 @@ export interface UnknownField { signature?:string; id:string; label:string; name
 // in the open shadow roots, in document order.
 export interface ClassifiedField { index:number; type:string; confidence:number }
 export interface SuggestedField { signature:string; values:string[] }
-export interface FillRequest { typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
+// Values in another language, for fields written in it: an Arabic label on an English setup.
+export type LocalizedData = Pick<LocalizedValues, 'values'> & Partial<LocalizedValues>;
+export interface FillRequest { localized?:Partial<Record<Locale,LocalizedData>>; typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 // `index` is the form's position in document.forms.
 export interface FormInsight { index:number; type:string; confidence:number; fields:number }
 export interface FillResult { widgets?:ClassifiedField[]; forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
@@ -20,6 +22,7 @@ export interface FillResult { widgets?:ClassifiedField[]; forms?:FormInsight[]; 
 export interface FillContext {
   readonly request: FillRequest;
   readonly values: Values;          // the coherent identity and samples chosen for this fill
+  readonly localized: Partial<Record<Locale, Values>>; // the same, per other language, for fields written in it
   readonly controls: readonly Control[];
   readonly exclusions: Exclusions;
   readonly panel?: PanelPageState;

@@ -101,10 +101,22 @@ const DATE_HINTS: ReadonlyArray<readonly [RegExp, (y: string, m: string, d: stri
 const isTextInput = (el: Control) => el instanceof HTMLInputElement && ['text', 'search', 'tel', ''].includes(el.type);
 const language = (el: Control) => (el.closest('[lang]')?.getAttribute('lang') || document.documentElement.lang || '').toLowerCase();
 
+// A picker's own format attribute, in the token styles of bootstrap-datepicker ("dd-mm-yyyy"),
+// moment ("DD/MM/YYYY") and flatpickr ("d/m/Y"). Formats with month names are left alone.
+function pickerFormat(el: Control, y: string, m: string, d: string): string | undefined {
+  const format = (el.getAttribute('data-date-format') || el.getAttribute('data-format') || '').trim();
+  const TOKENS = /yyyy|YYYY|aaaa|yy|YY|Y|y|mm|MM|m|dd|DD|jj|d/g;
+  if (!format || format.replace(TOKENS, '').replace(/[\s/.-]/g, '')) return undefined;
+  // Four letters, or flatpickr's single Y, are the full year; two letters or flatpickr's y are two digits.
+  return format.replace(TOKENS, token => token.length === 4 || token === 'Y' ? y : /^y/i.test(token) ? y.slice(2) : /^m/i.test(token) ? m : d);
+}
+
 export function formatDateText(el: Control, iso: string): string {
   const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match || !isTextInput(el)) return iso;
   const [, y, m, d] = match;
+  const declared = pickerFormat(el, y, m, d);
+  if (declared) return declared;
   const hints = ['placeholder', 'title', 'aria-label'].map(name => el.getAttribute(name) || '').join(' ') + ' ' + Array.from(el.labels || [], label => label.textContent || '').join(' ');
   const hinted = DATE_HINTS.find(([pattern]) => pattern.test(hints));
   if (hinted) return hinted[1](y, m, d);

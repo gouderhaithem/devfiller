@@ -1,6 +1,7 @@
 import type { Control } from './types';
 import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP } from './dictionary';
 import { normalize } from './normalize';
+import { placeholderShape } from './placeholder';
 
 // Input types the engine never touches or reports.
 export const OMITTED_TYPES: readonly string[] = ['hidden','submit','button','reset','image'];
@@ -31,10 +32,33 @@ export const isVisible = (el: Control) => !!el.getClientRects().length && getCom
 const isReadOnly = (el: Control) => 'readOnly' in el && el.readOnly;
 const isDisabled = (el: Control) => el.disabled || el.matches(':disabled');
 
+// Date pickers from the common libraries: bootstrap, jQuery UI, flatpickr, Pikaday, react-datepicker,
+// MUI, Ant Design, Element. Many are read-only so people use the calendar; a fill writes them anyway.
+// Class tokens are matched whole: a "datepicker-row" wrapper doesn't make a total a date.
+const PICKER_INPUT = /^(?:(?:js-|form-)?date-?picker(?:-input)?|datetimepicker|hasdatepicker|flatpickr-input|pikaday|daterangepicker|mat-datepicker-input|air-datepicker|litepicker|duet-date__input)$/i;
+const PICKER_WRAPPER = /^(?:react-datepicker__input-container|muipickerstextfield-root|muipickersinputbase-root|ant-picker-input|el-date-editor|vdp-datepicker)$/i;
+const TIME_ONLY = /^(?:time-?picker(?:-input)?|ui-timepicker-input|ant-picker-time|el-date-editor--time(?:-select)?)$/i;
+const PICKER_TYPES: readonly string[] = ['text', 'tel', 'search', ''];
+const tokens = (node: Element) => Array.from(node.classList);
+// The hidden input a flatpickr alt input stands for: it holds the date the form submits.
+export const pickerTarget = (el: Control): HTMLInputElement | undefined => {
+  const previous = el.previousElementSibling;
+  return previous instanceof HTMLInputElement && previous.type === 'hidden' && previous.classList.contains('flatpickr-input') ? previous : undefined;
+};
+export function isDatePicker(el: Control): boolean {
+  if (!(el instanceof HTMLInputElement) || !PICKER_TYPES.includes(el.type)) return false;
+  if (el.getAttribute('data-provide') === 'datepicker' || el.hasAttribute('data-date-format') || el.hasAttribute('data-datepicker') || pickerTarget(el)) return true;
+  const own = tokens(el), around = [el.parentElement, el.parentElement?.parentElement].flatMap(node => node ? tokens(node) : []);
+  if ([...own, ...around].some(token => TIME_ONLY.test(token))) return false;
+  if (own.some(token => PICKER_INPUT.test(token)) || around.some(token => PICKER_WRAPPER.test(token))) return true;
+  // An empty read-only field that shows a date format is a picker whatever its library.
+  return el.readOnly && !el.value && placeholderShape(el.placeholder)?.kind === 'date';
+}
+
 // Controls the user could type into or click right now.
 // `visible` lets a fill pass in visibility measured before it wrote anything: checking styles
 // after each write forces the browser to recalculate them, which is slow on large forms.
-export const isFillable = (el: Control, visible = isVisible(el)) => !isDisabled(el) && !isReadOnly(el) && !el.closest('[inert]') && visible;
+export const isFillable = (el: Control, visible = isVisible(el)) => !isDisabled(el) && (!isReadOnly(el) || isDatePicker(el)) && !el.closest('[inert]') && visible;
 export const isEditableChoice = (el: HTMLInputElement, visible = isVisible(el)) => !isDisabled(el) && !el.closest('[inert]') && visible;
 
 export const labelText = (el: Control) => Array.from(el.labels || []).map(label => label.textContent || '').join(' ');
@@ -65,7 +89,7 @@ export function displayLabel(el: Control): string {
   return (labelText(el) || el.getAttribute('aria-label') || labelledByText(el).trim() || el.getAttribute('placeholder') || el.name || el.id || el.type || 'Unnamed field').trim().slice(0, 160);
 }
 
-export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule';
+export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule' | 'format';
 export interface Signal { source: SignalSource; raw: string; text: string }
 
 const CONTROLS = 'input, select, textarea, button';

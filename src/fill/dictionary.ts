@@ -12,10 +12,14 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   email: ['email', 'e-mail', 'mail', 'email address', 'e-mail address', 'courriel', 'adresse électronique', 'adresse mail', 'adresse e-mail', 'البريد الإلكتروني', 'البريد'],
   phone: ['phone', 'phone number', 'area code', 'telephone', 'tel', 'mobile', 'mobile number', 'cell', 'cellphone', 'cell phone', 'gsm', 'whatsapp', 'contact number', 'numéro de téléphone', 'portable', 'téléphone portable', 'numéro de portable', 'الهاتف', 'رقم الهاتف', 'هاتف', 'الجوال', 'رقم الجوال', 'الهاتف المحمول'],
   password: ['password', 'confirm password', 'repeat password', 'pwd', 'passwd', 'pass', 'mot de passe', 'confirmation mot de passe', 'mdp', 'كلمة المرور', 'تأكيد كلمة المرور'],
-  birthDate: ['date of birth', 'birth date', 'birthday', 'dob', 'date de naissance', 'date naissance', 'تاريخ الميلاد'],
+  birthDate: ['date of birth', 'birth date', 'birthday', 'dob', 'born on', 'né le', 'née le', 'né(e) le', 'date de naissance', 'date naissance', 'تاريخ الميلاد'],
   age: ['age', 'how old', 'العمر'],
   gender: ['gender', 'sex', 'genre', 'sexe', 'الجنس'],
   nationality: ['nationality', 'citizenship', 'nationalité', 'الجنسية'],
+  year: ['year', 'graduation year', 'year of graduation', 'year graduated', 'graduated in', 'class of', 'completion year', 'year of completion', 'year obtained', 'passing year', 'year of passing', 'birth year', 'year of birth', 'model year', 'year of manufacture', 'construction year', 'year built',
+    'année', "année d'obtention", "année d'obtention du diplôme", 'année du diplôme', 'année de diplôme', 'année de naissance', 'année de fabrication', 'année de construction', 'السنة', 'سنة التخرج', 'سنة الحصول', 'سنة الميلاد', 'سنة الصنع'],
+  experience: ['years of experience', 'year of experience', 'years experience', 'experience years', 'experience in years', 'years of work experience', 'years of professional experience', 'work experience years', 'total experience', 'total years of experience', 'yoe', 'experience',
+    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة'],
   company: ['company', 'company name', 'organization', 'organisation', 'organization name', 'org', 'employer', 'business name', 'entreprise', 'société', "nom de l'entreprise", 'raison sociale', 'الشركة', 'اسم الشركة', 'المؤسسة'],
   jobTitle: ['job title', 'profession', 'position', 'occupation', 'fonction', 'poste', 'titre du poste', 'المهنة', 'المسمى الوظيفي', 'الوظيفة'],
   department: ['department', 'dept', 'division', 'département', 'service', 'القسم'],
@@ -48,7 +52,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
   rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'how likely', 'likely to recommend', 'net promoter score', 'nps', 'stars', 'évaluation', 'التقييم'],
-  date: ['date', 'event date', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
+  date: ['date', 'event date', 'deadline', 'due date', 'travel date', 'select date', 'select a date', 'choose date', 'choose a date', 'pick a date', 'graduation date', 'joining date', 'date of joining', 'hire date', 'date of hire', 'choisir une date', 'اختر التاريخ', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
   startDate: ['start date', 'check in', 'check-in date', 'arrival date', 'arrival', 'departure date', 'from date', 'date from', 'available from', 'availability date', 'date de début', "date d'arrivée", 'arrivée', 'date de départ', 'date de disponibilité', 'disponibilité', 'تاريخ البداية', 'تاريخ البدء', 'تاريخ الوصول'],
   endDate: ['end date', 'check out', 'check-out date', 'return date', 'to date', 'date to', 'date de fin', 'date de retour', 'retour', 'تاريخ النهاية', 'تاريخ الانتهاء', 'تاريخ المغادرة', 'تاريخ العودة'],
   time: ['time', 'arrival time', 'session time', 'time slot', 'preferred time', 'heure', "heure d'arrivée", 'الوقت', 'الساعة'],
@@ -59,7 +63,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
 
 // Words that name many things, so they only count on their own or with other evidence:
 // "Project name" is not a person's name, and "Delivery date" is only a date with type="date".
-export const GENERIC_WORDS: ReadonlySet<string> = new Set(['grade', 'area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
+export const GENERIC_WORDS: ReadonlySet<string> = new Set(['year', 'annee', 'السنة', 'experience', 'الخبرة', 'grade', 'area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
 
 // Single words developers glue to others: userEmail → "useremail", billingCity → "billingcity".
 export const COMPOUND_WORDS: ReadonlySet<string> = new Set(['email', 'courriel', 'phone', 'mobile', 'telephone', 'address', 'adresse', 'city', 'ville', 'country', 'company', 'website', 'username', 'password', 'postcode', 'zipcode', 'birthday', 'firstname', 'lastname', 'surname', 'salary', 'quantity', 'price', 'amount', 'gender', 'nationality', 'department', 'message', 'subject', 'description']);
@@ -77,7 +81,7 @@ export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.6], tel: ['phone', 0.6], url: ['website', 0.55], search: ['search', 0.6] };
 
 // Types each kind of control can hold. Anything else is pushed down, not ruled out.
-export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
+export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['year', 'experience', 'measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
 export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
@@ -147,6 +151,9 @@ export const PASSWORD = /password|mot de passe|كلمة المرور/u;
 export const PLACEHOLDER_OPTION = /select|choose|choisir|selectionner|اختر/i;
 // Two- and three-letter codes, for fields that only take a code.
 export const COUNTRY_CODES: Readonly<Record<string, readonly [string, string]>> = { 'United States': ['US', 'USA'], France: ['FR', 'FRA'], Algeria: ['DZ', 'DZA'] };
+// Countries and nationalities stay in English in the values so options match; a text field
+// written in Arabic takes the Arabic name.
+export const ARABIC_NAMES: Readonly<Record<string, string>> = { Algeria: 'الجزائر', France: 'فرنسا', 'United States': 'الولايات المتحدة', Algerian: 'جزائري', French: 'فرنسي', American: 'أمريكي' };
 export const COUNTRY_SPELLINGS: Readonly<Record<string, readonly string[]>> = {
   'United States': ['United States','US','USA','États-Unis','الولايات المتحدة'],
   France: ['France','FR','فرنسا'],
@@ -159,7 +166,7 @@ export const MACHINE_ID = /\b[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\b|(?:^|
 export const CONTEXTUAL_KEYS: readonly FieldKey[] = ['bio','description','message','subject','notes','title','company','jobTitle','department','industry','search'];
 // Text types that may be lengthened with more readable sample sentences to meet a minimum length.
 export const EXTENDABLE_KEYS: readonly FieldKey[] = ['company','jobTitle','department','industry','address','bio','description','message','subject','notes','search','title'];
-export const NUMERIC_KEYS: readonly FieldKey[] = ['measurement','age','employeeCount','quantity','price','amount','salary','percentage','rating'];
+export const NUMERIC_KEYS: readonly FieldKey[] = ['year','experience','measurement','age','employeeCount','quantity','price','amount','salary','percentage','rating'];
 
 // Lookup tables, built once when the engine loads.
 export interface AliasEntry { key: FieldKey; name: string; tokens: readonly string[]; generic: boolean }

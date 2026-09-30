@@ -55,6 +55,12 @@ test('native panel inspects, fills, edits rules, excludes, undoes, and follows n
     await clickButton('Fill again');
     await expect.poll(()=>panel.evaluate('document.querySelector(".primary").disabled')).toBe(false);
     await expect(website.locator('#project-code')).toHaveValue('Keep this');
+    // The excluded field shows an Include button on its row, which removes the exclusion.
+    await expect.poll(()=>panel.evaluate('document.body.textContent')).toContain('Excluded 1');
+    await clickButton('Include');
+    await expect.poll(()=>panel.evaluate('document.body.textContent')).toContain('This field will be filled again');
+    await clickButton('Fill again');
+    await expect(website.locator('#project-code')).toHaveValue('PRJ-PANEL');
     for(const width of [360,420,768]) {
       await panel.send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});
       expect(await panel.evaluate('document.documentElement.scrollWidth<=innerWidth')).toBe(true);

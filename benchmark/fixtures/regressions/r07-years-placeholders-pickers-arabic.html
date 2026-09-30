@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: years, placeholder shapes, date pickers and Arabic labels</title></head>
+<body>
+<main>
+  <!-- Reported on real sites on 30 September 2026: "Graduation year" and "Years of experience" got
+       words, placeholders never shaped a value, read-only and type="tel" date pickers were skipped
+       or given a phone number, and Arabic labels were filled in English. -->
+  <form action="/apply" method="post" data-form-type="other">
+    <label for="gy">GRADUATION YEAR *</label><input id="gy" name="graduation_year" type="text" required data-expect="year" data-value-pattern="^(19|20)\d{2}$">
+    <label for="yoe">YEARS OF EXPERIENCE</label><input id="yoe" name="experience" type="text" data-expect="experience" data-value-pattern="^\d{1,2}$">
+    <label for="exp2">Experience (years)</label><input id="exp2" name="exp_years" data-expect="experience" data-value-pattern="^\d{1,2}$">
+    <label for="yob">Year of birth</label><input id="yob" name="yob" data-expect="year" data-value-pattern="^(19|20)\d{2}$">
+    <label for="mail">Contact</label><input id="mail" name="contact" placeholder="you@company.com" data-expect="email" data-value-pattern="@">
+    <label for="site">Portfolio link</label><input id="site" name="link" placeholder="https://" data-expect="website" data-value-pattern="^https?://">
+    <input name="f_7" placeholder="+213 5XX XX XX XX" data-expect="phone">
+    <label for="start">Available from</label><input id="start" name="available" class="form-control datepicker" data-date-format="dd-mm-yyyy" data-expect="startDate" data-value-pattern="^\d{2}-\d{2}-\d{4}$">
+    <label for="dob">Date of birth</label><input id="dob" name="dob" class="form-control" placeholder="dd/mm/yyyy" readonly data-expect="birthDate" data-value-pattern="^\d{2}/\d{2}/\d{4}$">
+    <label for="ev">Interview date</label><input id="ev" name="interview" type="tel" inputmode="text" placeholder="MM/DD/YYYY" data-expect="date" data-value-pattern="^\d{2}/\d{2}/\d{4}$">
+    <label for="slot">Preferred time</label><input id="slot" name="slot" placeholder="HH:MM" data-expect="time">
+    <button type="submit">Apply</button>
+  </form>
+  <form action="/ar" method="post" dir="rtl" lang="ar" data-form-type="other">
+    <label for="afn">الاسم الأول</label><input id="afn" name="a1" data-expect="firstName" data-value-pattern="[؀-ۿ]">
+    <label for="aln">اسم العائلة</label><input id="aln" name="a2" data-expect="lastName" data-value-pattern="[؀-ۿ]">
+    <label for="acity">المدينة</label><input id="acity" name="a3" data-expect="city" data-value-pattern="[؀-ۿ]">
+    <label for="acountry">البلد</label><input id="acountry" name="a4" data-expect="country" data-value-pattern="[؀-ۿ]">
+    <label for="agy">سنة التخرج</label><input id="agy" name="a5" data-expect="year" data-value-pattern="^(19|20)\d{2}$">
+    <label for="ayoe">سنوات الخبرة</label><input id="ayoe" name="a6" data-expect="experience" data-value-pattern="^\d{1,2}$">
+    <label for="amsg">الرسالة</label><textarea id="amsg" name="a7" data-expect="message" data-value-pattern="[؀-ۿ]"></textarea>
+    <button type="submit">إرسال</button>
+  </form>
+</main>
+</body>
+</html>
