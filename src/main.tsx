@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Copy, FlaskConical, Plus, Settings2, Shuffle, Sparkles, Trash2, X } from 'lucide-react';
 import { defaults, fields, generateIdentities, generateValues, type Settings, type Values } from './data';
 import { generateSamples } from './samples';
-import { fillPage, type FillResult } from './engine';
+import type { FillResult } from './fill';
+import { runFillPage } from './fill/inject';
 import { isExtension, readSettings, saveSettings } from './storage';
 import './style.css';
 import { GeminiPanel } from './GeminiPanel';
@@ -39,9 +40,9 @@ function App() {
       if (isExtension()) {
         const [active] = await chrome.tabs.query({active:true,currentWindow:true});
         if (!active?.id) throw new Error('Open a webpage with a form, then try again.');
-        const responses = await chrome.scripting.executeScript({target:{tabId:active.id},func:fillPage,args:[request]});
-        if (!responses[0]?.result) throw new Error('The page did not respond. Reopen the extension and try again.');
-        setResult(responses[0].result);
+        const reply = await runFillPage({tabId:active.id},request);
+        if (!reply) throw new Error('The page did not respond. Reopen the extension and try again.');
+        setResult(reply);
       } else {
         const demo = document.querySelector<HTMLIFrameElement>('#demo-form');
         if (!demo?.contentWindow) throw new Error('Demo form is still loading. Try again.');

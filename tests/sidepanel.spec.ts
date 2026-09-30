@@ -32,7 +32,15 @@ test('native panel inspects, fills, edits rules, excludes, undoes, and follows n
     expect(await panel.evaluate('document.body.textContent')).toContain('Password filling disabled');
     async function clickButton(text:string){const selector=`Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()===${JSON.stringify(text)})`;await expect.poll(()=>panel.evaluate(`!!(${selector}) && !(${selector}).disabled`)).toBe(true);await panel.evaluate(`(${selector}).click()`);await panel.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');await expect.poll(()=>panel.evaluate('document.querySelector(".primary").disabled')).toBe(false);}
     async function clickField(label:string){const selector=`Array.from(document.querySelectorAll('.field-row')).find(b=>b.querySelector('strong').textContent===${JSON.stringify(label)})`;await expect.poll(()=>panel.evaluate(`!!(${selector}) && !(${selector}).disabled`)).toBe(true);await panel.evaluate(`(${selector}).click()`);await panel.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');await expect.poll(()=>panel.evaluate('document.querySelector(".primary").disabled')).toBe(false);}
+    // Every field shows what it was recognized as, and the page overlay can be switched on and off.
+    await expect.poll(()=>panel.evaluate('document.body.textContent')).toMatch(/Email · \d+%/);
+    const overlayCount=()=>website.evaluate(()=>Array.from(document.documentElement.children).filter(el=>el.tagName==='DIV' && (el as HTMLElement).style.pointerEvents==='none').length);
+    await clickButton('Show field types on the page');
+    await expect.poll(overlayCount).toBe(1);
+    await clickButton('Hide field types on the page');
+    await expect.poll(overlayCount).toBe(0);
     await clickField('Project code');
+    await expect.poll(()=>panel.evaluate('document.body.textContent')).toContain('Not recognized');
     await expect.poll(()=>panel.evaluate('!!document.querySelector("#field-value")')).toBe(true);
     await panel.evaluate(`(()=>{const el=document.querySelector('#field-value');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,'PRJ-PANEL');el.dispatchEvent(new Event('input',{bubbles:true}));})()`);
     await clickButton('Save field rule');

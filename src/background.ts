@@ -1,8 +1,8 @@
 import {installFormPreload} from './form-preload';
-import { panelPageAction } from './panel-page';
 import { generateIdentities, generateValues, validateSettings, type Settings } from './data';
 import { generateSamples } from './samples';
-import { fillPage, type FillRequest, type FillResult, type SuggestedField } from './engine';
+import type { FillRequest, FillResult, SuggestedField } from './fill';
+import { runFillPage, runPanelAction } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
@@ -54,8 +54,7 @@ async function status() {
 
 async function prepareBatch(tabId:number,request:FillRequest,settings:Settings,config:GeminiConfig,epoch:number,documentId?:string,userInitiated=false):Promise<{scan:FillResult;note:string;cacheKey?:string;batch?:CachedBatch}> {
   request.aiRequired=true;
-  const scans=await chrome.scripting.executeScript({target:documentId?{tabId,documentIds:[documentId]}:{tabId},func:fillPage,args:[{...request,mode:'scan'}]});
-  const scan=scans[0]?.result;
+  const scan=await runFillPage(documentId?{tabId,documentIds:[documentId]}:{tabId},{...request,mode:'scan'});
   if(!scan) throw new Error('The form could not be inspected. Local filling is still available.');
   if(request.expectedDocument && request.expectedDocument!==scan.documentId) throw new Error('The page changed. Refresh the field list.');
   request.expectedDocument=scan.documentId;
@@ -179,8 +178,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     }
     request.exclusions=validateSettings((await chrome.storage.local.get('settings')).settings).exclusions;
     if(epoch!==cacheEpoch || (batch && batch.expiresAt<=Date.now()))throw new Error('AI settings or cached data changed. Click Fill again.');
-    const responses=await chrome.scripting.executeScript({target:{tabId},func:fillPage,args:[request]});
-    const result:FillResult | undefined=responses[0]?.result;
+    const result:FillResult | undefined=await runFillPage({tabId},request);
     if(!result) throw new Error('The page did not respond. Click to try again.');
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
@@ -265,7 +263,7 @@ chrome.commands.onCommand.addListener((command,tab)=>{
 });
 async function inspectTab(tabId:number) {
   const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
-  const reply=(await chrome.scripting.executeScript({target:{tabId},func:fillPage,args:[{...settings,values:generateValues(settings.locale),mode:'inspect'}]}))[0]?.result;
+  const reply=await runFillPage({tabId},{...settings,values:generateValues(settings.locale),mode:'inspect'});
   if(!reply) throw new Error('The page did not respond. Refresh to try again.');
   return {tabId,...reply};
 }
@@ -283,16 +281,17 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     if(!msg.documentId) throw new Error('Refresh the field list first.');
     if(msg.type==='panel:fill') {await fillClickedTab(tab,msg.documentId);return inspectTab(tabId);}
     if(filling.has(tabId)) throw new Error('Wait for the current fill to finish.');
+    if(msg.type==='panel:overlay') return {...await inspectTab(tabId),...await runPanelAction({tabId},'overlay',msg.documentId,msg.value==='on'?'on':'off')};
     if(msg.type==='panel:highlight' || msg.type==='panel:undo') {
       const action=msg.type==='panel:undo'?'undo':'highlight';
-      const result=(await chrome.scripting.executeScript({target:{tabId},func:panelPageAction,args:[action,msg.documentId,msg.fieldId ?? '']}))[0]?.result;
+      const result=await runPanelAction({tabId},action,msg.documentId,msg.fieldId ?? '');
       if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'DevFiller: last fill undone. Click to fill again.'});}
       return {...await inspectTab(tabId),...result};
     }
     if(msg.type==='panel:exclude' || msg.type==='panel:rule') {
       if(!msg.fieldId) throw new Error('Choose a field first.');
       if(msg.type==='panel:rule' && (typeof msg.value!=='string' || !msg.value.trim() || msg.value.length>5000)) throw new Error('Enter a test value between 1 and 5,000 characters.');
-      const field=(await chrome.scripting.executeScript({target:{tabId},func:panelPageAction,args:['field',msg.documentId,msg.fieldId]}))[0]?.result;
+      const field=await runPanelAction({tabId},'field',msg.documentId,msg.fieldId);
       if(!field || !('selector' in field) || !field.selector || !field.site) throw new Error('This field could not be located. Refresh the panel.');
       const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
       if(msg.type==='panel:exclude') {

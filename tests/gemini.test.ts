@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CACHE_TTL, DEFAULT_MODEL, MODELS, PROVIDER_SPECS, generateSuggestions, listModels, liveBatch, parseSuggestions, validateGemini } from '../src/gemini';
-import type { UnknownField } from '../src/engine';
+import type { UnknownField } from '../src/fill';
 const fields:UnknownField[]=[{id:'field_1',label:'Project code',name:'project',placeholder:'',type:'text',min:'',max:'',step:'',minLength:-1,maxLength:20}];
 afterEach(()=>vi.unstubAllGlobals());
 describe('Gemini client and expiry',()=>{

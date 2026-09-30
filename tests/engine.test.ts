@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fillPage, type FillRequest } from '../src/engine';
+import { fillPage, type FillRequest } from '../src/fill';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 const values={...generateValues('en'),quantity:'3',price:'49.99',country:'United States'};

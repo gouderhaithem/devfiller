@@ -1,9 +1,23 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Check, ChevronRight, CircleMinus, ExternalLink, Eye, ListFilter, PanelRight, RefreshCw, Settings2, ShieldCheck, Sparkles, Undo2, X } from 'lucide-react';
+import { Check, ChevronRight, CircleMinus, ExternalLink, Eye, ListFilter, PanelRight, RefreshCw, Settings2, ShieldCheck, Sparkles, Tags, Undo2, X } from 'lucide-react';
 import { isExtension } from './storage';
-import type { FieldReport, PanelReply } from './panel-types';
+import type { Detection, FieldReport, PanelReply } from './panel-types';
 import './sidepanel.css';
+
+const isProtectedType=(d:Detection)=>d.type.startsWith('skip:');
+const tier=(d:Detection)=>isProtectedType(d)?'protected':d.type==='unknown'?'unknown':d.confidence>=0.9?'high':d.confidence>=0.7?'medium':'low';
+const percent=(d:Detection)=>`${Math.round(d.confidence*100)}%`;
+function detectedText(d:Detection) {
+  if(d.type==='unknown')return 'Type not recognized';
+  return isProtectedType(d)?`${d.label} · protected`:`${d.label} · ${percent(d)}`;
+}
+function DetectionDetails({detected}:{detected:Detection}) {
+  const title=detected.type==='unknown'?'Not recognized':isProtectedType(detected)?`Recognized as ${detected.label}, never filled`:`Recognized as ${detected.label}, ${percent(detected)} confident`;
+  return <div className="detection"><p className={`detection-title ${tier(detected)}`}>{title}</p>
+    {detected.evidence.length>0&&<ul aria-label="Evidence">{detected.evidence.map((item,index)=><li key={`${index}:${item}`}>{item}</li>)}</ul>}
+    {detected.alternatives.length>0&&<p className="hint">Also considered: {detected.alternatives.join(', ')}</p>}</div>;
+}
 
 function SidePanel() {
   const [page,setPage]=useState<PanelReply|null>(null);
@@ -15,6 +29,7 @@ function SidePanel() {
   const [filter,setFilter]=useState('all');
   const [selected,setSelected]=useState<string|null>(null);
   const [value,setValue]=useState('');
+  const [overlay,setOverlay]=useState(false);
   const version=useRef(0), working=useRef(false), current=useRef<PanelReply|null>(null);
   const installed=isExtension();
   const refresh=useCallback(async(explicit=false)=>{
@@ -30,7 +45,7 @@ function SidePanel() {
       const reply:PanelReply=await chrome.runtime.sendMessage({type:'panel:inspect',tabId:tab.id});
       if(seq!==version.current)return;
       if(!reply.ok)throw new Error(reply.error || 'Could not inspect this page.');
-      if(current.current?.documentId!==reply.documentId){setSelected(null);setNotice('');}
+      if(current.current?.documentId!==reply.documentId){setSelected(null);setNotice('');setOverlay(false);}
       current.current=reply;setPage(reply);setError('');
       if(explicit){setNotice('Field list refreshed.');setActionError('');}
     } catch(e) {if(seq===version.current){current.current=null;setPage(null);setSelected(null);setError(e instanceof Error?e.message:'Could not inspect this page.');}}
@@ -50,12 +65,12 @@ function SidePanel() {
     chrome.tabs.onActivated.addListener(activated);chrome.tabs.onUpdated.addListener(updated);
     return()=>{++version.current;window.clearInterval(interval);chrome.tabs.onActivated.removeListener(activated);chrome.tabs.onUpdated.removeListener(updated);};
   },[installed,refresh]);
-  async function action(type:string,fieldId?:string) {
+  async function action(type:string,fieldId?:string,payload?:string) {
     const target=current.current;
     if(!target?.documentId || working.current)return;
     working.current=true;const seq=++version.current;setBusy(type);setActionError('');setNotice('');
     try {
-      const reply:PanelReply=await chrome.runtime.sendMessage({type:`panel:${type}`,tabId:target.tabId,documentId:target.documentId,fieldId,value});
+      const reply:PanelReply=await chrome.runtime.sendMessage({type:`panel:${type}`,tabId:target.tabId,documentId:target.documentId,fieldId,value:payload ?? value});
       if(!reply.ok)throw new Error(reply.error || 'Could not complete this action.');
       if(seq!==version.current)return;
       current.current=reply;setPage(reply);
@@ -63,6 +78,7 @@ function SidePanel() {
       if(type==='exclude'){setNotice('This field will be skipped on this website. Manage exclusions in Options.');setSelected(null);}
       if(type==='undo')setNotice(`${reply.restored || 0} fields restored.${reply.kept?` ${reply.kept} changed or removed fields kept.`:''}`);
       if(type==='fill')setNotice('Fill complete. Review the form before submitting.');
+      if(type==='overlay')setOverlay(!!reply.overlay);
     } catch(e){setActionError(e instanceof Error?e.message:'The action failed.');}
     finally{working.current=false;setBusy('');void refresh();}
   }
@@ -72,7 +88,7 @@ function SidePanel() {
   const visible=fields.filter(field=>filter==='all' || (filter==='filled'?field.status==='filled':field.status==='skipped' || field.status==='incompatible'));
   const active=fields.find(field=>field.id===selected);
   function choose(field:FieldReport){setSelected(field.id);setValue('');void action('highlight',field.id);}
-  const editor=active&&<section className="field-editor" aria-label="Field controls"><div className="editor-heading"><h2>{active.label}</h2><button className="icon-button" aria-label="Close field controls" onClick={()=>setSelected(null)}><X size={17}/></button></div><button className="text-button" disabled={!!busy} onClick={()=>void action('highlight',active.id)}><Eye size={15}/> Show on page</button>{active.editable&&active.reason!=='Excluded by your settings'?<form onSubmit={e=>{e.preventDefault();void action('rule',active.id);}}><label htmlFor="field-value">Custom test value</label><input id="field-value" value={value} onChange={e=>setValue(e.target.value)} placeholder="e.g. PRJ-001" maxLength={5000} required/><p className="hint">Saved for this field on this website.</p><button className="secondary" disabled={!!busy || !value.trim()}>Save field rule</button><button className="text-button exclude" type="button" disabled={!!busy} onClick={()=>void action('exclude',active.id)}>Exclude this field</button></form>:<p className="hint">{active.reason}. You can manage generator settings and exclusions in Options.</p>}</section>;
+  const editor=active&&<section className="field-editor" aria-label="Field controls"><div className="editor-heading"><h2>{active.label}</h2><button className="icon-button" aria-label="Close field controls" onClick={()=>setSelected(null)}><X size={17}/></button></div>{active.detected&&<DetectionDetails detected={active.detected}/>}<button className="text-button" disabled={!!busy} onClick={()=>void action('highlight',active.id)}><Eye size={15}/> Show on page</button>{active.editable&&active.reason!=='Excluded by your settings'?<form onSubmit={e=>{e.preventDefault();void action('rule',active.id);}}><label htmlFor="field-value">Custom test value</label><input id="field-value" value={value} onChange={e=>setValue(e.target.value)} placeholder="e.g. PRJ-001" maxLength={5000} required/><p className="hint">Saved for this field on this website.</p><button className="secondary" disabled={!!busy || !value.trim()}>Save field rule</button><button className="text-button exclude" type="button" disabled={!!busy} onClick={()=>void action('exclude',active.id)}>Exclude this field</button></form>:<p className="hint">{active.reason}. You can manage generator settings and exclusions in Options.</p>}</section>;
   return <div className="panel-shell">
     <header className="panel-header"><a className="brand" href="./welcome.html" target="_blank" rel="noreferrer"><img src="./icons/icon-32.png" alt=""/><strong>devfiller</strong></a><span className="companion">PAGE COMPANION</span><button className="icon-button" aria-label="Open settings" title="Open settings" onClick={()=>installed?void chrome.runtime.openOptionsPage():window.open('./index.html','_blank')}><Settings2 size={18}/></button></header>
     <main aria-busy={!!busy || loading} data-document-id={page?.documentId}>
@@ -85,8 +101,9 @@ function SidePanel() {
       {installed&&loading&&<p className="empty" role="status">Looking for fields…</p>}
       {page&&<>
         <div className="results-heading"><h2>Form fields <span>{fields.length}</span></h2><span>{filled} filled · {skipped} skipped</span></div>
+        <button className="text-button overlay-toggle" aria-pressed={overlay} disabled={!!busy} onClick={()=>void action('overlay',undefined,overlay?'off':'on')}><Tags size={14}/>{overlay?'Hide field types on the page':'Show field types on the page'}</button>
         <div className="filters" aria-label="Filter fields"><ListFilter size={15}/>{[['all','All fields'],['filled','Filled'],['skipped','Skipped']].map(([key,label])=><button key={key} aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}</button>)}</div>
-        <div className="field-list">{visible.map(field=><React.Fragment key={field.id}><button className={`field-row ${selected===field.id?'selected':''}`} key={field.id} onClick={()=>choose(field)} disabled={!!busy} aria-label={`${field.label}: ${field.status}. ${field.reason}`}><span className={`field-status ${field.status}`}>{field.status==='filled'?<Check size={15}/>:field.status==='ready'?<span className="ready-dot"/>:<CircleMinus size={15}/>}</span><span className="field-copy"><strong>{field.label}</strong><span>{field.status==='filled'?field.value:field.reason}</span></span><ChevronRight size={15}/></button>{selected===field.id&&editor}</React.Fragment>)}</div>
+        <div className="field-list">{visible.map(field=><React.Fragment key={field.id}><button className={`field-row ${selected===field.id?'selected':''}`} key={field.id} onClick={()=>choose(field)} disabled={!!busy} aria-label={`${field.label}: ${field.status}. ${field.detected?`${detectedText(field.detected)}. `:''}${field.reason}`}><span className={`field-status ${field.status}`}>{field.status==='filled'?<Check size={15}/>:field.status==='ready'?<span className="ready-dot"/>:<CircleMinus size={15}/>}</span><span className="field-copy"><strong>{field.label}</strong>{field.detected&&<span className={`detected ${tier(field.detected)}`}>{detectedText(field.detected)}</span>}<span>{field.status==='filled'?field.value:field.reason}</span></span><ChevronRight size={15}/></button>{selected===field.id&&editor}</React.Fragment>)}</div>
         {!visible.length&&<div className="empty"><Eye size={25}/><h2>{fields.length?'No fields in this view':'No native form fields found'}</h2><p>{fields.length?'Try another filter or fill this page.':'Open a form, or reveal its next step and refresh. Embedded frames and custom widgets may not be supported.'}</p></div>}
       </>}
 
