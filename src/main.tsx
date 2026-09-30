@@ -65,7 +65,7 @@ function App() {
   const shown = expanded ? fields.filter(([key])=>key!=='password'||settings.passwords) : fields.filter(([key])=>['fullName','username','email','phone'].includes(key));
   return <div className={isExtension()?'extension':'workspace'}>
     <main className="panel">
-      <header><div className="brand"><img className="brand-icon" src="./icons/icon-128.png" width="34" height="34" alt=""/>devfiller<span className="badge">TEST DATA</span></div><button className={`icon ${options?'active':''}`} aria-label="Toggle settings" onClick={()=>setOptions(!options)}><Settings2 size={19}/></button></header>
+      <header><div className="brand"><img className="brand-icon" src="./icons/icon-128.png" width="34" height="34" alt=""/><strong className="wordmark">Dev<b className="wordmark-accent">Filler</b></strong><span className="badge">TEST DATA</span></div><button className={`icon ${options?'active':''}`} aria-label="Toggle settings" onClick={()=>setOptions(!options)}><Settings2 size={19}/></button></header>
       <nav aria-label="Sections"><button className={tab==='gemini'?'selected':''} onClick={()=>setTab('gemini')}><Sparkles size={15}/> AI</button><button className={tab==='generate'?'selected':''} onClick={()=>setTab('generate')}><Shuffle size={15}/> Generator</button><button className={tab==='custom'?'selected':''} onClick={()=>setTab('custom')}>Custom fields {settings.custom.length>0&&<span className="count">{settings.custom.length}</span>}</button><button className={tab==='excluded'?'selected':''} onClick={()=>setTab('excluded')}>Excluded fields</button></nav>
       <div className="content">
         <div className="eyebrow"><span/> YOUR FORM, FILLED.</div>

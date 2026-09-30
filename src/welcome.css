@@ -6,3 +6,6 @@
 /* Keep small supporting text readable on the light surfaces. */
 .welcome-brand>span,.hero-languages,.hero-actions>span,.preview-note,.preview-eyebrow,.preview-content>p,.preview-fields label,.preview-caption,.preview-toolbar>span,.section-label>span,.section-label>p,.steps p,.feature-links p,.welcome-footer{color:#68755f}.hero-description{color:#687466}.step-top>span{color:#77846e}.welcome-bottom p>span{color:#64725b}.preview-fields input::placeholder{color:#747f6f}.feature-links a>span{color:#4f66a4}
 @media(max-width:680px){.hero-copy h1{font-size:clamp(44px,11vw,58px);letter-spacing:-2px}}
+
+/* The wordmark: "Dev" in the text color, "Filler" in the brand indigo. */
+.wordmark{font-weight:inherit}.wordmark-accent{color:#5370ce;font-weight:inherit}
