@@ -5,10 +5,24 @@ type Status = "Available" | "In design" | "Planned";
 const STEPS: { status: Status; title: string; body: string; href?: string; link?: string }[] = [
   {
     status: "Available",
-    title: "Chrome extension 1.0",
-    body: "One-click filling, the side panel with undo, custom values, exclusions, English, French and Arabic, and optional AI with your own key. The Chrome Web Store listing is on its way; until then, install it from GitHub.",
+    title: "Chrome extension",
+    body: "One-click filling, the side panel with undo, custom values, exclusions, English, French and Arabic, and optional AI with your own key. The Chrome Web Store listing is in review.",
     href: "/docs/install/",
     link: "Install it",
+  },
+  {
+    status: "Available",
+    title: "Measured field recognition",
+    body: "Every field scored from all its clues, the form read as a whole, values fitted to the site's validation, custom ARIA widgets, and accuracy measured on forms the engine has never seen.",
+    href: "/docs/how-it-works/",
+    link: "How it works",
+  },
+  {
+    status: "Available",
+    title: "Repeatable and regional data",
+    body: "Seeded fills that give the same data every run, and addresses and phone numbers from the United States, France or Algeria, with the 69 wilayas and real communes.",
+    href: "/docs/generated-data/",
+    link: "Generated data",
   },
   {
     status: "In design",
@@ -24,8 +38,8 @@ const STEPS: { status: Status; title: string; body: string; href?: string; link?
   },
   {
     status: "Planned",
-    title: "Repeatable and custom data",
-    body: "Seeded fills that produce the same data every run, custom generators for patterns, UUIDs and ranges, and support for frames, shadow DOM and custom dropdowns.",
+    title: "Frames and shadow DOM",
+    body: "Forms inside same-origin frames and web components, and scanning only what changed on pages that reveal fields step by step.",
   },
 ];
 

@@ -7,23 +7,32 @@ const FILLS = [
   ["Identity", "Names, usernames, date of birth, age, gender, nationality"],
   ["Contact", "Emails at example.com, fictional phone numbers, websites"],
   ["Work", "Company, job title, department, industry, team size"],
-  ["Address", "Street, apartment, city, state or wilaya, postal code, country"],
-  ["Numbers and dates", "Quantities, prices, ratings, dates, times, colors, all within the field's limits"],
+  ["Address", "Street, city or commune, district or daira, state or wilaya, postal code and country, all from one country"],
+  ["Numbers and dates", "Quantities, prices, ratings, dates and times, within the field's limits; end dates after start dates"],
+  ["Measurements and codes", "Lengths, weights and thicknesses sized for their unit, order and invoice numbers that look real"],
   ["Text", "Readable words and short sentences, never random strings"],
 ];
 
 const LEAVES = [
   "Passwords, unless you turn test passwords on",
-  "Payment card fields and one-time codes",
-  "Consent, terms and newsletter checkboxes",
+  "Card and bank details, and one-time codes",
+  "Consent, terms, newsletter and data-sharing checkboxes, and \"Remember me\"",
   "File uploads, hidden, disabled and read-only fields",
   "Search boxes and navigation controls",
   "Any field you exclude, on every site or just one",
 ];
 
+const HOW_IT_WORKS = [
+  ["Read every clue", "The label, name, placeholder, autocomplete, units such as (mm) or (kg), and the answers a list offers."],
+  ["Score the candidates", "Clues that agree add up, clues that contradict push a type down, and close calls stay unknown."],
+  ["Read the form", "Confirmation fields, start and end dates, card sections and the form's type, from the fields around each one."],
+  ["Fit the page", "Values follow the field's rules, and a value the site rejects is written another way."],
+];
+
 const PANEL_POINTS = [
   ["Every field, with a reason", "Filled, skipped, or incompatible, and why."],
-  ["Fix one field", "Save a custom value or exclude a field for this website."],
+  ["What each field was recognized as", "Its type, how sure DevFiller is, and the clues behind it."],
+  ["Fix one field", "Set its type, save a custom value, or exclude it for this website."],
   ["Undo last fill", "Restore the previous values, keeping anything you edited since."],
 ];
 
@@ -57,8 +66,8 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">What it fills, and what it leaves alone</h2>
         <p className="mt-4 max-w-2xl text-ink-soft">
-          46 field types, matched by label, name, placeholder or autocomplete. Values fit together: the username and email
-          follow the generated name.
+          46 field types in English, French and Arabic. Values fit together: the username and email follow the generated
+          name, and the address and phone number come from one country.
         </p>
         <div className="mt-10 grid gap-12 md:grid-cols-2">
           <div>
@@ -111,6 +120,26 @@ export default function Home() {
             className="w-full rounded-xl border border-mist shadow-[0_20px_50px_-24px_rgba(31,42,92,0.45)]"
           />
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <h2 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">It reads the field before it fills it</h2>
+        <p className="mt-4 max-w-2xl text-ink-soft">
+          DevFiller weighs every clue a field gives and fills it only when the evidence is strong enough. When it isn&apos;t sure,
+          it leaves the field unknown rather than guess wrong.
+        </p>
+        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_IT_WORKS.map(([term, detail], index) => (
+            <li key={term} className="border-t-2 border-mint pt-4">
+              <span className="text-sm font-semibold text-brand">{index + 1}</span>
+              <h3 className="mt-1 font-semibold">{term}</h3>
+              <p className="mt-2 text-ink-soft">{detail}</p>
+            </li>
+          ))}
+        </ol>
+        <Link href="/docs/how-it-works/" className="mt-8 inline-block font-medium text-brand underline underline-offset-4">
+          How recognition works
+        </Link>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">

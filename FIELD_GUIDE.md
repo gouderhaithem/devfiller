@@ -53,44 +53,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 
 ## How recognition works
 
-DevFiller never guesses silently. For every field it collects evidence, scores each likely type, and fills it only when the evidence is strong enough. It prefers saying "unknown" to giving a field the wrong type.
-
-- **Evidence**, strongest first: the `autocomplete` token, the input type, the visible label or accessible name, the `name` and `id`, the placeholder, text beside the field, and its fieldset legend. For a radio group, the group's question counts as its label. Generated names such as `field_7`, `mat-input-3` or `:r5:` are ignored.
-- **Matching**: a whole-label match beats a phrase inside the label, which beats a single word (`userEmail`, `contact_phone`). Glued words (`billingcity`, `phonenumber`), plurals and one-letter typos (`Emial`, `Frist name`) count for less. Common words like "name", "date" or "title" only count on their own, so "Project name" isn't mistaken for a person's name.
-- **Units**: a unit beside the label says what the field holds. `(mm)`, `[kg]`, `m²` or `en litres` make it a measurement, `(u)` or `pcs` a count, `(%)` a percentage, `(€)`, `(DA)` or `($)` an amount, and a rate such as `($/h)` a price.
-- **Against**: the kind of control pushes down types it can't hold. A password box isn't an email, a `type="number"` field isn't a city, and a field that mentions "search" isn't a shipping address.
-- **Confidence**: agreeing signals raise it. When the top two types are close, as in "Email or phone", the field is treated as ambiguous and the confidence drops.
-
-| Confidence | What DevFiller does |
-| --- | --- |
-| High (90% and up) or medium (70–89%) | Fills the field with that type's value |
-| Low (50–69%) | Fills it only when **Fill unknown fields** is on; otherwise explains why it was skipped |
-| Below 50% | Treats the field as unknown: generic text when **Fill unknown fields** is on, or AI suggestions when AI is on |
-
-### Values that fit the field
-
-- **Measurements** are sized for their dimension and unit: a thickness in mm between 1 and 40, a length in mm in the hundreds or thousands, a weight in kg with a decimal. French pages get a decimal comma (`12,5`).
-- **References** look like real ones: `CMD-2030-0421` for a commande, `FAC-…` for a facture, `INV-…`, `PO-…` or `SKU-…` in English, digits only when the field asks for digits (`pattern="[0-9]{8}"`, `inputmode="numeric"`), and a short code such as `C7` when the field allows only a few characters. Each fill gives a new one.
-- **Numeric fields** that DevFiller can't otherwise recognize (`inputmode="numeric"` or `"decimal"`, or a digits-only pattern) get digits, never a word.
-
-### The form as a whole
-
-After each field is scored on its own, DevFiller reads each form as a whole:
-
-- **Answers count as evidence.** A select or radio group whose options are mostly countries, wilayas (the 69 of Law 26-06 of 2026), Algerian communes, US states, French or Canadian regions, nationalities, genders or materials (S235JR, 304L, 6061-T6) is recognized from them, with or without a label. Day, month and year selects under a "Date of birth" legend are filled with the parts of one date.
-- **Matching answers.** Radio groups and selects pick the option that matches the generated value: "Femme", "Féminin" or "أنثى" for a female identity, "16 - Alger" for Algiers.
-- **Confirmations.** A field that says "Confirm", "Repeat" or "Retype" repeats the email, password, phone or username just before it, with exactly the value written there.
-- **Passwords.** On a change-password form, the current password gets a different value from the new one and its confirmation.
-- **Dates.** "Arrival" and "Departure", "From" and "To", "Du" and "Au", "من" and "إلى", or an unlabelled date after a start date become a start and an end date. The end date always falls after the start date, even when the start has a later `min`.
-- **Payment sections.** A "Name" field in the same section as card fields is the cardholder's name, so it's skipped. A shipping name in its own section is filled.
-- **Order.** A weak guess that fits the field before it ("Surname" after "First name") gains a little confidence.
-- **Form type.** Each form is recognized as a sign-in, sign-up, checkout, booking, contact or search form, or none of these. The side panel shows it.
-
-**Sensitive fields are recognized so they can be skipped, never filled**: card numbers, expiry, CVV and cardholder names; one-time, SMS and 2FA codes; IBAN, BIC, RIB and bank account fields; and consent checkboxes for terms, privacy, newsletters, marketing, permissions or declarations ("I certify…"). "Remember me" and "Keep me signed in" stay as you set them. This holds whatever your settings are.
-
-The side panel shows each field's type, confidence and evidence, for example "Phone, 96%: autocomplete=tel, label “Téléphone”". **Show field types on the page** draws the same labels over the form.
-
-Accuracy is measured, not guessed: see the [benchmark results](https://github.com/gouderhaithem/form-filler/blob/main/benchmark/RESULTS.md).
+DevFiller scores every clue a field gives (its `autocomplete` token, type, label, name, placeholder, nearby text, units and the answers it offers), reads the form as a whole, and fills a field only when the evidence is strong enough. Card, bank, one-time-code and consent fields are recognized so they're never filled. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/form-filler/blob/main/benchmark/RESULTS.md).
 
 ## Generic control coverage
 

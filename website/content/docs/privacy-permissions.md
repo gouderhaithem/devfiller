@@ -4,12 +4,14 @@ DevFiller has no server, no account and no analytics. The full [privacy policy](
 
 | Data | Where |
 | --- | --- |
-| Settings, custom fields and exclusions | Local extension storage in this browser. Never synced. |
+| Settings, custom fields, field types you set, exclusions and your seed | Local extension storage in this browser. Never synced. |
 | AI provider, model and API key | Local extension storage, readable only by DevFiller's own pages. **Not encrypted.** Sent only to your provider, to authenticate. |
 | AI suggestions | Session memory, cleared on expiry, when you clear the cache, or when the browser closes. |
 | Undo history | The page's memory, until it reloads. |
 
 **Remove saved key** in **Options → AI** turns AI off and clears the cache.
+
+Recognizing fields happens entirely on your device: no page content is sent anywhere to work out what a field is. **Export as test fixture** in the side panel saves a file on your computer only; it keeps the form's structure and labels and removes the values in it, hidden fields, scripts and the site's address.
 
 ## What is sent, and only with AI on
 

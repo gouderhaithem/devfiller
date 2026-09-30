@@ -32,13 +32,28 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
 | **46 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
+| **Measured recognition** | Every field scored from all its clues, the form read as a whole, and a confidence and the evidence shown in the side panel. Card, bank, one-time-code and consent fields are never filled. |
+| **Fits the site's validation** | Values follow each field's rules, and a value the site rejects is written another way. |
+| **Custom widgets** | ARIA switches, checkboxes, radio groups, dropdowns and rich-text editors are filled too. |
+| **Repeatable and regional data** | A seed gives the same data every run; addresses and phones come from the United States, France or Algeria (69 wilayas, real communes). |
+| **Fix a field's type** | Tell DevFiller what a field is from the side panel, and export any form as a test fixture. |
 | **English, French & Arabic** | Recognize labels in all three languages and choose a language for generated data. |
 | **Custom values** | Map your own labels to exact test values, such as `Project code` → `PRJ-001`. |
 | **Field exclusions** | Protect fields by label or CSS selector, optionally scoped to a website. Search and navigation controls are skipped by default. |
 | **Optional AI** | Contextual suggestions for unfamiliar fields using your own **Groq** (default) or **Gemini** key, requested when you click Fill. Quota failures fall back to local data. |
 | **Cache controls** | Keep Gemini suggestions for 1–60 minutes, see their expiry, or clear them immediately. |
 
-## Quick start
+## Install
+
+Install DevFiller from the **Chrome Web Store** (the listing is in review; [www.devfiller.com](https://www.devfiller.com/docs/install/) links to it as soon as it's live). Chrome keeps it up to date.
+
+1. Open DevFiller on the Chrome Web Store and click **Add to Chrome**.
+2. Pin DevFiller to your toolbar and follow the welcome guide.
+3. Open a page with a form and click the DevFiller icon.
+
+Right-click the icon and choose **Options** to change the generated language, add custom values, or configure exclusions. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains how DevFiller decides what each field is.
+
+## Run your own build
 
 Use **Node.js 22** and npm for the same runtime as CI.
 
@@ -51,11 +66,9 @@ npm run build
 
 1. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
 2. Enable **Developer mode**, then click **Load unpacked**.
-3. Select the generated **`dist/` folder**.
-4. Follow the welcome guide and pin DevFiller to your toolbar.
-5. Open a page with a form and click the DevFiller icon.
+3. Select the generated **`dist/` folder**. Turn off the store version while you test your build.
 
-Right-click the icon and choose **Options** to change the generated language, add custom values, or configure exclusions. To update an existing installation, rebuild and click **Reload** on its extension card.
+To update your build, rebuild and click **Reload** on its extension card.
 
 ### Try the local demo
 
