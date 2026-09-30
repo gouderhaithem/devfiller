@@ -7,7 +7,7 @@ import {resolve} from 'node:path';
 
 test('native panel inspects, fills, edits rules, excludes, undoes, and follows navigation',async()=>{
   test.setTimeout(60000);
-  const profile=await mkdtemp(resolve(tmpdir(),'formly-panel-test-'));
+  const profile=await mkdtemp(resolve(tmpdir(),'devfiller-panel-test-'));
   const extension=resolve('dist');
   const context=await launchExtension(profile,extension);
   try{

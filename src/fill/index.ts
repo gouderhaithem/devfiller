@@ -217,8 +217,8 @@ function tally(result: FillResult, outcome: Outcome) {
 // never submits a form or sends anything off the page.
 export function fillPage(request: FillRequest): FillResult {
   const pageState = globalThis as PageState;
-  pageState.__formlyDocumentId ||= crypto.randomUUID();
-  const result: FillResult = { filled: 0, preserved: 0, unmatched: 0, invalid: 0, documentId: pageState.__formlyDocumentId, origin: location.origin };
+  pageState.__devfillerDocumentId ||= crypto.randomUUID();
+  const result: FillResult = { filled: 0, preserved: 0, unmatched: 0, invalid: 0, documentId: pageState.__devfillerDocumentId, origin: location.origin };
   if (request.expectedDocument && request.expectedDocument !== result.documentId) return { ...result, stale: true };
   if (request.mode === 'scan') result.unknown = [];
   if (request.suggestions) result.used = {};
@@ -234,7 +234,7 @@ export function fillPage(request: FillRequest): FillResult {
     return result;
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
-  const panel = request.mode === 'scan' ? undefined : (pageState.__formlyPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
+  const panel = request.mode === 'scan' ? undefined : (pageState.__devfillerPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
   const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map() };
   if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;

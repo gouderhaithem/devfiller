@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 // Gemini runs when the user clicks Fill.
 test('by default the AI runs only when Fill is clicked',async()=>{
   test.setTimeout(120000);
-  const root=await mkdtemp(resolve(tmpdir(),'formly-click-'));
+  const root=await mkdtemp(resolve(tmpdir(),'devfiller-click-'));
   const path=resolve(root,'extension'),profile=resolve(root,'profile');
   await cp(resolve('dist'),path,{recursive:true});
   // Headless Chrome cannot operate its native permission bubble. Pregrant site access in this copy only.

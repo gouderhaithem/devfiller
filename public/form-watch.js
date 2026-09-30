@@ -1,6 +1,6 @@
 // Runs only on permitted websites while Gemini is enabled. No entered values leave this script.
 (() => {
-  if (globalThis.__formlyWatcher) { globalThis.__formlyWatcher.refresh(); return; }
+  if (globalThis.__devfillerWatcher) { globalThis.__devfillerWatcher.refresh(); return; }
   let timer, stopped=false, previous='', lastScan=0;
   const fields='input:not([type=hidden]):not([type=submit]):not([type=button]),textarea,select';
   function check() {
@@ -15,15 +15,15 @@
     ]));
     if(fingerprint===previous)return;previous=fingerprint;
     if(!controls.length)return;
-    void chrome.runtime.sendMessage({type:'formly:prepare'}).catch(()=>stop());
+    void chrome.runtime.sendMessage({type:'devfiller:prepare'}).catch(()=>stop());
   }
   function schedule(){if(stopped || timer)return;timer=setTimeout(check,Math.max(250,1000-(Date.now()-lastScan)));}
   function refresh(){previous='';schedule();}
   const observer=new MutationObserver(schedule);
   observer.observe(document,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['type','id','name','placeholder','autocomplete','aria-label','aria-labelledby','min','max','step','minlength','maxlength','pattern','required','readonly','disabled','hidden','style','class','open']});
-  function message(msg,sender){if(sender.id!==chrome.runtime.id)return;if(msg?.type==='formly:watch-stop')stop();if(msg?.type==='formly:watch-refresh')refresh();}
+  function message(msg,sender){if(sender.id!==chrome.runtime.id)return;if(msg?.type==='devfiller:watch-stop')stop();if(msg?.type==='devfiller:watch-refresh')refresh();}
   function visible(){if(document.visibilityState==='visible')refresh();}
-  function stop(){stopped=true;clearTimeout(timer);observer.disconnect();document.removeEventListener('visibilitychange',visible);chrome.runtime.onMessage.removeListener(message);delete globalThis.__formlyWatcher;}
+  function stop(){stopped=true;clearTimeout(timer);observer.disconnect();document.removeEventListener('visibilitychange',visible);chrome.runtime.onMessage.removeListener(message);delete globalThis.__devfillerWatcher;}
   chrome.runtime.onMessage.addListener(message);document.addEventListener('visibilitychange',visible);
-  globalThis.__formlyWatcher={refresh,stop};schedule();
+  globalThis.__devfillerWatcher={refresh,stop};schedule();
 })();

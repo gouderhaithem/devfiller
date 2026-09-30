@@ -53,7 +53,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 
 ## How recognition works
 
-DevFiller scores every clue a field gives (its `autocomplete` token, type, label, name, placeholder, nearby text, units and the answers it offers), reads the form as a whole, and fills a field only when the evidence is strong enough. Card, bank, one-time-code and consent fields are recognized so they're never filled. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/form-filler/blob/main/benchmark/RESULTS.md).
+DevFiller scores every clue a field gives (its `autocomplete` token, type, label, name, placeholder, nearby text, units and the answers it offers), reads the form as a whole, and fills a field only when the evidence is strong enough. Card, bank, one-time-code and consent fields are recognized so they're never filled. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/devfiller/blob/main/benchmark/RESULTS.md).
 
 ## Generic control coverage
 

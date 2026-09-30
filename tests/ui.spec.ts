@@ -59,7 +59,7 @@ test('desktop and mobile layouts fit and generated language changes',async({page
 
 test('toolbar action fills the target website directly and options persist',async()=>{
   const extensionPath=resolve('dist');
-  const profile=await mkdtemp(resolve(tmpdir(),'formly-test-'));
+  const profile=await mkdtemp(resolve(tmpdir(),'devfiller-test-'));
   const context=await launchExtension(profile,extensionPath);
   try {
     const id=createHash('sha256').update(extensionPath).digest('hex').slice(0,32).replace(/[0-9a-f]/g,c=>String.fromCharCode(97+parseInt(c,16)));

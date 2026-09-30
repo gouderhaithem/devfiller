@@ -6,7 +6,7 @@ import {resolve} from 'node:path';
 
 test('prepares late forms before clicks and waits for AI before filling',async()=>{
   test.setTimeout(60000);
-  const root=await mkdtemp(resolve(tmpdir(),'formly-preload-')),extension=resolve(root,'extension');await cp(resolve('dist'),extension,{recursive:true});
+  const root=await mkdtemp(resolve(tmpdir(),'devfiller-preload-')),extension=resolve(root,'extension');await cp(resolve('dist'),extension,{recursive:true});
   const manifest=JSON.parse(await readFile(resolve(extension,'manifest.json'),'utf8'));manifest.host_permissions.push('http://*/*','https://*/*');await writeFile(resolve(extension,'manifest.json'),JSON.stringify(manifest));
   const context=await launchExtension(resolve(root,'profile'),extension);
   try{

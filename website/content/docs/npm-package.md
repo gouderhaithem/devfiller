@@ -1,4 +1,4 @@
-> **Planned, not published yet.** This page describes the direction for a `devfiller` npm package. Names and APIs below are a draft and will change. [Tell us what you need](https://github.com/gouderhaithem/form-filler/issues) before it's built.
+> **Planned, not published yet.** This page describes the direction for a `devfiller` npm package. Names and APIs below are a draft and will change. [Tell us what you need](https://github.com/gouderhaithem/devfiller/issues) before it's built.
 
 ## Why a package
 

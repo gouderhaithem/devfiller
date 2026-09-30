@@ -68,4 +68,4 @@ The extension never uses this form. If you write in through <https://www.devfill
 
 ## Changes and contact
 
-If this policy changes, the updated version will be published at this address with a new date. For questions, use the [support form](https://www.devfiller.com/support/) or open an issue at <https://github.com/gouderhaithem/form-filler/issues>.
+If this policy changes, the updated version will be published at this address with a new date. For questions, use the [support form](https://www.devfiller.com/support/) or open an issue at <https://github.com/gouderhaithem/devfiller/issues>.

@@ -4,9 +4,9 @@ import { showOverlay } from './overlay';
 
 // Runs in the same isolated world as fillPage. DOM references and undo values never leave it.
 export function panelPageAction(action:'highlight'|'undo'|'field'|'overlay',documentId:string,id?:string) {
-  const state=globalThis as typeof globalThis & {__formlyDocumentId?:string;__formlyPanel?:PanelPageState};
-  if(state.__formlyDocumentId!==documentId || !state.__formlyPanel) throw new Error('This page changed. Refresh the field list.');
-  const panel=state.__formlyPanel;
+  const state=globalThis as typeof globalThis & {__devfillerDocumentId?:string;__devfillerPanel?:PanelPageState};
+  if(state.__devfillerDocumentId!==documentId || !state.__devfillerPanel) throw new Error('This page changed. Refresh the field list.');
+  const panel=state.__devfillerPanel;
   if(action==='overlay') return showOverlay(id==='on');
   if(action==='undo') {
     const eligible=panel.undo.filter(entry=>entry.element.isConnected && JSON.stringify(snapshot(entry.element))===JSON.stringify(entry.after));

@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 // unrelated local words even after Gemini recovered. A click the user made must always try AI again.
 test('a click retries AI as soon as Gemini recovers from a rate limit',async()=>{
   test.setTimeout(120000);
-  const root=await mkdtemp(resolve(tmpdir(),'formly-quota-'));
+  const root=await mkdtemp(resolve(tmpdir(),'devfiller-quota-'));
   const path=resolve(root,'extension'),profile=resolve(root,'profile');
   await cp(resolve('dist'),path,{recursive:true});
   // Headless Chrome cannot operate its native permission bubble. Pregrant site access in this copy only.

@@ -5,7 +5,7 @@
 <p align="center"><strong>Less typing. More testing.</strong></p>
 <p align="center">Fill website forms with fresh, fictional test data in one toolbar click.</p>
 <p align="center">
-  <a href="https://github.com/gouderhaithem/form-filler/actions/workflows/ci.yml"><img src="https://github.com/gouderhaithem/form-filler/actions/workflows/ci.yml/badge.svg" alt="Build and tests" /></a>
+  <a href="https://github.com/gouderhaithem/devfiller/actions/workflows/ci.yml"><img src="https://github.com/gouderhaithem/devfiller/actions/workflows/ci.yml/badge.svg" alt="Build and tests" /></a>
   <img src="https://img.shields.io/badge/version-0.11.2-5370ce" alt="Version 0.11.2" />
   <img src="https://img.shields.io/badge/Chrome_%26_Edge-Manifest_V3-527b66" alt="Chrome and Edge, Manifest V3" />
   <img src="https://img.shields.io/badge/TypeScript-React-3178c6" alt="TypeScript and React" />
@@ -13,7 +13,6 @@
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="docs/getting-started.html">First-run walkthrough</a> ·
-  <a href="docs/presentation/README.md">Presentation</a> ·
   <a href="docs/USER_GUIDE.md">User guide</a> ·
   <a href="#development">Development</a>
 </p>
@@ -58,8 +57,8 @@ Right-click the icon and choose **Options** to change the generated language, ad
 Use **Node.js 22** and npm for the same runtime as CI.
 
 ```sh
-git clone https://github.com/gouderhaithem/form-filler.git
-cd form-filler
+git clone https://github.com/gouderhaithem/devfiller.git
+cd devfiller
 npm ci
 npm run build
 ```
@@ -118,13 +117,9 @@ Turn on **Prepare ahead of the click** to trade quota for speed. DevFiller then 
 
 See the [complete user guide](docs/USER_GUIDE.md#gemini-optional) for cache behavior, settings, permissions, and troubleshooting.
 
-## Presentation and onboarding
+## Onboarding
 
 New to DevFiller? **[docs/getting-started.html](docs/getting-started.html)** is a self-contained first-run walkthrough: build, load, pin, fill, the three settings worth knowing on day one, what DevFiller deliberately will not do, and the four things that most often trip people up. Open the file in any browser, or hand it to a teammate who just loaded the extension.
-
-A six-slide product walkthrough covers the filling workflow, supported fields, optional Gemini, privacy, and installation.
-
-**[View the presentation on GitHub](docs/presentation/README.md)** · **[Download the editable PowerPoint](docs/presentation/formly.pptx)**
 
 ## Privacy and boundaries
 

@@ -216,7 +216,11 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
 }
 
 chrome.runtime.onInstalled.addListener(details=>{
-  chrome.contextMenus.create({id:'formly-panel',title:'Open DevFiller panel',contexts:['action']},()=>void chrome.runtime.lastError);
+  // Menu items survive updates; clearing first means an update from 1.0.0 (id 'formly-panel') leaves one item.
+  chrome.contextMenus.removeAll(()=>{
+    void chrome.runtime.lastError;
+    chrome.contextMenus.create({id:'devfiller-panel',title:'Open DevFiller panel',contexts:['action']},()=>void chrome.runtime.lastError);
+  });
   void chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false});
   if(details.reason==='install') void chrome.tabs.create({url:chrome.runtime.getURL('welcome.html')}).catch(()=>{});
 });
@@ -275,7 +279,7 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
 
 // Call open synchronously from the browser gesture, before any asynchronous work.
 chrome.contextMenus.onClicked.addListener((info,tab)=>{
-  if(info.menuItemId==='formly-panel' && tab?.windowId!==undefined) void chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});
+  if(info.menuItemId==='devfiller-panel' && tab?.windowId!==undefined) void chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});
 });
 chrome.commands.onCommand.addListener((command,tab)=>{
   if(command==='open-panel' && tab?.windowId!==undefined) void chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});

@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 
 test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fallback',async()=>{
   test.setTimeout(60000);
-  const testRoot=await mkdtemp(resolve(tmpdir(),'formly-gemini-'));
+  const testRoot=await mkdtemp(resolve(tmpdir(),'devfiller-gemini-'));
   const path=resolve(testRoot,'extension'),profile=resolve(testRoot,'profile');
   await cp(resolve('dist'),path,{recursive:true});
   // Headless Chrome cannot operate its native permission bubble. Pregrant site access in this disposable test copy only.

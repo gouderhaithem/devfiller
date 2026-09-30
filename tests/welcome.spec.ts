@@ -31,7 +31,7 @@ test('welcome preview, settings links and responsive layouts',async({page})=>{
 
 test('fresh installation opens the guide and extension reload does not reopen it',async()=>{
   const extensionPath=resolve('dist');
-  const profile=await mkdtemp(resolve(tmpdir(),'formly-welcome-'));
+  const profile=await mkdtemp(resolve(tmpdir(),'devfiller-welcome-'));
   const context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${extensionPath}`,`--load-extension=${extensionPath}`]});
   try {
     const id=createHash('sha256').update(extensionPath).digest('hex').slice(0,32).replace(/[0-9a-f]/g,c=>String.fromCharCode(97+parseInt(c,16)));

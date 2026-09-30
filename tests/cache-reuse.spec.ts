@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 // orphaned the cached batch and sent a fresh Gemini request on every single toolbar click.
 test('a form that grows after filling keeps reusing its cached suggestions',async()=>{
   test.setTimeout(90000);
-  const root=await mkdtemp(resolve(tmpdir(),'formly-cache-'));
+  const root=await mkdtemp(resolve(tmpdir(),'devfiller-cache-'));
   const path=resolve(root,'extension'),profile=resolve(root,'profile');
   await cp(resolve('dist'),path,{recursive:true});
   // Headless Chrome cannot operate its native permission bubble. Pregrant site access in this copy only.
