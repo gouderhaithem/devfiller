@@ -9,6 +9,7 @@ import { analyzePage } from './context';
 import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
 import { randomFor, secureRandom, type Random } from '../rng';
 import { alignPhones } from './phones';
+import { classifyWidget, listWidgets, WIDGET_SELECTOR } from './widgets';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
 import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
 import { DATE_FIELD_TYPES } from './dictionary';
@@ -227,6 +228,9 @@ export function fillPage(request: FillRequest): FillResult {
   result.forms = analysis.forms;
   if (request.mode === 'classify') {
     result.classified = controls.flatMap((el, index) => { const found = analysis.fields.get(el); return found ? [{ index, type: found.type, confidence: found.confidence }] : []; });
+    // Widgets are indexed in document.querySelectorAll(WIDGET_SELECTOR).
+    const widgets = Array.from(document.querySelectorAll<HTMLElement>(WIDGET_SELECTOR));
+    result.widgets = listWidgets().map(el => { const found = classifyWidget(el); return { index: widgets.indexOf(el), type: found.type, confidence: found.confidence }; });
     return result;
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };

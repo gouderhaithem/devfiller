@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Workspace settings — custom widgets</title>
+<style>[role=listbox][hidden]{display:none}[role=option]{padding:4px}[role=checkbox],[role=switch],[role=radio]{display:inline-block;width:16px;height:16px;border:1px solid #888;margin-right:6px}[aria-checked=true]{background:#5370ce}.editor{border:1px solid #ccc;min-height:60px;padding:6px}</style></head>
+<body>
+<main>
+  <h1>Workspace settings</h1>
+  <!-- Widgets follow the WAI-ARIA Authoring Practices patterns, as component libraries do. -->
+  <form action="/workspace" method="post" data-form-type="other">
+    <p><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="l1" id="cb1" data-expect="unknown"></span><span id="l1">Show weekends in the calendar</span></p>
+    <p><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="l2" id="cb2" data-expect="skip:consent"></span><span id="l2">I agree to the Terms of Service</span></p>
+    <p><button type="button" role="switch" aria-checked="false" aria-label="Keep me signed in" id="sw1" data-expect="skip:session"></button> Keep me signed in</p>
+    <p><button type="button" role="switch" aria-checked="false" aria-label="Compact mode" id="sw2" data-expect="unknown"></button> Compact mode</p>
+    <div role="radiogroup" aria-labelledby="g1">
+      <p id="g1">Gender</p>
+      <span role="radio" tabindex="0" aria-checked="false" data-expect="gender">Female</span>
+      <span role="radio" tabindex="-1" aria-checked="false" data-expect="gender">Male</span>
+      <span role="radio" tabindex="-1" aria-checked="false" data-expect="gender">Prefer not to say</span>
+    </div>
+    <p><span id="c1l">Country</span>
+      <div role="combobox" tabindex="0" aria-labelledby="c1l" aria-haspopup="listbox" aria-expanded="false" aria-controls="c1list" id="c1" data-expect="country" data-value-pattern="^(United States|France|Algeria|Canada)$">Choose a country</div>
+      <ul role="listbox" id="c1list" hidden><li role="option">United States</li><li role="option">France</li><li role="option">Algeria</li><li role="option">Canada</li></ul></p>
+    <p><span id="c2l">Priority</span>
+      <div role="combobox" tabindex="0" aria-labelledby="c2l" aria-haspopup="listbox" aria-expanded="false" aria-controls="c2list" id="c2" data-expect="unknown" data-value-pattern="^(Low|Normal|High)$">Select…</div>
+      <ul role="listbox" id="c2list" hidden><li role="option">Low</li><li role="option">Normal</li><li role="option">High</li></ul></p>
+    <p><label for="city">City</label><input id="city" role="combobox" aria-autocomplete="list" aria-controls="citylist" aria-expanded="false" data-expect="city">
+      <ul role="listbox" id="citylist" hidden></ul><input type="hidden" id="city-picked" name="city_value"></p>
+    <p id="dl">Description</p>
+    <div class="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="dl" id="ed" data-expect="description" data-value-pattern="\S"></div>
+    <button type="submit">Save settings</button>
+  </form>
+  <script>
+    for (const box of document.querySelectorAll('[role=checkbox],[role=switch]')) {
+      const toggle = () => box.setAttribute('aria-checked', String(box.getAttribute('aria-checked') !== 'true'));
+      box.addEventListener('click', toggle);
+      box.addEventListener('keydown', event => { if (event.key === ' ') toggle(); });
+    }
+    for (const group of document.querySelectorAll('[role=radiogroup]')) {
+      for (const radio of group.querySelectorAll('[role=radio]')) radio.addEventListener('click', () => {
+        for (const other of group.querySelectorAll('[role=radio]')) other.setAttribute('aria-checked', String(other === radio));
+      });
+    }
+    for (const combo of document.querySelectorAll('div[role=combobox]')) {
+      const list = document.getElementById(combo.getAttribute('aria-controls'));
+      combo.addEventListener('mousedown', () => { list.hidden = false; combo.setAttribute('aria-expanded', 'true'); });
+      for (const option of list.querySelectorAll('[role=option]')) option.addEventListener('click', () => {
+        for (const other of list.querySelectorAll('[role=option]')) other.setAttribute('aria-selected', String(other === option));
+        combo.textContent = option.textContent; list.hidden = true; combo.setAttribute('aria-expanded', 'false');
+      });
+    }
+    // An editable combobox: typing filters the cities; choosing one stores it.
+    const cities = ['Algiers', 'Oran', 'Paris', 'Lyon', 'Austin', 'Seattle', 'Washington', 'Chicago', 'Marseille', 'Toulouse', 'Constantine', 'Annaba'];
+    const input = document.getElementById('city'), list = document.getElementById('citylist');
+    const show = () => {
+      const typed = input.value.toLowerCase();
+      list.replaceChildren(...cities.filter(city => city.toLowerCase().startsWith(typed.slice(0, 3))).map(city => { const li = document.createElement('li'); li.setAttribute('role', 'option'); li.textContent = city; li.addEventListener('click', () => { input.value = city; document.getElementById('city-picked').value = city; list.hidden = true; input.setAttribute('aria-expanded', 'false'); }); return li; }));
+      list.hidden = !list.children.length; input.setAttribute('aria-expanded', String(!list.hidden));
+    };
+    input.addEventListener('input', show);
+    input.addEventListener('keydown', event => { if (event.key === 'ArrowDown') show(); });
+  </script>
+</main>
+</body>
+</html>

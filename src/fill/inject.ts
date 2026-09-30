@@ -2,11 +2,12 @@
 import type { fillPage, panelPageAction } from './index';
 import type { exportFixture } from './export';
 import type { revalidate } from './validation';
+import type { fillWidgets } from './widgets';
 import type { TypeRule } from '../data';
 import type { FillRequest, FillResult } from './types';
 
 export const ENGINE_FILE = 'fill-engine.js';
-export interface Engine { fillPage: typeof fillPage; panelPageAction: typeof panelPageAction; exportFixture: typeof exportFixture; revalidate: typeof revalidate }
+export interface Engine { fillPage: typeof fillPage; panelPageAction: typeof panelPageAction; exportFixture: typeof exportFixture; revalidate: typeof revalidate; fillWidgets: typeof fillWidgets }
 export type EngineGlobal = typeof globalThis & { __devfiller?: Engine };
 type PanelAction = Parameters<typeof panelPageAction>[0];
 
@@ -19,6 +20,12 @@ export async function runFillPage(target: chrome.scripting.InjectionTarget, requ
   await injectEngine(target);
   const [reply] = await chrome.scripting.executeScript({ target, func: (req: FillRequest) => (globalThis as EngineGlobal).__devfiller?.fillPage(req), args: [request] });
   return reply?.result ?? undefined;
+}
+
+// Custom widgets (ARIA checkboxes, radio groups, comboboxes, editors) after the native fill.
+export async function runWidgets(target: chrome.scripting.InjectionTarget, request: FillRequest): Promise<number> {
+  const [reply] = await chrome.scripting.executeScript({ target, func: (req: FillRequest) => (globalThis as EngineGlobal).__devfiller?.fillWidgets(req), args: [request] });
+  return reply?.result?.filled ?? 0;
 }
 
 // The page's own validation runs after our events, sometimes a moment later: wait, then retry the

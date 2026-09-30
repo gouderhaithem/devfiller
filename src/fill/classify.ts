@@ -233,10 +233,10 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
 }
 
 // Positive evidence from every signal, grouped by type.
-function collectEvidence(el: Control, signals: readonly Signal[]): Map<FieldKey, Evidence[]> {
+function collectEvidence(el: Control, signals: readonly Signal[], answers?: readonly string[], grouped = false): Map<FieldKey, Evidence[]> {
   const byType = new Map<FieldKey, Evidence[]>();
   const add = (type: FieldKey, evidence: Evidence) => byType.set(type, [...(byType.get(type) ?? []), evidence]);
-  const options = optionTexts(el);
+  const options = answers ?? optionTexts(el);
   for (const [type, evidence] of optionEvidence(options, signals)) add(type, evidence);
   const unit = unitOf(signals);
   if (unit) {
@@ -246,7 +246,7 @@ function collectEvidence(el: Control, signals: readonly Signal[]): Map<FieldKey,
     add(type, { source: 'unit', signal: unit.symbol, weight, match: 'type' });
   }
   // A radio group's question, or the legend over split day/month/year selects, is their label.
-  const radio = (isChoice(el) && el.type === 'radio') || !!datePart(options);
+  const radio = grouped || (isChoice(el) && el.type === 'radio') || !!datePart(options);
   // With no meaningful name or id, what the person reads is all there is, so it counts a bit more.
   const visibleBoost = signals.some(signal => signal.source === 'name' || signal.source === 'id') ? 1 : 1.06;
   for (const signal of signals) {
@@ -314,11 +314,22 @@ function classifySignals(el: Control, signals: Signal[]): Classification {
     const session = sessionEvidence(signals);
     if (session) return { type: 'skip:session', confidence: 1, candidates: [], evidence: [session] };
   }
-  const candidates = [...collectEvidence(el, signals)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score).slice(0, 3);
+  return rank(el, signals);
+}
+
+// Scores every candidate type and applies the margin rule.
+function rank(el: Control, signals: Signal[], answers?: readonly string[], grouped = false): Classification {
+  const candidates = [...collectEvidence(el, signals, answers, grouped)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score).slice(0, 3);
   const [top, runnerUp] = candidates;
   if (!top) return { type: 'unknown', confidence: 0, candidates, evidence: [] };
   const confidence = Math.max(0, Math.min(1, top.score - Math.max(0, MARGIN - (top.score - (runnerUp?.score ?? 0))) * 2));
   return { type: confidence >= THRESHOLDS.low ? top.type : 'unknown', confidence, candidates, evidence: top.evidence };
+}
+
+// Custom widgets (ARIA radio groups, comboboxes, rich-text editors) have no native control, so they
+// bring their own signals and answers; the same scoring then applies.
+export function rankElement(el: Element, signals: Signal[], answers: readonly string[], grouped: boolean): Classification {
+  return { ...rank(el as Control, signals, answers, grouped), signals };
 }
 
 // Classification never depends on a field's value, so one fill classifies each control once.

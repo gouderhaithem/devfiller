@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: data-sharing switches</title></head>
+<body>
+<main>
+  <!-- Found by the second held-out set on 30 September 2026: a custom switch sharing usage data was turned on. -->
+  <form action="/privacy" method="post" data-form-type="other">
+    <p><span role="switch" tabindex="0" aria-checked="false" aria-labelledby="s1" data-expect="skip:consent"></span><span id="s1">Share anonymous usage data to help improve the product</span></p>
+    <p><span role="switch" tabindex="0" aria-checked="false" aria-labelledby="s2" data-expect="skip:consent"></span><span id="s2">Send crash reports and diagnostics</span></p>
+    <p><label><input type="checkbox" name="t" data-expect="skip:consent"> Allow analytics cookies</label></p>
+    <p><label><input type="checkbox" name="f" data-expect="skip:consent"> Partager mes données d'utilisation anonymes</label></p>
+    <p><span role="switch" tabindex="0" aria-checked="false" aria-labelledby="s3" data-expect="unknown"></span><span id="s3">Dark mode</span></p>
+    <button type="submit">Save</button>
+  </form>
+  <script>
+    for (const box of document.querySelectorAll('[role=switch]')) box.addEventListener('click', () => box.setAttribute('aria-checked', String(box.getAttribute('aria-checked') !== 'true')));
+  </script>
+</main>
+</body>
+</html>

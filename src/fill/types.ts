@@ -13,7 +13,7 @@ export interface SuggestedField { signature:string; values:string[] }
 export interface FillRequest { typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 // `index` is the form's position in document.forms.
 export interface FormInsight { index:number; type:string; confidence:number; fields:number }
-export interface FillResult { forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
+export interface FillResult { widgets?:ClassifiedField[]; forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
 
 // Everything one fillPage call shares while it walks the page's controls.
 export interface FillContext {

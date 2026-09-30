@@ -2,7 +2,7 @@ import {installFormPreload} from './form-preload';
 import { fields, generateIdentities, generatePhones, generateValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
-import { fixRejected, runExport, runFillPage, runPanelAction } from './fill/inject';
+import { fixRejected, runExport, runFillPage, runPanelAction, runWidgets } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
@@ -182,6 +182,8 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const result:FillResult | undefined=await runFillPage({tabId},request);
     if(!result) throw new Error('The page did not respond. Click to try again.');
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
+    // Custom widgets, then the page's own validation of what was written.
+    result.filled+=await runWidgets({tabId},request).catch(()=>0);
     if(result.filled) await fixRejected({tabId}).catch(()=>0);
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{

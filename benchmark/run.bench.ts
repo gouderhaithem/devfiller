@@ -9,6 +9,7 @@ import type { FillRequest, FillResult } from '../src/engine';
 import { calibration, regressions, score, type Baseline, type Current, type Pair } from './metrics';
 import { formatReport, type FixtureScore, type PerfResult, type RunExtras } from './report';
 import { variantCases } from './variants';
+import { WIDGET_SELECTOR } from '../src/fill/widgets';
 
 // The benchmark injects the same bundle the extension ships, built straight from source.
 // BENCHMARK_ENTRY swaps in another engine entry, to compare engines on the same fixtures.
@@ -24,8 +25,8 @@ const SENSITIVE = ['skip:card', 'skip:otp', 'skip:iban', 'skip:consent'];
 const ALLOWED = new Set<string>([...fields.map(([key]) => key), 'unknown', ...SENSITIVE, 'skip:session']);
 const OMITTED = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
 
-type Engine = { fillPage: (request: FillRequest) => FillResult; revalidate: () => { retried: number } };
-interface ControlInfo { index: number; expect: string | null; omitted: boolean; html: string }
+type Engine = { fillPage: (request: FillRequest) => FillResult; revalidate: () => { retried: number }; fillWidgets: (request: FillRequest) => Promise<unknown> };
+interface ControlInfo { index: number; expect: string | null; omitted: boolean; html: string; widget?: boolean }
 interface ControlState { value: string; checked: boolean }
 
 const values = generateValues('en');
@@ -52,32 +53,36 @@ async function openWithEngine(page: Page, url: string) {
 const runEngine = (page: Page, request: FillRequest) => page.evaluate(req => (globalThis as unknown as { __devfiller: Engine }).__devfiller.fillPage(req), request);
 
 function describeControls(page: Page) {
-  return page.evaluate((omitted): ControlInfo[] => Array.from(document.querySelectorAll('input, textarea, select'), (el, index) => ({
-    index,
-    expect: el.getAttribute('data-expect'),
-    omitted: el instanceof HTMLInputElement && omitted.includes(el.type),
-    html: el.outerHTML.slice(0, 140),
-  })), OMITTED);
+  return page.evaluate(({ omitted, widgets }): ControlInfo[] => [
+    ...Array.from(document.querySelectorAll('input, textarea, select'), (el, index) => ({
+      index, expect: el.getAttribute('data-expect'), omitted: el instanceof HTMLInputElement && omitted.includes(el.type), html: el.outerHTML.slice(0, 140),
+    })),
+    // Custom widgets are scored the same way, indexed among the widgets.
+    ...Array.from(document.querySelectorAll(widgets), (el, index) => ({ index, expect: el.getAttribute('data-expect'), omitted: !el.hasAttribute('data-expect'), html: el.outerHTML.slice(0, 140), widget: true })),
+  ], { omitted: OMITTED, widgets: WIDGET_SELECTOR });
 }
 
-function readStates(page: Page, indexes: number[]) {
-  return page.evaluate((wanted): ControlState[] => {
-    const controls = document.querySelectorAll<HTMLInputElement>('input, textarea, select');
-    return wanted.map(i => ({ value: controls[i].value, checked: !!controls[i].checked }));
-  }, indexes);
+function readStates(page: Page, controls: ControlInfo[]) {
+  return page.evaluate(({ wanted, widgets }): ControlState[] => {
+    const natives = document.querySelectorAll<HTMLInputElement>('input, textarea, select');
+    const custom = document.querySelectorAll<HTMLElement>(widgets);
+    return wanted.map(([i, widget]) => widget ? { value: custom[i].textContent || '', checked: custom[i].getAttribute('aria-checked') === 'true' } : { value: natives[i].value, checked: !!natives[i].checked });
+  }, { wanted: controls.map(control => [control.index, !!control.widget] as [number, boolean]), widgets: WIDGET_SELECTOR });
 }
 
 async function classifyFixture(page: Page, name: string, controls: ControlInfo[]) {
   const result = await runEngine(page, { ...base, mode: 'classify' });
   const forms = await formTypes(page, result);
   const predicted = new Map((result.classified ?? []).map(field => [field.index, field]));
+  const predictedWidgets = new Map((result.widgets ?? []).map(field => [field.index, field]));
   const pairs: Pair[] = [];
   for (const control of controls) {
     if (control.omitted) continue;
     expect(control.expect, `${name}: control needs data-expect: ${control.html}`).not.toBeNull();
     expect(ALLOWED.has(control.expect!), `${name}: unknown data-expect "${control.expect}"`).toBe(true);
-    expect(predicted.has(control.index), `${name}: engine did not classify ${control.html}`).toBe(true);
-    const answer = predicted.get(control.index)!;
+    const answers = control.widget ? predictedWidgets : predicted;
+    expect(answers.has(control.index), `${name}: engine did not classify ${control.html}`).toBe(true);
+    const answer = answers.get(control.index)!;
     pairs.push({ fixture: name, index: control.index, expected: control.expect!, predicted: answer.type, confidence: answer.confidence, html: control.html });
   }
   return { pairs, forms };
@@ -90,14 +95,15 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
   let relations: Relation[] = [];
   for (const settings of FILL_SETTINGS) {
     await openWithEngine(page, url);
-    const before = await readStates(page, sensitive.map(control => control.index));
+    const before = await readStates(page, sensitive);
     await runEngine(page, settings);
+    await page.evaluate(req => (globalThis as unknown as { __devfiller: Engine }).__devfiller.fillWidgets(req), settings);
     // What the extension does after a fill: let the page validate, then retry rejected values.
     await page.evaluate(async () => {
       const engine = (globalThis as unknown as { __devfiller: Engine }).__devfiller;
       for (let round = 0; round < 4; round++) { await new Promise(resolve => setTimeout(resolve, 30)); if (!engine.revalidate().retried) break; }
     });
-    const after = await readStates(page, sensitive.map(control => control.index));
+    const after = await readStates(page, sensitive);
     sensitive.forEach((control, i) => {
       const changed = before[i].value !== after[i].value || before[i].checked !== after[i].checked;
       if (changed && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
@@ -112,7 +118,7 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
 interface Relation { kind: string; ok: boolean; detail: string }
 function checkRelations(page: Page, fixture: string): Promise<Relation[]> {
   return page.evaluate(name => {
-    const read = (el: Element | null) => el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement ? el.value : '';
+    const read = (el: Element | null) => el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement ? el.value : (el?.textContent ?? '').trim();
     const describe = (el: Element) => `${name}: ${el.outerHTML.slice(0, 100)}`;
     const checks: Array<[string, string, (a: string, b: string) => boolean]> = [
       ['data-same-as', 'confirmation', (a, b) => !!a && a === b],

@@ -119,12 +119,12 @@ export function alternatives(el: Control, key: FieldKey | undefined, value: stri
   if (key === 'phone') {
     // This number in other formats first, then the other countries' numbers, which may be the
     // format an app insists on ("0[5-7]…" wants an Algerian or French mobile).
-    for (const phone of [value, ...otherPhones]) {
-      const digits = phone.replace(/\D/g, '');
+    const phones = [value, ...otherPhones];
+    for (const phone of phones) {
       const national = phone.match(/^\+(?:213|33)\s?(.*)$/)?.[1];
       if (national) found.push(`0${national}`, `0${national.replace(/\D/g, '')}`);
-      found.push(phone, phone.replace(/\s/g, ''), digits, `+${digits}`);
     }
+    for (const phone of phones) { const digits = phone.replace(/\D/g, ''); found.push(phone, phone.replace(/\s/g, ''), digits, `+${digits}`); }
   }
   // A username may lose its dot for a stricter pattern; it never becomes random characters.
   if (key === 'username') found.push(value.replace(/\./g, '_'), value.replace(/\./g, ''), value.replace(/\./g, '-'));
