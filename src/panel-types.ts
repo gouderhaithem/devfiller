@@ -35,4 +35,5 @@ export interface PanelReply {
   restored?: number;
   kept?: number;
   overlay?: boolean;
+  forms?: Array<{ index: number; type: string; confidence: number; fields: number }>;
 }

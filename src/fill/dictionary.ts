@@ -150,4 +150,10 @@ export const SENSITIVE_SECTION_PHRASES: Readonly<Record<SensitiveKind, readonly 
   card: SENSITIVE_SECTIONS.card.map(normalize), otp: [], iban: SENSITIVE_SECTIONS.iban.map(normalize),
 };
 export const CONFIRM_PHRASES = CONFIRM_WORDS.map(normalize);
+// Words that make a field repeat the one before it. "Verify" isn't one: a verification code isn't a copy.
+export const PAIR_PHRASES = ['confirm', 'confirmation', 'repeat', 're enter', 'retype', 'again', 'confirmer', 'répéter', 'ressaisir', 'تأكيد', 'إعادة'].map(normalize);
+// A select of languages shares many words with a list of nationalities ("French", "Français").
+export const LANGUAGE_PHRASES = ['language', 'languages', 'langue', 'langues', 'lang', 'اللغة'].map(normalize);
+// Session choices are the user's to make: "Remember me", "Trust this device" stay as they are.
+export const SESSION = /(?:^| )(?:remember|trust this (?:device|browser|computer)|save my (?:login|password|details)|stay (?:signed|logged)|keep me (?:signed|logged)|se souvenir|memoriser (?:mes identifiants|mon mot de passe|cet appareil)|rester connecte)|تذكر|البقاء متصلا/u;
 export const SEARCH_PHRASES = SEARCH_WORDS.map(normalize);

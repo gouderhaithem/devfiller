@@ -50,7 +50,7 @@ export function displayLabel(el: Control): string {
   return (labelText(el) || el.getAttribute('aria-label') || labelledByText(el).trim() || el.getAttribute('placeholder') || el.name || el.id || el.type || 'Unnamed field').trim().slice(0, 160);
 }
 
-export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend';
+export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form';
 export interface Signal { source: SignalSource; raw: string; text: string }
 
 const CONTROLS = 'input, select, textarea, button';
@@ -94,6 +94,38 @@ export function nearbyText(el: Control): string {
     anchor = parent;
   }
   return '';
+}
+
+// Radio groups by form and name, built once per pass so large forms don't rescan every radio.
+let radioIndex: Map<HTMLFormElement | null, Map<string, HTMLInputElement[]>> | undefined;
+export function indexRadios(controls: readonly Control[] | undefined) {
+  if (!controls) { radioIndex = undefined; return; }
+  radioIndex = new Map();
+  for (const el of controls) {
+    if (!(el instanceof HTMLInputElement) || el.type !== 'radio' || !el.name) continue;
+    const byName = radioIndex.get(el.form) ?? new Map<string, HTMLInputElement[]>();
+    radioIndex.set(el.form, byName);
+    const members = byName.get(el.name) ?? [];
+    members.push(el);
+    byName.set(el.name, members);
+  }
+}
+
+// The other radios answering the same question.
+export function radioGroup(el: HTMLInputElement): HTMLInputElement[] {
+  if (!el.name) return [el];
+  const indexed = radioIndex?.get(el.form)?.get(el.name);
+  if (indexed) return indexed;
+  const scope: ParentNode = el.form ?? document;
+  return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="radio"]')).filter(radio => radio.name === el.name && radio.form === el.form);
+}
+
+// The answers a field offers: a select's options (without an empty placeholder) or the labels of
+// a radio group's buttons.
+export function optionTexts(el: Control): string[] {
+  if (el instanceof HTMLSelectElement) return Array.from(el.options).filter((option, i) => i > 0 || option.value !== '').map(option => clip(option.textContent || ''));
+  if (isChoice(el) && el.type === 'radio') return radioGroup(el).map(radio => Array.from(radio.labels || []).map(ownText).join(' ') || radio.getAttribute('aria-label') || '').filter(Boolean);
+  return [];
 }
 
 // A radio group's question: its fieldset legend or its radiogroup's accessible name.

@@ -135,7 +135,8 @@ describe('sensitive fields', () => {
     expect(typeOf(`<label><input type="checkbox"> ${label}</label>`)).toBe('skip:consent');
   });
   it('leaves ordinary checkboxes and contact-method radios alone', () => {
-    expect(typeOf('<label><input type="checkbox"> Remember me</label>')).toBe('unknown');
+    expect(typeOf('<label><input type="checkbox"> Remember me</label>')).toBe('skip:session');
+    expect(typeOf('<label><input type="checkbox"> Same as billing address</label>')).toBe('unknown');
     expect(typeOf('<fieldset><legend>Preferred contact method</legend><label><input type="radio" name="via"> Email</label></fieldset>')).toBe('unknown');
   });
   it('never fills bank fields or marketing opt-ins, even with every filler switched on', () => {

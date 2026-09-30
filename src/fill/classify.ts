@@ -2,18 +2,24 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  DECLARATION, GLUE_WORDS, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, WORDS,
+  DECLARATION, GLUE_WORDS, LANGUAGE_PHRASES, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, WORDS,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
-import { autocompleteToken, describeSignals, isChoice, isInput, OMITTED_TYPES, type Signal, type SignalSource } from './extract';
+import { autocompleteToken, describeSignals, isChoice, isInput, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
+import { MONTH_SET, OPTION_LISTS } from './vocabulary';
 import { normalize } from './normalize';
 
-export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent'}`;
-export type MatchKind = 'autocomplete' | 'type' | 'exact' | 'plural' | 'phrase' | 'joined' | 'word' | 'compound' | 'fuzzy' | 'generic' | 'sensitive' | 'against';
+export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
+export type MatchKind = 'autocomplete' | 'type' | 'exact' | 'plural' | 'phrase' | 'joined' | 'word' | 'compound' | 'fuzzy' | 'generic' | 'sensitive' | 'against' | 'options' | 'context';
+export type FieldRole = 'confirm' | 'current' | 'new' | 'start' | 'end' | 'cardholder';
 export interface Evidence { source: SignalSource; signal: string; weight: number; match: MatchKind }
 export interface Candidate { type: FieldKey; score: number; evidence: Evidence[] }
 export interface Classification {
   type: FieldType;
+  role?: FieldRole;        // set by the form-level pass
+  pairOf?: Control;        // the field a confirmation repeats
+  after?: Control;         // the start date an end date must follow
+  signals?: Signal[];      // what the field said, kept for the form-level pass
   confidence: number;      // 0..1, after the margin adjustment
   candidates: Candidate[]; // top alternatives, best first
   evidence: Evidence[];    // why the winning type won (or why the field is sensitive)
@@ -26,8 +32,8 @@ const MARGIN = 0.15;
 
 // How much each source is worth on its own. Sources in one group repeat each other (a label and a
 // placeholder usually say the same thing), so only the strongest in a group counts.
-const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4 };
-const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context' };
+const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1 };
+export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form' };
 // A radio group's question is its label.
 const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.
@@ -149,8 +155,9 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
 
 // Checkboxes and radios about terms, privacy, newsletters or marketing are never touched.
 function consentEvidence(el: HTMLInputElement, signals: readonly Signal[]): Evidence | undefined {
-  // A radio's own label is left out of its signals, but "I agree" there still means consent.
-  const own: Signal[] = el.type === 'radio' ? Array.from(el.labels || [], label => ({ source: 'label', raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') })) : [];
+  // A radio's own label is left out of its signals, but "I agree" on any answer in the group
+  // makes the whole group a consent question.
+  const own: Signal[] = el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
   const texts = [...signals, ...own].filter(signal => TEXT_SOURCES.has(signal.source));
   const found = texts.find(signal => CONSENT.test(signal.text)) ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && DECLARATION.test(signal.text));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
@@ -181,11 +188,46 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   return found;
 }
 
+export type DatePart = 'day' | 'month' | 'year';
+const numbersIn = (texts: readonly string[]) => texts.map(text => Number(text)).filter(n => Number.isInteger(n));
+
+// Whether a select lists days, months or years, as split date-of-birth fields do.
+export function datePart(texts: readonly string[]): DatePart | undefined {
+  if (texts.length < 5) return undefined;
+  const numbers = numbersIn(texts);
+  if (numbers.length >= 0.8 * texts.length && numbers.every(n => n >= 1900 && n <= 2100)) return 'year';
+  if (numbers.length >= 28 && numbers.every(n => n >= 1 && n <= 31)) return 'day';
+  if (texts.filter(text => MONTH_SET.has(normalize(text))).length >= Math.min(10, 0.6 * texts.length)) return 'month';
+  return undefined;
+}
+
+// What the answers say: mostly country names means a country, mostly wilayas a state or wilaya.
+// Answers alone stay below medium confidence: a list can share words with another kind of list.
+function optionEvidence(texts: readonly string[], signals: readonly Signal[]): Array<[FieldKey, Evidence]> {
+  if (texts.length < 2) return [];
+  const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
+  const found: Array<[FieldKey, Evidence]> = [];
+  // "16 - Alger", "Alger (16)": the code isn't part of the name.
+  const names = texts.map(text => normalize(text).replace(/^\d+ | \d+$/g, ''));
+  for (const [type, list] of OPTION_LISTS) {
+    const hits = names.filter(name => list.has(name)).length;
+    const ratio = hits / names.length;
+    if (aboutLanguage && type === 'nationality') continue;
+    if (hits >= 2 && ratio >= 0.5) found.push([type, { source: 'options', signal: `${hits} of ${names.length} options`, weight: Math.min(THRESHOLDS.medium - 0.02, 0.5 + 0.2 * ratio), match: 'options' }]);
+  }
+  const part = datePart(texts);
+  if (part) found.push(['date', { source: 'options', signal: `${part} options`, weight: 0.55, match: 'options' }]);
+  return found;
+}
+
 // Positive evidence from every signal, grouped by type.
 function collectEvidence(el: Control, signals: readonly Signal[]): Map<FieldKey, Evidence[]> {
   const byType = new Map<FieldKey, Evidence[]>();
   const add = (type: FieldKey, evidence: Evidence) => byType.set(type, [...(byType.get(type) ?? []), evidence]);
-  const radio = isChoice(el) && el.type === 'radio';
+  const options = optionTexts(el);
+  for (const [type, evidence] of optionEvidence(options, signals)) add(type, evidence);
+  // A radio group's question, or the legend over split day/month/year selects, is their label.
+  const radio = (isChoice(el) && el.type === 'radio') || !!datePart(options);
   // With no meaningful name or id, what the person reads is all there is, so it counts a bit more.
   const visibleBoost = signals.some(signal => signal.source === 'name' || signal.source === 'id') ? 1 : 1.06;
   for (const signal of signals) {
@@ -226,15 +268,29 @@ function scoreType(el: Control, type: FieldKey, evidence: readonly Evidence[], s
 
 export function classifyField(el: Control): Classification {
   const signals = describeSignals(el);
+  return { ...classifySignals(el, signals), signals };
+}
+
+const sessionEvidence = (signals: readonly Signal[]): Evidence | undefined => {
+  const found = signals.find(signal => TEXT_SOURCES.has(signal.source) && SESSION.test(signal.text));
+  return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
+};
+
+function classifySignals(el: Control, signals: Signal[]): Classification {
   const sensitive = sensitiveKind(el, signals);
   if (sensitive) return { type: `skip:${sensitive.kind}`, confidence: 1, candidates: [], evidence: [sensitive.evidence] };
   if (isChoice(el) && el.type === 'checkbox') {
     const consent = consentEvidence(el, signals);
-    return consent ? { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] } : { type: 'unknown', confidence: 0, candidates: [], evidence: [] };
+    if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
+    const session = sessionEvidence(signals);
+    return session ? { type: 'skip:session', confidence: 1, candidates: [], evidence: [session] } : { type: 'unknown', confidence: 0, candidates: [], evidence: [] };
   }
   if (isChoice(el)) {
     const consent = consentEvidence(el, signals);
     if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
+    // "Stay signed in? Yes / No" is a session choice too.
+    const session = sessionEvidence(signals);
+    if (session) return { type: 'skip:session', confidence: 1, candidates: [], evidence: [session] };
   }
   const candidates = [...collectEvidence(el, signals)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score).slice(0, 3);
   const [top, runnerUp] = candidates;
@@ -260,8 +316,3 @@ export function usableKey(classification: Classification, fillUnknown: boolean):
   return confidence >= THRESHOLDS.medium || (fillUnknown && confidence >= THRESHOLDS.low) ? type as FieldKey : undefined;
 }
 
-// The classification the benchmark reads, or undefined for controls the engine never considers.
-export function classifyControl(el: Control): Classification | undefined {
-  if (el instanceof HTMLInputElement && [...OMITTED_TYPES, 'file'].includes(el.type)) return undefined;
-  return classifyField(el);
-}

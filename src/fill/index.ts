@@ -3,8 +3,9 @@ import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome
 import { CONSENT, CONTEXTUAL_KEYS, MACHINE_ID, PASSWORD } from './dictionary';
 import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, isVisible, legendText, listControls, type ControlSignals } from './extract';
 import { shouldExclude } from './exclude';
-import { classificationOf, classifyControl, isSensitive, usableKey } from './classify';
-import { coherentValues, fallbackValue, fitValue, random, type Resolved } from './generate';
+import { classificationOf, isSensitive, usableKey, type Classification } from './classify';
+import { analyzePage } from './context';
+import { coherentValues, fallbackValue, fitValue, matchChoice, random, spellingsFor, type Resolved } from './generate';
 import { setNativeChecked, setNativeValue, snapshot } from './apply';
 import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
@@ -28,7 +29,10 @@ function fillRadioGroup(ctx: FillContext, el: HTMLInputElement): ControlRun {
   const different = candidates.filter(c => !c.checked);
   const choices = request.overwrite && different.length ? different : candidates;
   if (!choices.length) return run('none', { reason: 'No option in this group can be selected' });
-  const target = choices[random(choices.length)];
+  // A recognized group ("Male / Female") picks the answer that matches the generated value.
+  const key = usableKey(classificationOf(ctx.classifications, el), request.fillUnknown);
+  const matching = key ? matchChoice(candidates, spellingsFor(ctx.values[key], key), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')]) : undefined;
+  const target = matching ?? choices[random(choices.length)];
   for (const member of controls) if (member === target || (target.name && member instanceof HTMLInputElement && member.type === 'radio' && member.form === target.form && member.name === target.name)) ctx.touched.add(member);
   setNativeChecked(target, true);
   return run('filled');
@@ -61,6 +65,35 @@ function suggestion(ctx: FillContext, el: Control, field: UnknownField): string 
   return usable.find(v => v !== el.value) ?? usable[0];
 }
 
+// Values that depend on another field: a confirmation repeats what was written into the field it
+// confirms, and a current password differs from the new one.
+function relatedValue(ctx: FillContext, found: Classification, key: string): { value: string; literal: boolean } | undefined {
+  // Whatever the first field holds, filled now, kept, or read-only, the confirmation repeats it.
+  // If it stays empty, so does the confirmation.
+  if (found.role === 'confirm' && found.pairOf) return { value: found.pairOf.value, literal: true };
+  if (found.role === 'current' && key === 'password') {
+    const other = (ctx.request.samples?.password ?? []).find(sample => sample !== ctx.values.password);
+    if (other) return { value: other, literal: false };
+  }
+  return undefined;
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+const addDays = (date: string, days: number) => { const day = new Date(`${date}T00:00:00Z`); day.setUTCDate(day.getUTCDate() + days); return day.toISOString().slice(0, 10); };
+
+// An end date lands one to fourteen days after its start date (and no later than its max) when
+// generated values or limits would put it earlier.
+function afterStart(el: Control, found: Classification, resolved: Resolved, value: string): string {
+  const start = found.role === 'end' && !resolved.literal ? found.after?.value ?? '' : '';
+  if (!ISO_DATE.test(start) || !ISO_DATE.test(value) || !(el instanceof HTMLInputElement) || !['date', 'datetime-local'].includes(el.type) || value.slice(0, 10) > start.slice(0, 10)) return value;
+  const first = addDays(start.slice(0, 10), 1);
+  const last = el.max && ISO_DATE.test(el.max) ? el.max.slice(0, 10) : addDays(first, 13);
+  if (first > last) return value;
+  const span = Math.round((Date.parse(`${last}T00:00:00Z`) - Date.parse(`${first}T00:00:00Z`)) / 86400000);
+  const day = addDays(first, random(Math.min(span, 13) + 1));
+  return el.type === 'date' ? day : `${day}${value.slice(10) || 'T12:00'}`;
+}
+
 type Resolution = { resolved: Resolved; source: string; aiSuggestion?: string } | { done: ControlRun };
 
 // Decides the value for a text, number, date or select control: a custom rule, a recognized type,
@@ -73,8 +106,10 @@ function resolveValue(ctx: FillContext, el: Control, index: number, sig: Control
   const customRule = findCustomRule(request.custom, el, sig.signals);
   if (customRule) { resolved = { value: customRule.value, literal: true, generic: false, ai: false }; source = 'your custom rule'; }
   else {
-    const key = usableKey(classificationOf(ctx.classifications, el), request.fillUnknown);
-    if (key) resolved = { value: ctx.values[key], key, literal: false, generic: false, ai: false };
+    const found = classificationOf(ctx.classifications, el);
+    const key = usableKey(found, request.fillUnknown);
+    const related = key && relatedValue(ctx, found, key);
+    if (key) resolved = { value: related ? related.value : ctx.values[key], key, literal: !!related?.literal, generic: false, ai: false };
   }
   // Contextual text must reach AI even when a familiar label matched a local sample.
   // Explicit rules and coherent identity/contact fields keep their existing generators.
@@ -104,8 +139,9 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
   const resolution = resolveValue(ctx, el, index, sig);
   if ('done' in resolution) return resolution.done;
   const { resolved, source, aiSuggestion } = resolution;
-  const value = fitValue(ctx, el, resolved);
-  if (value === undefined) return run('invalid', { source });
+  const fitted = fitValue(ctx, el, resolved);
+  if (fitted === undefined) return run('invalid', { source });
+  const value = afterStart(el, classificationOf(ctx.classifications, el), resolved, fitted);
   ctx.touched.add(el);
   setNativeValue(el, value);
   if (el.value !== value) return run('invalid', { source });
@@ -141,13 +177,16 @@ export function fillPage(request: FillRequest): FillResult {
   if (request.mode === 'scan') result.unknown = [];
   if (request.suggestions) result.used = {};
   const controls = listControls();
+  const visible = new Map(controls.map(el => [el, isVisible(el)]));
+  const analysis = analyzePage(controls, visible);
+  result.forms = analysis.forms;
   if (request.mode === 'classify') {
-    result.classified = controls.flatMap((el, index) => { const found = classifyControl(el); return found ? [{ index, type: found.type, confidence: found.confidence }] : []; });
+    result.classified = controls.flatMap((el, index) => { const found = analysis.fields.get(el); return found ? [{ index, type: found.type, confidence: found.confidence }] : []; });
     return result;
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__formlyPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
-  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: new Map(), visible: new Map(controls.map(el => [el, isVisible(el)])) };
+  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible };
   if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
@@ -156,8 +195,11 @@ export function fillPage(request: FillRequest): FillResult {
     let outcome: ControlRun = NONE;
     try {
       outcome = processControl(ctx, el, index);
-      tally(result, outcome.outcome);
+    } catch {
+      // One odd control must not stop the rest of the form from filling.
+      outcome = run('invalid', { reason: 'This control could not be filled' });
     } finally {
+      tally(result, outcome.outcome);
       if (panel) panel.reports.set(el, controlReport(ctx, el, outcome));
     }
   });

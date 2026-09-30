@@ -10,7 +10,7 @@ export interface ClassifiedField { index:number; type:string; confidence:number 
 export interface SuggestedField { signature:string; values:string[] }
 export interface FillRequest { aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 // `index` is the form's position in document.forms.
-export interface FormInsight { index:number; type:string; confidence:number }
+export interface FormInsight { index:number; type:string; confidence:number; fields:number }
 export interface FillResult { forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
 
 // Everything one fillPage call shares while it walks the page's controls.

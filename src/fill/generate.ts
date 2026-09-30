@@ -1,6 +1,9 @@
 import type { Exclusions, FieldKey, Identity, Values } from '../data';
 import type { Control, FillContext, FillRequest } from './types';
-import { COUNTRY_SPELLINGS, EXTENDABLE_KEYS, NUMERIC_KEYS, PLACEHOLDER_OPTION } from './dictionary';
+import { COUNTRY_SPELLINGS, DATE_FIELD_TYPES, EXTENDABLE_KEYS, NUMERIC_KEYS, PLACEHOLDER_OPTION } from './dictionary';
+import { datePart } from './classify';
+import { optionTexts } from './extract';
+import { GENDER_SPELLINGS, MONTH_NAMES, STATE_SPELLINGS } from './vocabulary';
 import { DATE_TYPES, TEXT_TYPES, isInput } from './extract';
 import { shouldExclude } from './exclude';
 import { normalize } from './normalize';
@@ -79,13 +82,57 @@ export function coherentValues(request: FillRequest, controls: readonly Control[
   return values;
 }
 
+// Every way an option may spell a generated value: "Algeria", "Algérie", "DZ", "الجزائر".
+// Gender and wilaya spellings only apply to those fields: an "Algiers" city isn't wilaya "16".
+export function spellingsFor(value: string, key?: FieldKey): readonly string[] {
+  const tables = [COUNTRY_SPELLINGS, ...(key === 'gender' ? [GENDER_SPELLINGS] : []), ...(key === 'state' ? [STATE_SPELLINGS] : [])];
+  for (const table of tables) if (Object.hasOwn(table, value)) return table[value];
+  return [value];
+}
+
+// The option (or radio) whose text or value spells the value: an exact match first, then a longer
+// text that contains it as words ("16 - Alger"). One- and two-letter codes must match exactly.
+// Spellings are tried in order, so the preferred one wins ("Prefer not to say" before "Other").
+export function matchChoice<T>(choices: readonly T[], spellings: readonly string[], texts: (choice: T) => string[]): T | undefined {
+  const wanted = spellings.map(normalize).filter(Boolean);
+  const normalized = choices.map(choice => texts(choice).map(normalize));
+  for (const word of wanted) {
+    const exact = normalized.findIndex(list => list.includes(word));
+    if (exact >= 0) return choices[exact];
+  }
+  for (const word of wanted.filter(word => word.length > 2)) {
+    const inside = normalized.findIndex(list => list.some(text => ` ${text} `.includes(` ${word} `)));
+    if (inside >= 0) return choices[inside];
+  }
+  return undefined;
+}
+
+// Split date selects: the day, month or year of the date. A missing year takes the nearest one.
+function datePartOption(options: readonly HTMLOptionElement[], value: string, part: 'day' | 'month' | 'year'): HTMLOptionElement | undefined {
+  const [year, month, rawDay] = value.slice(0, 10).split('-').map(Number);
+  // 29 February becomes the 28th: the year select may only offer non-leap years.
+  const day = month === 2 && rawDay === 29 ? 28 : rawDay;
+  const target = part === 'year' ? year : part === 'month' ? month : day;
+  const number = (o: HTMLOptionElement) => Number(o.value || o.textContent);
+  // Month names win over values, which may count from 0.
+  if (part === 'month') {
+    const named = options.find(o => MONTH_NAMES[target - 1].has(normalize(o.textContent || '').replace(/ /g, '')));
+    if (named) return named;
+  }
+  const byNumber = options.find(o => number(o) === target);
+  if (byNumber || part !== 'year') return byNumber;
+  const years = options.filter(o => Number.isInteger(number(o)) && number(o) > 1000);
+  return years.sort((a, b) => Math.abs(number(a) - target) - Math.abs(number(b) - target))[0];
+}
+
 export function chooseOption(ctx: FillContext, el: HTMLSelectElement, resolved: Resolved): string | undefined {
   const { overwrite, fillUnknown } = ctx.request;
   const options = Array.from(el.options).filter(o => !o.disabled && !(o.parentElement instanceof HTMLOptGroupElement && o.parentElement.disabled));
-  const spellings = Object.hasOwn(COUNTRY_SPELLINGS, resolved.value) ? COUNTRY_SPELLINGS[resolved.value] : [resolved.value];
   const eligible = options.filter(o => o.value && !PLACEHOLDER_OPTION.test(o.textContent || ''));
+  const part = resolved.key && DATE_FIELD_TYPES.has(resolved.key) ? datePart(optionTexts(el)) : undefined;
+  if (part && /^\d{4}-\d{2}-\d{2}/.test(resolved.value)) return datePartOption(eligible, resolved.value, part)?.value;
   const different = eligible.filter(o => !o.selected);
-  const match = options.find(o => spellings.some(v => normalize(o.value) === normalize(v) || normalize(o.textContent || '') === normalize(v)));
+  const match = matchChoice(options, spellingsFor(resolved.value, resolved.key), o => [o.value, o.textContent || '']);
   const choices = overwrite && different.length ? different : eligible;
   const option = resolved.literal ? match
     : overwrite && match?.selected && fillUnknown && different.length ? pick(different)

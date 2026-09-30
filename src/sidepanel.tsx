@@ -5,6 +5,9 @@ import { isExtension } from './storage';
 import type { Detection, FieldReport, PanelReply } from './panel-types';
 import './sidepanel.css';
 
+const FORM_NAMES:Record<string,string>={login:'Sign-in form',signup:'Sign-up form',checkout:'Checkout form',booking:'Booking form',contact:'Contact form',search:'Search form'};
+// The most telling form on the page: the first one of a recognized kind, searches last.
+const pageForm=(forms?:PanelReply['forms'])=>[...(forms||[])].filter(form=>FORM_NAMES[form.type]).sort((a,b)=>Number(a.type==='search')-Number(b.type==='search') || b.fields-a.fields || b.confidence-a.confidence)[0];
 const isProtectedType=(d:Detection)=>d.type.startsWith('skip:');
 const tier=(d:Detection)=>isProtectedType(d)?'protected':d.type==='unknown'?'unknown':d.confidence>=0.9?'high':d.confidence>=0.7?'medium':'low';
 const percent=(d:Detection)=>`${Math.round(d.confidence*100)}%`;
@@ -100,7 +103,7 @@ function SidePanel() {
       {!installed&&<div className="empty"><PanelRight size={28}/><h2>Your form, in view</h2><p>Install the extension, then right-click its toolbar icon and choose <strong>Open DevFiller panel</strong>.</p><p>You can also press <strong>Alt + Shift + F</strong>.</p></div>}
       {installed&&loading&&<p className="empty" role="status">Looking for fields…</p>}
       {page&&<>
-        <div className="results-heading"><h2>Form fields <span>{fields.length}</span></h2><span>{filled} filled · {skipped} skipped</span></div>
+        <div className="results-heading"><h2>Form fields <span>{fields.length}</span></h2><span>{pageForm(page.forms)&&<>{FORM_NAMES[pageForm(page.forms)!.type]} · </>}{filled} filled · {skipped} skipped</span></div>
         <button className="text-button overlay-toggle" aria-pressed={overlay} disabled={!!busy} onClick={()=>void action('overlay',undefined,overlay?'off':'on')}><Tags size={14}/>{overlay?'Hide field types on the page':'Show field types on the page'}</button>
         <div className="filters" aria-label="Filter fields"><ListFilter size={15}/>{[['all','All fields'],['filled','Filled'],['skipped','Skipped']].map(([key,label])=><button key={key} aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}</button>)}</div>
         <div className="field-list">{visible.map(field=><React.Fragment key={field.id}><button className={`field-row ${selected===field.id?'selected':''}`} key={field.id} onClick={()=>choose(field)} disabled={!!busy} aria-label={`${field.label}: ${field.status}. ${field.detected?`${detectedText(field.detected)}. `:''}${field.reason}`}><span className={`field-status ${field.status}`}>{field.status==='filled'?<Check size={15}/>:field.status==='ready'?<span className="ready-dot"/>:<CircleMinus size={15}/>}</span><span className="field-copy"><strong>{field.label}</strong>{field.detected&&<span className={`detected ${tier(field.detected)}`}>{detectedText(field.detected)}</span>}<span>{field.status==='filled'?field.value:field.reason}</span></span><ChevronRight size={15}/></button>{selected===field.id&&editor}</React.Fragment>)}</div>
