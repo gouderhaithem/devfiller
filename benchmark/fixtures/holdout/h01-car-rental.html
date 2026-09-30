@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DriveEasy - Reserve your car</title>
+<style>
+  body { font-family: sans-serif; max-width: 640px; margin: 2rem auto; }
+  fieldset { margin-bottom: 1rem; }
+  label { display: block; margin-top: .5rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reserve your rental car</h1>
+  <form action="/reserve" method="post">
+    <fieldset>
+      <legend>Trip details</legend>
+      <label for="pu-branch">Pick-up branch</label>
+      <select id="pu-branch" name="branch_id" data-expect="unknown">
+        <option value="">Choose a branch</option>
+        <option>Airport Terminal 2</option>
+        <option>Downtown Station</option>
+        <option>Harbour Street</option>
+      </select>
+
+      <label for="d1">Pick-up date</label>
+      <input type="date" id="d1" name="dt_from" data-expect="startDate">
+
+      <label for="t1">Pick-up time</label>
+      <input type="time" id="t1" name="tm_from" data-expect="time">
+
+      <label for="d2">Return date</label>
+      <input type="date" id="d2" name="dt_to" data-expect="endDate">
+
+      <label for="t2">Return time</label>
+      <input type="text" id="t2" name="tm_to" placeholder="HH:MM" data-expect="time">
+
+      <label for="cat">Vehicle class</label>
+      <select id="cat" name="acriss" data-expect="unknown">
+        <option>Economy (ECMR)</option>
+        <option>Compact (CDMR)</option>
+        <option>SUV (IFAR)</option>
+        <option>Van (PVMR)</option>
+      </select>
+
+      <label><input type="checkbox" name="extra_seat" value="1" data-expect="unknown"> Add a child seat (+ 4.00 / day)</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Main driver</legend>
+      <input type="text" name="drv_a" placeholder="First name" data-expect="firstName">
+      <input type="text" name="drv_b" placeholder="Last name" data-expect="lastName">
+
+      <label for="dob">Date of birth</label>
+      <input type="date" id="dob" name="dob" autocomplete="bday" data-expect="birthDate">
+
+      <label for="em">Email address</label>
+      <input type="email" id="em" name="contact_email" autocomplete="email" data-expect="email">
+
+      <label for=":r7:">Mobile phone</label>
+      <input type="tel" id=":r7:" name="field_12" data-expect="phone">
+
+      <label for="lic">Driving licence number</label>
+      <input type="text" id="lic" name="licence_no" data-expect="unknown">
+
+      <label for="lic-c">Country that issued your licence</label>
+      <input type="text" id="lic-c" name="licence_country" autocomplete="country-name" data-expect="country">
+    </fieldset>
+
+    <fieldset>
+      <legend>Deposit guarantee</legend>
+      <label for="pan">Card number</label>
+      <input type="text" id="pan" name="pan" inputmode="numeric" autocomplete="cc-number" data-expect="skip:card">
+      <label for="exp">Expiry (MM/YY)</label>
+      <input type="text" id="exp" name="exp" autocomplete="cc-exp" data-expect="skip:card">
+      <label for="sec">Security code</label>
+      <input type="text" id="sec" name="sec" autocomplete="cc-csc" data-expect="skip:card">
+    </fieldset>
+
+    <label for="pc">Promo code</label>
+    <input type="text" id="pc" name="promo" data-expect="unknown">
+
+    <label><input type="checkbox" name="tc" data-expect="skip:consent"> I have read and accept the rental conditions</label>
+    <label><input type="checkbox" name="mk" data-expect="skip:consent"> Keep me posted about special offers and seasonal deals</label>
+
+    <button type="submit">Book now</button>
+  </form>
+</main>
+</body>
+</html>

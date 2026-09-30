@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout - Step 2 of 3</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #fafafa; margin: 0; }
+  main { max-width: 680px; margin: 20px auto; background: #fff; padding: 24px; border: 1px solid #e3e3e3; }
+  fieldset { margin-bottom: 20px; border: 1px solid #ddd; }
+  .form-row { margin-bottom: 10px; }
+  .form-row label { display: block; font-size: 13px; color: #555; }
+  .form-row input, .form-row select, .form-row textarea { width: 100%; padding: 7px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Checkout</h1>
+  <form id="checkout" action="/checkout/place" method="post">
+    <fieldset>
+      <legend>Shipping address</legend>
+      <div class="form-row">
+        <label for="ship-name">Full name</label>
+        <input id="ship-name" name="shipping_name" autocomplete="shipping name" required data-expect="fullName">
+      </div>
+      <div class="form-row">
+        <label for="ship-a1">Address line 1</label>
+        <input id="ship-a1" name="shipping_address1" autocomplete="shipping address-line1" required data-expect="address">
+      </div>
+      <div class="form-row">
+        <label for="ship-a2">Address line 2 (optional)</label>
+        <input id="ship-a2" name="shipping_address2" autocomplete="shipping address-line2" data-expect="address2">
+      </div>
+      <div class="form-row">
+        <label for="ship-city">City</label>
+        <input id="ship-city" name="shipping_city" autocomplete="shipping address-level2" required data-expect="city">
+      </div>
+      <div class="form-row">
+        <label for="ship-state">State</label>
+        <select id="ship-state" name="shipping_state" autocomplete="shipping address-level1" required data-expect="state">
+          <option value="">Choose a state</option>
+          <option value="CA">California</option>
+          <option value="NY">New York</option>
+          <option value="TX">Texas</option>
+          <option value="WA">Washington</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="ship-zip">ZIP code</label>
+        <input id="ship-zip" name="shipping_zip" autocomplete="shipping postal-code" maxlength="10" required data-expect="postalCode">
+      </div>
+      <div class="form-row">
+        <label for="ship-country">Country</label>
+        <select id="ship-country" name="shipping_country" autocomplete="shipping country" required data-expect="country">
+          <option value="US" selected>United States</option>
+          <option value="CA">Canada</option>
+          <option value="GB">United Kingdom</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="ship-phone">Phone (for delivery updates)</label>
+        <input id="ship-phone" type="tel" name="shipping_phone" autocomplete="shipping tel" data-expect="phone">
+      </div>
+      <div class="form-row">
+        <label for="ship-email">Email for receipt</label>
+        <input id="ship-email" type="email" name="contact_email" autocomplete="email" required data-expect="email">
+      </div>
+      <div class="form-row">
+        <label><input type="checkbox" name="save_info" data-expect="unknown"> Save this information for next time</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Payment</legend>
+      <div class="form-row">
+        <label for="cc-name">Name on card</label>
+        <input id="cc-name" name="cardholder" autocomplete="cc-name" data-expect="skip:card">
+      </div>
+      <div class="form-row">
+        <label for="cc-num">Card number</label>
+        <input id="cc-num" name="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="1234 1234 1234 1234" data-expect="skip:card">
+      </div>
+      <div class="form-row">
+        <label for="cc-exp">Expiration date (MM / YY)</label>
+        <input id="cc-exp" name="card_expiry" autocomplete="cc-exp" maxlength="7" placeholder="MM / YY" data-expect="skip:card">
+      </div>
+      <div class="form-row">
+        <label for="cc-csc">CVC</label>
+        <input id="cc-csc" name="card_cvc" autocomplete="cc-csc" maxlength="4" data-expect="skip:card">
+      </div>
+    </fieldset>
+
+    <div class="form-row">
+      <label for="promo">Promo code</label>
+      <input id="promo" name="promo_code" placeholder="Enter code" data-expect="unknown">
+    </div>
+    <div class="form-row">
+      <label for="order-notes">Order notes</label>
+      <textarea id="order-notes" name="order_comments" rows="3" placeholder="Notes about your order, e.g. special delivery instructions" data-expect="notes"></textarea>
+    </div>
+    <div class="form-row">
+      <label><input type="checkbox" name="accept_terms" required data-expect="skip:consent"> I have read and agree to the terms and conditions</label>
+    </div>
+    <button type="submit">Place order</button>
+  </form>
+</main>
+</body>
+</html>

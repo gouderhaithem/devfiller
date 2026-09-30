@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IronWorks Gym - Join today</title>
+<style>
+  body { font-family: Impact, Arial, sans-serif; max-width: 640px; margin: 2rem auto; }
+  .b { margin: .6rem 0; }
+  h2 { border-bottom: 2px solid #c00; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Join IronWorks</h1>
+  <form action="/join" method="post">
+    <h2>About you</h2>
+    <div class="b">
+      <label for="g1">First name</label>
+      <input id="g1" name="fname" type="text" autocomplete="given-name" data-expect="firstName">
+    </div>
+    <div class="b">
+      <label for="g2">Last name</label>
+      <input id="g2" name="lname" type="text" autocomplete="family-name" data-expect="lastName">
+    </div>
+    <div class="b">
+      Gender
+      <label><input type="radio" name="sex" value="m" data-expect="gender"> Male</label>
+      <label><input type="radio" name="sex" value="f" data-expect="gender"> Female</label>
+    </div>
+    <div class="b">
+      <label for="g3">Date of birth</label>
+      <input id="g3" name="dob" type="date" data-expect="birthDate">
+    </div>
+    <div class="b">
+      <label for="g4">Adress</label>
+      <input id="g4" name="street" type="text" data-expect="address">
+    </div>
+    <div class="b">
+      <label for="g5">Town / City</label>
+      <input id="g5" name="town" type="text" data-expect="city">
+    </div>
+    <div class="b">
+      <label for="g6">Post code</label>
+      <input id="g6" name="pcode" type="text" data-expect="postalCode">
+    </div>
+    <div class="b">
+      <label for="g7">Phone numbre</label>
+      <input id="g7" name="tel" type="text" data-expect="phone">
+    </div>
+    <div class="b">
+      <label for="g8">E-mail</label>
+      <input id="g8" name="mail" type="text" data-expect="email">
+    </div>
+
+    <h2>In case of emergency</h2>
+    <div class="b">
+      <label for="g9">Contact name</label>
+      <input id="g9" name="ice_name" type="text" data-expect="fullName">
+    </div>
+    <div class="b">
+      <label for="g10">Contact phone</label>
+      <input id="g10" name="ice_tel" type="text" data-expect="phone">
+    </div>
+    <div class="b">
+      <label for="g11">Any medical conditions we should know about?</label>
+      <textarea id="g11" name="health" rows="3" data-expect="notes"></textarea>
+    </div>
+
+    <h2>Your plan</h2>
+    <div class="b">
+      <label for="g12">Membership</label>
+      <select id="g12" name="plan" data-expect="unknown">
+        <option>Off-peak monthly</option>
+        <option>Anytime monthly</option>
+        <option>Annual - pay in full</option>
+        <option>Student</option>
+      </select>
+    </div>
+    <div class="b">
+      <label for="g13">Start date</label>
+      <input id="g13" name="start" type="date" data-expect="startDate">
+    </div>
+    <div class="b">
+      <label for="g14">Referral code (optional)</label>
+      <input id="g14" name="ref" type="text" data-expect="unknown">
+    </div>
+
+    <h2>Payment</h2>
+    <div class="b">
+      <label for="p1">Card number</label>
+      <input id="p1" name="card_no" type="text" data-expect="skip:card">
+    </div>
+    <div class="b">
+      <label for="p2">Name on card</label>
+      <input id="p2" name="card_holder" type="text" autocomplete="cc-name" data-expect="skip:card">
+    </div>
+    <div class="b">
+      <label for="p3">Expiry date</label>
+      <input id="p3" name="card_exp" type="text" placeholder="MM / YY" data-expect="skip:card">
+    </div>
+    <div class="b">
+      <label for="p4">CVV</label>
+      <input id="p4" name="card_cvv" type="password" maxlength="4" data-expect="skip:card">
+    </div>
+
+    <div class="b">
+      <label><input type="checkbox" name="terms" data-expect="skip:consent"> I agree to the membership terms &amp; conditions and direct debit guarantee</label>
+    </div>
+    <div class="b">
+      <label><input type="checkbox" name="news" data-expect="skip:consent"> Tick to hear about classes, challenges and member-only deals</label>
+    </div>
+
+    <button type="submit">Start my membership</button>
+  </form>
+</main>
+</body>
+</html>

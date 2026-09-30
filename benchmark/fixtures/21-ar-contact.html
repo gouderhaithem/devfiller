@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اتصل بنا</title>
+<style>
+  body { font-family: "Noto Kufi Arabic", Tahoma, sans-serif; background: #fdf8ee; margin: 0; }
+  main { max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border: 1px solid #e3d8bd; }
+  .form-row { margin-bottom: 1rem; }
+  .form-row label { display: block; margin-bottom: .25rem; }
+  .form-row input, .form-row textarea { width: 100%; padding: .55rem; box-sizing: border-box; font-family: inherit; }
+  .submit { background: #b8860b; color: #fff; border: 0; padding: .7rem 2rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>تواصل معنا</h1>
+  <p>يسعدنا أن نسمع منك، املأ النموذج وسنعاود الاتصال بك قريبا.</p>
+  <form action="/contact" method="post">
+    <div class="form-row">
+      <label for="cf-name">الاسم الكامل</label>
+      <input type="text" id="cf-name" name="name" autocomplete="name" required data-expect="fullName">
+    </div>
+    <div class="form-row">
+      <label for="cf-email">البريد الإلكتروني</label>
+      <input type="email" id="cf-email" name="email" dir="ltr" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="form-row">
+      <label for="cf-phone">الهاتف</label>
+      <input type="tel" id="cf-phone" name="phone" dir="ltr" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="form-row">
+      <label for="cf-company">الشركة</label>
+      <input type="text" id="cf-company" name="company" autocomplete="organization" data-expect="company">
+    </div>
+    <div class="form-row">
+      <label for="cf-city">المدينة</label>
+      <input type="text" id="cf-city" name="city" autocomplete="address-level2" data-expect="city">
+    </div>
+    <div class="form-row">
+      <label for="cf-subject">الموضوع</label>
+      <input type="text" id="cf-subject" name="subject" maxlength="100" required data-expect="subject">
+    </div>
+    <div class="form-row">
+      <label for="cf-message">الرسالة</label>
+      <textarea id="cf-message" name="message" rows="6" maxlength="1500" required data-expect="message"></textarea>
+    </div>
+    <div class="form-row">
+      <label><input type="checkbox" name="newsletter" value="1" data-expect="skip:consent"> أرغب في تلقي النشرة البريدية والعروض التسويقية</label>
+    </div>
+    <button type="submit" class="submit">إرسال</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finaliser ma commande - Maison Dupré</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f4f4f4; margin: 0; }
+  main { max-width: 720px; margin: 1.5rem auto; padding: 0 1rem; }
+  fieldset { background: #fff; border: 1px solid #ccc; margin-bottom: 1.5rem; padding: 1rem 1.25rem; }
+  legend { font-weight: 700; padding: 0 .5rem; }
+  .row { display: flex; gap: 1rem; margin-bottom: .75rem; }
+  .row > div { flex: 1; display: flex; flex-direction: column; }
+  input, select, textarea { padding: .5rem; }
+  .btn-pay { background: #111; color: #fff; padding: .9rem 2rem; border: 0; font-size: 1rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Finaliser ma commande</h1>
+  <form action="/checkout" method="post" novalidate>
+    <fieldset>
+      <legend>Adresse de livraison</legend>
+      <div class="row">
+        <div>
+          <label for="liv-prenom">Prénom</label>
+          <input type="text" id="liv-prenom" name="livraison[prenom]" autocomplete="shipping given-name" required data-expect="firstName">
+        </div>
+        <div>
+          <label for="liv-nom">Nom</label>
+          <input type="text" id="liv-nom" name="livraison[nom]" autocomplete="shipping family-name" required data-expect="lastName">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="liv-email">E-mail (pour le suivi de commande)</label>
+          <input type="email" id="liv-email" name="livraison[email]" autocomplete="email" required data-expect="email">
+        </div>
+        <div>
+          <label for="liv-tel">Téléphone</label>
+          <input type="tel" id="liv-tel" name="livraison[telephone]" autocomplete="tel" data-expect="phone">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="liv-adresse">Adresse de livraison</label>
+          <input type="text" id="liv-adresse" name="livraison[adresse]" autocomplete="shipping address-line1" required data-expect="address">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="liv-complement">Complément d'adresse</label>
+          <input type="text" id="liv-complement" name="livraison[complement]" placeholder="Bâtiment, étage, digicode…" autocomplete="shipping address-line2" data-expect="address2">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="liv-cp">Code postal</label>
+          <input type="text" id="liv-cp" name="livraison[cp]" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" autocomplete="shipping postal-code" required data-expect="postalCode">
+        </div>
+        <div>
+          <label for="liv-ville">Ville</label>
+          <input type="text" id="liv-ville" name="livraison[ville]" autocomplete="shipping address-level2" required data-expect="city">
+        </div>
+        <div>
+          <label for="liv-pays">Pays</label>
+          <select id="liv-pays" name="livraison[pays]" autocomplete="shipping country" data-expect="country">
+            <option value="FR">France métropolitaine</option>
+            <option value="BE">Belgique</option>
+            <option value="LU">Luxembourg</option>
+            <option value="MC">Monaco</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="liv-instructions">Instructions pour le livreur</label>
+          <textarea id="liv-instructions" name="livraison[instructions]" rows="2" data-expect="notes"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Paiement par carte bancaire</legend>
+      <div class="row">
+        <div>
+          <label for="cb-titulaire">Titulaire de la carte</label>
+          <input type="text" id="cb-titulaire" name="cb_titulaire" autocomplete="cc-name" data-expect="skip:card">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cb-numero">Numéro de carte</label>
+          <input type="text" id="cb-numero" name="cb_numero" inputmode="numeric" maxlength="19" autocomplete="cc-number" data-expect="skip:card">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cb-expiration">Date d'expiration</label>
+          <input type="text" id="cb-expiration" name="cb_expiration" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" data-expect="skip:card">
+        </div>
+        <div>
+          <label for="cb-cvc">Cryptogramme</label>
+          <input type="text" id="cb-cvc" name="cb_cryptogramme" inputmode="numeric" maxlength="4" autocomplete="cc-csc" data-expect="skip:card">
+        </div>
+      </div>
+      <label><input type="checkbox" name="cb_memoriser" value="1" data-expect="unknown"> Mémoriser cette carte pour mes prochains achats</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Prélèvement SEPA (abonnement mensuel)</legend>
+      <div class="row">
+        <div>
+          <label for="sepa-iban">IBAN</label>
+          <input type="text" id="sepa-iban" name="sepa_iban" placeholder="FR76 ____ ____ ____ ____ ____ ___" maxlength="34" data-expect="skip:iban">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="sepa-bic">BIC</label>
+          <input type="text" id="sepa-bic" name="sepa_bic" maxlength="11" data-expect="skip:iban">
+        </div>
+        <div>
+          <label for="sepa-rib">RIB (relevé d'identité bancaire)</label>
+          <input type="text" id="sepa-rib" name="sepa_rib" maxlength="27" data-expect="skip:iban">
+        </div>
+      </div>
+    </fieldset>
+
+    <p>
+      <label><input type="checkbox" name="cgv" value="1" required data-expect="skip:consent"> J'ai lu et j'accepte les conditions générales de vente</label>
+    </p>
+    <button type="submit" class="btn-pay">Payer et confirmer la commande</button>
+  </form>
+</main>
+</body>
+</html>

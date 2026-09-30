@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Intake</title>
+<style>
+  body { font-family: Roboto, Arial, sans-serif; background: #f5f5f5; margin: 0; }
+  main { max-width: 580px; margin: 2rem auto; padding: 1.5rem; background: #fff; }
+  .mat-form-field { display: block; margin-bottom: 1rem; }
+  .mat-form-field label, .mat-form-field .mat-label { display: block; font-size: .85rem; color: #555; margin-bottom: .2rem; }
+  .mat-input-element { width: 100%; padding: .55rem; box-sizing: border-box; }
+  button { background: #3f51b5; color: #fff; border: 0; padding: .7rem 1.6rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Customer intake</h1>
+  <form action="/intake" method="post" novalidate>
+    <div class="mat-form-field">
+      <label for="input_7">Full name</label>
+      <input type="text" id="input_7" name="field1" class="mat-input-element" data-expect="fullName">
+    </div>
+    <div class="mat-form-field">
+      <label for="mat-input-3" class="mat-label">Email address</label>
+      <input type="text" id="mat-input-3" name="field2" class="mat-input-element" data-expect="email">
+    </div>
+    <div class="mat-form-field">
+      <label for=":r5:">Phone number</label>
+      <input type="text" id=":r5:" name="field3" class="mat-input-element" data-expect="phone">
+    </div>
+    <div class="mat-form-field">
+      <input type="text" id="3f2b8c1e-9a47-4d6e-b0c5-7e1a2d9f4b68" name="field4" aria-label="Company name" placeholder="Company name" class="mat-input-element" data-expect="company">
+    </div>
+    <div class="mat-form-field">
+      <span id="lbl-8d1c" class="mat-label">Street address</span>
+      <input type="text" id="c7e9d2a4-51b3-4f08-a6d7-2b90e1c35f44" name="field5" aria-labelledby="lbl-8d1c" class="mat-input-element" data-expect="address">
+    </div>
+    <div class="mat-form-field">
+      <label for="input_12">City</label>
+      <input type="text" id="input_12" name="field6" class="mat-input-element" data-expect="city">
+    </div>
+    <div class="mat-form-field">
+      <label for="mat-input-9">Postal code</label>
+      <input type="text" id="mat-input-9" name="field7" maxlength="10" class="mat-input-element" data-expect="postalCode">
+    </div>
+    <div class="mat-form-field">
+      <label for=":r8:">Country</label>
+      <select id=":r8:" name="field8" class="mat-input-element" data-expect="country">
+        <option value="0">Choose…</option>
+        <option value="1">Italy</option>
+        <option value="2">Spain</option>
+        <option value="3">Portugal</option>
+        <option value="4">Greece</option>
+      </select>
+    </div>
+    <div class="mat-form-field">
+      <label for="input_15">Date of birth</label>
+      <input type="date" id="input_15" name="field9" class="mat-input-element" data-expect="birthDate">
+    </div>
+    <div class="mat-form-field">
+      <label for="mat-input-14">Password</label>
+      <input type="password" id="mat-input-14" name="field10" class="mat-input-element" data-expect="password">
+    </div>
+    <div class="mat-form-field">
+      <textarea id="a91e77b0-33dc-4c2f-8e15-0d6b4f7a2c19" name="field11" rows="3" aria-label="Your message" class="mat-input-element" data-expect="message"></textarea>
+    </div>
+    <div class="mat-form-field">
+      <label for="input_21">Email or phone</label>
+      <input type="text" id="input_21" name="field12" class="mat-input-element" data-expect="unknown">
+    </div>
+    <div class="mat-form-field">
+      <label for="mat-input-22">Fax number</label>
+      <input type="text" id="mat-input-22" name="field13" class="mat-input-element" data-expect="unknown">
+    </div>
+    <div class="mat-form-field">
+      <label for=":r11:">Reference number</label>
+      <input type="text" id=":r11:" name="field14" class="mat-input-element" data-expect="unknown">
+    </div>
+    <div class="mat-form-field">
+      <input type="text" id="input_30" name="field15" class="mat-input-element" data-expect="unknown">
+    </div>
+    <div class="mat-form-field">
+      <input type="text" id="e5b3a0d8-7c21-49f6-9b84-1a3d6c0e2f75" name="field16" class="mat-input-element" data-expect="unknown">
+    </div>
+    <div class="mat-form-field">
+      <label><input type="checkbox" id="mat-checkbox-2" name="field17" data-expect="skip:consent"> I agree to the privacy policy</label>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>SAA Assurances - Devis assurance automobile</title>
+<style>
+  body { font-family: Verdana, sans-serif; max-width: 680px; margin: 2rem auto; }
+  .g { margin: .6rem 0; }
+  label.b { display: block; font-weight: bold; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Devis assurance automobile</h1>
+  <form action="/devis" method="post">
+    <h2>Conducteur</h2>
+    <div class="g">
+      <label class="b" for="c1">Nom</label>
+      <input id="c1" name="nom" type="text" data-expect="lastName">
+    </div>
+    <div class="g">
+      <label class="b" for="c2">Prénom</label>
+      <input id="c2" name="prenom" type="text" data-expect="firstName">
+    </div>
+    <div class="g">
+      <label class="b" for="c3">Date de naissance</label>
+      <input id="c3" name="ddn" type="text" placeholder="JJ/MM/AAAA" data-expect="birthDate">
+    </div>
+    <div class="g">
+      <label class="b" for="c4">Wilaya de résidence</label>
+      <select id="c4" name="wilaya" data-expect="state">
+        <option value="">Sélectionnez</option>
+        <option>16 - Alger</option>
+        <option>31 - Oran</option>
+        <option>25 - Constantine</option>
+        <option>09 - Blida</option>
+        <option>19 - Sétif</option>
+      </select>
+    </div>
+    <div class="g">
+      <label class="b" for="c5">Commune</label>
+      <input id="c5" name="commune" type="text" data-expect="city">
+    </div>
+    <div class="g">
+      <label class="b" for="c6">Numéro de téléphone (mobile)</label>
+      <input id="c6" name="tel" type="tel" placeholder="05 XX XX XX XX" data-expect="phone">
+    </div>
+    <div class="g">
+      <label class="b" for="c7">Adresse email</label>
+      <input id="c7" name="mail" type="email" data-expect="email">
+    </div>
+    <div class="g">
+      <label class="b" for="c8">N° du permis de conduire</label>
+      <input id="c8" name="permis_num" type="text" data-expect="unknown">
+    </div>
+    <div class="g">
+      <label class="b" for="c9">Date d'obtention du permis</label>
+      <input id="c9" name="permis_date" type="date" data-expect="date">
+    </div>
+
+    <h2>Véhicule</h2>
+    <div class="g">
+      <label class="b" for="v1">Marque</label>
+      <input id="v1" name="marque" type="text" data-expect="unknown">
+    </div>
+    <div class="g">
+      <label class="b" for="v2">Modèle</label>
+      <input id="v2" name="modele" type="text" data-expect="unknown">
+    </div>
+    <div class="g">
+      <label class="b" for="v3">Numéro d'immatriculation</label>
+      <input id="v3" name="immat" type="text" data-expect="unknown">
+    </div>
+    <div class="g">
+      <label class="b" for="v4">Puissance fiscale</label>
+      <select id="v4" name="cv" data-expect="unknown">
+        <option>4 CV</option>
+        <option>5 CV</option>
+        <option>6 CV</option>
+        <option>7 CV et plus</option>
+      </select>
+    </div>
+    <div class="g">
+      <label class="b" for="v5">Valeur estimée du véhicule (DA)</label>
+      <input id="v5" name="valeur" type="number" data-expect="amount">
+    </div>
+
+    <h2>Garantie</h2>
+    <div class="g">
+      Formule :
+      <label><input type="radio" name="formule" value="rc" data-expect="unknown"> Responsabilité civile</label>
+      <label><input type="radio" name="formule" value="tr" data-expect="unknown"> Tiers renforcé</label>
+      <label><input type="radio" name="formule" value="tous" data-expect="unknown"> Tous risques</label>
+    </div>
+    <div class="g">
+      <label class="b" for="e1">Date d'effet souhaitée</label>
+      <input id="e1" name="effet" type="date" data-expect="startDate">
+    </div>
+    <div class="g">
+      <label><input type="checkbox" name="contact" data-expect="skip:consent"> J'accepte d'être contacté(e) par un conseiller SAA et de recevoir des offres commerciales</label>
+    </div>
+
+    <button type="submit">Obtenir mon devis</button>
+  </form>
+</main>
+</body>
+</html>

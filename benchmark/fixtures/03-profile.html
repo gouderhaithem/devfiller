@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit profile</title>
+<style>
+  body { font-family: Inter, sans-serif; margin: 0; color: #1f2933; }
+  header { padding: 10px 20px; background: #102a43; color: #fff; }
+  header input { padding: 6px 10px; }
+  main { max-width: 640px; margin: 24px auto; padding: 0 16px; }
+  .field { display: grid; grid-template-columns: 160px 1fr; gap: 8px; margin-bottom: 12px; align-items: start; }
+  .field label { padding-top: 6px; }
+  input, select, textarea { padding: 6px; font: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <input type="text" name="site_search" placeholder="Search people and teams..." data-expect="search">
+</header>
+<main>
+  <h1>Your profile</h1>
+  <form action="/settings/profile" method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label for=":r1:">Username</label>
+      <input id=":r1:" name="username" minlength="3" maxlength="30" pattern="[a-z0-9_]+" autocomplete="username" data-expect="username">
+    </div>
+    <div class="field">
+      <label for=":r2:">Full name</label>
+      <input id=":r2:" name="name" autocomplete="name" data-expect="fullName">
+    </div>
+    <div class="field">
+      <label for=":r3:">Email</label>
+      <input id=":r3:" type="email" name="email" autocomplete="email" data-expect="email">
+    </div>
+    <div class="field">
+      <label for=":r4:">Bio</label>
+      <textarea id=":r4:" name="about" rows="4" maxlength="280" placeholder="Tell us a little about yourself" data-expect="bio"></textarea>
+    </div>
+    <div class="field">
+      <label for=":r5:">Website</label>
+      <input id=":r5:" type="url" name="url" placeholder="https://" autocomplete="url" data-expect="website">
+    </div>
+    <div class="field">
+      <label for=":r6:">Phone</label>
+      <input id=":r6:" type="tel" name="phone_number" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="field">
+      <label for=":r7:">Job title</label>
+      <input id=":r7:" name="headline" autocomplete="organization-title" data-expect="jobTitle">
+    </div>
+    <div class="field">
+      <label for=":r8:">Company</label>
+      <input id=":r8:" name="employer" autocomplete="organization" data-expect="company">
+    </div>
+    <div class="field">
+      <label for=":r9:">Avatar</label>
+      <input id=":r9:" type="file" name="avatar" accept="image/*">
+    </div>
+    <div class="field">
+      <label for=":ra:">Timezone</label>
+      <select id=":ra:" name="tz" data-expect="unknown">
+        <option value="">Select a timezone</option>
+        <option value="UTC">UTC</option>
+        <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+        <option value="America/New_York">America/New_York (UTC-5)</option>
+        <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for=":rb:">Language</label>
+      <select id=":rb:" name="locale" data-expect="unknown">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+    <button type="submit">Save changes</button>
+  </form>
+</main>
+</body>
+</html>

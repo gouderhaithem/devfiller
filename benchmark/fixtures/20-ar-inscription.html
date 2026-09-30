@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إنشاء حساب جديد</title>
+<style>
+  body { font-family: Tahoma, "Noto Naskh Arabic", sans-serif; background: #f0f6f4; margin: 0; }
+  main { max-width: 520px; margin: 2rem auto; background: #fff; padding: 1.5rem 2rem; border-radius: 10px; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; margin-bottom: .3rem; font-weight: bold; }
+  .field input[type=text], .field input[type=email], .field input[type=password], .field input[type=tel], .field input[type=date], .field select { width: 100%; padding: .5rem; box-sizing: border-box; }
+  .ltr { direction: ltr; text-align: right; }
+  button { background: #0b7a5b; color: #fff; padding: .7rem 2rem; border: 0; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>إنشاء حساب جديد</h1>
+  <form action="/register" method="post">
+    <div class="field">
+      <label for="first">الاسم</label>
+      <input type="text" id="first" name="first_name" autocomplete="given-name" required data-expect="firstName">
+    </div>
+    <div class="field">
+      <label for="last">اللقب</label>
+      <input type="text" id="last" name="last_name" autocomplete="family-name" required data-expect="lastName">
+    </div>
+    <div class="field">
+      <label for="uname">اسم المستخدم</label>
+      <input type="text" id="uname" name="username" class="ltr" minlength="4" maxlength="20" autocomplete="username" required data-expect="username">
+    </div>
+    <div class="field">
+      <label for="mail">البريد الإلكتروني</label>
+      <input type="email" id="mail" name="email" class="ltr" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="field">
+      <label for="pass">كلمة المرور</label>
+      <input type="password" id="pass" name="password" class="ltr" minlength="8" autocomplete="new-password" required data-expect="password">
+    </div>
+    <div class="field">
+      <label for="pass2">تأكيد كلمة المرور</label>
+      <input type="password" id="pass2" name="password_confirm" class="ltr" minlength="8" autocomplete="new-password" required data-expect="password">
+    </div>
+    <div class="field">
+      <label for="bdate">تاريخ الميلاد</label>
+      <input type="date" id="bdate" name="birth_date" min="1930-01-01" max="2012-12-31" data-expect="birthDate">
+    </div>
+    <div class="field">
+      <span id="gender-label">الجنس</span>
+      <div role="radiogroup" aria-labelledby="gender-label">
+        <label><input type="radio" name="gender" value="male" data-expect="gender"> ذكر</label>
+        <label><input type="radio" name="gender" value="female" data-expect="gender"> أنثى</label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="nat">الجنسية</label>
+      <select id="nat" name="nationality" data-expect="nationality">
+        <option value="">اختر الجنسية</option>
+        <option value="dz">جزائرية</option>
+        <option value="ma">مغربية</option>
+        <option value="tn">تونسية</option>
+        <option value="eg">مصرية</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="phone">رقم الهاتف</label>
+      <input type="tel" id="phone" name="phone" class="ltr" placeholder="0550 00 00 00" maxlength="14" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="terms" value="1" required data-expect="skip:consent"> أوافق على الشروط والأحكام وسياسة الخصوصية</label>
+    </div>
+    <button type="submit">تسجيل</button>
+  </form>
+</main>
+</body>
+</html>

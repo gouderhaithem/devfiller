@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>جمعية الأمل - انضم إلينا كمتطوع | Association El Amal</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; max-width: 680px; margin: 2rem auto; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: .4rem; border-bottom: 1px solid #ddd; }
+  .fr { color: #555; font-size: .85rem; direction: ltr; unicode-bidi: embed; }
+</style>
+</head>
+<body>
+<main>
+  <h1>انضم إلى فريق المتطوعين <span class="fr">Devenir bénévole</span></h1>
+  <form action="/benevole" method="post">
+    <table>
+      <tr>
+        <td>اللقب / <span class="fr">Nom</span></td>
+        <td><input type="text" name="nom" data-expect="lastName"></td>
+      </tr>
+      <tr>
+        <td>الاسم / <span class="fr">Prénom</span></td>
+        <td><input type="text" name="prenom" data-expect="firstName"></td>
+      </tr>
+      <tr>
+        <td>تاريخ الميلاد / <span class="fr">Date de naissance</span></td>
+        <td><input type="text" name="ddn" placeholder="JJ/MM/AAAA" dir="ltr" data-expect="birthDate"></td>
+      </tr>
+      <tr>
+        <td>رقم بطاقة التعريف الوطنية / <span class="fr">N° CNI</span></td>
+        <td><input type="text" name="cni" dir="ltr" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>الولاية / <span class="fr">Wilaya</span></td>
+        <td>
+          <select name="wilaya" data-expect="state">
+            <option value="">اختر / Choisir</option>
+            <option>الجزائر - Alger</option>
+            <option>وهران - Oran</option>
+            <option>قسنطينة - Constantine</option>
+            <option>تلمسان - Tlemcen</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>البلدية / <span class="fr">Commune</span></td>
+        <td><input type="text" name="commune" data-expect="city"></td>
+      </tr>
+      <tr>
+        <td>العنوان / <span class="fr">Adresse</span></td>
+        <td><input type="text" name="adresse" data-expect="address"></td>
+      </tr>
+      <tr>
+        <td>الهاتف / <span class="fr">Téléphone</span></td>
+        <td><input type="tel" name="tel" dir="ltr" data-expect="phone"></td>
+      </tr>
+      <tr>
+        <td>البريد الإلكتروني / <span class="fr">E-mail</span></td>
+        <td><input type="email" name="email" dir="ltr" data-expect="email"></td>
+      </tr>
+      <tr>
+        <td>المهنة / <span class="fr">Profession</span></td>
+        <td><input type="text" name="profession" data-expect="jobTitle"></td>
+      </tr>
+      <tr>
+        <td>المستوى الدراسي / <span class="fr">Niveau d'études</span></td>
+        <td>
+          <select name="niveau" data-expect="unknown">
+            <option>ثانوي / Secondaire</option>
+            <option>ليسانس / Licence</option>
+            <option>ماستر / Master</option>
+            <option>دكتوراه / Doctorat</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>مجال التطوع / <span class="fr">Domaine d'action</span></td>
+        <td>
+          <select name="domaine" data-expect="unknown">
+            <option>التعليم / Éducation</option>
+            <option>الصحة / Santé</option>
+            <option>البيئة / Environnement</option>
+            <option>الإغاثة / Aide sociale</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>تاريخ الانطلاق / <span class="fr">Date de début souhaitée</span></td>
+        <td><input type="date" name="debut" data-expect="startDate"></td>
+      </tr>
+      <tr>
+        <td>أوقات التفرغ / <span class="fr">Disponibilités</span></td>
+        <td>
+          <label><input type="checkbox" name="dispo_we" data-expect="unknown"> نهاية الأسبوع / Week-end</label>
+          <label><input type="checkbox" name="dispo_soir" data-expect="unknown"> المساء / Soirées</label>
+          <label><input type="checkbox" name="dispo_vac" data-expect="unknown"> العطل / Vacances</label>
+        </td>
+      </tr>
+      <tr>
+        <td>نبذة عنك / <span class="fr">Parlez-nous de vous</span></td>
+        <td><textarea name="presentation" rows="4" data-expect="bio"></textarea></td>
+      </tr>
+    </table>
+
+    <p><label><input type="checkbox" name="charte" data-expect="skip:consent"> أوافق على ميثاق المتطوع وسياسة الخصوصية / J'accepte la charte du bénévole et la politique de confidentialité</label></p>
+    <p><label><input type="checkbox" name="infos" data-expect="skip:consent"> أريد تلقي أخبار الجمعية / Je souhaite recevoir les actualités de l'association</label></p>
+
+    <button type="submit">إرسال / Envoyer</button>
+  </form>
+</main>
+</body>
+</html>

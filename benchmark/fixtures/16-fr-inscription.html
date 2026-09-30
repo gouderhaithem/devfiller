@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créer un compte - Librairie du Quai</title>
+<style>
+  body { font-family: Georgia, serif; background: #faf7f2; color: #222; margin: 0; }
+  main { max-width: 560px; margin: 2rem auto; padding: 1.5rem; background: #fff; border: 1px solid #ddd; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-weight: bold; margin-bottom: .25rem; }
+  .form-control { width: 100%; padding: .5rem; box-sizing: border-box; }
+  .btn-primary { background: #7b2d26; color: #fff; border: 0; padding: .7rem 1.4rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Créer votre compte</h1>
+  <p>Rejoignez la Librairie du Quai et profitez de la livraison offerte dès 35 €.</p>
+  <form action="/inscription" method="post" class="form-inscription" autocomplete="on">
+    <div class="form-group">
+      <label for="civilite">Civilité</label>
+      <select id="civilite" name="civilite" class="form-control" data-expect="unknown">
+        <option value="">Choisir…</option>
+        <option value="mme">Madame</option>
+        <option value="m">Monsieur</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" name="nom" class="form-control" autocomplete="family-name" required data-expect="lastName">
+    </div>
+    <div class="form-group">
+      <label for="prenom">Prénom</label>
+      <input type="text" id="prenom" name="prenom" class="form-control" autocomplete="given-name" required data-expect="firstName">
+    </div>
+    <div class="form-group">
+      <label for="email">Adresse e-mail</label>
+      <input type="email" id="email" name="email" class="form-control" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="form-group">
+      <label for="email2">Confirmation de l'e-mail</label>
+      <input type="email" id="email2" name="email_confirmation" class="form-control" autocomplete="off" required data-expect="email">
+    </div>
+    <div class="form-group">
+      <label for="mdp">Mot de passe</label>
+      <input type="password" id="mdp" name="mot_de_passe" class="form-control" minlength="8" autocomplete="new-password" required data-expect="password">
+    </div>
+    <div class="form-group">
+      <label for="mdp2">Confirmer le mot de passe</label>
+      <input type="password" id="mdp2" name="mot_de_passe_confirmation" class="form-control" minlength="8" autocomplete="new-password" required data-expect="password">
+    </div>
+    <div class="form-group">
+      <label for="naissance">Date de naissance</label>
+      <input type="date" id="naissance" name="date_naissance" class="form-control" min="1900-01-01" max="2010-12-31" autocomplete="bday" data-expect="birthDate">
+    </div>
+    <div class="form-group">
+      <label for="mobile">Téléphone portable</label>
+      <input type="tel" id="mobile" name="mobile" class="form-control" placeholder="06 12 34 56 78" maxlength="14" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="form-group">
+      <label for="pays">Pays de résidence</label>
+      <select id="pays" name="pays" class="form-control" autocomplete="country-name" data-expect="country">
+        <option value="FR" selected>France</option>
+        <option value="BE">Belgique</option>
+        <option value="CH">Suisse</option>
+        <option value="LU">Luxembourg</option>
+        <option value="CA">Canada</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="cgu" value="1" required data-expect="skip:consent"> J'accepte les conditions générales d'utilisation et la politique de confidentialité</label>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="newsletter" value="1" data-expect="skip:consent"> Je souhaite recevoir la newsletter et les offres de nos partenaires</label>
+    </div>
+    <button type="submit" class="btn-primary">Créer mon compte</button>
+  </form>
+</main>
+</body>
+</html>

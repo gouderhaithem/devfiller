@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer insights survey</title>
+<style>
+  body { font-family: Calibri, sans-serif; margin: 0; background: #fffdf7; color: #333; }
+  main { max-width: 600px; margin: 24px auto; padding: 0 16px; }
+  .question { margin-bottom: 22px; }
+  .question h3 { margin: 0 0 6px; font-size: 16px; }
+  input[type=text], input[type=number], input[type=email], select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+  .scale { display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tell us about yourself and your experience</h1>
+  <form action="/survey/submit" method="post">
+    <div class="question">
+      <h3 id="q1">1. What is your age?</h3>
+      <input type="number" name="q1" aria-labelledby="q1" min="16" max="110" data-expect="age">
+    </div>
+    <div class="question">
+      <h3 id="q2">2. Gender</h3>
+      <select name="q2" aria-labelledby="q2" data-expect="gender">
+        <option value="">Please select</option>
+        <option>Female</option>
+        <option>Male</option>
+        <option>Non-binary</option>
+        <option>Prefer not to say</option>
+      </select>
+    </div>
+    <div class="question">
+      <h3 id="q3">3. Which country do you live in?</h3>
+      <input type="text" name="q3" aria-labelledby="q3" data-expect="country">
+    </div>
+    <div class="question">
+      <h3 id="q4">4. Industry</h3>
+      <select name="q4" aria-labelledby="q4" data-expect="industry">
+        <option value="">Please select</option>
+        <option>Technology</option>
+        <option>Healthcare</option>
+        <option>Finance</option>
+        <option>Retail</option>
+        <option>Education</option>
+        <option>Manufacturing</option>
+      </select>
+    </div>
+    <div class="question">
+      <label for="q5"><strong>5. Company size (number of employees)</strong></label>
+      <input type="number" id="q5" name="q5" min="1" data-expect="employeeCount">
+    </div>
+    <fieldset class="question">
+      <legend><strong>6. How satisfied are you with our service? (1 = very unhappy, 5 = very happy)</strong></legend>
+      <div class="scale">
+        <label><input type="radio" name="q6" value="1" data-expect="rating"> 1</label>
+        <label><input type="radio" name="q6" value="2" data-expect="rating"> 2</label>
+        <label><input type="radio" name="q6" value="3" data-expect="rating"> 3</label>
+        <label><input type="radio" name="q6" value="4" data-expect="rating"> 4</label>
+        <label><input type="radio" name="q6" value="5" data-expect="rating"> 5</label>
+      </div>
+    </fieldset>
+    <div class="question">
+      <label for="q7"><strong>7. Any other comments?</strong></label>
+      <textarea id="q7" name="q7" rows="5" data-expect="message"></textarea>
+    </div>
+    <div class="question">
+      <label for="q8"><strong>8. Email (optional, only if you want a reply)</strong></label>
+      <input type="email" id="q8" name="q8" data-expect="email">
+    </div>
+    <div class="question">
+      <label><input type="checkbox" name="q9" data-expect="skip:consent"> You may contact me for follow-up research and marketing</label>
+    </div>
+    <button type="submit">Send answers</button>
+  </form>
+</main>
+</body>
+</html>

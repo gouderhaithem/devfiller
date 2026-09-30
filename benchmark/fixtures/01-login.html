@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in to Northwind</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #f5f6f8; color: #222; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #fff; border-bottom: 1px solid #ddd; }
+  header .logo { font-weight: 700; }
+  main { max-width: 420px; margin: 32px auto; background: #fff; padding: 24px; border-radius: 8px; }
+  .form-group { margin-bottom: 14px; }
+  .form-control { width: 100%; padding: 8px; box-sizing: border-box; }
+  footer { max-width: 420px; margin: 0 auto 32px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">Northwind</span>
+  <div role="search">
+    <input type="search" name="q" placeholder="Search help articles" aria-label="Search the site" data-expect="search">
+  </div>
+</header>
+<main>
+  <h1>Welcome back</h1>
+  <form action="/session" method="post" autocomplete="on">
+    <div class="form-group">
+      <label for="login-email">Email address</label>
+      <input class="form-control" type="email" id="login-email" name="session[email]" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="form-group">
+      <label for="login-pass">Password</label>
+      <input class="form-control" type="password" id="login-pass" name="session[password]" autocomplete="current-password" required data-expect="password">
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="remember" value="1" data-expect="unknown"> Remember me on this device</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Sign in</button>
+  </form>
+
+  <hr>
+  <form action="/session/sms" method="post">
+    <h2>Prefer a text message?</h2>
+    <div class="form-group">
+      <label for="sms-phone">Mobile number</label>
+      <input class="form-control" type="tel" id="sms-phone" name="sms_phone" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="form-group">
+      <label for="sms-code">6-digit code we sent you</label>
+      <input class="form-control" type="text" id="sms-code" name="sms_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" data-expect="skip:otp">
+    </div>
+    <button type="submit" class="btn">Verify and sign in</button>
+  </form>
+<footer>
+  <form action="/newsletter" method="post">
+    <label for="nl-email">Get product news</label><br>
+    <input type="email" id="nl-email" name="newsletter_email" placeholder="you@example.com" data-expect="email">
+    <label><input type="checkbox" name="nl_consent" data-expect="skip:consent"> I agree to receive marketing emails</label>
+    <button type="submit">Subscribe</button>
+  </form>
+</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply - Senior Backend Engineer</title>
+<style>
+  body { font-family: "Helvetica Neue", sans-serif; margin: 0; background: #fff; color: #333; }
+  main { max-width: 620px; margin: 28px auto; padding: 0 16px; }
+  .q { margin-bottom: 18px; }
+  .q > span.lbl { display: block; font-weight: 600; margin-bottom: 4px; }
+  input[type=text], input[type=email], input[type=tel], input[type=url], input[type=number], input[type=date], select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Senior Backend Engineer</h1>
+  <p>Remote - Full time</p>
+  <form action="/jobs/5521/apply" method="post" enctype="multipart/form-data">
+    <div class="q">
+      <span class="lbl" id="lbl-fn">First name *</span>
+      <input type="text" name="cand_fn" aria-labelledby="lbl-fn" required data-expect="firstName">
+    </div>
+    <div class="q">
+      <span class="lbl" id="lbl-ln">Last name *</span>
+      <input type="text" name="cand_ln" aria-labelledby="lbl-ln" required data-expect="lastName">
+    </div>
+    <div class="q">
+      <label for="app-email">Email *</label>
+      <input type="email" id="app-email" name="email" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="q">
+      <label for="app-phone">Phone</label>
+      <input type="tel" id="app-phone" name="phone" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="q">
+      <label for="app-resume">Resume/CV *</label>
+      <input type="file" id="app-resume" name="resume" accept=".pdf,.doc,.docx">
+    </div>
+    <div class="q">
+      <label for="app-li">LinkedIn URL</label>
+      <input type="url" id="app-li" name="urls[LinkedIn]" placeholder="https://linkedin.com/in/..." data-expect="website">
+    </div>
+    <div class="q">
+      <label for="app-pf">Portfolio</label>
+      <input type="url" id="app-pf" name="urls[Portfolio]" placeholder="https://" data-expect="website">
+    </div>
+    <div class="q">
+      <label for="app-co">Current company</label>
+      <input type="text" id="app-co" name="org" autocomplete="organization" data-expect="company">
+    </div>
+    <div class="q">
+      <label for="app-jt">Current job title</label>
+      <input type="text" id="app-jt" name="cf_current_title" data-expect="jobTitle">
+    </div>
+    <div class="q">
+      <label for="app-sal">Expected salary (USD / year)</label>
+      <input type="number" id="app-sal" name="cf_salary" min="0" step="1000" data-expect="salary">
+    </div>
+    <div class="q">
+      <label for="app-start">Available start date</label>
+      <input type="date" id="app-start" name="cf_start" data-expect="startDate">
+    </div>
+    <div class="q">
+      <label for="app-yrs">Years of experience</label>
+      <input type="number" id="app-yrs" name="cf_years" min="0" max="50" data-expect="unknown">
+    </div>
+    <div class="q">
+      <label for="app-cover">Cover letter</label>
+      <textarea id="app-cover" name="comments" rows="8" placeholder="Tell us why you would be a great fit" data-expect="message"></textarea>
+    </div>
+    <div class="q">
+      <label for="app-src">How did you hear about us?</label>
+      <select id="app-src" name="source" data-expect="unknown">
+        <option value="">Select...</option>
+        <option>LinkedIn</option>
+        <option>Referral</option>
+        <option>Job board</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="q">
+      <label><input type="checkbox" name="gdpr" required data-expect="skip:consent"> I agree that my personal data may be processed for recruitment purposes.</label>
+    </div>
+    <button type="submit">Submit application</button>
+  </form>
+</main>
+</body>
+</html>

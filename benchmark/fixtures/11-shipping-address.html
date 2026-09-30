@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add a delivery address</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #fff; margin: 0; }
+  main { max-width: 440px; margin: 32px auto; padding: 0 16px; }
+  input, select { display: block; width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #bbb; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+  .half { display: flex; gap: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Delivery address</h1>
+  <form action="/account/addresses" method="post">
+    <div class="half">
+      <input type="text" name="a1" placeholder="First name" data-expect="firstName">
+      <input type="text" name="a2" placeholder="Last name" data-expect="lastName">
+    </div>
+    <input type="text" name="a3" placeholder="Company (optional)" data-expect="company">
+    <input type="text" name="a4" placeholder="Street address" data-expect="address">
+    <input type="text" name="a5" placeholder="Apartment, suite, etc. (optional)" data-expect="address2">
+    <input type="text" name="a6" placeholder="City" data-expect="city">
+    <div class="half">
+      <input type="text" name="a7" placeholder="State / Province" data-expect="state">
+      <input type="text" name="a8" placeholder="Postal code" data-expect="postalCode">
+    </div>
+    <select name="a9" data-expect="country">
+      <option value="">Country</option>
+      <option value="US">United States</option>
+      <option value="CA">Canada</option>
+      <option value="FR">France</option>
+      <option value="DE">Germany</option>
+    </select>
+    <input type="tel" name="a10" placeholder="Phone" data-expect="phone">
+    <button type="submit">Save address</button>
+  </form>
+</main>
+</body>
+</html>

@@ -24,6 +24,14 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run benchmark
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: benchmark/results/
+          if-no-files-found: ignore
       - name: Upload unpacked extension
         uses: actions/upload-artifact@v4
         with:

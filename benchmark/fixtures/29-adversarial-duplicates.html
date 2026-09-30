@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order and Event Registration</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f3f5f7; margin: 0; }
+  main { max-width: 620px; margin: 1.5rem auto; padding: 0 1rem; }
+  section { background: #fff; padding: 1rem 1.25rem; margin-bottom: 1rem; border: 1px solid #d5d9de; }
+  h2 { margin-top: 0; font-size: 1.1rem; }
+  .f { margin-bottom: .7rem; }
+  .f label { display: block; font-size: .9rem; margin-bottom: .15rem; }
+  .f input, .f select { width: 100%; padding: .45rem; box-sizing: border-box; }
+  button { background: #222; color: #fff; padding: .7rem 1.6rem; border: 0; }
+</style>
+</head>
+<body>
+<main>
+  <form action="/checkout" method="post">
+    <section id="billing">
+      <h2>Billing address</h2>
+      <div class="f">
+        <label for="bill-name">Name</label>
+        <input type="text" id="bill-name" name="name" autocomplete="billing name" data-expect="fullName">
+      </div>
+      <div class="f">
+        <label for="bill-street">Street address</label>
+        <input type="text" id="bill-street" name="address" autocomplete="billing street-address" data-expect="address">
+      </div>
+      <div class="f">
+        <label for="bill-city">City</label>
+        <input type="text" id="bill-city" name="city" autocomplete="billing address-level2" data-expect="city">
+      </div>
+      <div class="f">
+        <label for="bill-state">State</label>
+        <input type="text" id="bill-state" name="state" maxlength="2" autocomplete="billing address-level1" data-expect="state">
+      </div>
+      <div class="f">
+        <label for="bill-zip">ZIP code</label>
+        <input type="text" id="bill-zip" name="zip" maxlength="10" autocomplete="billing postal-code" data-expect="postalCode">
+      </div>
+      <div class="f">
+        <label for="bill-country">Country</label>
+        <select id="bill-country" name="country" autocomplete="billing country" data-expect="country">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="GB">United Kingdom</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="shipping">
+      <h2>Shipping address</h2>
+      <div class="f">
+        <label><input type="checkbox" name="same_as_billing" value="1" data-expect="unknown"> Same as billing address</label>
+      </div>
+      <div class="f">
+        <label for="ship-name">Name</label>
+        <input type="text" id="ship-name" name="name" autocomplete="shipping name" data-expect="fullName">
+      </div>
+      <div class="f">
+        <label for="ship-street">Street address</label>
+        <input type="text" id="ship-street" name="address" autocomplete="shipping street-address" data-expect="address">
+      </div>
+      <div class="f">
+        <label for="ship-city">City</label>
+        <input type="text" id="ship-city" name="city" autocomplete="shipping address-level2" data-expect="city">
+      </div>
+      <div class="f">
+        <label for="ship-state">State</label>
+        <input type="text" id="ship-state" name="state" maxlength="2" autocomplete="shipping address-level1" data-expect="state">
+      </div>
+      <div class="f">
+        <label for="ship-zip">ZIP code</label>
+        <input type="text" id="ship-zip" name="zip" maxlength="10" autocomplete="shipping postal-code" data-expect="postalCode">
+      </div>
+      <div class="f">
+        <label for="ship-country">Country</label>
+        <select id="ship-country" name="country" autocomplete="shipping country" data-expect="country">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="GB">United Kingdom</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="guests">
+      <h2>Event guests</h2>
+      <div class="f">
+        <label for="guest1-name">Name</label>
+        <input type="text" id="guest1-name" name="guest_name[]" data-expect="fullName">
+      </div>
+      <div class="f">
+        <label for="guest2-name">Name</label>
+        <input type="text" id="guest2-name" name="guest_name[]" data-expect="fullName">
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact details</h2>
+      <div class="f">
+        <label for="c-email">Email</label>
+        <input type="email" id="c-email" name="email" data-expect="email">
+      </div>
+      <div class="f">
+        <label for="c-email2">Confirm email</label>
+        <input type="email" id="c-email2" name="email_confirm" data-expect="email">
+      </div>
+      <div class="f">
+        <label for="c-home">Home phone</label>
+        <input type="tel" id="c-home" name="phone" data-expect="phone">
+      </div>
+      <div class="f">
+        <label for="c-work">Work phone</label>
+        <input type="tel" id="c-work" name="phone" data-expect="phone">
+      </div>
+      <div class="f">
+        <label for="c-mobile">Mobile phone</label>
+        <input type="tel" id="c-mobile" name="phone" data-expect="phone">
+      </div>
+    </section>
+    <button type="submit">Place order</button>
+  </form>
+</main>
+</body>
+</html>

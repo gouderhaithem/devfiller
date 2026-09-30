@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demande d'extrait d'acte de naissance - Mairie en ligne</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f2f7f2; margin: 0; }
+  main { max-width: 680px; margin: 1.5rem auto; background: #fff; padding: 1.5rem 2rem; border-top: 6px solid #006233; }
+  h1 { color: #006233; font-size: 1.4rem; }
+  .champ { margin-bottom: .9rem; }
+  .champ label.lbl { display: block; font-weight: bold; margin-bottom: .2rem; }
+  .champ input[type=text], .champ input[type=email], .champ input[type=tel], .champ input[type=date], .champ input[type=number], .champ select, .champ textarea { width: 100%; padding: .45rem; box-sizing: border-box; }
+  button { background: #006233; color: #fff; border: 0; padding: .7rem 1.8rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>République Algérienne Démocratique et Populaire<br>Demande d'extrait d'acte de naissance (S12)</h1>
+  <form action="/etat-civil/demande" method="post">
+    <div class="champ">
+      <label class="lbl" for="ec-nom">Nom</label>
+      <input type="text" id="ec-nom" name="nom" required data-expect="lastName">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-prenom">Prénom</label>
+      <input type="text" id="ec-prenom" name="prenom" required data-expect="firstName">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-pere">Nom et prénom du père</label>
+      <input type="text" id="ec-pere" name="pere" required data-expect="fullName">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-mere">Nom et prénom de la mère</label>
+      <input type="text" id="ec-mere" name="mere" required data-expect="fullName">
+    </div>
+    <div class="champ">
+      <span class="lbl" id="ec-sexe-lbl">Sexe</span>
+      <label><input type="radio" name="sexe" value="M" aria-labelledby="ec-sexe-lbl" data-expect="gender"> Masculin</label>
+      <label><input type="radio" name="sexe" value="F" aria-labelledby="ec-sexe-lbl" data-expect="gender"> Féminin</label>
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-naissance">Date de naissance</label>
+      <input type="date" id="ec-naissance" name="date_naissance" required data-expect="birthDate">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-lieu">Lieu de naissance</label>
+      <input type="text" id="ec-lieu" name="lieu_naissance" required data-expect="unknown">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-nin">Numéro d'identification nationale (NIN)</label>
+      <input type="text" id="ec-nin" name="nin" inputmode="numeric" maxlength="18" pattern="[0-9]{18}" data-expect="unknown">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-wilaya">Wilaya de résidence</label>
+      <select id="ec-wilaya" name="wilaya" required data-expect="state">
+        <option value="">-- Sélectionner --</option>
+        <option value="16">16 - Alger</option>
+        <option value="31">31 - Oran</option>
+        <option value="25">25 - Constantine</option>
+        <option value="23">23 - Annaba</option>
+        <option value="15">15 - Tizi Ouzou</option>
+        <option value="06">06 - Béjaïa</option>
+        <option value="19">19 - Sétif</option>
+        <option value="13">13 - Tlemcen</option>
+        <option value="05">05 - Batna</option>
+        <option value="09">09 - Blida</option>
+      </select>
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-commune">Commune</label>
+      <input type="text" id="ec-commune" name="commune" required data-expect="unknown">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-adresse">Adresse</label>
+      <input type="text" id="ec-adresse" name="adresse" required data-expect="address">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-tel">Téléphone mobile</label>
+      <input type="tel" id="ec-tel" name="telephone" placeholder="+213 5XX XX XX XX" maxlength="17" required data-expect="phone">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-mail">E-mail</label>
+      <input type="email" id="ec-mail" name="email" data-expect="email">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-copies">Nombre d'exemplaires</label>
+      <input type="number" id="ec-copies" name="copies" min="1" max="10" value="1" data-expect="quantity">
+    </div>
+    <div class="champ">
+      <label class="lbl" for="ec-obs">Observations</label>
+      <textarea id="ec-obs" name="observations" rows="3" data-expect="notes"></textarea>
+    </div>
+    <button type="submit">Envoyer la demande</button>
+  </form>
+</main>
+</body>
+</html>

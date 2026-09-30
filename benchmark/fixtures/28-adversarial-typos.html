@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign Up (typos everywhere)</title>
+<style>
+  body { font-family: "Comic Sans MS", Arial, sans-serif; background: #fffbe6; margin: 0; }
+  main { max-width: 520px; margin: 2rem auto; padding: 1.5rem; background: #fff; border: 2px dashed #c9a400; }
+  .item { margin-bottom: .8rem; }
+  .item label { display: block; }
+  .item input, .item select, .item textarea { width: 100%; padding: .4rem; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Join our clubb</h1>
+  <form action="/join" method="post">
+    <div class="item">
+      <label for="t-first">Frist name</label>
+      <input type="text" id="t-first" name="frist_name" required data-expect="firstName">
+    </div>
+    <div class="item">
+      <label for="t-last">Lats name</label>
+      <input type="text" id="t-last" name="lastnmae" required data-expect="lastName">
+    </div>
+    <div class="item">
+      <label for="t-user">Usrename</label>
+      <input type="text" id="t-user" name="usrname" data-expect="username">
+    </div>
+    <div class="item">
+      <label for="t-email">Emial</label>
+      <input type="text" id="t-email" name="emial" required data-expect="email">
+    </div>
+    <div class="item">
+      <label for="t-pass">Pasword</label>
+      <input type="password" id="t-pass" name="pasword" required data-expect="password">
+    </div>
+    <div class="item">
+      <label for="t-tel">Telphone</label>
+      <input type="text" id="t-tel" name="telphone" data-expect="phone">
+    </div>
+    <div class="item">
+      <label for="t-adr">Adress</label>
+      <input type="text" id="t-adr" name="adress" data-expect="address">
+    </div>
+    <div class="item">
+      <label for="t-cty">Cty</label>
+      <input type="text" id="t-cty" name="cty" data-expect="city">
+    </div>
+    <div class="item">
+      <label for="t-zip">Zip cod</label>
+      <input type="text" id="t-zip" name="zipcod" maxlength="10" data-expect="postalCode">
+    </div>
+    <div class="item">
+      <label for="t-country">Coutry</label>
+      <select id="t-country" name="coutry" data-expect="country">
+        <option value="">Please choose</option>
+        <option>United States</option>
+        <option>Canada</option>
+        <option>Ireland</option>
+        <option>New Zealand</option>
+      </select>
+    </div>
+    <div class="item">
+      <label for="t-bd">Birth dat</label>
+      <input type="date" id="t-bd" name="birthdat" data-expect="birthDate">
+    </div>
+    <div class="item">
+      <label for="t-gender">Gendr</label>
+      <select id="t-gender" name="gendr" data-expect="gender">
+        <option value="">Select</option>
+        <option>Female</option>
+        <option>Male</option>
+        <option>Non-binary</option>
+      </select>
+    </div>
+    <div class="item">
+      <label for="t-comp">Compnay</label>
+      <input type="text" id="t-comp" name="compnay" data-expect="company">
+    </div>
+    <div class="item">
+      <label for="t-web">Webiste</label>
+      <input type="text" id="t-web" name="webiste" placeholder="https://" data-expect="website">
+    </div>
+    <div class="item">
+      <label for="t-sub">Subejct</label>
+      <input type="text" id="t-sub" name="subejct" data-expect="subject">
+    </div>
+    <div class="item">
+      <label for="t-msg">Mesage</label>
+      <textarea id="t-msg" name="mesage" rows="3" data-expect="message"></textarea>
+    </div>
+    <div class="item">
+      <label><input type="checkbox" name="agre" value="1" data-expect="skip:consent"> I agre to the terms of servce</label>
+    </div>
+    <button type="submit">Joing now</button>
+  </form>
+</main>
+</body>
+</html>

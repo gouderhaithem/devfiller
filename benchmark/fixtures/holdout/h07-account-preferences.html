@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Account settings - Notes Weekly</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 620px; margin: 2rem auto; }
+  section { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; }
+  .f { margin: .5rem 0; }
+  .f > span { display: block; font-size: .9rem; color: #555; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Account &amp; newsletter preferences</h1>
+  <form action="/settings" method="post">
+    <section>
+      <h2>Profile</h2>
+      <div class="f">
+        <label for=":r1:">Username</label>
+        <input id=":r1:" name="handle" type="text" autocomplete="username" data-expect="username">
+      </div>
+      <div class="f">
+        <label for=":r2:">Email</label>
+        <input id=":r2:" name="email" type="email" autocomplete="email" data-expect="email">
+      </div>
+      <div class="f">
+        <label for=":r3:">Confirm email</label>
+        <input id=":r3:" name="email_confirm" type="email" data-expect="email">
+      </div>
+      <div class="f">
+        <label for=":r4:">Mobile number</label>
+        <input id=":r4:" name="mobile" type="tel" autocomplete="tel" data-expect="phone">
+      </div>
+      <div class="f">
+        <label for=":r5:">Country / region</label>
+        <select id=":r5:" name="country" autocomplete="country" data-expect="country">
+          <option value="">Select</option>
+          <option value="GB">United Kingdom</option>
+          <option value="FR">France</option>
+          <option value="DZ">Algeria</option>
+          <option value="US">United States</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for=":r6:">Time zone</label>
+        <select id=":r6:" name="tz" data-expect="unknown">
+          <option>UTC</option>
+          <option>Europe/Paris</option>
+          <option>Africa/Algiers</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for=":r8:">Personal site or blog</label>
+        <input id=":r8:" name="url" type="text" placeholder="https://" data-expect="website">
+      </div>
+      <div class="f">
+        <label for=":r9:">About you</label>
+        <textarea id=":r9:" name="about" rows="3" data-expect="bio"></textarea>
+      </div>
+    </section>
+
+    <section>
+      <h2>Security</h2>
+      <div class="f">
+        <label for="pw0">Current password</label>
+        <input id="pw0" name="pw_old" type="password" autocomplete="current-password" data-expect="password">
+      </div>
+      <div class="f">
+        <label for="pw1">New password</label>
+        <input id="pw1" name="pw_new" type="password" autocomplete="new-password" data-expect="password">
+      </div>
+      <div class="f">
+        <label for="pw2">Repeat new password</label>
+        <input id="pw2" name="pw_new2" type="password" autocomplete="new-password" data-expect="password">
+      </div>
+      <div class="f">
+        <label for="code">Verification code we just emailed you</label>
+        <input id="code" name="vcode" type="text" inputmode="numeric" data-expect="skip:otp">
+      </div>
+    </section>
+
+    <section>
+      <h2>Newsletter</h2>
+      <fieldset>
+        <legend>How often?</legend>
+        <label><input type="radio" name="freq" value="d" data-expect="unknown"> Daily</label>
+        <label><input type="radio" name="freq" value="w" data-expect="unknown"> Weekly</label>
+        <label><input type="radio" name="freq" value="m" data-expect="unknown"> Monthly</label>
+      </fieldset>
+      <fieldset>
+        <legend>Topics</legend>
+        <label><input type="checkbox" name="t_tech" data-expect="unknown"> Technology</label>
+        <label><input type="checkbox" name="t_sci" data-expect="unknown"> Science</label>
+        <label><input type="checkbox" name="t_cul" data-expect="unknown"> Culture</label>
+      </fieldset>
+      <p><label><input type="checkbox" name="digest" data-expect="skip:consent"> Yes, send me the weekly digest</label></p>
+      <p><label><input type="checkbox" name="partners" data-expect="skip:consent"> Share my email with selected partners so they can send me promotions</label></p>
+      <p><label><input type="checkbox" name="keep" data-expect="unknown"> Keep me signed in on this device</label></p>
+    </section>
+
+    <button type="submit">Save changes</button>
+  </form>
+</main>
+</body>
+</html>

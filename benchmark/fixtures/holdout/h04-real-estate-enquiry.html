@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Hartley &amp; Co Estate Agents - Property enquiry</title>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+  .row { margin-bottom: .8rem; }
+  .mat-form-field { display: block; }
+  input, select, textarea { width: 100%; box-sizing: border-box; padding: .4rem; }
+  input[type=radio], input[type=checkbox] { width: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Enquire about 14 Orchard Lane</h1>
+  <p>3 bed semi-detached, guide price 285,000. Tell us what you need and an agent will be in touch.</p>
+  <form action="/enquire" method="post" class="mat-form">
+    <div class="row mat-form-field">
+      <input id="mat-input-0" name="mat_input_0" type="text" placeholder="Your full name" data-expect="fullName">
+    </div>
+    <div class="row mat-form-field">
+      <input id="mat-input-1" name="mat_input_1" type="email" placeholder="Email" data-expect="email">
+    </div>
+    <div class="row mat-form-field">
+      <input id="mat-input-2" name="mat_input_2" type="tel" placeholder="Phone number" data-expect="phone">
+    </div>
+
+    <div class="row">
+      I am looking to:
+      <label><input type="radio" name="intent" value="buy" data-expect="unknown"> Buy</label>
+      <label><input type="radio" name="intent" value="rent" data-expect="unknown"> Rent</label>
+    </div>
+
+    <div class="row">
+      <label for="ptype">Property type</label>
+      <select id="ptype" name="ptype" data-expect="unknown">
+        <option>House</option>
+        <option>Flat / apartment</option>
+        <option>Bungalow</option>
+        <option>Land</option>
+      </select>
+    </div>
+
+    <div class="row mat-form-field">
+      <span class="mat-label">Maximum price</span>
+      <input id="mat-input-3" name="field_12" type="number" data-expect="price">
+    </div>
+
+    <div class="row mat-form-field">
+      <span class="mat-label">Minimum bedrooms</span>
+      <input id="mat-input-4" name="field_13" type="number" min="0" max="10" data-expect="quantity">
+    </div>
+
+    <div class="row mat-form-field">
+      <span class="mat-label">Search area (postcode)</span>
+      <input id="mat-input-5" name="field_14" type="text" data-expect="postalCode">
+    </div>
+
+    <div class="row">
+      <label for="ref">Property reference</label>
+      <input id="ref" name="ref" type="text" value="" data-expect="unknown">
+    </div>
+
+    <div class="row">
+      <label for="vd">Preferred viewing day</label>
+      <input id="vd" name="view_day" type="date" data-expect="date">
+    </div>
+    <div class="row">
+      <label for="vt">Preferred viewing time</label>
+      <input id="vt" name="view_time" type="time" data-expect="time">
+    </div>
+
+    <div class="row">
+      <textarea name="enquiry_body" rows="4" placeholder="Write your message here" data-expect="message"></textarea>
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox" name="mortgage" data-expect="unknown"> I already have a mortgage agreement in principle</label>
+    </div>
+
+    <div class="row">
+      <label for="human">Quick check: what is 4 + 3?</label>
+      <input id="human" name="human" type="text" data-expect="unknown">
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox" name="contact_ok" data-expect="skip:consent"> I agree to Hartley &amp; Co contacting me about this property and storing my details</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" name="alerts" data-expect="skip:consent"> Email me new listings that match my search</label>
+    </div>
+
+    <button type="submit">Send enquiry</button>
+  </form>
+</main>
+</body>
+</html>

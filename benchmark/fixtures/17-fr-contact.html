@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contactez-nous - Atelier Lumière</title>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; background: #eef2f5; margin: 0; }
+  main { max-width: 640px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; }
+  .field { display: flex; flex-direction: column; margin-bottom: 1rem; }
+  .field input, .field textarea { padding: .55rem; border: 1px solid #aab; border-radius: 4px; }
+  button { padding: .7rem 1.5rem; background: #0a5; color: #fff; border: 0; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Une question ? Écrivez-nous</h1>
+  <p>Notre équipe vous répond sous 48 heures ouvrées.</p>
+  <form action="/contact" method="post" class="wpcf7-form">
+    <p class="field">
+      <label for="wpcf7-nom">Nom complet *</label>
+      <input type="text" id="wpcf7-nom" name="your-name" class="wpcf7-form-control wpcf7-text" required data-expect="fullName">
+    </p>
+    <p class="field">
+      <label for="wpcf7-email">Courriel *</label>
+      <input type="email" id="wpcf7-email" name="your-email" class="wpcf7-form-control wpcf7-email" required data-expect="email">
+    </p>
+    <p class="field">
+      <label for="wpcf7-tel">Téléphone</label>
+      <input type="tel" id="wpcf7-tel" name="your-tel" class="wpcf7-form-control wpcf7-tel" data-expect="phone">
+    </p>
+    <p class="field">
+      <label for="wpcf7-societe">Société</label>
+      <input type="text" id="wpcf7-societe" name="your-company" class="wpcf7-form-control wpcf7-text" data-expect="company">
+    </p>
+    <p class="field">
+      <label for="wpcf7-objet">Objet</label>
+      <input type="text" id="wpcf7-objet" name="your-subject" class="wpcf7-form-control wpcf7-text" maxlength="120" data-expect="subject">
+    </p>
+    <p class="field">
+      <label for="wpcf7-message">Message</label>
+      <textarea id="wpcf7-message" name="your-message" rows="6" cols="40" class="wpcf7-form-control wpcf7-textarea" maxlength="2000" data-expect="message"></textarea>
+    </p>
+    <p>
+      <label><input type="checkbox" name="copie" value="oui" data-expect="unknown"> M'envoyer une copie de ce message</label>
+    </p>
+    <p>
+      <label><input type="checkbox" name="rgpd" value="oui" required data-expect="skip:consent"> J'accepte que mes données soient utilisées pour répondre à ma demande (politique de confidentialité)</label>
+    </p>
+    <button type="submit">Envoyer le message</button>
+  </form>
+</main>
+</body>
+</html>

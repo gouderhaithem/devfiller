@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book your stay - Hotel Belvedere</title>
+<style>
+  body { font-family: Georgia, serif; margin: 0; background: #f4efe6; }
+  main { max-width: 560px; margin: 24px auto; background: #fff; padding: 24px; }
+  label { display: block; margin-top: 12px; font-size: 14px; }
+  input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+  .check { display: flex; gap: 8px; align-items: center; }
+  .check input { width: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reserve a room</h1>
+  <form action="/reservations" method="post">
+    <label for="ci">Check-in</label>
+    <input type="date" id="ci" name="arrival" min="2026-10-01" required data-expect="startDate">
+
+    <label for="co">Check-out</label>
+    <input type="date" id="co" name="departure" min="2026-10-02" required data-expect="endDate">
+
+    <label for="guests">Number of guests</label>
+    <input type="number" id="guests" name="guests" min="1" max="6" value="2" data-expect="quantity">
+
+    <label for="room">Room type</label>
+    <select id="room" name="room_type" data-expect="unknown">
+      <option value="">Any</option>
+      <option value="std">Standard double</option>
+      <option value="dlx">Deluxe king</option>
+      <option value="ste">Junior suite</option>
+    </select>
+
+    <label for="eta">Estimated arrival time</label>
+    <input type="time" id="eta" name="eta" data-expect="time">
+
+    <label for="guest-name">Guest name</label>
+    <input id="guest-name" name="guest_name" autocomplete="name" required data-expect="fullName">
+
+    <label for="guest-email">Email</label>
+    <input type="email" id="guest-email" name="guest_email" autocomplete="email" required data-expect="email">
+
+    <label for="guest-tel">Phone</label>
+    <input type="tel" id="guest-tel" name="guest_tel" autocomplete="tel" data-expect="phone">
+
+    <label for="requests">Special requests</label>
+    <textarea id="requests" name="special_requests" rows="4" maxlength="500" placeholder="Late check-in, quiet room, extra pillows..." data-expect="notes"></textarea>
+
+    <label class="check"><input type="checkbox" name="offers" data-expect="skip:consent"> Yes, send me special offers from Hotel Belvedere</label>
+
+    <p><button type="submit">Check availability</button></p>
+  </form>
+</main>
+</body>
+</html>

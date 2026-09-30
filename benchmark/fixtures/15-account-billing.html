@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Billing details</title>
+<style>
+  body { font-family: "IBM Plex Sans", sans-serif; margin: 0; background: #f8f9fb; }
+  main { max-width: 640px; margin: 24px auto; background: #fff; padding: 24px; border: 1px solid #e2e5ea; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; margin-bottom: 4px; }
+  .field input:not([type=checkbox]), .field select { width: 100%; padding: 8px; box-sizing: border-box; }
+  h2 { font-size: 16px; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Billing details</h1>
+  <form action="/account/billing" method="post">
+    <h2>Company</h2>
+    <div class="field">
+      <label for="bill-company">Company name</label>
+      <input id="bill-company" name="company_name" autocomplete="organization" required data-expect="company">
+    </div>
+    <div class="field">
+      <label for="bill-vat">VAT number</label>
+      <input id="bill-vat" name="vat_id" placeholder="e.g. FR12345678901" data-expect="unknown">
+    </div>
+    <div class="field">
+      <label for="bill-po">Purchase order reference</label>
+      <input id="bill-po" name="po_ref" data-expect="unknown">
+    </div>
+    <div class="field">
+      <label for="bill-email">Billing email</label>
+      <input id="bill-email" type="email" name="billing_email" autocomplete="email" required data-expect="email">
+    </div>
+
+    <h2>Billing address</h2>
+    <div class="field">
+      <label for="bill-addr">Address</label>
+      <input id="bill-addr" name="address_line1" autocomplete="street-address" required data-expect="address">
+    </div>
+    <div class="field">
+      <label for="bill-addr2">Suite, floor, building</label>
+      <input id="bill-addr2" name="address_line2" data-expect="address2">
+    </div>
+    <div class="field">
+      <label for="bill-city">City</label>
+      <input id="bill-city" name="city" autocomplete="address-level2" required data-expect="city">
+    </div>
+    <div class="field">
+      <label for="bill-region">State / Region</label>
+      <input id="bill-region" name="region" autocomplete="address-level1" data-expect="state">
+    </div>
+    <div class="field">
+      <label for="bill-zip">Postal code</label>
+      <input id="bill-zip" name="postal_code" autocomplete="postal-code" required data-expect="postalCode">
+    </div>
+    <div class="field">
+      <label for="bill-country">Country</label>
+      <select id="bill-country" name="country" autocomplete="country" required data-expect="country">
+        <option value="">Select a country</option>
+        <option value="FR">France</option>
+        <option value="DE">Germany</option>
+        <option value="ES">Spain</option>
+        <option value="GB">United Kingdom</option>
+      </select>
+    </div>
+
+    <h2>Bank details for direct debit</h2>
+    <div class="field">
+      <label for="bank-holder">Account holder</label>
+      <input id="bank-holder" name="account_holder" data-expect="skip:iban">
+    </div>
+    <div class="field">
+      <label for="bank-iban">IBAN</label>
+      <input id="bank-iban" name="iban" maxlength="34" placeholder="FR76 ..." data-expect="skip:iban">
+    </div>
+    <div class="field">
+      <label for="bank-bic">BIC / SWIFT</label>
+      <input id="bank-bic" name="bic" maxlength="11" data-expect="skip:iban">
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="paper_invoice" data-expect="unknown"> Also send paper invoices by post</label>
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="sepa_mandate" required data-expect="skip:consent"> I authorise the SEPA direct debit mandate and accept the billing terms</label>
+    </div>
+    <button type="submit">Save billing details</button>
+  </form>
+</main>
+</body>
+</html>

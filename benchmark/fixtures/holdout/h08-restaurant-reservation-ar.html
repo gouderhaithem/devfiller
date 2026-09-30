@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مطعم الياسمين - حجز طاولة</title>
+<style>
+  body { font-family: "Noto Naskh Arabic", Tahoma, sans-serif; max-width: 600px; margin: 2rem auto; }
+  .r { margin: .7rem 0; }
+  label.t { display: block; }
+</style>
+</head>
+<body>
+<main>
+  <h1>احجز طاولتك</h1>
+  <form action="/book" method="post">
+    <div class="r">
+      <label class="t" for="a1">الاسم الكامل</label>
+      <input id="a1" name="guest" type="text" data-expect="fullName">
+    </div>
+    <div class="r">
+      <label class="t" for="a2">رقم الهاتف</label>
+      <input id="a2" name="gsm" type="tel" dir="ltr" data-expect="phone">
+    </div>
+    <div class="r">
+      <input name="contact_2" type="text" dir="ltr" placeholder="البريد الإلكتروني" data-expect="email">
+    </div>
+    <div class="r">
+      <label class="t" for="a4">المدينة</label>
+      <input id="a4" name="ville" type="text" data-expect="city">
+    </div>
+    <div class="r">
+      <label class="t" for="a5">تاريخ الحجز</label>
+      <input id="a5" name="day" type="date" data-expect="date">
+    </div>
+    <div class="r">
+      <label class="t" for="a6">الوقت</label>
+      <input id="a6" name="hour" type="time" data-expect="time">
+    </div>
+    <div class="r">
+      <label class="t" for="a7">عدد الأشخاص</label>
+      <input id="a7" name="pax" type="number" min="1" max="20" data-expect="quantity">
+    </div>
+    <div class="r">
+      <label class="t" for="a8">منهم أطفال</label>
+      <input id="a8" name="kids" type="number" min="0" max="10" data-expect="quantity">
+    </div>
+    <div class="r">
+      <label class="t" for="a9">المكان المفضل</label>
+      <select id="a9" name="zone" data-expect="unknown">
+        <option>القاعة الداخلية</option>
+        <option>التراس</option>
+        <option>الحديقة</option>
+      </select>
+    </div>
+    <div class="r">
+      الطاولة:
+      <label><input type="radio" name="tbl" value="quiet" data-expect="unknown"> هادئة</label>
+      <label><input type="radio" name="tbl" value="window" data-expect="unknown"> بجانب النافذة</label>
+    </div>
+    <div class="r">
+      <label class="t" for="a12">المناسبة</label>
+      <select id="a12" name="occasion" data-expect="unknown">
+        <option value="">بدون</option>
+        <option>عيد ميلاد</option>
+        <option>خطوبة</option>
+        <option>عشاء عمل</option>
+      </select>
+    </div>
+    <div class="r">
+      <label class="t" for="a13">ملاحظات خاصة</label>
+      <textarea id="a13" name="remarks" rows="3" data-expect="notes"></textarea>
+    </div>
+    <div class="r">
+      <label class="t" for="a14">رمز الخصم</label>
+      <input id="a14" name="coupon" type="text" data-expect="unknown">
+    </div>
+    <div class="r">
+      <p>ضمان الحجز للمجموعات الكبيرة</p>
+      <label class="t" for="a15">رقم البطاقة البنكية</label>
+      <input id="a15" name="cc_no" type="text" dir="ltr" inputmode="numeric" data-expect="skip:card">
+      <label class="t" for="a16">تاريخ انتهاء الصلاحية</label>
+      <input id="a16" name="cc_exp" type="text" dir="ltr" placeholder="MM/YY" data-expect="skip:card">
+    </div>
+    <div class="r">
+      <label><input type="checkbox" name="policy" data-expect="skip:consent"> أوافق على سياسة الإلغاء وشروط الحجز</label>
+    </div>
+    <div class="r">
+      <label><input type="checkbox" name="promos" data-expect="skip:consent"> أرغب في تلقي العروض والأخبار عبر البريد الإلكتروني</label>
+    </div>
+    <button type="submit">تأكيد الحجز</button>
+  </form>
+</main>
+</body>
+</html>
