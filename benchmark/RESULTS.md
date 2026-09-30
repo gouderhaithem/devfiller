@@ -102,7 +102,27 @@ The Phase D code review found two more ways to fill a sensitive field (a card-ex
 as an end date, and expiry month and year selects beside a card number) and a crash on dates in
 another format. All three are fixed and covered by tests.
 
+## Phase E: data
 
+Phase E changed how values are generated, not how fields are recognized. Three things are
+measured on every fixture:
+
+| Check | Result |
+| --- | --- |
+| Seeded repeat: two page loads and a refill with the same seed give identical values | 37 / 37 fixtures |
+| Phone follows the form (a country field or a dial code on the field) | 3 / 3 |
+| Precision / recall on the main fixtures (464 fields) | 100% / 100% |
+| Held-out recall | 83.7% → 85.4%, because communes are now recognized as cities |
+
+Two fixtures were relabelled for Phase E's spec change: a commune is now `city` (it was
+`unknown`), matching what the held-out fixtures' author had already chosen independently.
+
+The Phase E code review found that a fixed region made every second fresh fill pick a different
+country or wilaya option, that seeded generic text shifted when a field was added, and that
+phone hints misread French landlines and compact numbers. All are fixed and tested. Its data
+checks confirmed the wilaya codes, names and chef-lieu postal codes.
+
+## Confidence calibration
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.
 
