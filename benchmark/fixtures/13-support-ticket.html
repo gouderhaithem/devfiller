@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Submit a request - Help Center</title>
+<style>
+  body { font-family: "Lucida Grande", sans-serif; margin: 0; background: #f3f5f7; }
+  main { max-width: 640px; margin: 24px auto; background: #fff; padding: 24px; }
+  .request-field { margin-bottom: 16px; }
+  .request-field label { display: block; font-weight: bold; margin-bottom: 4px; }
+  .request-field input[type=text], .request-field input[type=email], .request-field input[type=tel], .request-field select, .request-field textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Submit a request</h1>
+  <form action="/requests" method="post" enctype="multipart/form-data" data-form-type="contact">
+    <div class="request-field">
+      <label for="req-name">Your name</label>
+      <input type="text" id="req-name" name="request[name]" autocomplete="name" data-expect="fullName">
+    </div>
+    <div class="request-field">
+      <label for="req-email">Email address</label>
+      <input type="email" id="req-email" name="request[anonymous_requester_email]" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="request-field">
+      <label for="req-phone">Phone</label>
+      <input type="tel" id="req-phone" name="request[phone]" data-expect="phone">
+    </div>
+    <div class="request-field">
+      <label for="req-title">Ticket title</label>
+      <input type="text" id="req-title" name="request[subject]" maxlength="150" required data-expect="title">
+    </div>
+    <div class="request-field">
+      <label for="req-cat">Category</label>
+      <select id="req-cat" name="request[custom_fields][360001]" data-expect="unknown">
+        <option value="">-</option>
+        <option>Billing</option>
+        <option>Technical issue</option>
+        <option>Account access</option>
+        <option>Feature request</option>
+      </select>
+    </div>
+    <div class="request-field">
+      <label for="req-prio">Priority</label>
+      <select id="req-prio" name="request[priority]" data-expect="unknown">
+        <option>Low</option>
+        <option selected>Normal</option>
+        <option>High</option>
+        <option>Urgent</option>
+      </select>
+    </div>
+    <div class="request-field">
+      <label for="req-order">Order number</label>
+      <input type="text" id="req-order" name="request[custom_fields][360002]" placeholder="e.g. #100234" data-expect="reference">
+    </div>
+    <div class="request-field">
+      <label for="req-desc">Description</label>
+      <textarea id="req-desc" name="request[description]" rows="7" required data-expect="description"></textarea>
+    </div>
+    <div class="request-field">
+      <label for="req-files">Attachments</label>
+      <input type="file" id="req-files" name="request[attachments][]" multiple>
+    </div>
+    <div class="request-field">
+      <label><input type="checkbox" name="request[cc_me]" data-expect="unknown"> Send me a copy of this request</label>
+    </div>
+    <div class="request-field">
+      <label><input type="checkbox" name="request[privacy]" required data-expect="skip:consent"> I accept the privacy policy</label>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+</main>
+</body>
+</html>

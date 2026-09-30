@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapport de contrôle qualité</title>
+<style>
+body{font:14px/1.4 Arial,sans-serif;max-width:820px;margin:2rem auto;padding:0 1rem}
+table{border-collapse:collapse;width:100%;margin-bottom:1rem}
+th,td{border:1px solid #bbb;padding:.35rem .5rem;text-align:left}
+input,select,textarea{box-sizing:border-box;width:100%;padding:.3rem}
+label{display:block;margin-top:.6rem;font-weight:bold}
+</style>
+</head>
+<body>
+<header><h1>Atelier usinage - Fiche de contrôle dimensionnel</h1></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <h2>Identification</h2>
+  <label for="f_lot">N° de lot</label>
+  <input id="f_lot" name="field_1" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference">
+  <label for="f_piece">Référence pièce</label>
+  <input id="f_piece" name="field_2" placeholder="ex. PX-4471-B" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference">
+  <label for="f_date">Date du contrôle</label>
+  <input id="f_date" name="field_3" type="date" data-expect="date">
+  <label for="f_insp">Contrôleur (nom et prénom)</label>
+  <input id="f_insp" name="field_4" autocomplete="name" data-expect="fullName">
+  <label for="f_atel">Atelier</label>
+  <select id="f_atel" name="field_5" data-expect="department">
+    <option value="">--</option><option>Tournage</option><option>Fraisage</option><option>Rectification</option><option>Assemblage</option>
+  </select>
+  <label for="f_ser">N° de série du pied à coulisse</label>
+  <input id="f_ser" name="field_6" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{2,}$" data-expect="reference">
+
+  <h2>Mesures relevées</h2>
+  <table>
+    <thead><tr><th>Cote</th><th>Valeur mesurée</th></tr></thead>
+    <tbody>
+      <tr><td>Diamètre extérieur (mm)</td><td><input name="mes_1" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></td></tr>
+      <tr><td>Épaisseur de paroi (mm)</td><td><input name="mes_2" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></td></tr>
+      <tr><td>Longueur totale (mm)</td><td><input name="mes_3" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></td></tr>
+      <tr><td>Masse (g)</td><td><input name="mes_4" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></td></tr>
+      <tr><td>Tolérance ± (mm)</td><td><input name="mes_5" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Résultat</h2>
+  <label for="nb_c">Pièces contrôlées (u)</label>
+  <input id="nb_c" name="field_20" type="number" min="0" data-expect="quantity">
+  <label for="nb_nc">Pièces non conformes (u)</label>
+  <input id="nb_nc" name="field_21" type="number" min="0" data-expect="quantity">
+  <label for="taux">Taux de rebut (%)</label>
+  <input id="taux" name="field_22" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="percentage">
+  <label for="deci">Décision</label>
+  <select id="deci" name="field_23" data-expect="unknown">
+    <option value="">--</option><option>Conforme</option><option>Conforme avec dérogation</option><option>Non conforme - mise au rebut</option>
+  </select>
+  <label for="nc_desc">Description de la non-conformité</label>
+  <textarea id="nc_desc" name="field_24" rows="3" data-expect="description"></textarea>
+  <label for="obs">Observations</label>
+  <textarea id="obs" name="field_25" rows="2" data-expect="notes"></textarea>
+  <label style="font-weight:normal"><input type="checkbox" name="proc" style="width:auto" data-expect="skip:consent"> Je certifie que les mesures ont été effectuées selon la procédure en vigueur.</label>
+  <p><button type="submit">Valider le rapport</button></p>
+</form>
+</main>
+</body>
+</html>

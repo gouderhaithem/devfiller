@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حجز غرفة - فندق الواحة</title>
+<style>
+  body { font-family: Cairo, Tahoma, sans-serif; background: #e9f1f7; margin: 0; }
+  main { max-width: 640px; margin: 2rem auto; background: #fff; padding: 1.5rem 2rem; border-radius: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .full { grid-column: 1 / -1; }
+  .grid label { display: block; margin-bottom: .25rem; font-size: .95rem; }
+  .grid input, .grid select, .grid textarea { width: 100%; padding: .5rem; box-sizing: border-box; }
+  .cta { margin-top: 1.25rem; background: #0a4d8c; color: #fff; padding: .8rem 2rem; border: 0; border-radius: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>احجز إقامتك</h1>
+  <form action="/booking" method="post" data-form-type="booking">
+    <div class="grid">
+      <div class="full">
+        <label for="b-name">الاسم الكامل</label>
+        <input type="text" id="b-name" name="guest_name" autocomplete="name" required data-expect="fullName">
+      </div>
+      <div>
+        <label for="b-phone">رقم الهاتف</label>
+        <input type="tel" id="b-phone" name="guest_phone" dir="ltr" autocomplete="tel" required data-expect="phone">
+      </div>
+      <div>
+        <label for="b-email">البريد الإلكتروني</label>
+        <input type="email" id="b-email" name="guest_email" dir="ltr" autocomplete="email" data-expect="email">
+      </div>
+      <div>
+        <label for="b-arrival">تاريخ الوصول</label>
+        <input type="date" id="b-arrival" name="arrival" min="2026-01-01" required data-expect="startDate">
+      </div>
+      <div>
+        <label for="b-departure">تاريخ المغادرة</label>
+        <input type="date" id="b-departure" name="departure" min="2026-01-01" required data-expect="endDate" data-after="#b-arrival">
+      </div>
+      <div>
+        <label for="b-guests">عدد الأشخاص</label>
+        <input type="number" id="b-guests" name="guests" min="1" max="8" value="2" required data-expect="quantity">
+      </div>
+      <div>
+        <label for="b-time">الوقت</label>
+        <input type="time" id="b-time" name="arrival_time" data-expect="time">
+      </div>
+      <div>
+        <label for="b-room">نوع الغرفة</label>
+        <select id="b-room" name="room_type" data-expect="unknown">
+          <option value="single">غرفة فردية</option>
+          <option value="double">غرفة مزدوجة</option>
+          <option value="suite">جناح</option>
+        </select>
+      </div>
+      <div>
+        <label for="b-coupon">رمز الخصم</label>
+        <input type="text" id="b-coupon" name="coupon" dir="ltr" maxlength="12" data-expect="unknown">
+      </div>
+      <div>
+        <label for="b-city">المدينة</label>
+        <input type="text" id="b-city" name="city" autocomplete="address-level2" data-expect="city">
+      </div>
+      <div>
+        <label for="b-country">البلد</label>
+        <select id="b-country" name="country" autocomplete="country-name" data-expect="country">
+          <option value="dz">الجزائر</option>
+          <option value="tn">تونس</option>
+          <option value="ma">المغرب</option>
+          <option value="fr">فرنسا</option>
+          <option value="sa">السعودية</option>
+        </select>
+      </div>
+      <div class="full">
+        <label for="b-notes">ملاحظات</label>
+        <textarea id="b-notes" name="notes" rows="4" maxlength="500" data-expect="notes"></textarea>
+      </div>
+    </div>
+    <button type="submit" class="cta">تأكيد الحجز</button>
+  </form>
+</main>
+</body>
+</html>

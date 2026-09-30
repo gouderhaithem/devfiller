@@ -1,4 +1,5 @@
-import { test, expect, chromium } from '@playwright/test';
+import {launchExtension} from './helpers/extension';
+import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { mkdtemp, rm, cp, readFile, writeFile } from 'node:fs/promises';
@@ -13,7 +14,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
   const manifest=JSON.parse(await readFile(resolve(path,'manifest.json'),'utf8'));
   manifest.host_permissions.push('http://*/*','https://*/*');
   await writeFile(resolve(path,'manifest.json'),JSON.stringify(manifest));
-  const context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${path}`,`--load-extension=${path}`]});
+  const context=await launchExtension(profile,path);
   try {
     const id=createHash('sha256').update(path).digest('hex').slice(0,32).replace(/[0-9a-f]/g,c=>String.fromCharCode(97+parseInt(c,16)));
     const worker=context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
@@ -58,6 +59,9 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await website.goto('http://127.0.0.1:5188/demo.html');
     const requests=()=>worker.evaluate(()=>(globalThis as typeof globalThis & {testRequests:unknown[]}).testRequests);
     await expect.poll(async()=>(await requests()).length).toBe(1);
+    // The request reaches the mock before the batch is stored, so wait for the batch itself.
+    const cachedBatch=()=>worker.evaluate(async()=>Object.entries(await chrome.storage.session.get(null)).some(([key])=>key.startsWith('gemini-cache:')));
+    await expect.poll(cachedBatch).toBe(true);
     const remaining=await worker.evaluate(async()=>{
       const all=await chrome.storage.session.get(null);
       const batch=Object.entries(all).find(([key])=>key.startsWith('gemini-cache:'))![1];
@@ -98,12 +102,17 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await expect(options.getByLabel('API key',{exact:true})).toHaveValue('fake-key-for-local-tests');
     await website.reload();
     await expect.poll(async()=>(await requests()).length).toBe(2);
+    await expect.poll(cachedBatch).toBe(true);
     const newRemaining=await worker.evaluate(async()=>Object.entries(await chrome.storage.session.get(null)).find(([key])=>key.startsWith('gemini-cache:'))![1].expiresAt-Date.now());
     expect(newRemaining).toBeGreaterThan(60000);expect(newRemaining).toBeLessThanOrEqual(2*60000);
     await worker.evaluate(async()=>{const all=await chrome.storage.session.get(null);for(const [key,value] of Object.entries(all))if(key.startsWith('gemini-cache:'))await chrome.storage.session.set({[key]:{...value,expiresAt:Date.now()-1}});});
     await options.evaluate(()=>chrome.runtime.sendMessage({type:'gemini:status'}));
-    await expect.poll(()=>worker.evaluate(async()=>Object.keys(await chrome.storage.session.get(null)).filter(k=>k.startsWith('gemini-cache:')).length)).toBe(0);
-    await website.reload();await expect.poll(async()=>(await requests()).length).toBe(3);
+    // Expired batches are pruned. The open form may already be preparing a replacement batch
+    // (the page watcher can ask again at any time), so only expired entries must be gone.
+    await expect.poll(()=>worker.evaluate(async()=>Object.entries(await chrome.storage.session.get(null)).filter(([k,v])=>k.startsWith('gemini-cache:') && (v as {expiresAt:number}).expiresAt<=Date.now()).length)).toBe(0);
+    await website.reload();
+    await expect.poll(async()=>(await requests()).length).toBeGreaterThanOrEqual(3);
+    await expect.poll(cachedBatch).toBe(true);
     await options.getByRole('button',{name:'Clear AI cache'}).click();
     await expect(options.getByText('Cached suggestions cleared.')).toBeVisible();
     await worker.evaluate(()=>{(globalThis as typeof globalThis & {testFail:boolean}).testFail=true;});

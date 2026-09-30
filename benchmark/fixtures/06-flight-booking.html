@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search and book flights</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; margin: 0; background: #e8f1fb; }
+  main { max-width: 760px; margin: 20px auto; background: #fff; padding: 24px; border-radius: 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+  input, select { padding: 8px; }
+  h2 { margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Where to next?</h1>
+  <form action="/flights/book" method="post" data-form-type="booking">
+    <div>
+      <label><input type="radio" name="trip" value="rt" checked data-expect="unknown"> Round trip</label>
+      <label><input type="radio" name="trip" value="ow" data-expect="unknown"> One way</label>
+    </div>
+
+    <div class="grid">
+      <label>From
+        <input type="text" name="origin" placeholder="City or airport" aria-autocomplete="list" data-expect="unknown">
+      </label>
+      <label>To
+        <input type="text" name="dest" placeholder="City or airport" aria-autocomplete="list" data-expect="unknown">
+      </label>
+      <label>Departure date
+        <input type="date" name="d1" data-expect="startDate">
+      </label>
+      <label>Return date
+        <input type="date" name="d2" data-expect="endDate" data-after="[name=d1]">
+      </label>
+      <label>Passengers
+        <input type="number" name="pax" min="1" max="9" value="1" data-expect="quantity">
+      </label>
+      <label>Cabin class
+        <select name="cabin" data-expect="unknown">
+          <option>Economy</option>
+          <option>Premium economy</option>
+          <option>Business</option>
+          <option>First</option>
+        </select>
+      </label>
+    </div>
+
+    <h2>Passenger 1</h2>
+    <div class="grid">
+      <label>First name (as on passport)
+        <input type="text" name="p1_fn" autocomplete="given-name" required data-expect="firstName">
+      </label>
+      <label>Last name (as on passport)
+        <input type="text" name="p1_ln" autocomplete="family-name" required data-expect="lastName">
+      </label>
+      <label>Date of birth
+        <input type="date" name="p1_dob" autocomplete="bday" data-expect="birthDate">
+      </label>
+      <label>Nationality
+        <select name="p1_nat" data-expect="nationality">
+          <option value="">Select</option>
+          <option>French</option>
+          <option>German</option>
+          <option>American</option>
+          <option>Japanese</option>
+        </select>
+      </label>
+      <label>Passport number
+        <input type="text" name="p1_pp" maxlength="9" data-expect="unknown">
+      </label>
+      <label>Contact email
+        <input type="email" name="contact" autocomplete="email" data-expect="email">
+      </label>
+      <label>Contact phone
+        <input type="tel" name="contact_tel" autocomplete="tel" data-expect="phone">
+      </label>
+    </div>
+    <p><label><input type="checkbox" name="flex_dates" data-expect="unknown"> My dates are flexible (+/- 3 days)</label></p>
+    <button type="submit">Search flights</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: consent worded without "consent" or "newsletter"</title></head>
+<body>
+<main>
+  <!-- Found by the held-out fixtures on 30 September 2026: these opt-ins were ticked by a fill. -->
+  <form action="/prefs" method="post">
+    <p><label><input type="checkbox" name="photos" data-expect="skip:consent"> J'autorise l'établissement à publier des photos de mon enfant</label></p>
+    <p><label><input type="checkbox" name="alerts" data-expect="skip:consent"> Email me new listings that match my search</label></p>
+    <p><label><input type="checkbox" name="digest" data-expect="skip:consent"> Yes, send me the weekly digest</label></p>
+    <p><label><input type="checkbox" name="news" data-expect="skip:consent"> Tick to hear about classes, challenges and member-only deals</label></p>
+    <p><label><input type="checkbox" name="infos" data-expect="skip:consent"> أريد تلقي أخبار الجمعية / Je souhaite recevoir les actualités de l'association</label></p>
+    <p><label><input type="checkbox" name="updates" data-expect="skip:consent"> Keep me updated about new features</label></p>
+    <p><label><input type="checkbox" name="allow" data-expect="skip:consent"> I give permission to contact my references</label></p>
+    <!-- Ordinary options that must stay fillable. -->
+    <p><label><input type="checkbox" name="copy" data-expect="unknown"> Send me a copy of this request</label></p>
+    <p><label><input type="checkbox" name="keep" data-expect="skip:session"> Keep me signed in on this device</label></p>
+    <p><label><input type="checkbox" name="same" data-expect="unknown"> Same as billing address</label></p>
+    <button type="submit">Save</button>
+  </form>
+</main>
+</body>
+</html>

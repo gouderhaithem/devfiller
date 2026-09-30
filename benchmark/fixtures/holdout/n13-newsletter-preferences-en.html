@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Email preferences</title>
+<style>
+body{font:15px/1.5 system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem}
+.f{margin:.8rem 0}
+.f label.t{display:block;font-weight:600;margin-bottom:.2rem}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+.cb{display:flex;align-items:flex-start;gap:.6rem;margin:.6rem 0}
+[role=checkbox]{flex:none;width:20px;height:20px;border:2px solid #444;border-radius:4px;cursor:pointer;position:relative}
+[role=checkbox][aria-checked=true]{background:#136}
+[role=checkbox][aria-checked=true]::after{content:"\2713";color:#fff;position:absolute;left:3px;top:-2px;font-size:14px}
+</style>
+</head>
+<body>
+<header><h1>The Workbench Digest</h1><p>Manage what lands in your inbox.</p></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <div class="f"><label class="t" for="np_fn">First name</label>
+    <input id="np_fn" name="fname" autocomplete="given-name" data-expect="firstName"></div>
+  <div class="f"><label class="t" for="np_em">Email address</label>
+    <input id="np_em" name="email" type="email" autocomplete="email" data-expect="email"></div>
+  <div class="f"><label class="t" for="np_em2">Confirm email address</label>
+    <input id="np_em2" name="email_confirm" type="email" data-same-as="#np_em" data-expect="email"></div>
+  <div class="f"><label class="t" for="np_co">Company (optional)</label>
+    <input id="np_co" name="field_4" data-expect="company"></div>
+  <div class="f"><label class="t" for="np_zip">Postal code</label>
+    <input id="np_zip" name="field_5" autocomplete="postal-code" data-expect="postalCode"></div>
+  <div class="f"><label class="t" for="np_ct">Country</label>
+    <select id="np_ct" name="field_6" autocomplete="country-name" data-expect="country"><option>France</option><option>Algeria</option><option>Belgium</option><option>Canada</option></select></div>
+  <div class="f"><label class="t" for="np_dob">Date of birth (optional)</label>
+    <input id="np_dob" name="field_7" type="date" data-expect="birthDate"></div>
+  <div class="f"><label class="t" for="np_fr">How often?</label>
+    <select id="np_fr" name="freq" data-expect="unknown"><option>Weekly</option><option>Every two weeks</option><option>Monthly</option></select></div>
+  <div class="f"><label class="t" for="np_src">How did you hear about us?</label>
+    <select id="np_src" name="field_9" data-expect="unknown"><option value="">--</option><option>Search</option><option>A friend</option><option>Conference</option><option>Other</option></select></div>
+  <div class="f"><label class="t" for="np_ref">Referral code</label>
+    <input id="np_ref" name="field_10" data-expect="unknown"></div>
+
+  <h2>Topics I care about</h2>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="tp1" data-expect="unknown"></span><span id="tp1">Product news</span></div>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="tp2" data-expect="unknown"></span><span id="tp2">Engineering blog</span></div>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="tp3" data-expect="unknown"></span><span id="tp3">Events and webinars</span></div>
+
+  <div class="f"><label class="t" for="np_msg">Anything else you would like to tell us?</label>
+    <textarea id="np_msg" name="field_11" rows="3" data-expect="message"></textarea></div>
+
+  <h2>Permissions</h2>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="cs1" data-expect="skip:consent"></span><span id="cs1">Yes, send me the weekly newsletter</span></div>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="cs2" data-expect="skip:consent"></span><span id="cs2">Keep me posted about special offers from your partners</span></div>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="cs3" data-expect="skip:consent"></span><span id="cs3">You may text me about events near me</span></div>
+  <div class="cb"><span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="cs4" data-expect="skip:consent"></span><span id="cs4">I am over 16 years old and have read the Privacy Policy</span></div>
+  <div class="cb"><input type="checkbox" id="cs5" name="beta" data-expect="skip:consent"><label for="cs5">Opt me in to beta programme communications</label></div>
+
+  <button type="submit">Save my preferences</button>
+</form>
+</main>
+<script>
+document.querySelectorAll('[role=checkbox]').forEach(function (el) {
+  function t() { el.setAttribute('aria-checked', el.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
+  el.addEventListener('click', t);
+  el.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); t(); } });
+});
+</script>
+</body>
+</html>

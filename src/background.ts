@@ -1,11 +1,13 @@
 import {installFormPreload} from './form-preload';
-import { panelPageAction } from './panel-page';
-import { generateIdentities, generateValues, validateSettings, type Settings } from './data';
+import { fields, generateIdentities, generatePhones, generateValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
-import { fillPage, type FillRequest, type FillResult, type SuggestedField } from './engine';
+import type { FillRequest, FillResult, SuggestedField } from './fill';
+import { fixRejected, runExport, runFillPage, runPanelAction } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
+// Counts fills per tab, so validation retries of an older fill stop when a new one starts.
+const fillGenerations = new Map<number, number>();
 const CACHE_PREFIX='gemini-cache:';
 const ALARM='gemini-cache-expiry';
 // A tab keeps one batch per origin, so cap how many field signatures it may accumulate as the user
@@ -54,8 +56,7 @@ async function status() {
 
 async function prepareBatch(tabId:number,request:FillRequest,settings:Settings,config:GeminiConfig,epoch:number,documentId?:string,userInitiated=false):Promise<{scan:FillResult;note:string;cacheKey?:string;batch?:CachedBatch}> {
   request.aiRequired=true;
-  const scans=await chrome.scripting.executeScript({target:documentId?{tabId,documentIds:[documentId]}:{tabId},func:fillPage,args:[{...request,mode:'scan'}]});
-  const scan=scans[0]?.result;
+  const scan=await runFillPage(documentId?{tabId,documentIds:[documentId]}:{tabId},{...request,mode:'scan'});
   if(!scan) throw new Error('The form could not be inspected. Local filling is still available.');
   if(request.expectedDocument && request.expectedDocument!==scan.documentId) throw new Error('The page changed. Refresh the field list.');
   request.expectedDocument=scan.documentId;
@@ -131,7 +132,7 @@ async function prepareForPage(tabId:number,tab:chrome.tabs.Tab,documentId?:strin
     const settings=validateSettings(stored.settings),config=validateGemini(stored.gemini);
     if(!config.enabled || !config.apiKey || !settings.fillUnknown) return;
     const epoch=cacheEpoch;
-    const prepared=await prepareBatch(tabId,{...settings,values:generateValues(settings.locale)},settings,config,epoch,documentId);
+    const prepared=await prepareBatch(tabId,{...settings,values:generateValues(settings.locale,settings)},settings,config,epoch,documentId);
     if(epoch===cacheEpoch) await chrome.storage.session.set({geminiStatus:prepared.batch?`${providerSpec(config.provider).label} suggestions are ready. Click DevFiller to fill.`:prepared.note});
   } catch(error) {
     await chrome.storage.session.set({geminiStatus:error instanceof GeminiQuotaError?`${error.message} Local fallback is available.`:error instanceof Error?`${error.message} Fill will retry AI.`:'AI preparation failed. Fill will retry AI.'});
@@ -146,19 +147,23 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
   const tabId=tab.id;
   if(tabId===undefined || filling.has(tabId)) throw new Error('A fill is already running. Try again in a moment.');
   filling.add(tabId);
+  const generation=(fillGenerations.get(tabId) ?? 0)+1;
+  fillGenerations.set(tabId,generation);
+  let checkValidation=false;
   try {
     await protectStorage;
     await chrome.action.setBadgeText({tabId,text:'…'});
     const stored=await chrome.storage.local.get(['settings','gemini']);
     const settings=validateSettings(stored.settings);
     const config=validateGemini(stored.gemini);
-    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale),identities:generateIdentities(settings.locale),samples:generateSamples(settings.locale)};
+    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale,settings),identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed)};
     let note='';
     let cacheKey:string | undefined;
     let batch:CachedBatch | undefined;
     let signatures:Map<string,string> | undefined;
     const epoch=cacheEpoch;
-    if(config.enabled && config.apiKey && settings.fillUnknown) {
+    // A seed promises the same data every time, which AI answers can't give: seeded fills stay local.
+    if(config.enabled && config.apiKey && settings.fillUnknown && !settings.seed.trim()) {
       try {
         await chrome.action.setTitle({tabId,title:'DevFiller: waiting for AI data…'});
         const prepared=await prepareBatch(tabId,request,settings,config,epoch,undefined,true);
@@ -179,10 +184,10 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     }
     request.exclusions=validateSettings((await chrome.storage.local.get('settings')).settings).exclusions;
     if(epoch!==cacheEpoch || (batch && batch.expiresAt<=Date.now()))throw new Error('AI settings or cached data changed. Click Fill again.');
-    const responses=await chrome.scripting.executeScript({target:{tabId},func:fillPage,args:[request]});
-    const result:FillResult | undefined=responses[0]?.result;
+    const result:FillResult | undefined=await runFillPage({tabId},request,true);
     if(!result) throw new Error('The page did not respond. Click to try again.');
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
+    checkValidation=result.filled>0;
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{
         const latest=liveBatch((await chrome.storage.session.get(cacheKey!))[cacheKey!]);
@@ -206,6 +211,8 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     await chrome.action.setTitle({tabId,title:`DevFiller: ${reason}`});
     throw new Error(reason);
   } finally {filling.delete(tabId);}
+  // The page's own validation is checked after the fill is done, so a second click is never blocked.
+  if(checkValidation) void fixRejected({tabId},()=>fillGenerations.get(tabId)===generation).catch(()=>0);
 }
 
 chrome.runtime.onInstalled.addListener(details=>{
@@ -218,7 +225,17 @@ chrome.storage.onChanged.addListener((changes,area)=>{
   if(area==='local' && changes.settings && JSON.stringify(validateSettings(changes.settings.oldValue).exclusions)!==JSON.stringify(validateSettings(changes.settings.newValue).exclusions)) void clearCache().catch(()=>{});
 });
 const syncFormPreload=installFormPreload(prepareForPage);
-chrome.action.onClicked.addListener(tab=>fillClickedTab(tab).catch(()=>{}));
+// A click while a fill is running fills again once it ends, instead of being dropped.
+const queuedClicks=new Map<number,chrome.tabs.Tab>();
+async function clickFill(tab:chrome.tabs.Tab) {
+  if(tab.id!==undefined && filling.has(tab.id)){queuedClicks.set(tab.id,tab);return;}
+  try{await fillClickedTab(tab);}
+  finally{
+    const next=tab.id===undefined?undefined:queuedClicks.get(tab.id);
+    if(next && tab.id!==undefined){queuedClicks.delete(tab.id);void clickFill(next).catch(()=>{});}
+  }
+}
+chrome.action.onClicked.addListener(tab=>void clickFill(tab).catch(()=>{}));
 chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name===ALARM) void pruneCache().catch(()=>{});});
 chrome.tabs.onRemoved.addListener(tabId=>{
   queuedPreparations.delete(tabId);
@@ -265,7 +282,7 @@ chrome.commands.onCommand.addListener((command,tab)=>{
 });
 async function inspectTab(tabId:number) {
   const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
-  const reply=(await chrome.scripting.executeScript({target:{tabId},func:fillPage,args:[{...settings,values:generateValues(settings.locale),mode:'inspect'}]}))[0]?.result;
+  const reply=await runFillPage({tabId},{...settings,values:generateValues(settings.locale,settings),mode:'inspect'});
   if(!reply) throw new Error('The page did not respond. Refresh to try again.');
   return {tabId,...reply};
 }
@@ -283,19 +300,26 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     if(!msg.documentId) throw new Error('Refresh the field list first.');
     if(msg.type==='panel:fill') {await fillClickedTab(tab,msg.documentId);return inspectTab(tabId);}
     if(filling.has(tabId)) throw new Error('Wait for the current fill to finish.');
+    if(msg.type==='panel:export') return {...await inspectTab(tabId),fixture:await runExport({tabId},validateSettings((await chrome.storage.local.get('settings')).settings).typeRules)};
+    if(msg.type==='panel:overlay') return {...await inspectTab(tabId),...await runPanelAction({tabId},'overlay',msg.documentId,msg.value==='on'?'on':'off')};
     if(msg.type==='panel:highlight' || msg.type==='panel:undo') {
       const action=msg.type==='panel:undo'?'undo':'highlight';
-      const result=(await chrome.scripting.executeScript({target:{tabId},func:panelPageAction,args:[action,msg.documentId,msg.fieldId ?? '']}))[0]?.result;
+      const result=await runPanelAction({tabId},action,msg.documentId,msg.fieldId ?? '');
       if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'DevFiller: last fill undone. Click to fill again.'});}
       return {...await inspectTab(tabId),...result};
     }
-    if(msg.type==='panel:exclude' || msg.type==='panel:rule') {
+    if(msg.type==='panel:exclude' || msg.type==='panel:rule' || msg.type==='panel:type') {
       if(!msg.fieldId) throw new Error('Choose a field first.');
       if(msg.type==='panel:rule' && (typeof msg.value!=='string' || !msg.value.trim() || msg.value.length>5000)) throw new Error('Enter a test value between 1 and 5,000 characters.');
-      const field=(await chrome.scripting.executeScript({target:{tabId},func:panelPageAction,args:['field',msg.documentId,msg.fieldId]}))[0]?.result;
+      if(msg.type==='panel:type' && (typeof msg.value!=='string' || ![...fields.map(([key])=>key as string),'unknown','auto'].includes(msg.value))) throw new Error('Choose a field type.');
+      const field=await runPanelAction({tabId},'field',msg.documentId,msg.fieldId);
       if(!field || !('selector' in field) || !field.selector || !field.site) throw new Error('This field could not be located. Refresh the panel.');
       const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
-      if(msg.type==='panel:exclude') {
+      if(msg.type==='panel:type') {
+        // "auto" removes the rule and lets recognition decide again.
+        settings.typeRules=settings.typeRules.filter(rule=>rule.selector!==field.selector || rule.site!==field.site);
+        if(msg.value!=='auto') settings.typeRules.push({id:crypto.randomUUID(),selector:field.selector,site:field.site,type:msg.value as TypeRule['type']});
+      } else if(msg.type==='panel:exclude') {
         if(!settings.exclusions.rules.some(rule=>rule.match==='selector' && rule.value===field.selector && rule.site===field.site)) settings.exclusions.rules.push({id:crypto.randomUUID(),match:'selector',value:field.selector,site:field.site});
       } else {
         settings.custom=settings.custom.filter(rule=>rule.selector!==field.selector || rule.site!==field.site);

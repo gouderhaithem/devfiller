@@ -1,4 +1,4 @@
-import type { UnknownField } from './engine';
+import type { UnknownField } from './fill';
 
 export type Provider = 'gemini' | 'groq';
 export const PROVIDERS = ['gemini', 'groq'] as const;

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin - Edit product</title>
+<style>
+  body { font-family: Roboto, Arial, sans-serif; margin: 0; background: #f1f3f6; }
+  .topbar { background: #1e293b; padding: 10px 20px; }
+  .topbar input { padding: 6px 10px; width: 260px; }
+  main { max-width: 720px; margin: 20px auto; background: #fff; padding: 24px; border-radius: 4px; }
+  .row { display: flex; gap: 16px; margin-bottom: 14px; }
+  .col { flex: 1; display: flex; flex-direction: column; }
+  .col label { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+  .form-control, .form-select { padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <input type="search" class="form-control" name="admin_q" placeholder="Search orders, products, customers" data-expect="search">
+</header>
+<main>
+  <h1>Edit product #1042</h1>
+  <form action="/admin/products/1042" method="post" data-form-type="other">
+    <div class="row">
+      <div class="col">
+        <label for="prod-title">Product title</label>
+        <input type="text" class="form-control" id="prod-title" name="product[title]" maxlength="120" required data-expect="title">
+      </div>
+      <div class="col">
+        <label for="prod-sku">SKU</label>
+        <input type="text" class="form-control" id="prod-sku" name="product[sku]" maxlength="24" data-expect="reference">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label for="prod-desc">Description</label>
+        <textarea class="form-control" id="prod-desc" name="product[body_html]" rows="5" data-expect="description"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label for="prod-price">Price (USD)</label>
+        <input type="number" class="form-control" id="prod-price" name="product[price]" min="0" step="0.01" data-expect="price">
+      </div>
+      <div class="col">
+        <label for="prod-stock">Quantity in stock</label>
+        <input type="number" class="form-control" id="prod-stock" name="product[inventory_quantity]" min="0" max="100000" data-expect="quantity">
+      </div>
+      <div class="col">
+        <label for="prod-disc">Discount percentage</label>
+        <input type="number" class="form-control" id="prod-disc" name="product[discount_pct]" min="0" max="100" data-expect="percentage">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label for="prod-cat">Category</label>
+        <select class="form-select" id="prod-cat" name="product[category_id]" data-expect="unknown">
+          <option value="">Uncategorized</option>
+          <option value="3">Electronics</option>
+          <option value="7">Home &amp; Garden</option>
+          <option value="9">Apparel</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="prod-color">Color</label>
+        <input type="color" class="form-control" id="prod-color" name="product[color]" value="#336699" data-expect="color">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label for="prod-release">Release date</label>
+        <input type="date" class="form-control" id="prod-release" name="product[released_on]" data-expect="date">
+      </div>
+      <div class="col">
+        <label for="prod-rating">Rating (0-5)</label>
+        <input type="number" class="form-control" id="prod-rating" name="product[rating]" min="0" max="5" step="0.1" data-expect="rating">
+      </div>
+      <div class="col">
+        <label for="prod-tags">Tags</label>
+        <input type="text" class="form-control" id="prod-tags" name="product[tag_list]" placeholder="comma, separated" data-expect="unknown">
+      </div>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" name="product[active]" value="1" checked data-expect="unknown"> Active</label>
+      <label><input type="checkbox" name="product[featured]" value="1" data-expect="unknown"> Featured on homepage</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Save product</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workspace settings</title>
+<style>
+body{font:14px/1.45 system-ui,sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem;color:#222}
+h2{margin-top:2rem;font-size:16px}
+.field{margin:.8rem 0}
+.field>label,.field>span.lbl{display:block;font-weight:600;margin-bottom:.25rem}
+input[type=text],input[type=email],input[type=tel],input[type=url],input[type=number],input[type=color]{width:100%;box-sizing:border-box;padding:.4rem}
+.toggle{display:flex;align-items:center;gap:.75rem;margin:.6rem 0}
+[role=switch]{width:40px;height:22px;border-radius:11px;background:#bbb;position:relative;cursor:pointer;flex:none}
+[role=switch]::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+[role=switch][aria-checked=true]{background:#2a7}
+[role=switch][aria-checked=true]::after{left:20px}
+[role=combobox]{border:1px solid #888;padding:.4rem;cursor:pointer;background:#fff}
+[role=listbox]{list-style:none;margin:0;padding:0;border:1px solid #888;background:#fff}
+[role=option]{padding:.35rem .5rem;cursor:pointer}
+[role=option]:hover,[role=option][aria-selected=true]{background:#def}
+#desc_box{border:1px solid #888;min-height:5rem;padding:.4rem;background:#fff}
+</style>
+</head>
+<body>
+<header><h1>Acme Cloud</h1><nav>Settings / General</nav></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <h2>Organization</h2>
+  <div class="field"><label for=":r7:">Company name</label>
+    <input type="text" id=":r7:" name="org_name" autocomplete="organization" data-expect="company"></div>
+  <div class="field"><label for=":r8:">Workspace URL</label>
+    <input type="text" id=":r8:" name="slug" placeholder="your-team" data-expect="unknown"></div>
+  <div class="field"><label for=":r9:">Company website</label>
+    <input type="url" id=":r9:" name="site" data-expect="website"></div>
+  <div class="field"><span class="lbl" id="cty_l">Country</span>
+    <div role="combobox" id="cty" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-controls="cty_lb" aria-labelledby="cty_l" data-expect="country">Select a country</div>
+    <ul role="listbox" id="cty_lb" aria-labelledby="cty_l" hidden>
+      <li role="option" aria-selected="false">France</li>
+      <li role="option" aria-selected="false">Algeria</li>
+      <li role="option" aria-selected="false">Canada</li>
+      <li role="option" aria-selected="false">Germany</li>
+    </ul></div>
+  <div class="field"><span class="lbl" id="tz_l">Default time zone</span>
+    <div role="combobox" id="tz" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-controls="tz_lb" aria-labelledby="tz_l" data-expect="unknown">Choose time zone</div>
+    <ul role="listbox" id="tz_lb" aria-labelledby="tz_l" hidden>
+      <li role="option" aria-selected="false">UTC+01:00 Africa/Algiers</li>
+      <li role="option" aria-selected="false">UTC+01:00 Europe/Paris</li>
+      <li role="option" aria-selected="false">UTC-05:00 America/Toronto</li>
+    </ul></div>
+  <div class="field"><span class="lbl" id="desc_l">Workspace description</span>
+    <div id="desc_box" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="desc_l" data-expect="description"></div></div>
+
+  <h2>Contacts</h2>
+  <div class="field"><label for="f_12">Admin email</label>
+    <input type="email" id="f_12" name="field_12" autocomplete="email" data-expect="email"></div>
+  <div class="field"><label for="f_13">Billing contact email</label>
+    <input type="email" id="f_13" name="field_13" data-expect="email"></div>
+  <div class="field"><label for="f_14">Support phone</label>
+    <input type="tel" id="f_14" name="field_14" data-expect="phone"></div>
+
+  <h2>Limits &amp; branding</h2>
+  <div class="field"><label for="seats">Seat limit</label>
+    <input type="number" id="seats" name="field_15" min="1" data-expect="quantity"></div>
+  <div class="field"><label for="budget">Monthly budget cap (€)</label>
+    <input type="text" id="budget" name="field_16" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="amount"></div>
+  <div class="field"><label for="idle">Session timeout (min)</label>
+    <input type="number" id="idle" name="field_17" data-expect="unknown"></div>
+  <div class="field"><label for="brand">Brand color</label>
+    <input type="color" id="brand" name="field_18" data-expect="color"></div>
+
+  <h2>Preferences</h2>
+  <div class="toggle"><div role="switch" tabindex="0" aria-checked="false" aria-labelledby="sw1" data-expect="unknown"></div><span id="sw1">Allow guest access to shared boards</span></div>
+  <div class="toggle"><div role="switch" tabindex="0" aria-checked="true" aria-labelledby="sw2" data-expect="unknown"></div><span id="sw2">Require two-factor authentication for all members</span></div>
+  <div class="toggle"><div role="switch" tabindex="0" aria-checked="false" aria-labelledby="sw3" data-expect="skip:consent"></div><span id="sw3">Email me product updates and tips</span></div>
+  <div class="toggle"><div role="switch" tabindex="0" aria-checked="false" aria-labelledby="sw4" data-expect="skip:consent"></div><span id="sw4">Share anonymous usage data to help improve Acme</span></div>
+
+  <p><button type="submit">Save settings</button></p>
+</form>
+</main>
+<script>
+(function () {
+  function toggle(el) { el.setAttribute('aria-checked', el.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
+  document.querySelectorAll('[role=switch]').forEach(function (el) {
+    el.addEventListener('click', function () { toggle(el); });
+    el.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(el); } });
+  });
+  document.querySelectorAll('[role=combobox]').forEach(function (cb) {
+    var lb = document.getElementById(cb.getAttribute('aria-controls'));
+    cb.addEventListener('click', function () { lb.hidden = false; cb.setAttribute('aria-expanded', 'true'); });
+    cb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lb.hidden = false; cb.setAttribute('aria-expanded', 'true'); } });
+    lb.addEventListener('click', function (e) {
+      var o = e.target.closest('[role=option]');
+      if (!o) return;
+      lb.querySelectorAll('[role=option]').forEach(function (x) { x.setAttribute('aria-selected', x === o ? 'true' : 'false'); });
+      cb.textContent = o.textContent;
+      cb.setAttribute('aria-expanded', 'false');
+      lb.hidden = true;
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partner Onboarding (legacy field names)</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f6f6f9; margin: 0; }
+  main { max-width: 560px; margin: 2rem auto; background: #fff; padding: 1.5rem; border-radius: 6px; }
+  .fld { margin-bottom: .9rem; }
+  .fld label { display: block; font-weight: 600; margin-bottom: .2rem; }
+  .fld input, .fld select, .fld textarea { width: 100%; padding: .5rem; box-sizing: border-box; }
+  button { background: #5a3fc0; color: #fff; padding: .7rem 1.5rem; border: 0; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Partner onboarding</h1>
+  <p>This form was migrated from an old CRM, so the internal field names do not match the labels.</p>
+  <form action="/partners" method="post" data-form-type="other">
+    <div class="fld">
+      <label for="f-phone">Phone number</label>
+      <input type="text" id="f-phone" name="email" data-expect="phone">
+    </div>
+    <div class="fld">
+      <label for="firstName">Company</label>
+      <input type="text" id="firstName" name="firstName" data-expect="company">
+    </div>
+    <div class="fld">
+      <label for="f-mail">Email address</label>
+      <input type="text" id="f-mail" name="phone" data-expect="email">
+    </div>
+    <div class="fld">
+      <label for="f-first">First name</label>
+      <input type="text" id="f-first" name="lastName" autocomplete="off" data-expect="firstName">
+    </div>
+    <div class="fld">
+      <label for="f-last">Last name</label>
+      <input type="text" id="f-last" name="first_name" autocomplete="off" data-expect="lastName">
+    </div>
+    <div class="fld">
+      <label for="f-city">City</label>
+      <input type="text" id="f-city" name="zip" data-expect="city">
+    </div>
+    <div class="fld">
+      <label for="f-zip">ZIP / Postal code</label>
+      <input type="text" id="f-zip" name="city" maxlength="10" data-expect="postalCode">
+    </div>
+    <div class="fld">
+      <label for="f-street">Street address</label>
+      <input type="text" id="f-street" name="website" data-expect="address">
+    </div>
+    <div class="fld">
+      <label for="f-site">Website</label>
+      <input type="url" id="f-site" name="address" placeholder="https://" data-expect="website">
+    </div>
+    <div class="fld">
+      <label for="f-pass">Password</label>
+      <input type="password" id="f-pass" name="username" data-expect="password">
+    </div>
+    <div class="fld">
+      <label for="f-user">Username</label>
+      <input type="text" id="f-user" name="password" data-expect="username">
+    </div>
+    <div class="fld">
+      <label for="f-country">Country</label>
+      <select id="f-country" name="state" data-expect="country">
+        <option value="">Select…</option>
+        <option>United States</option>
+        <option>Canada</option>
+        <option>United Kingdom</option>
+        <option>Germany</option>
+        <option>Australia</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label for="f-job">Job title</label>
+      <input type="text" id="f-job" name="department" data-expect="jobTitle">
+    </div>
+    <div class="fld">
+      <label for="f-bday">Date of birth</label>
+      <input type="date" id="f-bday" name="startDate" data-expect="birthDate">
+    </div>
+    <div class="fld">
+      <label for="f-subject">Subject</label>
+      <input type="text" id="f-subject" name="message" data-expect="subject">
+    </div>
+    <div class="fld">
+      <label for="f-msg">Message</label>
+      <textarea id="f-msg" name="subject" rows="4" data-expect="message"></textarea>
+    </div>
+    <div class="fld">
+      <label><input type="checkbox" name="terms" value="1" data-expect="skip:consent"> Subscribe me to the partner newsletter</label>
+    </div>
+    <button type="submit">Submit application</button>
+  </form>
+</main>
+</body>
+</html>

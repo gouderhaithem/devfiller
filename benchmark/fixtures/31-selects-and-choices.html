@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Dossier — listes et choix sans libellé</title></head>
+<body>
+<main>
+  <h1>Dossier d'inscription</h1>
+  <form action="/dossier" method="post" data-form-type="other">
+    <!-- The options are the only evidence for these selects. -->
+    <div class="row"><select name="s1" data-expect="country">
+      <option>Algérie</option><option>Maroc</option><option>Tunisie</option><option>France</option><option>Belgique</option><option>Canada</option>
+    </select></div>
+    <div class="row"><select name="s2" data-expect="state">
+      <option value="">—</option><option value="01">01 - Adrar</option><option value="02">02 - Chlef</option><option value="09">09 - Blida</option><option value="16">16 - Alger</option><option value="31">31 - Oran</option><option value="25">25 - Constantine</option>
+    </select></div>
+    <div class="row"><select name="s3" data-expect="gender"><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
+    <div class="row"><select name="s4" data-expect="nationality"><option value="">—</option><option>Algérienne</option><option>Française</option><option>Marocaine</option><option>Tunisienne</option></select></div>
+    <fieldset>
+      <legend>Date de naissance</legend>
+      <select name="jour" data-expect="birthDate"><option value="">Jour</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+      <select name="mois" data-expect="birthDate"><option value="">Mois</option><option value="1">janvier</option><option value="2">février</option><option value="3">mars</option><option value="4">avril</option><option value="5">mai</option><option value="6">juin</option><option value="7">juillet</option><option value="8">août</option><option value="9">septembre</option><option value="10">octobre</option><option value="11">novembre</option><option value="12">décembre</option></select>
+      <select name="annee" data-expect="birthDate"><option value="">Année</option><option>2008</option><option>2000</option><option>1995</option><option>1990</option><option>1985</option><option>1980</option><option>1975</option><option>1970</option><option>1965</option><option>1960</option><option>1955</option></select>
+    </fieldset>
+    <!-- A radio group recognized from its answers. -->
+    <div class="row">
+      <label><input type="radio" name="r1" value="m" data-expect="gender"> Masculin</label>
+      <label><input type="radio" name="r1" value="f" data-expect="gender"> Féminin</label>
+    </div>
+    <div class="row" dir="rtl">
+      <label><input type="radio" name="r2" value="1" data-expect="gender"> ذكر</label>
+      <label><input type="radio" name="r2" value="2" data-expect="gender"> أنثى</label>
+    </div>
+    <div class="row">
+      <label><input type="radio" name="r3" value="1" data-expect="unknown"> Oui</label>
+      <label><input type="radio" name="r3" value="0" data-expect="unknown"> Non</label>
+    </div>
+    <div class="row"><select name="s5" data-expect="unknown"><option>Option A</option><option>Option B</option><option>Option C</option></select></div>
+    <p><label><input type="checkbox" name="stay" data-expect="skip:session"> Rester connecté</label></p>
+    <button type="submit">Envoyer</button>
+  </form>
+</main>
+</body>
+</html>

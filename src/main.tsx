@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Copy, FlaskConical, Plus, Settings2, Shuffle, Sparkles, Trash2, X } from 'lucide-react';
-import { defaults, fields, generateIdentities, generateValues, type Settings, type Values } from './data';
+import { defaults, fields, generateIdentities, generatePhones, generateValues, type Settings, type Values } from './data';
 import { generateSamples } from './samples';
-import { fillPage, type FillResult } from './engine';
+import type { FillResult } from './fill';
+import { runFillPage } from './fill/inject';
 import { isExtension, readSettings, saveSettings } from './storage';
 import './style.css';
+import manifest from '../public/manifest.json';
 import { GeminiPanel } from './GeminiPanel';
 import { ExclusionsPanel } from './ExclusionsPanel';
 
 type Section = 'gemini'|'generate'|'custom'|'excluded';
+const VERSION = manifest.version;
 function App() {
   const [settings,setSettings] = useState<Settings>(defaults);
   const [values,setValues] = useState<Values>(()=>generateValues('en'));
@@ -25,23 +28,23 @@ function App() {
   const [result,setResult] = useState<FillResult|null>(null);
   const [copied,setCopied] = useState('');
   const saveQueue = useRef(Promise.resolve());
-  useEffect(()=> { let active=true; readSettings().then(s=>{ if(active){setSettings(s);setValues(generateValues(s.locale));} }).catch(()=>{if(active)setError('Could not load your settings. You can still generate data.');}).finally(()=>{if(active)setReady(true);}); return()=>{active=false;}; },[]);
+  useEffect(()=> { let active=true; readSettings().then(s=>{ if(active){setSettings(s);setValues(generateValues(s.locale,s));} }).catch(()=>{if(active)setError('Could not load your settings. You can still generate data.');}).finally(()=>{if(active)setReady(true);}); return()=>{active=false;}; },[]);
   function update(next:Settings) {
     setSettings(next);
     saveQueue.current = saveQueue.current.then(()=>saveSettings(next)).catch(()=>setError('Could not save your settings. Please try again.'));
   }
-  function regenerate() { setValues(generateValues(settings.locale));setResult(null);setError(''); }
+  function regenerate() { setValues(generateValues(settings.locale,settings));setResult(null);setError(''); }
   async function fill() {
     setBusy(true);setError('');setResult(null);
-    const fresh = generateValues(settings.locale);setValues(fresh);
+    const fresh = generateValues(settings.locale,settings);setValues(fresh);
     try {
-      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale),samples:generateSamples(settings.locale),custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords };
+      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed),seed:settings.seed,typeRules:settings.typeRules,custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords };
       if (isExtension()) {
         const [active] = await chrome.tabs.query({active:true,currentWindow:true});
         if (!active?.id) throw new Error('Open a webpage with a form, then try again.');
-        const responses = await chrome.scripting.executeScript({target:{tabId:active.id},func:fillPage,args:[request]});
-        if (!responses[0]?.result) throw new Error('The page did not respond. Reopen the extension and try again.');
-        setResult(responses[0].result);
+        const reply = await runFillPage({tabId:active.id},request);
+        if (!reply) throw new Error('The page did not respond. Reopen the extension and try again.');
+        setResult(reply);
       } else {
         const demo = document.querySelector<HTMLIFrameElement>('#demo-form');
         if (!demo?.contentWindow) throw new Error('Demo form is still loading. Try again.');
@@ -72,23 +75,28 @@ function App() {
           ['overwrite','Replace existing values','Overwrite fields that already have a value.'],
           ['fillUnknown','Fill unknown fields','Fill every editable field, even if its value is invalid.'],
           ['passwords','Generate test passwords','Fill password and confirmation fields.'],
-        ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}<p className="fine">Consent stays manual. Filling never submits forms automatically.</p></section>}
+        ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}
+          <label className="toggle-row setting-row"><span><strong>Addresses and phones</strong><small>Where cities, postal codes and phone numbers come from. A country chosen in the form still wins for phones.</small></span><select disabled={!ready||busy} value={settings.region} onChange={e=>{const next={...settings,region:e.target.value as Settings['region']};update(next);setValues(generateValues(next.locale,next));}}><option value="mixed">Mixed</option><option value="us">United States</option><option value="fr">France</option><option value="dz">Algeria</option></select></label>
+          <label className="toggle-row setting-row"><span><strong>Repeatable data</strong><small>Type a seed to get exactly the same values on every fill, for reproducible tests. Leave it empty for fresh data. Seeded fills don't use AI.</small></span><input type="text" value={settings.seed} maxLength={200} placeholder="e.g. checkout-test" disabled={!ready||busy} onChange={e=>{const next={...settings,seed:e.target.value};update(next);setValues(generateValues(next.locale,next));}}/></label>
+          <p className="fine">Consent stays manual. Filling never submits forms automatically.</p></section>}
         {tab==='gemini'?<GeminiPanel/>:tab==='excluded'?<ExclusionsPanel value={settings.exclusions} disabled={!ready||busy} onChange={exclusions=>update({...settings,exclusions})}/>:tab==='generate'?<>
-          <div className="section-heading"><h2>Generated identity</h2><label className="locale"><span className="sr-only">Data language</span><select disabled={!ready||busy} value={settings.locale} onChange={e=>{const locale=e.target.value as Settings['locale'];update({...settings,locale});setValues(generateValues(locale));setResult(null);}}><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select><ChevronDown size={13}/></label></div>
+          <div className="section-heading"><h2>Generated identity</h2><label className="locale"><span className="sr-only">Data language</span><select disabled={!ready||busy} value={settings.locale} onChange={e=>{const locale=e.target.value as Settings['locale'];update({...settings,locale});setValues(generateValues(locale,settings));setResult(null);}}><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select><ChevronDown size={13}/></label></div>
           <div className="identity"><span className="avatar">{values.firstName.slice(0,1)}{values.lastName.slice(0,1)}</span><div><strong dir="auto">{values.fullName}</strong><small>{values.jobTitle} · {values.company}</small></div><button className="icon" title="Generate another identity" aria-label="Generate another identity" onClick={regenerate} disabled={busy}><Shuffle size={17}/></button></div>
           <div className="values">{shown.map(([key,label])=><div className="value-row" key={key}><span>{label}</span><div><b dir="auto">{values[key]}</b><button className="copy" aria-label={`Copy ${label}`} onClick={()=>copy(key,values[key])}>{copied===key?<Check size={13}/>:<Copy size={13}/>}</button></div></div>)}</div>
           <button className="expand" aria-expanded={expanded} onClick={()=>setExpanded(!expanded)}>{expanded?<ChevronDown size={14}/>:<ChevronRight size={14}/>} {expanded?'Show fewer fields':`Explore all ${fields.length} field types`}</button>
           <div className="language-note"><span>EN</span><span>FR</span><span>AR</span><p>Recognizes labels in all three languages.<br/>Synthetic samples; field validity may vary.</p></div>
-        </>:<section className="custom"><div className="section-heading"><h2>Your field rules</h2><span className="subtle">{settings.custom.length} rules</span></div><p className="helper">Match a label, name, or ID with a test value. Your value is inserted exactly as entered. Autocomplete takes priority for label rules. Rules saved in the side panel target one field on one website.</p>{settings.custom.length===0&&<div className="empty"><Plus size={24}/><strong>Make any field familiar</strong><p>Add labels such as “Project code” or “Matricule”<br/>and choose the value to fill.</p></div>}{settings.custom.map((field,index)=><div className="custom-row" key={field.id}><div><label htmlFor={`label-${field.id}`}>Field label</label><input id={`label-${field.id}`} placeholder="e.g. Project code" readOnly={!!field.selector} title={field.selector?`Field on ${field.site}`:undefined} value={field.label} onChange={e=>update({...settings,custom:settings.custom.map((c,i)=>i===index?{...c,label:e.target.value}:c)})}/>{field.site&&<small className="rule-site">{field.site}</small>}</div><div><label htmlFor={`value-${field.id}`}>Test value</label><input id={`value-${field.id}`} placeholder="e.g. PRJ-001" value={field.value} onChange={e=>update({...settings,custom:settings.custom.map((c,i)=>i===index?{...c,value:e.target.value}:c)})}/></div><button className="icon delete" aria-label={`Delete rule ${index+1}`} onClick={()=>update({...settings,custom:settings.custom.filter((_,i)=>i!==index)})}><Trash2 size={16}/></button></div>)}<button className="add" disabled={!ready} onClick={()=>update({...settings,custom:[...settings.custom,{id:crypto.randomUUID(),label:'',value:''}]})}><Plus size={15}/> Add custom field</button></section>}
+        </>:<section className="custom"><div className="section-heading"><h2>Your field rules</h2><span className="subtle">{settings.custom.length} rules</span></div><p className="helper">Match a label, name, or ID with a test value. Your value is inserted exactly as entered. Autocomplete takes priority for label rules. Rules saved in the side panel target one field on one website.</p>{settings.custom.length===0&&<div className="empty"><Plus size={24}/><strong>Make any field familiar</strong><p>Add labels such as “Project code” or “Matricule”<br/>and choose the value to fill.</p></div>}{settings.custom.map((field,index)=><div className="custom-row" key={field.id}><div><label htmlFor={`label-${field.id}`}>Field label</label><input id={`label-${field.id}`} placeholder="e.g. Project code" readOnly={!!field.selector} title={field.selector?`Field on ${field.site}`:undefined} value={field.label} onChange={e=>update({...settings,custom:settings.custom.map((c,i)=>i===index?{...c,label:e.target.value}:c)})}/>{field.site&&<small className="rule-site">{field.site}</small>}</div><div><label htmlFor={`value-${field.id}`}>Test value</label><input id={`value-${field.id}`} placeholder="e.g. PRJ-001" value={field.value} onChange={e=>update({...settings,custom:settings.custom.map((c,i)=>i===index?{...c,value:e.target.value}:c)})}/></div><button className="icon delete" aria-label={`Delete rule ${index+1}`} onClick={()=>update({...settings,custom:settings.custom.filter((_,i)=>i!==index)})}><Trash2 size={16}/></button></div>)}<button className="add" disabled={!ready} onClick={()=>update({...settings,custom:[...settings.custom,{id:crypto.randomUUID(),label:'',value:''}]})}><Plus size={15}/> Add custom field</button>
+          {settings.typeRules.length>0&&<><div className="section-heading type-rules-heading"><h2>Field types you set</h2><span className="subtle">{settings.typeRules.length} rules</span></div><p className="helper">Set from the side panel with “This field is”. Each one fixes the type of one field on one website.</p>{settings.typeRules.map((rule,index)=><div className="custom-row type-rule" key={rule.id}><div><strong>{fields.find(([key])=>key===rule.type)?.[1] ?? 'Unknown'}</strong><small className="rule-site">{rule.site} · <code>{rule.selector.slice(0,60)}</code></small></div><button className="icon delete" aria-label={`Delete field type rule ${index+1}`} onClick={()=>update({...settings,typeRules:settings.typeRules.filter(other=>other.id!==rule.id)})}><Trash2 size={16}/></button></div>)}</>}
+        </section>}
       </div>
       <div className="actionbar">
         {error&&<div className="notice error" role="alert"><span>{error}</span><button className="icon" aria-label="Dismiss error" onClick={()=>setError('')}><X size={15}/></button></div>}
         {result&&<div className="notice success" role="status"><Check size={17}/><div><strong>{result.filled} {result.filled===1?'field':'fields'} filled</strong><small>{result.preserved} kept · {result.unmatched} unrecognized · {result.invalid} incompatible</small>{result.filled===0&&<small>Try enabling “Fill unknown fields” in settings.</small>}</div></div>}
 {!isExtension()&&<button className="fill" onClick={fill} disabled={!ready||busy}><Sparkles size={18}/>{busy?'Filling your form…':'Generate & fill'}<ArrowUpRight size={18}/></button>}
         {isExtension()&&<p className="helper">To fill a website, switch to its tab and click the DevFiller toolbar icon. These settings apply automatically. For field details and undo, right-click the icon → Open DevFiller panel, or press Alt + Shift + F.</p>}
-        <p className="footnote">New data with every click. {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
+        <p className="footnote">{settings.seed.trim()?`Seed “${settings.seed.trim()}”: the same data on every click.`:'New data with every click.'} {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
       </div>
-      <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v0.11.2</span></footer>
+      <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v{VERSION}</span></footer>
     </main>
     {!isExtension()&&<section className="demo"><div className="demo-header"><FlaskConical size={20}/><div><h2>Try it on a real form</h2><p>This local demo uses the same filling engine as the extension.</p></div><a href="/demo.html" target="_blank" rel="noreferrer">Open form <ArrowUpRight size={14}/></a></div><iframe id="demo-form" title="Mixed-language test form" src="/demo.html"/><p className="demo-tip">Use the generator on the left, then watch the fields fill here.</p></section>}
   </div>;

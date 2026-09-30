@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, expect, it, vi } from 'vitest';
-import { fillPage, type FillRequest } from '../src/engine';
-import { panelPageAction } from '../src/panel-page';
+import { fillPage, type FillRequest } from '../src/fill';
+import { panelPageAction } from '../src/fill';
 import { generateValues } from '../src/data';
 const request:FillRequest={values:generateValues('en'),custom:[],overwrite:true,fillUnknown:true,passwords:false};
 const input=(id:string)=>document.getElementById(id) as HTMLInputElement;

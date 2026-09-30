@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Nouvelle commande — Charpente métallique</title></head>
+<body>
+<main>
+  <h1>Nouvelle commande</h1>
+  <!-- Rebuilt from a production-planning app: text inputs, generated ids, units in the labels. -->
+  <form action="/commandes" method="post" data-form-type="other">
+    <div class="field"><label for=":r1:">Site de production</label>
+      <select id=":r1:" name="site" disabled data-expect="unknown"><option>Charpente Métallique</option><option>Chaudronnerie</option></select>
+      <p class="hint">Non modifiable : la commande porte déjà des repères.</p></div>
+    <div class="field"><label for=":r2:">N° de commande*</label><input id=":r2:" name="numero" type="text" required data-expect="reference" data-value-pattern="^[A-Z]{2,4}-\d{4}-\d{3,5}$">
+      <p class="hint">Unicité contrôlée en direct sur toutes les commandes.</p></div>
+    <div class="field"><label for=":r3:">Client*</label><select id=":r3:" name="client" required data-expect="unknown"><option value="">Choisir un client</option><option value="1">test client</option><option value="2">Atelier Benali</option></select></div>
+    <div class="field"><label for=":r4:">Projet</label><select id=":r4:" name="projet" data-expect="unknown"><option value="">Aucun projet pour ce client</option></select></div>
+    <div class="field"><label for=":r5:">Plan de la commande</label><input id=":r5:" name="plan" type="file" accept="image/*,application/pdf"></div>
+    <div class="field"><label for=":r6:">Statut</label><select id=":r6:" name="statut" data-expect="unknown"><option>Brouillon</option><option>Lancée</option><option>Terminée</option></select></div>
+    <section class="repere">
+      <h2>Repères à produire</h2>
+      <div class="field"><label for=":r7:">Nom du repère*</label><input id=":r7:" name="reperes[0][nom]" type="text" required data-expect="unknown"></div>
+      <div class="field"><label for=":r8:">Référence*</label><input id=":r8:" name="reperes[0][reference]" type="text" maxlength="3" required data-expect="reference" data-value-pattern="^[A-Z0-9]{1,3}$"></div>
+      <div class="field"><label for=":r9:">Type</label><select id=":r9:" name="reperes[0][type]" data-expect="unknown"><option>Poutre</option><option>Poteau</option><option>Platine</option></select></div>
+      <div class="field"><label for=":ra:">Couleur</label><select id=":ra:" name="reperes[0][couleur]" data-expect="color"><option>ZAM</option><option>RAL 7016</option><option>RAL 9010</option><option>Galvanisé</option></select></div>
+      <div class="field"><label for=":rb:">Grade</label><select id=":rb:" name="reperes[0][grade]" data-expect="material"><option>S235</option><option>S355</option><option>Autre</option></select></div>
+      <div class="field"><label for=":rc:">Grade — précisez*</label><input id=":rc:" name="reperes[0][grade_autre]" type="text" data-expect="material"></div>
+      <div class="field"><label for=":rd:">Priorité</label><select id=":rd:" name="reperes[0][priorite]" data-expect="unknown"><option>Basse</option><option>Normale</option><option>Haute</option></select></div>
+      <div class="field"><label for=":re:">Longueur (mm)</label><input id=":re:" name="reperes[0][longueur]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d{2,5}(,\d+)?$"></div>
+      <div class="field"><label for=":rf:">Largeur (mm)</label><input id=":rf:" name="reperes[0][largeur]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d{2,5}(,\d+)?$"></div>
+      <div class="field"><label for=":rg:">Épaisseur (mm)</label><input id=":rg:" name="reperes[0][epaisseur]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^([1-9]|[1-4]\d)(,\d)?$"></div>
+      <div class="field"><label for=":rh:">Quantité planifiée (u)*</label><input id=":rh:" name="reperes[0][quantite]" type="text" inputmode="numeric" required data-expect="quantity" data-value-pattern="^\d+$"></div>
+      <div class="field"><label for=":ri:">Poids unitaire (kg)</label><input id=":ri:" name="reperes[0][poids]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d{1,4}(,\d{1,2})?$">
+        <p class="hint">Non utilisé pour le poids : calcul volumétrique.</p></div>
+      <div class="field"><label for=":rj:">Perçages par pièce (u)</label><input id=":rj:" name="reperes[0][percages]" type="text" inputmode="numeric" data-expect="quantity" data-value-pattern="^\d+$"></div>
+      <div class="field"><label for=":rk:">Machine affectée</label><select id=":rk:" name="reperes[0][machine]" data-expect="unknown"><option value="">—</option><option>PEB 300 (Profilage)</option><option>Découpe plasma</option></select></div>
+    </section>
+    <button type="submit">Enregistrer la commande</button>
+  </form>
+</main>
+</body>
+</html>

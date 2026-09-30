@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Collège Jean Moulin - Dossier d'inscription</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 760px; margin: 2rem auto; }
+  th { text-align: left; background: #eef; padding: .4rem; }
+  td { padding: .3rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Dossier d'inscription - rentrée 2026</h1>
+  <form action="/inscription" method="post" data-form-type="other">
+    <table border="1" cellspacing="0">
+      <tr><th colspan="2">L'élève</th></tr>
+      <tr>
+        <td>Nom de l'élève</td>
+        <td><input type="text" name="eleve_nom" data-expect="lastName"></td>
+      </tr>
+      <tr>
+        <td>Prénom</td>
+        <td><input type="text" name="eleve_prenom" data-expect="firstName"></td>
+      </tr>
+      <tr>
+        <td>Date de naissance</td>
+        <td><input type="date" name="eleve_dn" data-expect="birthDate"></td>
+      </tr>
+      <tr>
+        <td>Lieu de naissance</td>
+        <td><input type="text" name="eleve_lieu" data-expect="city"></td>
+      </tr>
+      <tr>
+        <td>Nationalité</td>
+        <td><input type="text" name="eleve_nat" data-expect="nationality"></td>
+      </tr>
+      <tr>
+        <td>Sexe</td>
+        <td>
+          <select name="eleve_sexe" data-expect="gender">
+            <option value="">-</option>
+            <option>Garçon</option>
+            <option>Fille</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Classe demandée</td>
+        <td>
+          <select name="classe" data-expect="unknown">
+            <option>6ème</option>
+            <option>5ème</option>
+            <option>4ème</option>
+            <option>3ème</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Établissement fréquenté l'an dernier</td>
+        <td><input type="text" name="ecole_prec" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Régime</td>
+        <td>
+          <select name="regime" data-expect="unknown">
+            <option>Externe</option>
+            <option>Demi-pensionnaire</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+    <table border="1" cellspacing="0">
+      <tr><th colspan="2">Responsable légal</th></tr>
+      <tr>
+        <td>Nom et prénom</td>
+        <td><input type="text" name="resp_1" data-expect="fullName"></td>
+      </tr>
+      <tr>
+        <td>Profession</td>
+        <td><input type="text" name="resp_prof" data-expect="jobTitle"></td>
+      </tr>
+      <tr>
+        <td>Adresse</td>
+        <td><input type="text" name="resp_adr" autocomplete="address-line1" data-expect="address"></td>
+      </tr>
+      <tr>
+        <td>Complément d'adresse</td>
+        <td><input type="text" name="resp_adr2" data-expect="address2"></td>
+      </tr>
+      <tr>
+        <td>Code postal</td>
+        <td><input type="text" name="resp_cp" data-expect="postalCode"></td>
+      </tr>
+      <tr>
+        <td>Commune</td>
+        <td><input type="text" name="resp_commune" data-expect="city"></td>
+      </tr>
+      <tr>
+        <td>Téléphone portable</td>
+        <td><input type="text" name="resp_gsm" data-expect="phone"></td>
+      </tr>
+      <tr>
+        <td>Courriel</td>
+        <td><input type="text" name="resp_mail" data-expect="email"></td>
+      </tr>
+    </table>
+
+    <p><label><input type="checkbox" name="reglement" data-expect="skip:consent"> J'ai pris connaissance du règlement intérieur et je l'accepte</label></p>
+    <p><label><input type="checkbox" name="photos" data-expect="skip:consent"> J'autorise l'établissement à publier des photos de mon enfant</label></p>
+
+    <button type="submit">Déposer le dossier</button>
+  </form>
+</main>
+</body>
+</html>

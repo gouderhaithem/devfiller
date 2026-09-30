@@ -23,7 +23,7 @@ Click the extension icon to fill the current website. Click again for fresh valu
 | Feature | What it does |
 | --- | --- |
 | One-click filling | Fills the active page directly from the toolbar, with a count on the icon. |
-| 42 field categories | Identities, contact details, work, addresses, dates, numbers, and short text. |
+| 46 field categories | Identities, contact details, work, addresses, dates, numbers, and short text. |
 | Three languages | Recognizes English, French, and Arabic labels; choose the generated data language. |
 | Readable unknown values | Uses simple words such as “Garden” and “River”, or short sentences for textareas. |
 | Optional Gemini | Prepares related suggestions on page load and keeps a batch ready for your next click. |

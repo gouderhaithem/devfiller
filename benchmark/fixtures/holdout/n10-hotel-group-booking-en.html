@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Group booking enquiry</title>
+<style>
+body{font:14px/1.5 "Helvetica Neue",Arial,sans-serif;max-width:700px;margin:2rem auto;padding:0 1rem}
+.r{display:flex;gap:1rem}
+.r>*{flex:1}
+label{display:block;margin-top:.7rem;font-size:13px;color:#333}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+</style>
+</head>
+<body>
+<header><h1>Grand Meridian Hotels</h1><p>Groups of 10 rooms or more</p></header>
+<main>
+<form data-form-type="booking" action="#" method="post">
+  <label for="g_org">Organisation / group name</label>
+  <input id="g_org" name="field_1" data-expect="company">
+  <label for="g_site">Organisation website</label>
+  <input id="g_site" name="field_2" placeholder="www.example.org" data-expect="website">
+
+  <div class="r">
+    <div><label for="g_name">Contact person</label><input id="g_name" name="field_3" autocomplete="name" data-expect="fullName"></div>
+    <div><label for="g_mail">Contact email</label><input id="g_mail" name="field_4" type="email" data-expect="email"></div>
+    <div><label for="g_tel">Phone</label><input id="g_tel" name="field_5" type="tel" data-expect="phone"></div>
+  </div>
+
+  <div class="r">
+    <div><label for="g_in">Arrival</label><input id="g_in" name="checkin" type="date" data-expect="startDate"></div>
+    <div><label for="g_out">Departure</label><input id="g_out" name="checkout" type="date" data-after="#g_in" data-expect="endDate"></div>
+    <div><label for="g_eta">Estimated arrival time</label><input id="g_eta" name="eta" type="time" data-expect="time"></div>
+  </div>
+
+  <label for="g_htl">Preferred hotel</label>
+  <select id="g_htl" name="field_9" data-expect="unknown">
+    <option value="">Any property</option><option>Meridian Lisbon</option><option>Meridian Marseille</option><option>Meridian Algiers</option>
+  </select>
+  <div class="r">
+    <div><label for="g_sgl">Single rooms (u)</label><input id="g_sgl" name="field_10" type="number" min="0" data-expect="quantity"></div>
+    <div><label for="g_dbl">Double rooms (u)</label><input id="g_dbl" name="field_11" type="number" min="0" data-expect="quantity"></div>
+    <div><label for="g_pax">Nuber of guests</label><input id="g_pax" name="field_12" type="number" min="1" data-expect="quantity"></div>
+  </div>
+  <label for="g_meal">Meal plan</label>
+  <select id="g_meal" name="field_13" data-expect="unknown">
+    <option>Room only</option><option>Breakfast</option><option>Half board</option><option>Full board</option>
+  </select>
+  <label for="g_bud">Target budget per room per night (€)</label>
+  <input id="g_bud" name="field_14" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="price">
+  <label for="g_quo">Previous quote reference (if any)</label>
+  <input id="g_quo" name="field_15" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference">
+
+  <label for="g_ad">Billing address</label>
+  <input id="g_ad" name="field_16" autocomplete="street-address" data-expect="address">
+  <div class="r">
+    <div><label for="g_ct">City</label><input id="g_ct" name="field_17" data-expect="city"></div>
+    <div><label for="g_co">Country</label>
+      <select id="g_co" name="field_18" autocomplete="country-name" data-expect="country"><option>Portugal</option><option>France</option><option>Algeria</option><option>United Kingdom</option></select></div>
+  </div>
+  <label for="g_req">Special requests (meeting rooms, accessibility, dietary needs…)</label>
+  <textarea id="g_req" name="field_19" rows="4" data-expect="notes"></textarea>
+  <label><input type="checkbox" name="canc" data-expect="skip:consent" style="width:auto"> I agree to the group cancellation policy</label>
+  <p><button type="submit">Send enquiry</button></p>
+</form>
+</main>
+</body>
+</html>

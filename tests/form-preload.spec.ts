@@ -1,4 +1,5 @@
-import {test,expect,chromium} from '@playwright/test';
+import {launchExtension} from './helpers/extension';
+import {test,expect} from '@playwright/test';
 import {mkdtemp,rm,cp,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
@@ -7,7 +8,7 @@ test('prepares late forms before clicks and waits for AI before filling',async()
   test.setTimeout(60000);
   const root=await mkdtemp(resolve(tmpdir(),'formly-preload-')),extension=resolve(root,'extension');await cp(resolve('dist'),extension,{recursive:true});
   const manifest=JSON.parse(await readFile(resolve(extension,'manifest.json'),'utf8'));manifest.host_permissions.push('http://*/*','https://*/*');await writeFile(resolve(extension,'manifest.json'),JSON.stringify(manifest));
-  const context=await chromium.launchPersistentContext(resolve(root,'profile'),{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});
+  const context=await launchExtension(resolve(root,'profile'),extension);
   try{
     const worker=context.serviceWorkers()[0] || await context.waitForEvent('serviceworker'),id=worker.url().split('/')[2];
     await worker.evaluate(()=>{

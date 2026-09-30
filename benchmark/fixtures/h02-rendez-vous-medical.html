@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cabinet Médical du Parc - Prise de rendez-vous</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 720px; margin: 2rem auto; }
+  td { padding: .3rem .6rem; vertical-align: top; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prendre rendez-vous</h1>
+  <p>Remplissez ce formulaire, le secrétariat vous rappellera pour confirmer le créneau.</p>
+  <form action="/rdv" method="post" data-form-type="booking">
+    <table>
+      <tr>
+        <td>Nom</td>
+        <td><input type="text" name="f_nom" autocomplete="family-name" data-expect="lastName"></td>
+      </tr>
+      <tr>
+        <td>Prénom</td>
+        <td><input type="text" name="f_prenom" autocomplete="given-name" data-expect="firstName"></td>
+      </tr>
+      <tr>
+        <td>Né(e) le</td>
+        <td><input type="text" name="f_dn" placeholder="jj/mm/aaaa" data-expect="birthDate"></td>
+      </tr>
+      <tr>
+        <td>Sexe</td>
+        <td>
+          <label><input type="radio" name="sexe" value="H" data-expect="gender"> Homme</label>
+          <label><input type="radio" name="sexe" value="F" data-expect="gender"> Femme</label>
+        </td>
+      </tr>
+      <tr>
+        <td>N° de sécurité sociale</td>
+        <td><input type="text" name="nir" maxlength="15" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Mutuelle / complémentaire</td>
+        <td><input type="text" name="mutuelle" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Téléphone</td>
+        <td><input type="tel" name="field_3" data-expect="phone"></td>
+      </tr>
+      <tr>
+        <td>Adresse e-mail</td>
+        <td><input type="text" name="field_4" data-expect="email"></td>
+      </tr>
+    </table>
+
+    <table>
+      <tr>
+        <td><label for="spec">Spécialité</label></td>
+        <td>
+          <select id="spec" name="spec" data-expect="unknown">
+            <option value="">--</option>
+            <option>Médecine générale</option>
+            <option>Cardiologie</option>
+            <option>Dermatologie</option>
+            <option>Pédiatrie</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="doc">Praticien</label></td>
+        <td>
+          <select id="doc" name="praticien" data-expect="unknown">
+            <option value="">Peu importe</option>
+            <option>Dr Lemaire</option>
+            <option>Dr Benali</option>
+            <option>Dr Fontaine</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="rdvdate">Date souhaitée</label></td>
+        <td><input type="date" id="rdvdate" name="rdv_date" data-expect="date"></td>
+      </tr>
+      <tr>
+        <td><label for="rdvheure">Heure souhaitée</label></td>
+        <td><input type="time" id="rdvheure" name="rdv_heure" data-expect="time"></td>
+      </tr>
+      <tr>
+        <td><label for="motif">Motif de la consultation</label></td>
+        <td>
+          <select id="motif" name="motif" data-expect="unknown">
+            <option>Consultation</option>
+            <option>Renouvellement d'ordonnance</option>
+            <option>Certificat médical</option>
+            <option>Suivi</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Première consultation au cabinet ?</td>
+        <td>
+          <label><input type="radio" name="premiere" value="oui" data-expect="unknown"> Oui</label>
+          <label><input type="radio" name="premiere" value="non" data-expect="unknown"> Non</label>
+        </td>
+      </tr>
+    </table>
+
+    <p>
+      <label for="msg">Un mot pour le secrétariat</label><br>
+      <textarea id="msg" name="commentaire" rows="4" cols="50" data-expect="message"></textarea>
+    </p>
+
+    <p>
+      <label><input type="checkbox" name="rappel" data-expect="unknown"> Je souhaite un rappel la veille du rendez-vous</label><br>
+      <label><input type="checkbox" name="rgpd" data-expect="skip:consent"> J'accepte que mes données de santé soient traitées pour la gestion de mon rendez-vous</label>
+    </p>
+
+    <p>
+      Code reçu par SMS pour valider votre numéro
+      <input type="text" name="sms_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" data-expect="skip:otp">
+    </p>
+
+    <button type="submit">Envoyer la demande</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Request</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #fff; margin: 0; }
+  main { max-width: 560px; margin: 2rem auto; padding: 0 1rem; }
+  .row { display: flex; align-items: center; margin-bottom: .7rem; }
+  .row span, .row div.cap { width: 150px; color: #444; }
+  input, select, textarea { padding: .45rem; flex: 1; }
+  table td { padding: .3rem .5rem; }
+  button { padding: .6rem 1.4rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Quick request</h1>
+  <form action="/quick" method="post" data-form-type="other">
+    <div class="row"><span>Your name</span><input type="text" name="a1" data-expect="fullName"></div>
+    <div class="row"><input type="text" name="a2" placeholder="Email address" data-expect="email"></div>
+    <div class="row"><input type="text" name="a3" placeholder="Mobile number" data-expect="phone"></div>
+    <div class="row"><div class="cap">Company</div><input type="text" name="a4" data-expect="company"></div>
+    <div class="row"><input type="text" name="a5" placeholder="Street and number" data-expect="address"></div>
+    <div class="row"><input type="text" name="a6" placeholder="City" data-expect="city"></div>
+    <div class="row"><input type="text" name="a7" placeholder="ZIP" maxlength="10" data-expect="postalCode"></div>
+    <div class="row">
+      <select name="a8" data-expect="country">
+        <option value="">Select country</option>
+        <option>United States</option>
+        <option>Canada</option>
+        <option>France</option>
+        <option>Spain</option>
+      </select>
+    </div>
+    <div class="row"><p style="margin:0;width:150px">Date of birth</p><input type="date" name="a9" data-expect="birthDate"></div>
+    <div class="row"><input type="password" name="a10" placeholder="Password" data-expect="password"></div>
+    <div class="row"><textarea name="a11" rows="4" placeholder="Write your message here..." data-expect="message"></textarea></div>
+    <table>
+      <tr>
+        <td>Job title</td>
+        <td><input type="text" name="t1" data-expect="jobTitle"></td>
+      </tr>
+      <tr>
+        <td>Website</td>
+        <td><input type="text" name="t2" data-expect="website"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="text" name="t3" data-expect="unknown"></td>
+      </tr>
+    </table>
+    <div class="row"><input type="text" name="x" data-expect="unknown"></div>
+    <div class="row"><input type="text" name="q9" maxlength="6" data-expect="unknown"></div>
+    <div class="row"><input type="checkbox" name="c1" value="1" data-expect="unknown"></div>
+    <div class="row"><input type="checkbox" name="c2" value="1" data-expect="skip:consent"><span style="width:auto;margin-left:.4rem">I agree to the terms and conditions</span></div>
+    <button type="submit">Send</button>
+  </form>
+</main>
+</body>
+</html>

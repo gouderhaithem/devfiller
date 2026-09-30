@@ -1,6 +1,6 @@
 # DevFiller Privacy Policy
 
-_Last updated: 29 September 2026_
+_Last updated: 30 September 2026_
 
 DevFiller is a Chrome extension that fills website forms with generated, fictional test data. This policy explains what data DevFiller handles, where it goes, and what it never does.
 
@@ -15,12 +15,14 @@ DevFiller is a Chrome extension that fills website forms with generated, fiction
 
 | Data | Where | How long |
 | --- | --- | --- |
-| Generator settings, custom field values, field exclusions | `chrome.storage.local` (this browser only) | Until you change them or uninstall DevFiller |
+| Generator settings (including your region and seed), custom field values, field types you set, field exclusions | `chrome.storage.local` (this browser only) | Until you change them or uninstall DevFiller |
 | AI provider, model, and API key (if you add one) | `chrome.storage.local`, only readable by the extension's own pages. It is **not encrypted**. | Until you choose **Remove saved key** or uninstall DevFiller |
 | AI suggestions | `chrome.storage.session` (memory, cleared when the browser closes) | Your chosen cache time (1–60 minutes), or until you clear them |
 | Undo history for the last fill | The page's memory | Until the page is closed or reloaded |
 
 None of this data is sent to the developer.
+
+Working out what each field is happens entirely on your device; no page content is sent anywhere for it. If you click **Export as test fixture** in the side panel, DevFiller saves an HTML file to your computer with the form's structure and labels. It removes the values in the form, hidden fields, scripts, images and the site's address, and it is not sent anywhere unless you share it yourself.
 
 ## Data sent to third parties (optional AI only)
 

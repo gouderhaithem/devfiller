@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>استمارة استقبال مريض</title>
+<style>
+body{font:15px/1.6 Tahoma,Arial,sans-serif;max-width:700px;margin:2rem auto;padding:0 1rem}
+label{display:block;margin-top:.7rem;font-weight:bold}
+input:not([type=radio]):not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+.inline label{display:inline-block;font-weight:normal;margin-inline-end:1rem}
+</style>
+</head>
+<body>
+<header><h1>عيادة الشفاء - ملف المريض الجديد</h1></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <fieldset>
+    <legend>المعلومات الشخصية</legend>
+    <label for="p1">الاسم</label>
+    <input id="p1" name="field_1" autocomplete="given-name" data-expect="firstName">
+    <label for="p2">اللقب</label>
+    <input id="p2" name="field_2" autocomplete="family-name" data-expect="lastName">
+    <label for="p3">تاريخ الميلاد</label>
+    <input id="p3" name="field_3" type="date" data-expect="birthDate">
+    <div class="inline"><label>الجنس:</label>
+      <label><input type="radio" name="sx" value="m" data-expect="gender"> ذكر</label>
+      <label><input type="radio" name="sx" value="f" data-expect="gender"> أنثى</label>
+    </div>
+    <label for="p5">رقم الهاتف</label>
+    <input id="p5" name="field_5" type="tel" dir="ltr" data-phone-region="dz" data-expect="phone">
+    <label for="p6">البريد الإلكتروني</label>
+    <input id="p6" name="field_6" type="email" dir="ltr" data-expect="email">
+    <label for="p7">العنوان</label>
+    <input id="p7" name="field_7" data-expect="address">
+    <label for="p8">البلدية</label>
+    <input id="p8" name="field_8" data-expect="city">
+    <label for="p9">الولاية</label>
+    <select id="p9" name="field_9" data-expect="state">
+      <option value="">اختر الولاية</option><option>الجزائر</option><option>وهران</option><option>قسنطينة</option><option>عنابة</option><option>سطيف</option>
+    </select>
+    <label for="p10">رقم بطاقة الشفاء</label>
+    <input id="p10" name="field_10" inputmode="numeric" data-expect="unknown">
+  </fieldset>
+
+  <fieldset>
+    <legend>المعلومات الطبية</legend>
+    <label for="m1">فصيلة الدم</label>
+    <select id="m1" name="field_11" data-expect="unknown">
+      <option value="">--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+    </select>
+    <label for="m2">الوزن (كغ)</label>
+    <input id="m2" name="field_12" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement">
+    <label for="m3">الطول (سم)</label>
+    <input id="m3" name="field_13" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement">
+    <label for="m4">الأدوية التي تتناولها حاليا</label>
+    <textarea id="m4" name="field_14" rows="2" data-expect="unknown"></textarea>
+    <label for="m5">ملاحظات إضافية</label>
+    <textarea id="m5" name="field_15" rows="3" data-expect="notes"></textarea>
+    <label for="m6">تاريخ الموعد المفضل</label>
+    <input id="m6" name="field_16" type="date" data-expect="date">
+  </fieldset>
+
+  <fieldset>
+    <legend>الاتصال في حالات الطوارئ</legend>
+    <label for="e1">الاسم الكامل للشخص المرافق</label>
+    <input id="e1" name="field_17" data-expect="fullName">
+    <label for="e2">هاتف الطوارئ</label>
+    <input id="e2" name="field_18" type="tel" dir="ltr" data-phone-region="dz" data-expect="phone">
+  </fieldset>
+
+  <label style="font-weight:normal"><input type="checkbox" name="c1" data-expect="skip:consent"> أصرّح بأن المعلومات المقدمة صحيحة.</label>
+  <label style="font-weight:normal"><input type="checkbox" name="c2" data-expect="skip:consent"> أوافق على معالجة بياناتي الصحية من طرف العيادة.</label>
+  <p><button type="submit">إرسال الاستمارة</button></p>
+</form>
+</main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Travel and stays</title></head>
+<body>
+<main>
+  <h1>Plan a trip</h1>
+  <form action="/hotel" method="post" data-form-type="booking">
+    <h2>Hotel</h2>
+    <p><label for="h-in">Arrival</label><input type="date" id="h-in" name="arrive" data-expect="startDate"></p>
+    <!-- On a stay, departure is the day you leave: the end date. -->
+    <p><label for="h-out">Departure</label><input type="date" id="h-out" name="depart" data-expect="endDate" data-after="#h-in"></p>
+    <p><label for="h-guests">Guests</label><input type="number" id="h-guests" name="guests" min="1" max="6" data-expect="quantity"></p>
+  </form>
+  <form action="/cars" method="post" data-form-type="booking">
+    <h2>Car hire</h2>
+    <p><label for="c-from">From</label><input type="date" id="c-from" name="c1" min="2027-03-01" data-expect="startDate"></p>
+    <p><label for="c-to">To</label><input type="date" id="c-to" name="c2" data-expect="endDate" data-after="#c-from"></p>
+  </form>
+  <form action="/flights" method="post" data-form-type="booking">
+    <h2>Flight</h2>
+    <p><label for="f-dep">Departure date</label><input type="date" id="f-dep" name="f1" data-expect="startDate"></p>
+    <!-- No label: it follows the departure date. -->
+    <p><input type="date" id="f-ret" name="f2" data-expect="endDate" data-after="#f-dep"></p>
+  </form>
+  <form action="/sejour" method="post" data-form-type="booking" lang="fr">
+    <h2>Séjour</h2>
+    <p><label for="s-du">Du</label><input type="date" id="s-du" name="du" data-expect="startDate"></p>
+    <p><label for="s-au">Au</label><input type="date" id="s-au" name="au" data-expect="endDate" data-after="#s-du"></p>
+  </form>
+  <form action="/rihla" method="post" data-form-type="booking" dir="rtl" lang="ar">
+    <p><label for="a-from">من</label><input type="date" id="a-from" name="t1" data-expect="startDate"></p>
+    <p><label for="a-to">إلى</label><input type="date" id="a-to" name="t2" data-expect="endDate" data-after="#a-from"></p>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>المكتبة الوطنية - طلب بطاقة الانخراط</title>
+<style>
+  body { font-family: "Amiri", "Noto Naskh Arabic", serif; max-width: 640px; margin: 2rem auto; }
+  .w { margin: .6rem 0; }
+  .w small { display: block; color: #666; }
+  input[type=text], input[type=password], input[type=email], input[type=tel], select { width: 100%; padding: .35rem; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>طلب بطاقة الانخراط في المكتبة</h1>
+  <form action="/carte" method="post" data-form-type="signup">
+    <div class="w">
+      <label for="mat-input-0">الاسم</label>
+      <input id="mat-input-0" name="mat_input_0" type="text" autocomplete="given-name" data-expect="firstName">
+    </div>
+    <div class="w">
+      <label for="mat-input-1">اللقب</label>
+      <input id="mat-input-1" name="mat_input_1" type="text" autocomplete="family-name" data-expect="lastName">
+    </div>
+    <div class="w">
+      <label for="mat-input-2">تاريخ الميلاد</label>
+      <input id="mat-input-2" name="mat_input_2" type="text" placeholder="يوم/شهر/سنة" data-expect="birthDate">
+    </div>
+    <div class="w">
+      <label for="mat-input-3">الجنسية</label>
+      <input id="mat-input-3" name="mat_input_3" type="text" data-expect="nationality">
+    </div>
+    <div class="w">
+      الجنس
+      <label><input type="radio" name="sexe" value="m" data-expect="gender"> ذكر</label>
+      <label><input type="radio" name="sexe" value="f" data-expect="gender"> أنثى</label>
+    </div>
+    <div class="w">
+      <label for="mat-input-4">العنوان</label>
+      <input id="mat-input-4" name="mat_input_4" type="text" autocomplete="street-address" data-expect="address">
+    </div>
+    <div class="w">
+      <label for="mat-input-5">الولاية</label>
+      <select id="mat-input-5" name="mat_input_5" data-expect="state">
+        <option value="">اختر الولاية</option>
+        <option>الجزائر</option>
+        <option>وهران</option>
+        <option>سطيف</option>
+        <option>عنابة</option>
+        <option>ورقلة</option>
+      </select>
+    </div>
+    <div class="w">
+      <label for="mat-input-6">الرمز البريدي</label>
+      <input id="mat-input-6" name="mat_input_6" type="text" dir="ltr" data-expect="postalCode">
+    </div>
+    <div class="w">
+      <label for="mat-input-7">رقم الهاتف</label>
+      <input id="mat-input-7" name="mat_input_7" type="tel" dir="ltr" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="w">
+      <input name="mail" type="email" dir="ltr" placeholder="البريد الإلكتروني" data-expect="email">
+    </div>
+    <div class="w">
+      <input name="work" type="text" placeholder="المهنة" data-expect="jobTitle">
+    </div>
+    <div class="w">
+      <label for="lvl">المستوى الدراسي</label>
+      <select id="lvl" name="niveau" data-expect="unknown">
+        <option>متوسط</option>
+        <option>ثانوي</option>
+        <option>جامعي</option>
+      </select>
+    </div>
+    <div class="w">
+      <label for="cin">رقم بطاقة التعريف الوطنية</label>
+      <input id="cin" name="cin" type="text" dir="ltr" data-expect="unknown">
+    </div>
+    <div class="w">
+      <label for="abn">نوع الانخراط</label>
+      <select id="abn" name="abonnement" data-expect="unknown">
+        <option>طالب</option>
+        <option>بالغ</option>
+        <option>عائلي</option>
+      </select>
+    </div>
+
+    <div class="w">
+      <label for="u">اسم المستخدم للحساب الإلكتروني</label>
+      <input id="u" name="login" type="text" autocomplete="username" dir="ltr" data-expect="username">
+    </div>
+    <div class="w">
+      <label for="p1">كلمة المرور</label>
+      <input id="p1" name="pass1" type="password" autocomplete="new-password" data-expect="password">
+    </div>
+    <div class="w">
+      <label for="p2">تأكيد كلمة المرور</label>
+      <input id="p2" name="pass2" type="password" autocomplete="new-password" data-expect="password" data-same-as="#p1">
+    </div>
+    <div class="w">
+      <label for="sms">رمز التحقق المرسل إلى هاتفك</label>
+      <input id="sms" name="otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" dir="ltr" data-expect="skip:otp">
+    </div>
+
+    <div class="w">
+      <label><input type="checkbox" name="reglement" data-expect="skip:consent"> أقرّ بأنني اطلعت على النظام الداخلي للمكتبة وأوافق عليه</label>
+    </div>
+    <div class="w">
+      <label><input type="checkbox" name="newsletter" data-expect="skip:consent"> أرغب في الاشتراك في النشرة البريدية للمكتبة</label>
+    </div>
+
+    <button type="submit">إرسال الطلب</button>
+  </form>
+</main>
+</body>
+</html>

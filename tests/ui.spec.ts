@@ -1,4 +1,5 @@
-import { test, expect, chromium } from '@playwright/test';
+import {launchExtension} from './helpers/extension';
+import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -59,7 +60,7 @@ test('desktop and mobile layouts fit and generated language changes',async({page
 test('toolbar action fills the target website directly and options persist',async()=>{
   const extensionPath=resolve('dist');
   const profile=await mkdtemp(resolve(tmpdir(),'formly-test-'));
-  const context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${extensionPath}`,`--load-extension=${extensionPath}`]});
+  const context=await launchExtension(profile,extensionPath);
   try {
     const id=createHash('sha256').update(extensionPath).digest('hex').slice(0,32).replace(/[0-9a-f]/g,c=>String.fromCharCode(97+parseInt(c,16)));
     const worker=context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');

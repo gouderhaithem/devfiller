@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register - DevSummit 2026</title>
+<style>
+  body { font-family: Verdana, sans-serif; background: #101820; color: #eee; margin: 0; }
+  main { max-width: 540px; margin: 24px auto; background: #1b2733; padding: 24px; border-radius: 8px; }
+  .f { margin-bottom: 14px; }
+  .f label { display: block; margin-bottom: 4px; }
+  .f input:not([type=checkbox]), .f select, .f textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DevSummit 2026</h1>
+  <form action="/events/devsummit/register" method="post" data-form-type="other">
+    <div class="f">
+      <label for="reg_name">Full name</label>
+      <input type="text" id="reg_name" name="attendee_name" required data-expect="fullName">
+    </div>
+    <div class="f">
+      <label for="reg_mail">Work email</label>
+      <input type="email" id="reg_mail" name="attendee_email" required data-expect="email">
+    </div>
+    <div class="f">
+      <label for="reg_org">Company / organization</label>
+      <input type="text" id="reg_org" name="organisation" data-expect="company">
+    </div>
+    <div class="f">
+      <label for="reg_role">Job title</label>
+      <input type="text" id="reg_role" name="role" data-expect="jobTitle">
+    </div>
+    <div class="f">
+      <label for="reg_dept">Department</label>
+      <input type="text" id="reg_dept" name="dept" data-expect="department">
+    </div>
+    <div class="f">
+      <label for="reg_count">Number of attendees</label>
+      <input type="number" id="reg_count" name="attendees" min="1" max="20" value="1" data-expect="quantity">
+    </div>
+    <div class="f">
+      <label for="reg_diet">Dietary requirements or allergies</label>
+      <textarea id="reg_diet" name="dietary_notes" rows="3" data-expect="notes"></textarea>
+    </div>
+    <div class="f">
+      <label for="reg_day">Event date</label>
+      <select id="reg_day" name="event_day" data-expect="date">
+        <option value="2026-11-12">Thursday, November 12, 2026</option>
+        <option value="2026-11-13">Friday, November 13, 2026</option>
+        <option value="both">Both days</option>
+      </select>
+    </div>
+    <div class="f">
+      <label for="reg_slot">Preferred session time</label>
+      <input type="time" id="reg_slot" name="session_time" min="09:00" max="17:00" step="1800" data-expect="time">
+    </div>
+    <div class="f">
+      <label><input type="checkbox" name="coc" required data-expect="skip:consent"> I agree to the Code of Conduct and the event terms</label>
+    </div>
+    <div class="f">
+      <label><input type="checkbox" name="sponsor_share" data-expect="skip:consent"> Share my details with event sponsors</label>
+    </div>
+    <button type="submit">Complete registration</button>
+  </form>
+</main>
+</body>
+</html>

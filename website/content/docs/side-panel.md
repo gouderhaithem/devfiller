@@ -4,6 +4,12 @@ The side panel sits beside the website and follows the tab you're on. Open it wi
 
 The panel lists every form field on the page as **filled**, **skipped** or **incompatible**, with the reason. Filter the list by **Filled** or **Skipped**. Select a field to highlight it on the page with **Show on page**.
 
+Under each field's name, the panel shows what DevFiller recognized it as and how sure it is, for example **Phone · 96%**. Protected fields (card, bank, one-time code and consent) say so, and fields it couldn't recognize say **Type not recognized**. Select a field to see the evidence behind it, such as `autocomplete=tel` or `label “Téléphone”`, and any close alternatives. Fields under 70% are only filled when **Fill unknown fields** is on.
+
+Above the list, the panel names the kind of form it found, such as **Checkout form** or **Sign-up form**.
+
+**Show field types on the page** labels every field on the website itself with its type and confidence. It never changes a field. Click **Hide field types on the page** to remove the labels.
+
 Click **Fill this page** in the panel to fill, or **Fill again** for new values. The list refreshes when you switch tabs or the page changes, and every few seconds while the panel is open. Click the refresh button to update it now.
 
 ## Fix one field
@@ -12,6 +18,11 @@ Select a field to:
 
 - **Save field rule**: give this field a fixed test value on this website. The rule targets that exact field and takes priority over everything else. Use **Fill again** to apply it.
 - **Exclude this field**: skip it on this website from now on.
+- **This field is**: tell DevFiller what the field holds when it guessed wrong, for example that "Nom du repère" is a title. The type is saved for this field on this website and wins over recognition, but it never unlocks a card, bank, code or consent field.
+
+## Export a form as a test fixture
+
+**Export as test fixture**, below the field list, downloads the page's forms as an HTML file: their structure and labels, each field marked with the type DevFiller gives it (or the one you set). Values people typed, hidden fields, scripts, images and the site's address are removed. Use it to report a form DevFiller gets wrong, or to add it to your own tests.
 
 Both appear in the options afterwards, under [Custom fields](/docs/custom-fields/) and [Excluded fields](/docs/excluded-fields/), where you can edit or delete them. If the website changes its markup, create the rule again.
 

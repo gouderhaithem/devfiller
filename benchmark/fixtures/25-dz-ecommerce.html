@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commander - Boutique Dzair Shop</title>
+<style>
+  body { font-family: Verdana, sans-serif; background: #fafafa; margin: 0; }
+  main { max-width: 560px; margin: 1.5rem auto; background: #fff; padding: 1.5rem; border: 1px solid #e0e0e0; }
+  .woocommerce-input-wrapper { display: block; margin-bottom: 1rem; }
+  .woocommerce-input-wrapper label { display: block; margin-bottom: .2rem; }
+  .input-text, select, textarea { width: 100%; padding: .5rem; box-sizing: border-box; }
+  .pay { margin: 1rem 0; }
+  #place_order { background: #d32f2f; color: #fff; width: 100%; padding: .9rem; border: 0; font-size: 1.05rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Passer la commande</h1>
+  <p>Livraison dans les 58 wilayas. Paiement à la réception disponible.</p>
+  <form action="/checkout" method="post" name="checkout" class="checkout woocommerce-checkout" data-form-type="checkout">
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_full_name">الاسم الكامل / Nom complet</label>
+      <input type="text" class="input-text" id="billing_full_name" name="billing_full_name" required data-expect="fullName">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_phone">Téléphone</label>
+      <input type="tel" class="input-text" id="billing_phone" name="billing_phone" placeholder="05 / 06 / 07 XX XX XX XX" maxlength="10" required data-expect="phone">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_email">Email (facultatif)</label>
+      <input type="email" class="input-text" id="billing_email" name="billing_email" data-expect="email">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_state">Wilaya</label>
+      <select id="billing_state" name="billing_state" class="state_select" required data-expect="state">
+        <option value="">Choisir une wilaya…</option>
+        <option value="DZ-01">01 - Adrar</option>
+        <option value="DZ-02">02 - Chlef</option>
+        <option value="DZ-05">05 - Batna</option>
+        <option value="DZ-09">09 - Blida</option>
+        <option value="DZ-16">16 - Alger</option>
+        <option value="DZ-19">19 - Sétif</option>
+        <option value="DZ-25">25 - Constantine</option>
+        <option value="DZ-31">31 - Oran</option>
+        <option value="DZ-39">39 - El Oued</option>
+        <option value="DZ-47">47 - Ghardaïa</option>
+      </select>
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_commune">Commune</label>
+      <input type="text" class="input-text" id="billing_commune" name="billing_commune" required data-expect="city">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="billing_address_1">Adresse de livraison</label>
+      <input type="text" class="input-text" id="billing_address_1" name="billing_address_1" placeholder="N° de rue, cité, quartier" required data-expect="address">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="qty">Quantité</label>
+      <input type="number" class="input-text" id="qty" name="quantity" min="1" max="20" value="1" data-expect="quantity">
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="order_comments">Remarques sur la commande</label>
+      <textarea id="order_comments" name="order_comments" rows="3" placeholder="Horaires de livraison, précisions…" data-expect="notes"></textarea>
+    </p>
+    <p class="woocommerce-input-wrapper">
+      <label for="coupon_code">Code promo</label>
+      <input type="text" class="input-text" id="coupon_code" name="coupon_code" data-expect="unknown">
+    </p>
+    <fieldset class="pay">
+      <legend>Mode de paiement</legend>
+      <label><input type="radio" name="payment_method" value="cod" checked data-expect="unknown"> Paiement à la livraison</label><br>
+      <label><input type="radio" name="payment_method" value="edahabia" data-expect="unknown"> Carte CIB / Edahabia</label><br>
+      <label><input type="radio" name="payment_method" value="ccp" data-expect="unknown"> Virement CCP</label>
+    </fieldset>
+    <button type="submit" id="place_order">Confirmer la commande</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dépôt de thèse</title>
+<style>
+body{font:15px/1.5 Georgia,serif;max-width:700px;margin:2rem auto;padding:0 1rem}
+label{display:block;margin-top:.8rem}
+input:not([type=checkbox]):not([type=file]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+small{color:#555}
+</style>
+</head>
+<body>
+<header><h1>École doctorale - Dépôt du manuscrit</h1></header>
+<main>
+<form data-form-type="other" action="#" method="post" enctype="multipart/form-data">
+  <label for="t1">Titre de la thèse</label>
+  <input id="t1" name="field_1" data-expect="title">
+
+  <label for="a1">Nom de l'auteur</label>
+  <input id="a1" name="field_2" autocomplete="family-name" data-expect="lastName">
+  <label for="a2">Prénom</label>
+  <input id="a2" name="field_3" autocomplete="given-name" data-expect="firstName">
+  <label for="a3">N° d'étudiant</label>
+  <input id="a3" name="field_4" data-expect="unknown">
+  <label for="a4">Email universitaire</label>
+  <input id="a4" name="field_5" type="email" placeholder="prenom.nom@univ.fr" data-expect="email">
+
+  <label for="u1">Établissement de soutenance</label>
+  <input id="u1" name="field_6" data-expect="unknown">
+  <label for="u2">Département de rattachement</label>
+  <input id="u2" name="field_7" data-expect="department">
+  <label for="u3">Diplôme préparé</label>
+  <select id="u3" name="field_8" data-expect="unknown">
+    <option value="">Sélectionner…</option><option>Doctorat</option><option>Habilitation à diriger des recherches</option><option>Master recherche</option>
+  </select>
+
+  <label for="d1">Directeur de thèse</label>
+  <input id="d1" name="field_9" data-expect="fullName">
+  <label for="d2">Co-directrice ou co-directeur</label>
+  <input id="d2" name="field_10" data-expect="fullName">
+
+  <label for="dt1">Date de dépôt</label>
+  <input id="dt1" name="field_11" type="date" data-expect="date">
+  <label for="dt2">Date de soutenance prévue</label>
+  <input id="dt2" name="field_12" type="date" data-expect="date">
+
+  <label for="r1">Résumé (300 mots maximum)</label>
+  <textarea id="r1" name="field_13" rows="6" data-expect="description"></textarea>
+  <label for="k1">Mots-clés <small>séparés par des virgules</small></label>
+  <input id="k1" name="field_14" data-expect="unknown">
+  <label for="p1">Nombre de pages</label>
+  <input id="p1" name="field_15" type="number" min="1" data-expect="quantity">
+  <label for="l1">Langue de rédaction</label>
+  <select id="l1" name="field_16" data-expect="unknown">
+    <option>Français</option><option>Anglais</option><option>Arabe</option>
+  </select>
+  <label for="f1">Manuscrit (PDF)</label>
+  <input id="f1" name="manuscript" type="file" accept="application/pdf">
+
+  <label><input type="checkbox" name="plag" data-expect="skip:consent"> Je certifie que ce travail est original et que je n'ai pas commis de plagiat.</label>
+  <label><input type="checkbox" name="diff" data-expect="skip:consent"> J'autorise la diffusion en ligne de ma thèse sur le portail de l'établissement.</label>
+  <p><button type="submit">Déposer la thèse</button></p>
+</form>
+</main>
+</body>
+</html>

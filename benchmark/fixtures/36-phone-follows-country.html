@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Livraison — le téléphone suit le pays</title></head>
+<body>
+<main>
+  <h1>Adresse de livraison</h1>
+  <form action="/livraison" method="post" data-form-type="checkout">
+    <p><label for="nom">Nom complet</label><input id="nom" name="nom" data-expect="fullName"></p>
+    <p><label for="adr">Adresse</label><input id="adr" name="adresse" data-expect="address"></p>
+    <p><label for="com">Commune</label><input id="com" name="commune" data-expect="city"></p>
+    <p><label for="dai">Daïra</label><input id="dai" name="daira" data-expect="district"></p>
+    <p><label for="wil">Wilaya</label><select id="wil" name="wilaya" data-expect="state"><option value="">Choisir</option><option value="16">16 - Alger</option><option value="31">31 - Oran</option><option value="25">25 - Constantine</option></select></p>
+    <p><label for="pays">Pays</label><select id="pays" name="pays" data-expect="country"><option>Algérie</option></select></p>
+    <!-- Only Algeria is offered, so the phone number must be Algerian. -->
+    <p><label for="tel">Téléphone</label><input id="tel" name="telephone" type="tel" data-expect="phone" data-phone-follows="#pays"></p>
+    <button type="submit">Commander</button>
+  </form>
+  <form action="/contact-fr" method="post" data-form-type="contact">
+    <p><label for="m">Portable</label><input id="m" name="portable" type="tel" placeholder="+33 6 00 00 00 00" data-expect="phone" data-phone-region="fr"></p>
+    <p><label for="e">E-mail</label><input id="e" name="email" type="email" data-expect="email"></p>
+    <p><label for="msg">Message</label><textarea id="msg" name="message" data-expect="message"></textarea></p>
+    <button type="submit">Envoyer</button>
+  </form>
+  <form action="/rappel" method="post" data-form-type="other" dir="rtl" lang="ar">
+    <p><label for="h">رقم الهاتف</label><input id="h" name="hatif" type="tel" placeholder="+213 5XX XX XX XX" data-expect="phone" data-phone-region="dz"></p>
+    <button type="submit">اتصلوا بي</button>
+  </form>
+</main>
+</body>
+</html>

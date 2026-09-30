@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create shipment waybill</title>
+<style>
+body{font:14px/1.4 system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem}
+.row{display:flex;gap:1rem;flex-wrap:wrap}
+.row>div{flex:1 1 200px}
+label{display:block;margin-top:.6rem;font-size:13px}
+input,select,textarea{box-sizing:border-box;width:100%;padding:.35rem}
+</style>
+</head>
+<body>
+<header><h1>Freight desk</h1><p>New waybill</p></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <h2>References</h2>
+  <div class="row">
+    <div><label for="wb">Waybill no.</label>
+    <input id="wb" name="field_3" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference"></div>
+    <div><label for="trk">Tracking number</label>
+    <input id="trk" name="field_4" autocomplete="off" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{5,}$" data-expect="reference"></div>
+    <div><label for="po">Customer PO</label>
+    <input id="po" name="field_5" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{2,}$" data-expect="reference"></div>
+  </div>
+
+  <h2>Shipper</h2>
+  <label for="s_co">Shipper company</label>
+  <input id="s_co" name="shipper_company" autocomplete="organization" data-expect="company">
+  <label for="s_addr">Pickup address</label>
+  <input id="s_addr" name="shipper_street" autocomplete="street-address" data-expect="address">
+  <div class="row">
+    <div><label for="s_city">City</label><input id="s_city" name="shipper_city" data-expect="city"></div>
+    <div><label for="s_zip">ZIP / postcode</label><input id="s_zip" name="shipper_zip" data-expect="postalCode"></div>
+    <div><label for="s_ctry">Country</label>
+      <select id="s_ctry" name="shipper_country" data-expect="country"><option>France</option><option>Germany</option><option>Netherlands</option><option>Poland</option><option>Spain</option></select></div>
+  </div>
+
+  <h2>Consignee contact</h2>
+  <div class="row">
+    <div><label for="c_name">Contact name</label><input id="c_name" name="field_14" data-expect="fullName"></div>
+    <div><label for="c_tel">Phone on delivery</label><input id="c_tel" name="field_15" type="tel" data-expect="phone"></div>
+  </div>
+
+  <h2>Schedule</h2>
+  <div class="row">
+    <div><label for="d_pick">Pickup date</label><input id="d_pick" name="field_16" type="date" data-expect="startDate"></div>
+    <div><label for="d_del">Requested delivery date</label><input id="d_del" name="field_17" type="date" data-after="#d_pick" data-expect="endDate"></div>
+  </div>
+
+  <h2>Cargo</h2>
+  <div class="row">
+    <div><label for="pk">Number of packages (u)</label><input id="pk" name="pkgs" type="number" min="1" data-expect="quantity"></div>
+    <div><label for="gw">Gross weight (kg)</label><input id="gw" name="gw" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></div>
+  </div>
+  <div class="row">
+    <div><label for="dl">Length (cm)</label><input id="dl" name="dim_l" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></div>
+    <div><label for="dw">Width (cm)</label><input id="dw" name="dim_w" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></div>
+    <div><label for="dh">Heigth (cm)</label><input id="dh" name="dim_h" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></div>
+  </div>
+  <label for="dv">Declared value (€)</label>
+  <input id="dv" name="declared" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="amount">
+  <label for="inco">Incoterm</label>
+  <select id="inco" name="incoterm" data-expect="unknown"><option value="">Select</option><option>EXW</option><option>FCA</option><option>DAP</option><option>DDP</option></select>
+  <label for="hand">Special handling instructions</label>
+  <textarea id="hand" name="handling" rows="3" data-expect="notes"></textarea>
+  <p><button type="submit">Generate waybill</button></p>
+</form>
+</main>
+</body>
+</html>

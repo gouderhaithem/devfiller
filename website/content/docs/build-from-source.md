@@ -1,4 +1,4 @@
-DevFiller is open source under the [MIT license](https://github.com/gouderhaithem/form-filler/blob/main/LICENSE).
+DevFiller is open source under the [MIT license](https://github.com/gouderhaithem/form-filler/blob/main/LICENSE). This page is for contributors. To use DevFiller, [install it from the Chrome Web Store](/docs/install/), which keeps it up to date.
 
 ## Run it locally
 
@@ -16,6 +16,14 @@ npm run dev        # options preview and demo forms at http://127.0.0.1:5187
 | `/demo.html` | A mixed-language form to test the installed extension on |
 | `/dynamic-form.html` | A form that reveals fields after filling |
 
+## Load your build in Chrome
+
+1. Run `npm run build`.
+2. Open `chrome://extensions` and turn on **Developer mode**.
+3. Click **Load unpacked** and select the `dist` folder (the folder itself, not a file inside it).
+
+After a change, run `npm run build` again and click **Reload** on DevFiller's card. If the Chrome Web Store version is installed too, turn it off while you test your build.
+
 ## Build, test and package
 
 ```sh
@@ -23,9 +31,12 @@ npm run build              # type-check and build the extension into dist/
 npm test                   # unit tests
 npx playwright install chromium
 npm run test:e2e           # the real extension in Chromium
+npm run benchmark          # recognition accuracy on the benchmark forms, fails on any regression
 npm run package            # release/devfiller-<version>.zip for the Chrome Web Store
 npm run store-assets       # store screenshots and promo tile
 ```
+
+The [benchmark](https://github.com/gouderhaithem/form-filler/tree/main/benchmark) scores the fill engine on labelled forms in English, French and Arabic, and on held-out forms it was never tuned on. [How recognition works](/docs/how-it-works/) explains the engine.
 
 Browser tests load the built extension in a throwaway profile and cover toolbar filling, the side panel, settings, exclusions, forms that change, and the AI cache. AI providers are simulated.
 

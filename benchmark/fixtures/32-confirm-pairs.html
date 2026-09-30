@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Create your account</title></head>
+<body>
+<main>
+  <h1>Create your account</h1>
+  <form action="/join" method="post" data-form-type="signup">
+    <p><label for="mail">Work email</label><input type="email" id="mail" name="mail" maxlength="40" data-expect="email"></p>
+    <!-- Labelled only "Confirm": the pair makes it an email. -->
+    <p><label for="mail2">Confirm</label><input type="text" id="mail2" name="f_2" data-expect="email" data-same-as="#mail"></p>
+    <p><label for="p">Choose a password</label><input type="password" id="p" name="f_3" data-expect="password"></p>
+    <p><label for="p2">Retype it</label><input type="password" id="p2" name="f_4" data-expect="password" data-same-as="#p"></p>
+    <p><label for="ph">Mobile</label><input type="tel" id="ph" name="phone" data-expect="phone"></p>
+    <p><label for="ph2">Repeat mobile number</label><input type="tel" id="ph2" name="phone_again" data-expect="phone" data-same-as="#ph"></p>
+    <p><label><input type="checkbox" name="tos" data-expect="skip:consent"> I accept the terms of service</label></p>
+    <button type="submit">Create account</button>
+  </form>
+</main>
+</body>
+</html>

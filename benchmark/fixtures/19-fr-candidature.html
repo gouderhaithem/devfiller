@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candidature - Recrutement Nextera</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; background: #fff; color: #1b1b1b; margin: 0; }
+  main { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+  .mb-3 { margin-bottom: 1rem; }
+  .form-label { display: block; font-weight: 600; margin-bottom: .3rem; }
+  .form-control, .form-select { width: 100%; padding: .55rem .7rem; border: 1px solid #b5b5b5; border-radius: 6px; box-sizing: border-box; }
+  .btn { background: #2457d6; color: #fff; padding: .7rem 1.6rem; border: 0; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Postuler chez Nextera</h1>
+  <p>Les champs marqués d'un astérisque sont obligatoires.</p>
+  <form action="/candidatures" method="post" enctype="multipart/form-data" data-form-type="other">
+    <div class="mb-3">
+      <label class="form-label" for="c-nom">Nom *</label>
+      <input class="form-control" type="text" id="c-nom" name="lastname" autocomplete="family-name" required data-expect="lastName">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-prenom">Prénom *</label>
+      <input class="form-control" type="text" id="c-prenom" name="firstname" autocomplete="given-name" required data-expect="firstName">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-mail">Adresse électronique *</label>
+      <input class="form-control" type="email" id="c-mail" name="mail" autocomplete="email" required data-expect="email">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-tel">Téléphone</label>
+      <input class="form-control" type="tel" id="c-tel" name="tel" autocomplete="tel" data-expect="phone">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-ville">Ville de résidence</label>
+      <input class="form-control" type="text" id="c-ville" name="ville" autocomplete="address-level2" data-expect="city">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-poste">Poste souhaité</label>
+      <input class="form-control" type="text" id="c-poste" name="poste" placeholder="Ex. : Développeur back-end" data-expect="jobTitle">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-entreprise">Entreprise actuelle</label>
+      <input class="form-control" type="text" id="c-entreprise" name="entreprise_actuelle" autocomplete="organization" data-expect="company">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-salaire">Prétentions salariales (brut annuel, en €)</label>
+      <input class="form-control" type="number" id="c-salaire" name="pretentions" min="0" max="500000" step="500" data-expect="salary">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-dispo">Date de disponibilité</label>
+      <input class="form-control" type="date" id="c-dispo" name="disponibilite" data-expect="startDate">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-site">Site web / portfolio</label>
+      <input class="form-control" type="url" id="c-site" name="portfolio" placeholder="https://" data-expect="website">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-linkedin">Profil LinkedIn</label>
+      <input class="form-control" type="url" id="c-linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/" data-expect="website">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-cv">Curriculum vitae (PDF)</label>
+      <input class="form-control" type="file" id="c-cv" name="cv" accept=".pdf">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="c-lettre">Lettre de motivation</label>
+      <textarea class="form-control" id="c-lettre" name="lettre" rows="8" maxlength="4000" data-expect="message"></textarea>
+    </div>
+    <div class="mb-3">
+      <label><input type="checkbox" name="rgpd" value="1" required data-expect="skip:consent"> J'accepte que Nextera conserve mes données pendant 24 mois à des fins de recrutement</label>
+    </div>
+    <button type="submit" class="btn">Envoyer ma candidature</button>
+  </form>
+</main>
+</body>
+</html>

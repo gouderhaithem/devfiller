@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Télé-déclaration G50 - Direction Générale des Impôts</title>
+<style>
+  body { font-family: Tahoma, sans-serif; max-width: 780px; margin: 1.5rem auto; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #999; padding: .35rem .5rem; text-align: left; }
+  th { background: #e8efe8; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Déclaraton mensuelle G n° 50</h1>
+  <p>République Algérienne Démocratique et Populaire - Ministère des Finances</p>
+  <form action="/g50" method="post" data-form-type="other">
+    <table>
+      <tr><th colspan="2">A. Identification du contribuable</th></tr>
+      <tr>
+        <td>Numéro d'Identification Fiscale (NIF)</td>
+        <td><input type="text" name="nif" maxlength="15" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Numéro d'Identification Statistique (NIS)</td>
+        <td><input type="text" name="nis" maxlength="15" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Raison sociale</td>
+        <td><input type="text" name="f_12" data-expect="company"></td>
+      </tr>
+      <tr>
+        <td>Forme juridique</td>
+        <td>
+          <select name="f_13" data-expect="unknown">
+            <option>EURL</option>
+            <option>SARL</option>
+            <option>SPA</option>
+            <option>Personne physique</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Activité principale</td>
+        <td><input type="text" name="f_14" data-expect="industry"></td>
+      </tr>
+      <tr>
+        <td>Nombre de salariés</td>
+        <td><input type="number" name="f_15" min="0" data-expect="employeeCount"></td>
+      </tr>
+      <tr>
+        <td>Adresse du siège social</td>
+        <td><input type="text" name="f_16" data-expect="address"></td>
+      </tr>
+      <tr>
+        <td>Wilaya</td>
+        <td>
+          <select name="f_17" data-expect="state">
+            <option value="">--</option>
+            <option>Alger</option>
+            <option>Oran</option>
+            <option>Annaba</option>
+            <option>Tizi Ouzou</option>
+            <option>Béjaïa</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Code postal</td>
+        <td><input type="text" name="f_18" maxlength="5" data-expect="postalCode"></td>
+      </tr>
+      <tr>
+        <td>Téléphone</td>
+        <td><input type="text" name="f_19" data-expect="phone"></td>
+      </tr>
+      <tr>
+        <td>Adresse électronique</td>
+        <td><input type="text" name="f_20" data-expect="email"></td>
+      </tr>
+      <tr>
+        <td>Nom et prénom du déclarant</td>
+        <td><input type="text" name="f_21" data-expect="fullName"></td>
+      </tr>
+      <tr>
+        <td>Qualité du déclarant</td>
+        <td><input type="text" name="f_22" placeholder="Gérant, comptable..." data-expect="jobTitle"></td>
+      </tr>
+    </table>
+
+    <table>
+      <tr><th colspan="2">B. Période et montants</th></tr>
+      <tr>
+        <td>Mois concerné</td>
+        <td>
+          <select name="mois" data-expect="unknown">
+            <option>Janvier</option><option>Février</option><option>Mars</option>
+            <option>Avril</option><option>Mai</option><option>Juin</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Exercice</td>
+        <td><input type="text" name="exercice" placeholder="2026" data-expect="unknown"></td>
+      </tr>
+      <tr>
+        <td>Chiffre d'affaires hors taxes (DA)</td>
+        <td><input type="text" name="ca_ht" data-expect="amount"></td>
+      </tr>
+      <tr>
+        <td>Taux de TVA applicable (%)</td>
+        <td><input type="text" name="taux_tva" data-expect="percentage"></td>
+      </tr>
+      <tr>
+        <td>TVA collectée (DA)</td>
+        <td><input type="text" name="tva_coll" data-expect="amount"></td>
+      </tr>
+      <tr>
+        <td>TVA déductible (DA)</td>
+        <td><input type="text" name="tva_ded" data-expect="amount"></td>
+      </tr>
+      <tr>
+        <td>Date de dépôt</td>
+        <td><input type="text" name="date_depot" placeholder="JJ/MM/AAAA" data-expect="date"></td>
+      </tr>
+    </table>
+
+    <table>
+      <tr><th colspan="2">C. Règlement</th></tr>
+      <tr>
+        <td>RIB du compte à débiter</td>
+        <td><input type="text" name="rib" maxlength="20" data-expect="skip:iban"></td>
+      </tr>
+    </table>
+
+    <p><label><input type="checkbox" name="cgu" data-expect="skip:consent"> J'ai lu et j'accepte les conditions générales d'utilisation du télé-service</label></p>
+
+    <button type="submit">Valider la déclaration</button>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Générateur de facture - auto-entrepreneur</title>
+<style>
+  body { font-family: "Trebuchet MS", sans-serif; max-width: 720px; margin: 2rem auto; }
+  fieldset { margin-bottom: 1rem; }
+  .l { display: flex; gap: .5rem; margin: .4rem 0; align-items: center; }
+  .l span { width: 14rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Nouvelle facture</h1>
+  <form action="/factures" method="post" data-form-type="other">
+    <fieldset>
+      <legend>Émetteur</legend>
+      <div class="l"><span>Nom commercial</span><input type="text" name="emetteur" data-expect="company"></div>
+      <div class="l"><span>N° SIRET</span><input type="text" name="siret" data-expect="unknown"></div>
+      <div class="l"><span>N° TVA intracommunautaire</span><input type="text" name="tva_intra" data-expect="unknown"></div>
+      <div class="l"><span>Adresse</span><input type="text" name="adr_1" data-expect="address"></div>
+      <div class="l"><span>Code postal</span><input type="text" name="cp" data-expect="postalCode"></div>
+      <div class="l"><span>Ville</span><input type="text" name="ville" data-expect="city"></div>
+      <div class="l">
+        <span>Pays</span>
+        <select name="pays" data-expect="country">
+          <option>France</option>
+          <option>Belgique</option>
+          <option>Suisse</option>
+          <option>Algérie</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Client</legend>
+      <div class="l"><span>Société cliente</span><input type="text" name="client" data-expect="company"></div>
+      <div class="l"><span>E-mail de facturation</span><input type="email" name="client_mail" data-expect="email"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Facture</legend>
+      <div class="l"><span>Numéro de facture</span><input type="text" name="num" placeholder="FA-2026-001" data-expect="reference"></div>
+      <div class="l"><span>Date d'émission</span><input type="date" name="date_em" data-expect="date"></div>
+      <div class="l"><span>Date d'échéance</span><input type="date" name="date_ech" data-expect="date"></div>
+      <div class="l"><span>Désignation de la prestation</span><textarea name="designation" rows="2" data-expect="description"></textarea></div>
+      <div class="l"><span>Quantité (jours)</span><input type="number" name="qte" data-expect="quantity"></div>
+      <div class="l"><span>Prix unitaire HT (€)</span><input type="number" step="0.01" name="pu" data-expect="price"></div>
+      <div class="l"><span>Remise (%)</span><input type="number" name="remise" data-expect="percentage"></div>
+      <div class="l"><span>TVA (%)</span><input type="number" name="tva" value="20" data-expect="percentage"></div>
+      <div class="l"><span>Total TTC (€)</span><input type="number" name="total" readonly data-expect="amount"></div>
+      <div class="l"><span>Notes / mentions légales</span><textarea name="mentions" rows="2" data-expect="notes"></textarea></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Coordonnées bancaires à afficher</legend>
+      <div class="l"><span>IBAN</span><input type="text" name="iban" data-expect="skip:iban"></div>
+      <div class="l"><span>BIC</span><input type="text" name="bic" data-expect="skip:iban"></div>
+    </fieldset>
+
+    <button type="submit">Générer le PDF</button>
+  </form>
+</main>
+</body>
+</html>

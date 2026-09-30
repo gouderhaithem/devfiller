@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscription universitaire | التسجيل الجامعي</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background: #eef3fa; margin: 0; }
+  main { max-width: 720px; margin: 1.5rem auto; background: #fff; padding: 1.5rem 2rem; }
+  h1 { text-align: center; font-size: 1.3rem; }
+  .ligne { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .8rem; }
+  .ligne label { flex: 0 0 45%; }
+  .ligne input, .ligne select { flex: 1; padding: .45rem; }
+  .btn { background: #1c3f94; color: #fff; padding: .7rem 2rem; border: 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>التسجيل الأولي للطلبة الجدد<br>Pré-inscription des nouveaux bacheliers</h1>
+  <form action="/preinscription" method="post" data-form-type="other">
+    <div class="ligne">
+      <label for="u-nom">اللقب / Nom</label>
+      <input type="text" id="u-nom" name="nom" required data-expect="lastName">
+    </div>
+    <div class="ligne">
+      <label for="u-prenom">الاسم / Prénom</label>
+      <input type="text" id="u-prenom" name="prenom" required data-expect="firstName">
+    </div>
+    <div class="ligne">
+      <label for="u-dn">تاريخ الميلاد / Date de naissance</label>
+      <input type="date" id="u-dn" name="dn" required data-expect="birthDate">
+    </div>
+    <div class="ligne">
+      <label for="u-wn">ولاية الميلاد / Wilaya de naissance</label>
+      <select id="u-wn" name="wilaya_naissance" required data-expect="state">
+        <option value="">-- اختر / Choisir --</option>
+        <option value="16">الجزائر / Alger</option>
+        <option value="31">وهران / Oran</option>
+        <option value="25">قسنطينة / Constantine</option>
+        <option value="07">بسكرة / Biskra</option>
+        <option value="30">ورقلة / Ouargla</option>
+        <option value="22">سيدي بلعباس / Sidi Bel Abbès</option>
+      </select>
+    </div>
+    <div class="ligne">
+      <span id="u-sexe-l">الجنس / Sexe</span>
+      <span>
+        <label><input type="radio" name="sexe" value="M" aria-labelledby="u-sexe-l" data-expect="gender"> ذكر / Masculin</label>
+        <label><input type="radio" name="sexe" value="F" aria-labelledby="u-sexe-l" data-expect="gender"> أنثى / Féminin</label>
+      </span>
+    </div>
+    <div class="ligne">
+      <label for="u-nat">الجنسية / Nationalité</label>
+      <input type="text" id="u-nat" name="nationalite" value="" placeholder="Algérienne" data-expect="nationality">
+    </div>
+    <div class="ligne">
+      <label for="u-mat">رقم تسجيل البكالوريا / Matricule du bac</label>
+      <input type="text" id="u-mat" name="matricule_bac" maxlength="12" data-expect="unknown">
+    </div>
+    <div class="ligne">
+      <label for="u-filiere">الشعبة / Filière</label>
+      <select id="u-filiere" name="filiere" required data-expect="unknown">
+        <option value="">-- اختر / Choisir --</option>
+        <option value="mi">رياضيات وإعلام آلي / Mathématiques et Informatique</option>
+        <option value="st">علوم وتكنولوجيا / Sciences et Technologies</option>
+        <option value="sm">علوم الطبيعة والحياة / Sciences de la Nature et de la Vie</option>
+        <option value="se">علوم اقتصادية / Sciences Économiques</option>
+        <option value="dr">حقوق / Droit</option>
+      </select>
+    </div>
+    <div class="ligne">
+      <label for="u-adr">العنوان / Adresse</label>
+      <input type="text" id="u-adr" name="adresse" required data-expect="address">
+    </div>
+    <div class="ligne">
+      <label for="u-cp">الرمز البريدي / Code postal</label>
+      <input type="text" id="u-cp" name="code_postal" maxlength="5" inputmode="numeric" data-expect="postalCode">
+    </div>
+    <div class="ligne">
+      <label for="u-tel">الهاتف / Téléphone</label>
+      <input type="tel" id="u-tel" name="tel" maxlength="14" required data-expect="phone">
+    </div>
+    <div class="ligne">
+      <label for="u-mail">البريد الإلكتروني / Email</label>
+      <input type="email" id="u-mail" name="email" data-expect="email">
+    </div>
+    <button type="submit" class="btn">تأكيد / Valider</button>
+  </form>
+</main>
+</body>
+</html>

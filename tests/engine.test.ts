@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fillPage, type FillRequest } from '../src/engine';
+import { fillPage, type FillRequest } from '../src/fill';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 const values={...generateValues('en'),quantity:'3',price:'49.99',country:'United States'};
@@ -76,7 +76,7 @@ describe('fresh values on repeated fills',()=>{
     document.body.innerHTML=`<input id="firstName"><input id="username"><input id="mystery"><textarea id="another"></textarea>
       <input id="small" maxlength="1"><input id="quantity" type="number" min="1" max="3"><input id="range" type="range" min="1" max="3">
       <input id="date" type="date"><input id="month" type="month"><input id="week" type="week"><input id="time" type="time"><input id="appointment" type="datetime-local"><input id="color" type="color">
-      <select id="country"><option value="US">United States</option><option value="FR">France</option></select>
+      <select id="size"><option value="S">Small</option><option value="M">Medium</option></select>
       <input id="r1" type="radio" name="choice"><input id="r2" type="radio" name="choice"><input id="check" type="checkbox">`;
     const snapshot=()=>Array.from(document.querySelectorAll('input,textarea,select')).map(el=>el instanceof HTMLInputElement && ['radio','checkbox'].includes(el.type)?String(el.checked):(el as HTMLInputElement).value);
     fillPage(fresh);let before=snapshot();

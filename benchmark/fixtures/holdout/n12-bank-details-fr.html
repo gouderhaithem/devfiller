@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mise à jour des coordonnées bancaires</title>
+<style>
+body{font:14px/1.5 Arial,sans-serif;max-width:680px;margin:2rem auto;padding:0 1rem}
+label{display:block;margin-top:.7rem}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+.chk{display:flex;gap:.5rem;align-items:flex-start;margin-top:.7rem}
+.chk input{width:auto}
+</style>
+</head>
+<body>
+<header><h1>Banque Horizon - Espace client</h1><h2>Changer mon compte de prélèvement</h2></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <label for="b_nom">Nom du titulaire</label>
+  <input id="b_nom" name="field_1" autocomplete="family-name" data-expect="lastName">
+  <label for="b_pre">Prénom</label>
+  <input id="b_pre" name="field_2" autocomplete="given-name" data-expect="firstName">
+  <label for="b_dn">Date de naissance</label>
+  <input id="b_dn" name="field_3" type="date" autocomplete="bday" data-expect="birthDate">
+  <label for="b_job">Profession</label>
+  <input id="b_job" name="field_4" data-expect="jobTitle">
+  <label for="b_rev">Revenus mensuels nets (€)</label>
+  <input id="b_rev" name="field_5" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="salary">
+
+  <label for="b_ctr">N° de contrat</label>
+  <input id="b_ctr" name="field_6" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference">
+  <label for="b_bank">Nom de votre banque actuelle</label>
+  <input id="b_bank" name="field_7" data-expect="unknown">
+  <label for="b_iban">IBAN</label>
+  <input id="b_iban" name="field_8" autocomplete="off" placeholder="FR76 ____ ____ ____ ____ ____ ___" data-expect="skip:iban">
+  <label for="b_bic">BIC</label>
+  <input id="b_bic" name="field_9" data-expect="skip:iban">
+  <label for="b_amt">Montant du virement initial (€)</label>
+  <input id="b_amt" name="field_10" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="amount">
+  <label for="b_lib">Libellé du virement</label>
+  <input id="b_lib" name="field_11" maxlength="35" data-expect="unknown">
+
+  <label for="b_adr">Adresse postale</label>
+  <input id="b_adr" name="field_12" autocomplete="address-line1" data-expect="address">
+  <label for="b_cp">Code postal</label>
+  <input id="b_cp" name="field_13" data-expect="postalCode">
+  <label for="b_vil">Ville</label>
+  <input id="b_vil" name="field_14" data-expect="city">
+  <label for="b_tel">Téléphone mobile</label>
+  <input id="b_tel" name="field_15" type="tel" data-phone-region="fr" data-expect="phone">
+  <label for="b_mail">Adresse e-mail</label>
+  <input id="b_mail" name="field_16" type="email" data-expect="email">
+  <label for="b_sms">Code de sécurité reçu par SMS</label>
+  <input id="b_sms" name="field_17" inputmode="numeric" maxlength="6" autocomplete="one-time-code" data-expect="skip:otp">
+
+  <div class="chk"><input type="checkbox" id="c_sepa" name="sepa" data-expect="skip:consent"><label for="c_sepa" style="margin:0">J'autorise la banque à prélever les sommes dues sur le compte indiqué (mandat SEPA).</label></div>
+  <div class="chk"><input type="checkbox" id="c_cgu" name="cgu" data-expect="skip:consent"><label for="c_cgu" style="margin:0">J'ai lu et j'accepte les conditions générales et la politique de confidentialité.</label></div>
+  <div class="chk"><input type="checkbox" id="c_pub" name="offers" data-expect="skip:consent"><label for="c_pub" style="margin:0">Je souhaite recevoir les offres commerciales de la banque et de ses partenaires.</label></div>
+  <p><button type="submit">Valider mes nouvelles coordonnées</button></p>
+</form>
+</main>
+</body>
+</html>

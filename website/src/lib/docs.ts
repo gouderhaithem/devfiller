@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { site } from "./site";
 
 export interface DocPage {
   slug: string;
@@ -24,7 +25,8 @@ export const DOC_GROUPS: { title: string; pages: DocPage[] }[] = [
     pages: [
       { slug: "side-panel", title: "Side panel", description: "Inspect every field, fix one, and undo a fill.", source: "website/content/docs/side-panel.md" },
       { slug: "generated-data", title: "Generated data", description: "Languages, replacement, unknown fields and passwords.", source: "website/content/docs/generated-data.md" },
-      { slug: "field-types", title: "Field types", description: "The 42 field types and the labels DevFiller recognizes.", source: "FIELD_GUIDE.md", cutAt: "## Additional ideas" },
+      { slug: "how-it-works", title: "How recognition works", description: "How DevFiller works out what each field is, and how accurate it is.", source: "website/content/docs/how-it-works.md" },
+      { slug: "field-types", title: "Field types", description: "The 46 field types and the labels DevFiller recognizes.", source: "FIELD_GUIDE.md", cutAt: "## Additional ideas" },
       { slug: "custom-fields", title: "Custom fields", description: "Give a field an exact test value.", source: "website/content/docs/custom-fields.md" },
       { slug: "excluded-fields", title: "Excluded fields", description: "Keep fields untouched, everywhere or on one site.", source: "website/content/docs/excluded-fields.md" },
       { slug: "ai", title: "AI suggestions", description: "Optional Groq or Gemini suggestions for unusual fields.", source: "website/content/docs/ai.md" },
@@ -56,11 +58,22 @@ export function findDoc(slug: string) {
 
 const repoRoot = path.join(process.cwd(), "..");
 
+// Until the Chrome Web Store listing is live, links to it go to the store's search, and blocks
+// marked <!-- store-pending --> … <!-- /store-pending --> explain the wait. Setting
+// site.chromeStoreUrl switches every page over at the next build.
+const STORE_SEARCH = "https://chromewebstore.google.com/search/DevFiller";
+function applyStoreLink(markdown: string) {
+  const url = site.chromeStoreUrl;
+  return markdown
+    .replace(/<!-- store-pending -->([\s\S]*?)<!-- \/store-pending -->\n?/g, url ? "" : "$1")
+    .replace(/\{\{chromeStoreUrl\}\}/g, url ?? STORE_SEARCH);
+}
+
 /** Reads a page's Markdown at build time, dropping its own H1 because the layout renders the title. */
 export async function loadDoc(page: DocPage) {
   let markdown = await readFile(path.join(repoRoot, page.source), "utf8");
   if (page.cutAt) markdown = markdown.split(page.cutAt)[0];
-  return markdown.replace(/^# .*\n+/, "");
+  return applyStoreLink(markdown.replace(/^# .*\n+/, ""));
 }
 
 export function neighbours(page: DocPage) {
