@@ -1,7 +1,7 @@
 import type { FieldKey } from '../data';
 import type { Random } from '../rng';
 import type { Control, PageState } from './types';
-import { DATE_FIELD_TYPES } from './dictionary';
+import { COUNTRY_CODES, DATE_FIELD_TYPES } from './dictionary';
 import { dispatchChange, setNativeValue } from './apply';
 
 // Values that fit the page's rules: the field's own constraints before a value is written, and the
@@ -133,6 +133,7 @@ export function alternatives(el: Control, key: FieldKey | undefined, value: stri
     if (iso) { const [y, m, d] = iso.slice(0, 10).split('-'); found.push(`${d}/${m}/${y}`, iso.slice(0, 10), `${m}/${d}/${y}`, `${y}/${m}/${d}`, `${d}-${m}-${y}`, `${d}.${m}.${y}`); }
   }
   if (key === 'reference' || key === 'postalCode') found.push(value.replace(/[^A-Za-z0-9]/g, ''), value.replace(/\D/g, ''));
+  if (key === 'country') found.push(...Object.entries(COUNTRY_CODES).find(([name, codes]) => name === value || codes.includes(value))?.[1] ?? []);
   // A plain number of the usual lengths, for apps that want digits only.
   if (key === 'reference') found.push(...[8, 6, 10].map(count => String(1 + random(9)) + Array.from({ length: count - 1 }, () => random(10)).join('')));
   if (/^-?\d+[.,]\d+$/.test(value)) found.push(value.includes(',') ? value.replace(',', '.') : value.replace('.', ','), String(Math.round(Number(value.replace(',', '.')))));

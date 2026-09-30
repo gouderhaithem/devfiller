@@ -2,10 +2,10 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  DECLARATION, GLUE_WORDS, LANGUAGE_PHRASES, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, WORDS,
+  CIVILITY, DECLARATION, DOCUMENT_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
-import { autocompleteToken, describeSignals, isChoice, isInput, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
+import { autocompleteToken, describeSignals, isChoice, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
 import { MONTH_SET, OPTION_LISTS } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
 import { normalize } from './normalize';
@@ -22,6 +22,7 @@ export interface Classification {
   after?: Control;         // the start date an end date must follow
   signals?: Signal[];      // what the field said, kept for the form-level pass
   fixed?: boolean;         // set by your type rule: nothing refines it
+  unconfirmed?: Classification; // a card guess from a word other documents share: what the field is if the form has no card
   confidence: number;      // 0..1, after the margin adjustment
   candidates: Candidate[]; // top alternatives, best first
   evidence: Evidence[];    // why the winning type won (or why the field is sensitive)
@@ -41,6 +42,10 @@ const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.
 const MATCH_STRENGTH: Readonly<Partial<Record<MatchKind, number>>> = { exact: 1, plural: 0.95, phrase: 0.9, joined: 0.9, word: 0.75, compound: 0.7, fuzzy: 0.6, generic: 0.35 };
 const TEXT_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'title', 'nearby', 'name', 'id', 'legend']);
+// Sources that name a field on their own; without them, a title does.
+const NAMING_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder']);
+// Matches of a single word, which a long question may mention in passing.
+const WORD_MATCHES: ReadonlySet<MatchKind> = new Set(['word', 'generic', 'compound', 'fuzzy']);
 
 type Match = readonly [AliasEntry, MatchKind];
 const contains = (text: string, phrase: string) => ` ${text} `.includes(` ${phrase} `);
@@ -138,7 +143,8 @@ export function matchText(text: string): Match[] {
 }
 
 // Card, one-time-code and bank fields, found before any scoring so they can never be filled.
-export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: SensitiveKind; evidence: Evidence } | undefined {
+// `weak` marks a card word other documents share ("Expiry", "PIN"): the form must confirm it.
+export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: SensitiveKind; evidence: Evidence; weak?: boolean } | undefined {
   for (const token of (el.getAttribute('autocomplete') || '').toLowerCase().split(/\s+/)) {
     if (token.startsWith('cc-')) return { kind: 'card', evidence: { source: 'autocomplete', signal: token, weight: 1, match: 'sensitive' } };
     if (token === 'one-time-code') return { kind: 'otp', evidence: { source: 'autocomplete', signal: token, weight: 1, match: 'sensitive' } };
@@ -146,21 +152,33 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
   // A checkbox or radio can't hold a card number or a code: "Pay by card" is a choice, not card data.
   if (isChoice(el)) return undefined;
   const kinds: SensitiveKind[] = ['card', 'otp', 'iban'];
+  let weak: { kind: SensitiveKind; evidence: Evidence; weak: true } | undefined;
   for (const signal of signals) {
     if (!TEXT_SOURCES.has(signal.source)) continue;
     const phrases = signal.source === 'legend' ? SENSITIVE_SECTION_PHRASES : SENSITIVE_PHRASES;
     const glued = signal.source !== 'legend' ? signal.text.split(' ') : [];
-    const kind = kinds.find(k => phrases[k].some(phrase => contains(signal.text, phrase)) || glued.some(token => SENSITIVE_GLUED[k].test(token)));
+    // "Numéro de carte d'identité": another card owns the plain card words, never "credit card" or "CVV".
+    const otherCard = OTHER_CARD_PHRASES.some(phrase => contains(signal.text, phrase));
+    const matches = (k: SensitiveKind) => {
+      const words = phrases[k].filter(phrase => contains(signal.text, phrase) && !(k === 'card' && otherCard && PLAIN_CARD_PHRASES.has(phrase)));
+      return words.length > 0 || glued.some(token => SENSITIVE_GLUED[k].test(token));
+    };
+    const kind = kinds.find(matches);
     if (kind) return { kind, evidence: { source: signal.source, signal: signal.raw, weight: 1, match: 'sensitive' } };
+    // "Passport expiry", "Certificate expiration": a document's date, not a card's.
+    const document = otherCard || DOCUMENT_PHRASES.some(phrase => contains(signal.text, phrase));
+    if (!weak && !document && signal.source !== 'legend' && WEAK_CARD_PHRASES.some(phrase => contains(signal.text, phrase))) weak = { kind: 'card', evidence: { source: signal.source, signal: signal.raw, weight: 1, match: 'sensitive' }, weak: true };
   }
-  return undefined;
+  return weak;
 }
 
-// Checkboxes and radios about terms, privacy, newsletters or marketing are never touched.
-function consentEvidence(el: HTMLInputElement, signals: readonly Signal[]): Evidence | undefined {
+// Checkboxes, radios and yes/no selects about terms, privacy, newsletters or marketing are never touched.
+function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | undefined {
+  // A scale ("Strongly disagree … Strongly agree") is an opinion, whatever its question says.
+  if (isChoice(el) && el.type === 'radio' && isScale(optionTexts(el))) return undefined;
   // A radio's own label is left out of its signals, but "I agree" on any answer in the group
   // makes the whole group a consent question.
-  const own: Signal[] = el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
+  const own: Signal[] = isChoice(el) && el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
   const texts = [...signals, ...own].filter(signal => TEXT_SOURCES.has(signal.source));
   const found = texts.find(signal => CONSENT.test(signal.text)) ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && DECLARATION.test(signal.text));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
@@ -186,11 +204,19 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   const unit = unitOf(signals);
   if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
   if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type)) push('type', 'select', 0.6);
-  const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source));
+  // The field's own words, not its section's: a "Search flights" heading doesn't make every
+  // field in it a search box.
+  const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source) && signal.source !== 'legend');
   const search = type !== 'search' && texts.find(signal => SEARCH_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (search) push(search.source, search.raw, 0.5);
   const confirm = !CONFIRMABLE_TYPES.has(type) && texts.find(signal => CONFIRM_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (confirm) push(confirm.source, confirm.raw, 0.4);
+  const idNumber = texts.find(signal => ID_NUMBER_PHRASES.some(phrase => contains(signal.text, phrase)));
+  if (idNumber) push(idNumber.source, idNumber.raw, 0.6);
+  const slug = type === 'website' && texts.find(signal => SLUG_PHRASES.some(phrase => contains(signal.text, phrase)));
+  if (slug) push(slug.source, slug.raw, 0.9);
+  // "Mr / Mrs / Dr" is a civility, not the title of a thing.
+  if (type === 'title' && optionTexts(el).filter(text => CIVILITY.test(normalize(text))).length >= 2) push('options', 'civility titles', 0.9);
   return found;
 }
 
@@ -229,6 +255,9 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   }
   const part = datePart(texts);
   if (part) found.push(['date', { source: 'options', signal: `${part} options`, weight: 0.55, match: 'options' }]);
+  // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
+  const scale = isScale(texts);
+  if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.5, match: 'options' }]);
   return found;
 }
 
@@ -249,6 +278,8 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   const radio = grouped || (isChoice(el) && el.type === 'radio') || !!datePart(options);
   // With no meaningful name or id, what the person reads is all there is, so it counts a bit more.
   const visibleBoost = signals.some(signal => signal.source === 'name' || signal.source === 'id') ? 1 : 1.06;
+  // With no label, accessible name or placeholder, the title is the field's name (as for screen readers).
+  const titleIsName = !signals.some(signal => NAMING_SOURCES.has(signal.source));
   for (const signal of signals) {
     if (signal.source === 'autocomplete') {
       const token = autocompleteToken(el).toLowerCase();
@@ -258,12 +289,14 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
       const value = signal.raw.toLowerCase();
       if (Object.hasOwn(hints, value)) add(hints[value][0], { source: signal.source, signal: value, weight: hints[value][1], match: 'type' });
     } else {
-      const base = signal.source === 'legend' && radio ? RADIO_LEGEND_WEIGHT : SOURCE_WEIGHT[signal.source];
+      const base = signal.source === 'legend' && radio ? RADIO_LEGEND_WEIGHT : signal.source === 'title' && titleIsName ? SOURCE_WEIGHT.label : SOURCE_WEIGHT[signal.source];
       const boost = SOURCE_GROUP[signal.source] === 'visible' ? visibleBoost : 1;
       // "Email or phone", "City or airport": a field that takes either isn't clearly one type.
       const either = / (?:or|ou|او) /u.test(` ${signal.text} `) ? 0.6 : 1;
+      // One word in a long question ("…work in the country of this position?") is not its topic.
+      const aside = signal.source === 'legend' && signal.text.split(' ').length > 6 ? 0.7 : 1;
       for (const [entry, kind] of matchText(signal.text)) {
-        const strength = (MATCH_STRENGTH[kind] ?? 0) * (kind === 'exact' ? 1 : either);
+        const strength = (MATCH_STRENGTH[kind] ?? 0) * (kind === 'exact' ? 1 : either) * (WORD_MATCHES.has(kind) ? aside : 1);
         add(entry.key, { source: signal.source, signal: signal.raw, weight: Math.min(0.95, base * boost * strength), match: kind });
       }
     }
@@ -300,7 +333,12 @@ const sessionEvidence = (signals: readonly Signal[]): Evidence | undefined => {
 
 function classifySignals(el: Control, signals: Signal[]): Classification {
   const sensitive = sensitiveKind(el, signals);
-  if (sensitive) return { type: `skip:${sensitive.kind}`, confidence: 1, candidates: [], evidence: [sensitive.evidence] };
+  if (sensitive) return { type: `skip:${sensitive.kind}`, confidence: 1, candidates: [], evidence: [sensitive.evidence], ...(sensitive.weak ? { unconfirmed: rank(el, signals) } : {}) };
+  // "Subscribe to newsletter? Yes / No" asks for permission as much as a checkbox does.
+  if (el instanceof HTMLSelectElement && isYesNo(el)) {
+    const consent = consentEvidence(el, signals);
+    if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
+  }
   if (isChoice(el) && el.type === 'checkbox') {
     const consent = consentEvidence(el, signals);
     if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
@@ -315,6 +353,12 @@ function classifySignals(el: Control, signals: Signal[]): Classification {
     if (session) return { type: 'skip:session', confidence: 1, candidates: [], evidence: [session] };
   }
   return rank(el, signals);
+}
+
+// A select that only answers yes or no, besides its "Choose…" placeholder.
+function isYesNo(el: HTMLSelectElement): boolean {
+  const answers = optionTexts(el).map(normalize).filter(text => text && !PLACEHOLDER_OPTION.test(text));
+  return answers.length >= 1 && answers.length <= 3 && answers.every(text => YES_NO.test(text));
 }
 
 // Scores every candidate type and applies the margin rule.

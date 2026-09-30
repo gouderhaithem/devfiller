@@ -177,6 +177,56 @@ On the main fixtures (770 fields, including the rotated forms, which carry their
 
 The baseline was reset to these numbers, since the main set changed.
 
+## Form Lab: 30 held-out pages
+
+On 30 September 2026 the engine was run on Form Lab, a separate site of 30 test pages written
+without access to the engine, and labelled blind from the [labelling guide](fixtures/README.md):
+779 fields covering logins, checkouts, bookings, surveys, French, Arabic and Algerian forms,
+ARIA widgets, shadow DOM, iframes, controlled inputs, honeypots and a 122-field enterprise form.
+Each page was classified, then filled with the extension's default settings.
+
+| | Before | After |
+| --- | --- | --- |
+| Precision | 79.4% | 90.6% |
+| Recall | 77.5% | 89.9% |
+| F1 | 78.4% | 90.3% |
+| Fields left empty because they looked sensitive but weren't | 69 | 12 |
+| Sensitive fields filled | 2 | 0 |
+| Honeypots filled | 3 | 0 |
+| Values the page rejected | 2 | 0 |
+| Fields filled, as the page counts them | 79.0% | 84.1% |
+
+What it found, now fixed, with a fixture for each in `fixtures/regressions/r04`–`r06`:
+
+- **Card words that other documents use.** "Expiry", "PIN" and "carte" made "Passport expiry",
+  an account PIN and "Numéro de carte d'identité" card fields, and the card section then skipped
+  every name and date beside them. These words now need a card field in the same form, and a
+  field with its own autocomplete token or a confident date keeps its type.
+- **Consent read into questions.** "How much do you *agree*" made a Likert scale consent,
+  "authorized to work", "sponsorship" and medical "conditions" did too. A scale is never consent,
+  and those words now match only as whole words or phrases. A yes/no newsletter select and
+  declarations under a plain heading (not a `<legend>`) were filled; both are skipped now.
+- **Honeypots.** Fields inside `aria-hidden`, placed off the page or saying "leave this empty"
+  were filled, which is how pages spot bots.
+- **A section heading treated as the field.** A "Search flights" legend pushed every field in the
+  form down to unknown, and `q_a` read as a search box. Headings no longer penalize their fields,
+  and a `title` is the field's name when it has no other.
+- **Missing vocabulary.** Adults, children, rooms, tickets, income, expenses, down payment,
+  "How likely are you to recommend", expiry and issue dates.
+- **Values that don't fit.** A two-letter country field got "Un"; it now gets the country code.
+  A URL slug got a website.
+- **Page settings.** A checkbox outside the page's forms (a settings toggle) was flipped; when a
+  page keeps its fields in forms, choices outside them are left alone.
+- **Shadow DOM.** Fields inside open shadow roots were never seen; they are now classified and
+  filled, and their input events leave the shadow root as typing does.
+
+The main fixtures and the held-out set improved too: main F1 97.9% → 98.1% (817 fields, with the
+three new regression fixtures), held-out F1 92.3% → 93.1%.
+
+Not fixed here: forms inside iframes are still out of reach, because the extension injects the
+engine into the top frame only; form types were right for 32 of 46 forms; and fields in hidden
+wizard steps are filled only once their step is shown, which is by design.
+
 ## Confidence calibration
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.

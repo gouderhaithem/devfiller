@@ -1,4 +1,5 @@
 import type { Control } from './types';
+import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP } from './dictionary';
 import { normalize } from './normalize';
 
 // Input types the engine never touches or reports.
@@ -6,9 +7,23 @@ export const OMITTED_TYPES: readonly string[] = ['hidden','submit','button','res
 export const DATE_TYPES: readonly string[] = ['date','datetime-local','month','week','time'];
 export const TEXT_TYPES: readonly string[] = ['text','search','email','tel','url','password'];
 
-export function listControls(): Control[] {
-  return Array.from(document.querySelectorAll<Control>('input, textarea, select'));
+// Open shadow roots, nested ones included, in document order. Closed roots can't be reached.
+function shadowRoots(root: Document | ShadowRoot): ShadowRoot[] {
+  return Array.from(root.querySelectorAll('*')).flatMap(el => el.shadowRoot ? [el.shadowRoot, ...shadowRoots(el.shadowRoot)] : []);
 }
+
+// The page's controls, then those inside open shadow roots, so light-DOM indexes never shift.
+export function listControls(includeShadow = true): Control[] {
+  const roots = includeShadow ? [document, ...shadowRoots(document)] : [document];
+  return roots.flatMap(root => Array.from(root.querySelectorAll<Control>('input, textarea, select')));
+}
+
+// An id is looked up in the element's own tree: a label inside a shadow root points inside it.
+function byId(el: Element, id: string): Element | null {
+  const root = el.getRootNode();
+  return (root instanceof Document || root instanceof ShadowRoot ? root.getElementById(id) : null) ?? document.getElementById(id);
+}
+const idsText = (el: Element, ids: string | null) => (ids || '').split(/\s+/).filter(Boolean).map(id => byId(el, id)?.textContent || '').join(' ');
 
 export const isInput = (el: Control): el is HTMLInputElement => el instanceof HTMLInputElement;
 export const isChoice = (el: Control): el is HTMLInputElement => isInput(el) && (el.type === 'checkbox' || el.type === 'radio');
@@ -23,7 +38,7 @@ export const isFillable = (el: Control, visible = isVisible(el)) => !isDisabled(
 export const isEditableChoice = (el: HTMLInputElement, visible = isVisible(el)) => !isDisabled(el) && !el.closest('[inert]') && visible;
 
 export const labelText = (el: Control) => Array.from(el.labels || []).map(label => label.textContent || '').join(' ');
-export const labelledByText = (el: Control) => (el.getAttribute('aria-labelledby') || '').split(/\s+/).map(id => document.getElementById(id)?.textContent || '').join(' ');
+export const labelledByText = (el: Control) => idsText(el, el.getAttribute('aria-labelledby'));
 export const legendText = (el: Control) => normalize(el.closest('fieldset')?.querySelector('legend')?.textContent || '');
 
 // The last autocomplete token names the field: "shipping postal-code" → "postal-code".
@@ -96,15 +111,17 @@ export function nearbyText(el: Control): string {
   return '';
 }
 
-// Radio groups by form and name, built once per pass so large forms don't rescan every radio.
-let radioIndex: Map<HTMLFormElement | null, Map<string, HTMLInputElement[]>> | undefined;
+// Radio groups by form (or, outside forms, by the document or shadow root) and name, built once
+// per pass so large forms don't rescan every radio.
+export const radioScope = (el: HTMLInputElement): Node => el.form ?? el.getRootNode();
+let radioIndex: Map<Node, Map<string, HTMLInputElement[]>> | undefined;
 export function indexRadios(controls: readonly Control[] | undefined) {
   if (!controls) { radioIndex = undefined; return; }
   radioIndex = new Map();
   for (const el of controls) {
     if (!(el instanceof HTMLInputElement) || el.type !== 'radio' || !el.name) continue;
-    const byName = radioIndex.get(el.form) ?? new Map<string, HTMLInputElement[]>();
-    radioIndex.set(el.form, byName);
+    const byName = radioIndex.get(radioScope(el)) ?? new Map<string, HTMLInputElement[]>();
+    radioIndex.set(radioScope(el), byName);
     const members = byName.get(el.name) ?? [];
     members.push(el);
     byName.set(el.name, members);
@@ -114,10 +131,10 @@ export function indexRadios(controls: readonly Control[] | undefined) {
 // The other radios answering the same question.
 export function radioGroup(el: HTMLInputElement): HTMLInputElement[] {
   if (!el.name) return [el];
-  const indexed = radioIndex?.get(el.form)?.get(el.name);
+  const indexed = radioIndex?.get(radioScope(el))?.get(el.name);
   if (indexed) return indexed;
-  const scope: ParentNode = el.form ?? document;
-  return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="radio"]')).filter(radio => radio.name === el.name && radio.form === el.form);
+  const scope = radioScope(el) as ParentNode;
+  return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="radio"]')).filter(radio => radio.name === el.name && radioScope(radio) === radioScope(el));
 }
 
 // The answers a field offers: a select's options (without an empty placeholder) or the labels of
@@ -132,8 +149,48 @@ export function optionTexts(el: Control): string[] {
 function groupText(el: Control): string {
   const group = el.closest('[role="radiogroup"], fieldset');
   if (!group) return '';
-  const labelledBy = (group.getAttribute('aria-labelledby') || '').split(/\s+/).map(id => document.getElementById(id)?.textContent || '').join(' ');
-  return clip(group.getAttribute('aria-label') || labelledBy || group.querySelector('legend')?.textContent || '');
+  return clip(group.getAttribute('aria-label') || idsText(group, group.getAttribute('aria-labelledby')) || group.querySelector('legend')?.textContent || '');
+}
+
+const MAX_CAPTIONED = 30;
+// The question over choices that aren't in a fieldset: the text just before the element that holds
+// the group ("Have you ever been diagnosed with…" above a row of checkboxes).
+function choiceCaption(el: HTMLInputElement): string {
+  const sameGroup = (other: Element) => other instanceof HTMLInputElement && other.type === el.type && (el.type === 'checkbox' || other.name === el.name);
+  let node: Element = el;
+  for (let depth = 0; depth < 3 && node.parentElement; depth++) {
+    const parent: Element = node.parentElement;
+    const inside = parent.querySelectorAll(CONTROLS);
+    // A caption sits over a handful of choices; a container of dozens is a layout, not a group.
+    if (parent.matches('form, fieldset, body') || inside.length > MAX_CAPTIONED || !Array.from(inside).every(sameGroup)) return '';
+    node = parent;
+    const text = siblingText(node, false);
+    if (text) return text;
+  }
+  return '';
+}
+
+// Answers that read as a scale: worded ("Strongly disagree … Strongly agree") or numbered, 1 to 5 up
+// to 0 to 10. Months and days count further, so they are never a scale.
+export function isScale(answers: readonly string[]): 'words' | 'numbers' | undefined {
+  if (answers.length < 4) return undefined;
+  const texts = answers.map(normalize);
+  if (texts.some(text => NOT_SCALE_ANSWER.test(text))) return undefined;
+  if (texts.filter(text => SCALE_ANSWER.test(text)).length >= Math.ceil(0.75 * texts.length)) return 'words';
+  const numbers = texts.map(text => text.match(/^\d+/)?.[0]).filter(Boolean).map(Number);
+  const counting = numbers.length === texts.length && numbers.every((n, i) => i === 0 || n === numbers[i - 1] + 1) && numbers[0] <= 1 && numbers[numbers.length - 1] <= 10;
+  return counting ? 'numbers' : undefined;
+}
+
+// Honeypots: fields hidden from people (aria-hidden, placed off the page) or that say to leave them
+// empty. A person never fills them; a bot does, and the page then rejects the form.
+// A modal library hides the rest of the page with aria-hidden too, so that only counts with tabindex="-1".
+export function isTrap(el: Control): boolean {
+  if (el.getAttribute('tabindex') === '-1' && el.closest('[aria-hidden="true"]')) return true;
+  const hints = [el.getAttribute('placeholder'), labelText(el), el.getAttribute('aria-label'), el.getAttribute('title')];
+  if (hints.some(hint => TRAP.test(normalize(hint || '')))) return true;
+  const box = el.getBoundingClientRect();
+  return box.width > 0 && (box.right + scrollX <= 0 || box.bottom + scrollY <= 0);
 }
 
 const FILLER = new Set(['field', 'fld', 'input', 'inp', 'text', 'txt', 'ctl', 'ctrl', 'mat', 'form', 'el', 'elem', 'control', 'widget', 'item']);
@@ -166,7 +223,10 @@ export function describeSignals(el: Control): Signal[] {
   if (!signals.some(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby')) add('nearby', radio ? '' : nearbyText(el));
   if (!isMeaningless(el.name)) add('name', el.name);
   if (!isMeaningless(el.id)) add('id', el.id);
-  add('legend', radio ? groupText(el) : el.closest('fieldset')?.querySelector('legend')?.textContent);
+  // A radio group's question, else the heading just above it. A checkbox reads its fieldset's legend
+  // and the heading just above its own group, which may sit inside that larger fieldset.
+  add('legend', radio ? groupText(el) || choiceCaption(el) : el.closest('fieldset')?.querySelector('legend')?.textContent);
+  if (choice && !radio) add('legend', choiceCaption(el));
   if (isInput(el)) { add('type', el.type); add('inputmode', el.getAttribute('inputmode')); }
   add('autocomplete', el.getAttribute('autocomplete'));
   return signals;

@@ -36,7 +36,8 @@ function clean(root: Element) {
 }
 
 export function exportFixture(rules: readonly TypeRule[] = []): { html: string; filename: string } {
-  const controls = listControls();
+  // A fixture is copied from the page's own markup, which never holds a shadow root's contents.
+  const controls = listControls(false);
   const shown = controls.filter(el => !(el instanceof HTMLInputElement && el.type === 'hidden'));
   const { fields, forms } = analyzePage(controls, new Map(controls.map(el => [el, isVisible(el)])), rules);
   const parts = roots(shown).map(root => {
