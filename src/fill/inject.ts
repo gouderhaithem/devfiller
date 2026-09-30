@@ -15,17 +15,22 @@ async function injectEngine(target: chrome.scripting.InjectionTarget) {
   await chrome.scripting.executeScript({ target, files: [ENGINE_FILE] });
 }
 
-// Resolves to undefined when the page navigated away between the two injections.
-export async function runFillPage(target: chrome.scripting.InjectionTarget, request: FillRequest): Promise<FillResult | undefined> {
+// Resolves to undefined when the page navigated away between the two injections. With `widgets`,
+// the same call then fills custom ARIA widgets, so a fill is one round trip to the page.
+export async function runFillPage(target: chrome.scripting.InjectionTarget, request: FillRequest, widgets = false): Promise<FillResult | undefined> {
   await injectEngine(target);
-  const [reply] = await chrome.scripting.executeScript({ target, func: (req: FillRequest) => (globalThis as EngineGlobal).__devfiller?.fillPage(req), args: [request] });
+  const [reply] = await chrome.scripting.executeScript({
+    target,
+    func: async (req: FillRequest, withWidgets: boolean) => {
+      const engine = (globalThis as EngineGlobal).__devfiller;
+      const result = engine?.fillPage(req);
+      if (!engine || !result || !withWidgets || req.mode || result.stale) return result;
+      const custom = await engine.fillWidgets(req).catch(() => ({ filled: 0 }));
+      return { ...result, filled: result.filled + custom.filled };
+    },
+    args: [request, widgets],
+  });
   return reply?.result ?? undefined;
-}
-
-// Custom widgets (ARIA checkboxes, radio groups, comboboxes, editors) after the native fill.
-export async function runWidgets(target: chrome.scripting.InjectionTarget, request: FillRequest): Promise<number> {
-  const [reply] = await chrome.scripting.executeScript({ target, func: (req: FillRequest) => (globalThis as EngineGlobal).__devfiller?.fillWidgets(req), args: [request] });
-  return reply?.result?.filled ?? 0;
 }
 
 // The page's own validation runs after our events, sometimes a moment later: wait, then retry the

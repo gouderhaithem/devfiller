@@ -2,7 +2,7 @@ import {installFormPreload} from './form-preload';
 import { fields, generateIdentities, generatePhones, generateValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
-import { fixRejected, runExport, runFillPage, runPanelAction, runWidgets } from './fill/inject';
+import { fixRejected, runExport, runFillPage, runPanelAction } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
@@ -184,11 +184,9 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     }
     request.exclusions=validateSettings((await chrome.storage.local.get('settings')).settings).exclusions;
     if(epoch!==cacheEpoch || (batch && batch.expiresAt<=Date.now()))throw new Error('AI settings or cached data changed. Click Fill again.');
-    const result:FillResult | undefined=await runFillPage({tabId},request);
+    const result:FillResult | undefined=await runFillPage({tabId},request,true);
     if(!result) throw new Error('The page did not respond. Click to try again.');
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
-    // Custom widgets, then the page's own validation of what was written.
-    result.filled+=await runWidgets({tabId},request).catch(()=>0);
     checkValidation=result.filled>0;
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{
@@ -227,7 +225,17 @@ chrome.storage.onChanged.addListener((changes,area)=>{
   if(area==='local' && changes.settings && JSON.stringify(validateSettings(changes.settings.oldValue).exclusions)!==JSON.stringify(validateSettings(changes.settings.newValue).exclusions)) void clearCache().catch(()=>{});
 });
 const syncFormPreload=installFormPreload(prepareForPage);
-chrome.action.onClicked.addListener(tab=>fillClickedTab(tab).catch(()=>{}));
+// A click while a fill is running fills again once it ends, instead of being dropped.
+const queuedClicks=new Map<number,chrome.tabs.Tab>();
+async function clickFill(tab:chrome.tabs.Tab) {
+  if(tab.id!==undefined && filling.has(tab.id)){queuedClicks.set(tab.id,tab);return;}
+  try{await fillClickedTab(tab);}
+  finally{
+    const next=tab.id===undefined?undefined:queuedClicks.get(tab.id);
+    if(next && tab.id!==undefined){queuedClicks.delete(tab.id);void clickFill(next).catch(()=>{});}
+  }
+}
+chrome.action.onClicked.addListener(tab=>void clickFill(tab).catch(()=>{}));
 chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name===ALARM) void pruneCache().catch(()=>{});});
 chrome.tabs.onRemoved.addListener(tabId=>{
   queuedPreparations.delete(tabId);
