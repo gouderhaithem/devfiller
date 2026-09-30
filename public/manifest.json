@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DevFiller — Test data form filler",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Click the toolbar icon to fill the current website with generated test data.",
   "permissions": [
     "activeTab",

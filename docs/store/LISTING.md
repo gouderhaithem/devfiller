@@ -32,18 +32,27 @@ DevFiller fills website forms with realistic, fictional test data in one click, 
 HOW IT WORKS
 • Open any page with a form and click the DevFiller icon. Every field it recognizes is filled instantly.
 • DevFiller never submits the form. You review the values and submit when you are ready.
-• Open the side panel (right-click the icon, or press Alt+Shift+F) to see which fields were filled or skipped and why, jump to a field, and undo the last fill.
+• Open the side panel (right-click the icon, or press Alt+Shift+F) to see which fields were filled or skipped and why, what each field was recognized as, jump to a field, and undo the last fill.
+
+ACCURATE BY DESIGN
+• Each field is recognized from every clue the page gives: its label, name, placeholder, autocomplete attribute, units such as (mm) or (kg), and the answers a list offers. DevFiller fills a field only when the evidence is strong enough, and shows how sure it is.
+• It reads the form as a whole: confirmation fields repeat what they confirm, end dates follow start dates, and a phone number follows the country the form asks for.
+• Values follow each field's rules, and if the site rejects one, DevFiller writes it another way.
+• Custom switches, checkboxes, dropdowns and rich-text editors built with ARIA roles are filled too.
+• Got a field wrong? Tell DevFiller what it is from the side panel, and it remembers for that site.
 
 DATA THAT MAKES SENSE
 • 46 field types: names, usernames, emails, phones, addresses, companies, job titles, dates, numbers, messages and more.
-• Values fit together: the username and email match the generated name.
+• Values fit together: the username and email match the generated name, and the address and phone number come from one country: the United States, France or Algeria (69 wilayas and real communes).
+• Measurements sized for their unit, and order or invoice numbers that look real.
+• Repeatable data: type a seed to get exactly the same values on every fill.
 • Recognizes labels in English, French and Arabic, and generates data in any of the three languages.
 • Respects input types, length limits, min/max values and dropdown options.
 
 YOU STAY IN CONTROL
 • Custom values: map a label such as "Project code" to an exact value such as "PRJ-001".
 • Exclusions: leave search bars, navigation and any field you choose untouched, on every site or just one.
-• File uploads, payment and bank fields (card numbers, CVV, IBAN), one-time codes and consent checkboxes are skipped. Password fields stay empty unless you turn on test passwords.
+• File uploads, payment and bank fields (card numbers, CVV, IBAN), one-time codes, consent and data-sharing checkboxes and "Remember me" choices are skipped. Password fields stay empty unless you turn on test passwords.
 
 OPTIONAL AI FOR UNUSUAL FIELDS
 Fields the local generator doesn't recognize can get relevant suggestions from Groq or Google Gemini, using your own API key. This is off by default. Only field descriptions (labels, names, placeholders and limits) are sent, never the values you type, the page address or the page content. Without a key, everything runs locally.
