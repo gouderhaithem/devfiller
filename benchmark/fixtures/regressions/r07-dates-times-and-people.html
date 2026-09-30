@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: bare dates, date pairs, clock times and other people</title></head>
+<body>
+<main>
+  <!-- Found by the second set of Form Lab pages on 30 September 2026: a date input with no
+       recognizable words stayed unknown, so "From"/"To" and "Period from"/"Period to" pairs never
+       became a start and an end; clock-time selects and slots were unknown; "Manager's name" and
+       "Name of host person" stayed below the threshold. -->
+  <form action="/leave" method="post" data-form-type="other">
+    <label for="when">When did it happen?</label><input id="when" name="first_seen" type="date" data-expect="date">
+    <label for="pf">Period from</label><input id="pf" name="period_from" type="date" data-expect="startDate">
+    <label for="pt">Period to</label><input id="pt" name="period_to" type="date" data-expect="endDate" data-after="#pf">
+    <label for="arr">Intended date of arrival</label><input id="arr" name="arrival" type="date" data-expect="startDate">
+    <label for="dep">Intended date of departure</label><input id="dep" name="departure" type="date" data-expect="endDate" data-after="#arr">
+    <label for="ret">Return by</label>
+    <select id="ret" name="return_time" data-expect="time"><option value="">--:--</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option></select>
+    <fieldset><legend>Choose a slot</legend>
+      <label><input type="radio" name="slot" value="08:30" data-expect="time"> 08:30</label>
+      <label><input type="radio" name="slot" value="10:45" data-expect="time"> 10:45</label>
+      <label><input type="radio" name="slot" value="14:00" data-expect="time"> 14:00</label>
+      <label><input type="radio" name="slot" value="16:30" data-expect="time"> 16:30</label>
+    </fieldset>
+    <label for="mgr">Manager's name</label><input id="mgr" name="r_manager" data-expect="fullName">
+    <label for="host">Name of host person</label><input id="host" name="host" data-expect="fullName">
+    <label for="exp">Token expiration</label>
+    <select id="exp" name="expires_in" data-expect="unknown"><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="0">No expiration</option></select>
+    <button type="submit">Send</button>
+  </form>
+</main>
+</body>
+</html>
