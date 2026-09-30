@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AutoPieces - brake parts</title>
+<style>
+body{font:14px/1.45 Verdana,sans-serif;max-width:860px;margin:1.5rem auto;padding:0 1rem}
+.cols{display:flex;gap:2rem;flex-wrap:wrap}
+.cols>form{flex:1 1 320px;border:1px solid #ccc;padding:1rem}
+label{display:block;margin-top:.55rem}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.3rem}
+[role=switch]{display:inline-block;width:36px;height:20px;border-radius:10px;background:#aaa;vertical-align:middle;cursor:pointer;position:relative}
+[role=switch]::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff}
+[role=switch][aria-checked=true]{background:#c60}
+[role=switch][aria-checked=true]::after{left:18px}
+</style>
+</head>
+<body>
+<header><h1>AutoPieces</h1><p>Spare parts for every make</p></header>
+<main>
+<div class="cols">
+<form data-form-type="search" action="#" method="get">
+  <h2>Find a part</h2>
+  <input name="q" type="search" placeholder="Part name or OEM number" aria-label="Search parts" data-expect="search">
+  <label for="mk">Make</label>
+  <select id="mk" name="make_id" data-expect="unknown">
+    <option value="">All makes</option><option>Peugeot</option><option>Renault</option><option>Volkswagen</option><option>Toyota</option>
+  </select>
+  <label for="md">Model</label>
+  <select id="md" name="model_id" data-expect="unknown">
+    <option value="">All models</option><option>208</option><option>Clio</option><option>Golf</option><option>Yaris</option>
+  </select>
+  <label for="yr">Year of first registration</label>
+  <input id="yr" name="yr" inputmode="numeric" maxlength="4" data-expect="unknown">
+  <label for="pmin">Min price (€)</label>
+  <input id="pmin" name="pmin" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="price">
+  <label for="pmax">Max price (€)</label>
+  <input id="pmax" name="pmax" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="price">
+  <label><input type="checkbox" name="stock" data-expect="unknown"> In stock only</label>
+  <p><span id="oem_l">OEM parts only</span> <span role="switch" tabindex="0" aria-checked="false" aria-labelledby="oem_l" data-expect="unknown"></span></p>
+  <button type="submit">Apply filters</button>
+</form>
+
+<form data-form-type="checkout" action="#" method="post">
+  <h2>Quick order</h2>
+  <label for="pn">Part number</label>
+  <input id="pn" name="field_21" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/.]{3,}$" data-expect="reference">
+  <label for="qt">Qty (u)</label>
+  <input id="qt" name="field_22" type="number" min="1" data-expect="quantity">
+  <label for="vin">Vehicle VIN</label>
+  <input id="vin" name="field_23" maxlength="17" data-expect="unknown">
+  <label for="nm">Full name</label>
+  <input id="nm" name="field_24" autocomplete="name" data-expect="fullName">
+  <label for="ph">Mobile</label>
+  <input id="ph" name="field_25" type="tel" data-expect="phone">
+  <label for="ml">Email</label>
+  <input id="ml" name="field_26" type="email" data-expect="email">
+  <label for="sa">Delivery adress</label>
+  <input id="sa" name="field_27" data-expect="address">
+  <label for="pc">Postcode</label>
+  <input id="pc" name="field_28" data-expect="postalCode">
+  <label for="ct">Town</label>
+  <input id="ct" name="field_29" data-expect="city">
+  <label for="pr">Promo code</label>
+  <input id="pr" name="field_30" data-expect="unknown">
+  <label for="on">Note to the warehouse</label>
+  <textarea id="on" name="field_31" rows="2" data-expect="notes"></textarea>
+  <label><input type="checkbox" name="tos" data-expect="skip:consent"> I accept the terms of sale and the returns policy</label>
+  <p><button type="submit">Place order</button></p>
+</form>
+</div>
+</main>
+<script>
+document.querySelectorAll('[role=switch]').forEach(function (el) {
+  el.addEventListener('click', function () { el.setAttribute('aria-checked', el.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); });
+});
+</script>
+</body>
+</html>

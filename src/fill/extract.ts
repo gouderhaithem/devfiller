@@ -50,7 +50,7 @@ export function displayLabel(el: Control): string {
   return (labelText(el) || el.getAttribute('aria-label') || labelledByText(el).trim() || el.getAttribute('placeholder') || el.name || el.id || el.type || 'Unnamed field').trim().slice(0, 160);
 }
 
-export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit';
+export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule';
 export interface Signal { source: SignalSource; raw: string; text: string }
 
 const CONTROLS = 'input, select, textarea, button';

@@ -1,4 +1,4 @@
-import type { FieldKey } from '../data';
+import type { FieldKey, TypeRule } from '../data';
 import type { Control, FormInsight } from './types';
 import { classifyField, datePart, isSensitive, SOURCE_GROUP, THRESHOLDS, type Classification, type Evidence, type FieldRole } from './classify';
 import { CONFIRMABLE_TYPES, DATE_FIELD_TYPES, PAIR_PHRASES } from './dictionary';
@@ -49,7 +49,7 @@ const get = (pass: Pass, el: Control) => pass.fields.get(el)!;
 // Context refines ordinary fields only. A sensitive field stays sensitive whatever its neighbours say.
 function update(pass: Pass, el: Control, change: Partial<Classification>, reason: Evidence) {
   const current = get(pass, el);
-  if (isSensitive(current.type)) return;
+  if (isSensitive(current.type) || current.fixed) return;
   pass.fields.set(el, { ...current, ...change, evidence: [...current.evidence, reason] });
 }
 const retype = (pass: Pass, el: Control, type: FieldKey, role: FieldRole | undefined, reason: Evidence, extra: Partial<Classification> = {}) =>
@@ -176,11 +176,23 @@ export function formType(form: HTMLFormElement, types: readonly string[], roles:
 const classifiable = (el: Control) => !(el instanceof HTMLInputElement && [...OMITTED_TYPES, 'file'].includes(el.type));
 
 // Classifies every control, then adjusts each form's fields using the form as context.
-export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<Control, boolean>): PageAnalysis {
+// Your type rules for this site: the selector saved from the side panel, matched on this page.
+function ruleFor(el: Control, rules: readonly TypeRule[]): TypeRule | undefined {
+  const host = location.hostname;
+  return rules.find(rule => (!rule.site || rule.site === host) && (() => { try { return el.matches(rule.selector); } catch { return false; } })());
+}
+
+export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<Control, boolean>, rules: readonly TypeRule[] = []): PageAnalysis {
   const fields = new Map<Control, Classification>();
   indexRadios(controls);
   try {
-    for (const el of controls) if (classifiable(el)) fields.set(el, classifyField(el));
+    for (const el of controls) {
+      if (!classifiable(el)) continue;
+      const found = classifyField(el);
+      const rule = rules.length ? ruleFor(el, rules) : undefined;
+      // A sensitive field stays sensitive even if a rule says otherwise: it is never filled.
+      fields.set(el, rule && !isSensitive(found.type) ? { ...found, type: rule.type, confidence: rule.type === 'unknown' ? 0 : 1, candidates: [], evidence: [{ source: 'rule', signal: 'set for this site', weight: 1, match: 'context' }], fixed: true } : found);
+    }
   } finally { indexRadios(undefined); }
   const signals = (el: Control) => fields.get(el)?.signals ?? describeSignals(el);
   const groups = new Map<HTMLFormElement | null, Control[]>();

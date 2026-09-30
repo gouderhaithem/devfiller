@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Demande d'acte - طلب وثيقة</title>
+<style>
+body{font:14px/1.5 Arial,Tahoma,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1rem}
+label{display:block;font-weight:bold;margin-bottom:.15rem}
+.ar{float:right;direction:rtl;font-weight:normal}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.35rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>République Algérienne Démocratique et Populaire</h1>
+  <h2 dir="rtl" lang="ar">الجمهورية الجزائرية الديمقراطية الشعبية - طلب وثيقة إدارية</h2>
+</header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <div class="g">
+    <div><label for="nom">Nom <span class="ar" lang="ar">اللقب</span></label>
+      <input id="nom" name="field_1" data-expect="lastName"></div>
+    <div><label for="prenom">Prénom <span class="ar" lang="ar">الاسم</span></label>
+      <input id="prenom" name="field_2" data-expect="firstName"></div>
+    <div><label for="pere">Prénom du père <span class="ar" lang="ar">اسم الأب</span></label>
+      <input id="pere" name="field_3" data-expect="unknown"></div>
+    <div><label for="dn">Date de naissance <span class="ar" lang="ar">تاريخ الميلاد</span></label>
+      <input id="dn" name="field_4" type="date" data-expect="birthDate"></div>
+    <div><label for="cn">Commune de naissance <span class="ar" lang="ar">بلدية الميلاد</span></label>
+      <input id="cn" name="field_5" data-expect="city"></div>
+    <div><label for="nin">N° d'identification national (NIN) <span class="ar" lang="ar">رقم التعريف الوطني</span></label>
+      <input id="nin" name="field_6" inputmode="numeric" maxlength="18" data-expect="unknown"></div>
+    <div><label for="nat">Nationalité <span class="ar" lang="ar">الجنسية</span></label>
+      <input id="nat" name="field_7" value="" placeholder="Algérienne" data-expect="nationality"></div>
+    <div><label for="sf">Situation familiale <span class="ar" lang="ar">الحالة العائلية</span></label>
+      <select id="sf" name="field_8" data-expect="unknown">
+        <option value="">--</option><option>Célibataire / أعزب</option><option>Marié(e) / متزوج</option><option>Divorcé(e) / مطلق</option><option>Veuf(ve) / أرمل</option>
+      </select></div>
+  </div>
+
+  <h3>Résidence <span dir="rtl" lang="ar">مكان الإقامة</span></h3>
+  <div class="g">
+    <div><label for="w">Wilaya <span class="ar" lang="ar">الولاية</span></label>
+      <select id="w" name="wilaya" data-expect="state">
+        <option value="">-- اختر / Choisir --</option><option>16 - Alger / الجزائر</option><option>31 - Oran / وهران</option><option>25 - Constantine / قسنطينة</option><option>19 - Sétif / سطيف</option><option>23 - Annaba / عنابة</option>
+      </select></div>
+    <div><label for="d">Daira <span class="ar" lang="ar">الدائرة</span></label>
+      <input id="d" name="daira" data-expect="district"></div>
+    <div><label for="c">Commune <span class="ar" lang="ar">البلدية</span></label>
+      <input id="c" name="commune" data-expect="city"></div>
+    <div><label for="ad">Adresse <span class="ar" lang="ar">العنوان</span></label>
+      <input id="ad" name="field_12" data-expect="address"></div>
+    <div><label for="tel">Téléphone <span class="ar" lang="ar">الهاتف</span></label>
+      <input id="tel" name="field_13" type="tel" data-phone-region="dz" data-expect="phone"></div>
+    <div><label for="em">E-mail <span class="ar" lang="ar">البريد الإلكتروني</span></label>
+      <input id="em" name="field_14" type="email" data-expect="email"></div>
+  </div>
+
+  <h3>Objet de la demande <span dir="rtl" lang="ar">موضوع الطلب</span></h3>
+  <div class="g">
+    <div><label for="td">Type de document <span class="ar" lang="ar">نوع الوثيقة</span></label>
+      <select id="td" name="field_15" data-expect="unknown">
+        <option value="">--</option><option>Extrait de naissance n°12</option><option>Certificat de résidence</option><option>Fiche familiale</option><option>Casier judiciaire</option>
+      </select></div>
+    <div><label for="ne">Nombre d'exemplaires <span class="ar" lang="ar">عدد النسخ</span></label>
+      <input id="ne" name="field_16" type="number" min="1" max="10" data-expect="quantity"></div>
+  </div>
+  <label for="mot" style="margin-top:.8rem">Motif de la demande <span class="ar" lang="ar">سبب الطلب</span></label>
+  <textarea id="mot" name="field_17" rows="3" data-expect="message"></textarea>
+
+  <p><label style="font-weight:normal"><input type="checkbox" name="dh" data-expect="skip:consent"> Je déclare sur l'honneur l'exactitude des renseignements fournis / أصرح بشرفي بصحة المعلومات المقدمة</label></p>
+  <button type="submit">Déposer la demande / إرسال الطلب</button>
+</form>
+</main>
+</body>
+</html>

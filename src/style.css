@@ -10,3 +10,4 @@
 
 .rule-site{display:block;color:#83907b;font-size:10px;overflow-wrap:anywhere;margin-top:4px}.custom-row input[readonly]{background:#f4f6f0;color:#7b8775}
 .setting-row select,.setting-row input[type=text]{flex-shrink:0;width:130px;height:auto;border:1px solid #e3e6e9;background:#fff;padding:6px 8px;border-radius:4px;font-size:10px;color:#636c78;accent-color:auto}
+.type-rules-heading{margin-top:24px}.type-rule strong{font-size:11px;font-weight:600;display:block}.type-rule code{font-size:9px;color:#858c97}

@@ -20,6 +20,8 @@ export type Locale = 'en' | 'fr' | 'ar';
 export type RegionSetting = 'mixed' | Region;
 export interface GenerateOptions { seed?: string; region?: RegionSetting }
 export interface CustomField { id:string; label:string; value:string; selector?:string; site?:string }
+// A field type you set for one field on one site, from the side panel. It wins over recognition.
+export interface TypeRule { id:string; selector:string; site:string; type:FieldKey | 'unknown' }
 export interface ExclusionRule { id:string; match:'label'|'selector'; value:string; site:string }
 export interface Exclusions { skipSearch:boolean; skipHeader:boolean; rules:ExclusionRule[] }
 export const defaultExclusions:Exclusions={skipSearch:true,skipHeader:true,rules:[]};
@@ -30,8 +32,8 @@ export function validateExclusions(value:unknown):Exclusions {
     rules:Array.isArray(v.rules)?v.rules.filter((rule):rule is ExclusionRule=>!!rule && typeof rule.id==='string' && (rule.match==='label'||rule.match==='selector') && typeof rule.value==='string' && !!rule.value.trim() && typeof rule.site==='string'):[],
   };
 }
-export interface Settings { version:3; locale:Locale; region:RegionSetting; seed:string; overwrite:boolean; fillUnknown:boolean; passwords:boolean; custom:CustomField[]; exclusions:Exclusions }
-export const defaults:Settings = { version:3, locale:'en', region:'mixed', seed:'', overwrite:true, fillUnknown:true, passwords:false, custom:[], exclusions:defaultExclusions };
+export interface Settings { version:3; locale:Locale; region:RegionSetting; seed:string; typeRules:TypeRule[]; overwrite:boolean; fillUnknown:boolean; passwords:boolean; custom:CustomField[]; exclusions:Exclusions }
+export const defaults:Settings = { version:3, locale:'en', region:'mixed', seed:'', typeRules:[], overwrite:true, fillUnknown:true, passwords:false, custom:[], exclusions:defaultExclusions };
 const people = {
   en:[['Alex','Morgan'],['Jamie','Parker'],['Jordan','Taylor'],['Casey','Bennett'],['Maya','Chen'],['Noah','Wilson'],['Lena','Brooks'],['Adam','Hayes']],
   fr:[['Camille','Martin'],['Alexandre','Bernard'],['Emma','Laurent'],['Lucas','Robert'],['Chloé','Dubois'],['Hugo','Moreau'],['Léa','Simon'],['Nathan','Lefevre']],
@@ -105,6 +107,8 @@ export function validateSettings(value:unknown):Settings {
   const v = value as Partial<Settings>;
   const region:RegionSetting = v.region==='us' || v.region==='fr' || v.region==='dz' ? v.region : 'mixed';
   const seed = typeof v.seed==='string' ? v.seed.slice(0,200) : '';
-  return {version:3,region,seed,exclusions:validateExclusions(v.exclusions),locale:v.locale === 'fr' || v.locale === 'ar' ? v.locale : 'en',overwrite:v.version!==3 || v.overwrite !== false,fillUnknown:v.version!==3 || v.fillUnknown !== false,passwords:v.passwords === true,
+  const types=new Set<string>([...fields.map(([key])=>key),'unknown']);
+  const typeRules=Array.isArray(v.typeRules)?v.typeRules.filter((rule):rule is TypeRule=>!!rule && typeof rule.id==='string' && typeof rule.selector==='string' && !!rule.selector && typeof rule.site==='string' && types.has(rule.type)).slice(0,500):[];
+  return {version:3,region,seed,typeRules,exclusions:validateExclusions(v.exclusions),locale:v.locale === 'fr' || v.locale === 'ar' ? v.locale : 'en',overwrite:v.version!==3 || v.overwrite !== false,fillUnknown:v.version!==3 || v.fillUnknown !== false,passwords:v.passwords === true,
     custom:Array.isArray(v.custom) ? v.custom.filter((c):c is CustomField => !!c && typeof c.id === 'string' && typeof c.label === 'string' && typeof c.value === 'string') : []};
 }

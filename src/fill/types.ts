@@ -1,6 +1,6 @@
 import type { FieldReport, PanelPageState, Control } from '../panel-types';
 import type { Classification } from './classify';
-import type { FieldKey } from '../data';
+import type { FieldKey, TypeRule } from '../data';
 import type { Random } from '../rng';
 import type { CustomField, Values, Exclusions, Identity } from '../data';
 import type { FieldSamples } from '../samples';
@@ -10,7 +10,7 @@ export interface UnknownField { signature?:string; id:string; label:string; name
 // `index` is the control's position in document.querySelectorAll('input, textarea, select').
 export interface ClassifiedField { index:number; type:string; confidence:number }
 export interface SuggestedField { signature:string; values:string[] }
-export interface FillRequest { seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
+export interface FillRequest { typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 // `index` is the form's position in document.forms.
 export interface FormInsight { index:number; type:string; confidence:number; fields:number }
 export interface FillResult { forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Référencement fournisseur</title>
+<style>
+body{font:14px/1.4 sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem}
+label{display:block;margin-top:.7rem;font-weight:600}
+input,select,textarea{display:block;width:100%;padding:.35rem;box-sizing:border-box}
+fieldset{margin:1rem 0}
+td{padding:.3rem .6rem;vertical-align:middle}
+</style>
+</head>
+<body>
+<header><h1>Portail achats - Référencement d'un nouveau fournisseur</h1></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <fieldset>
+    <legend>1. La société</legend>
+    <label for=":r1:">Raison sociale *</label>
+    <input id=":r1:" name="field_1" autocomplete="organization" required data-expect="company">
+
+    <label for="fj">Forme juridique</label>
+    <select id="fj" name="field_2" data-expect="unknown">
+      <option value="">Choisir…</option><option>SARL</option><option>SAS</option><option>EURL</option><option>SA</option><option>Auto-entrepreneur</option>
+    </select>
+
+    <label>N° SIRET (14 chiffres)
+      <input name="siret_num" inputmode="numeric" maxlength="14" data-expect="unknown">
+    </label>
+
+    <label for="vat_7">N° de TVA intracommunautaire</label>
+    <input id="vat_7" name="field_4" placeholder="FR00 000 000 000" data-expect="unknown">
+
+    <label for="sect">Secteur d'activité</label>
+    <select id="sect" name="field_5" data-expect="industry">
+      <option value="">—</option><option>Métallurgie</option><option>Plasturgie</option><option>Emballage</option><option>Transport et logistique</option><option>Services informatiques</option>
+    </select>
+
+    <input name="field_6" type="number" min="1" placeholder="Nombre de salariés" aria-label="Effectif" data-expect="employeeCount">
+
+    <label for="web">Site internet</label>
+    <input id="web" name="field_7" type="url" placeholder="https://" autocomplete="url" data-expect="website">
+  </fieldset>
+
+  <fieldset>
+    <legend>2. Siège social</legend>
+    <label for="adr1">Adresse du siège</label>
+    <input id="adr1" name="field_8" autocomplete="address-line1" data-expect="address">
+    <label for="adr2">Complément d'adresse (bâtiment, zone industrielle…)</label>
+    <input id="adr2" name="field_9" data-expect="address2">
+    <label for="cp">Code postal</label>
+    <input id="cp" name="field_10" inputmode="numeric" autocomplete="postal-code" data-expect="postalCode">
+    <label for="ville">Ville</label>
+    <input id="ville" name="field_11" autocomplete="address-level2" data-expect="city">
+    <label for="pays">Pays</label>
+    <select id="pays" name="field_12" autocomplete="country-name" data-expect="country">
+      <option>France</option><option>Belgique</option><option>Allemagne</option><option>Espagne</option><option>Italie</option><option>Tunisie</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. Interlocuteur commercial</legend>
+    <table>
+      <tr><td>Nom</td><td><input name="mat-input-4" data-expect="lastName"></td></tr>
+      <tr><td>Prénom</td><td><input name="mat-input-5" data-expect="firstName"></td></tr>
+      <tr><td>Fonction</td><td><input name="mat-input-6" data-expect="jobTitle"></td></tr>
+      <tr><td>Adresse e-mial</td><td><input id="mail1" name="mat-input-7" type="email" data-expect="email"></td></tr>
+      <tr><td>Confirmer l'e-mail</td><td><input name="mat-input-8" type="email" data-same-as="#mail1" data-expect="email"></td></tr>
+      <tr><td>Téléphone</td><td><input name="mat-input-9" type="tel" data-phone-region="fr" data-expect="phone"></td></tr>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>4. Conditions de règlement</legend>
+    <label for="iban">IBAN</label>
+    <input id="iban" name="field_20" autocomplete="off" data-expect="skip:iban">
+    <label for="bic">BIC / SWIFT</label>
+    <input id="bic" name="field_21" data-expect="skip:iban">
+    <label for="delai">Délai de paiement souhaité (jours)</label>
+    <input id="delai" name="field_22" type="number" min="0" data-expect="unknown">
+    <label><input type="checkbox" name="cert" data-expect="skip:consent" style="display:inline;width:auto"> Je certifie sur l'honneur l'exactitude des informations ci-dessus et l'absence de dettes fiscales ou sociales.</label>
+  </fieldset>
+  <button type="submit">Envoyer la demande de référencement</button>
+</form>
+</main>
+</body>
+</html>

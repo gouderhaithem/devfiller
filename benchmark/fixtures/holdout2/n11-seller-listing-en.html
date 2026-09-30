@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New listing</title>
+<style>
+body{font:14px/1.45 system-ui,sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem}
+.f{margin:.75rem 0}
+.f>label,.f>.l{display:block;font-weight:600;margin-bottom:.2rem}
+input:not([type=checkbox]),textarea{width:100%;box-sizing:border-box;padding:.4rem}
+.dims{display:flex;gap:.75rem}
+[role=combobox]{border:1px solid #888;padding:.4rem;background:#fff;cursor:pointer}
+[role=listbox]{list-style:none;margin:0;padding:0;border:1px solid #888;background:#fff}
+[role=option]{padding:.3rem .5rem;cursor:pointer}
+[role=option][aria-selected=true]{background:#def}
+[role=radiogroup]{display:flex;gap:1rem}
+[role=radio]{border:1px solid #888;border-radius:4px;padding:.3rem .8rem;cursor:pointer}
+[role=radio][aria-checked=true]{background:#246;color:#fff}
+[role=checkbox]{display:inline-block;width:18px;height:18px;border:2px solid #555;vertical-align:middle;cursor:pointer}
+[role=checkbox][aria-checked=true]{background:#246}
+</style>
+</head>
+<body>
+<header><h1>Marketplace seller hub</h1><h2>Create a listing</h2></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <div class="f"><label for="l_title">Listing title</label>
+    <input id="l_title" name="field_1" maxlength="80" data-expect="title"></div>
+  <div class="f"><label for="l_sku">SKU</label>
+    <input id="l_sku" name="field_2" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{2,}$" data-expect="reference"></div>
+  <div class="f"><span class="l" id="cat_l">Category</span>
+    <div role="combobox" id="cat" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-controls="cat_lb" aria-labelledby="cat_l" data-expect="unknown">Pick a category</div>
+    <ul role="listbox" id="cat_lb" aria-labelledby="cat_l" hidden>
+      <li role="option" aria-selected="false">Home &amp; Garden</li>
+      <li role="option" aria-selected="false">Electronics</li>
+      <li role="option" aria-selected="false">Sports &amp; Outdoors</li>
+      <li role="option" aria-selected="false">Toys</li>
+    </ul></div>
+  <div class="f"><span class="l" id="cond_l">Condition</span>
+    <div role="radiogroup" aria-labelledby="cond_l">
+      <span role="radio" tabindex="0" aria-checked="false" data-expect="unknown">New</span>
+      <span role="radio" tabindex="-1" aria-checked="false" data-expect="unknown">Used</span>
+      <span role="radio" tabindex="-1" aria-checked="false" data-expect="unknown">Refurbished</span>
+    </div></div>
+  <div class="f"><label for="l_desc">Item description</label>
+    <textarea id="l_desc" name="field_5" rows="4" data-expect="description"></textarea></div>
+  <div class="f"><label for="l_brand">Brand</label>
+    <input id="l_brand" name="field_6" data-expect="unknown"></div>
+
+  <div class="f"><label for="l_price">Price (€)</label>
+    <input id="l_price" name="field_7" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="price"></div>
+  <div class="f"><label for="l_old">Original price (€)</label>
+    <input id="l_old" name="field_8" inputmode="decimal" data-value-pattern="^\d+([.,]\d+)?$" data-expect="price"></div>
+  <div class="f"><label for="l_disc">Discount (%)</label>
+    <input id="l_disc" name="field_9" inputmode="numeric" data-expect="percentage"></div>
+  <div class="f"><label for="l_qty">Stock quantity (u)</label>
+    <input id="l_qty" name="field_10" type="number" min="0" data-expect="quantity"></div>
+
+  <div class="f"><span class="l">Package size</span>
+    <div class="dims">
+      <input name="dim_l" placeholder="Length (mm)" aria-label="Length in millimetres" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement">
+      <input name="dim_w" placeholder="Width (mm)" aria-label="Width in millimetres" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement">
+      <input name="dim_h" placeholder="Height (mm)" aria-label="Height in millimetres" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement">
+    </div></div>
+  <div class="f"><label for="l_wt">Weight (g)</label>
+    <input id="l_wt" name="field_14" inputmode="numeric" data-value-pattern="^\d+([.,]\d+)?$" data-expect="measurement"></div>
+  <div class="f"><label for="l_hand">Handling time (days)</label>
+    <input id="l_hand" name="field_15" type="number" min="0" data-expect="unknown"></div>
+  <div class="f"><span id="fs_l">Offer free shipping</span> <span role="checkbox" tabindex="0" aria-checked="false" aria-labelledby="fs_l" data-expect="unknown"></span></div>
+
+  <div class="f"><label for="l_shop">Shop website</label>
+    <input id="l_shop" name="field_17" data-expect="website"></div>
+  <div class="f"><label for="l_mail">Seller email</label>
+    <input id="l_mail" name="field_18" type="email" data-expect="email"></div>
+  <div class="f"><label for="l_tel">Seller phone</label>
+    <input id="l_tel" name="field_19" type="tel" data-expect="phone"></div>
+  <div class="f"><label><input type="checkbox" name="rights" data-expect="skip:consent" style="width:auto"> I confirm that I have the right to sell these items and accept the seller agreement.</label></div>
+  <button type="submit">Publish listing</button>
+</form>
+</main>
+<script>
+(function () {
+  document.querySelectorAll('[role=checkbox]').forEach(function (el) {
+    function t() { el.setAttribute('aria-checked', el.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
+    el.addEventListener('click', t);
+    el.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); t(); } });
+  });
+  document.querySelectorAll('[role=radiogroup]').forEach(function (g) {
+    var radios = g.querySelectorAll('[role=radio]');
+    radios.forEach(function (r) {
+      r.addEventListener('click', function () {
+        radios.forEach(function (x) { x.setAttribute('aria-checked', x === r ? 'true' : 'false'); x.tabIndex = x === r ? 0 : -1; });
+      });
+    });
+  });
+  document.querySelectorAll('[role=combobox]').forEach(function (cb) {
+    var lb = document.getElementById(cb.getAttribute('aria-controls'));
+    cb.addEventListener('click', function () { lb.hidden = false; cb.setAttribute('aria-expanded', 'true'); });
+    lb.addEventListener('click', function (e) {
+      var o = e.target.closest('[role=option]');
+      if (!o) return;
+      lb.querySelectorAll('[role=option]').forEach(function (x) { x.setAttribute('aria-selected', x === o ? 'true' : 'false'); });
+      cb.textContent = o.textContent;
+      cb.setAttribute('aria-expanded', 'false');
+      lb.hidden = true;
+    });
+  });
+})();
+</script>
+</body>
+</html>

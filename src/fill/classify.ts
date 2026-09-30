@@ -21,6 +21,7 @@ export interface Classification {
   pairOf?: Control;        // the field a confirmation repeats
   after?: Control;         // the start date an end date must follow
   signals?: Signal[];      // what the field said, kept for the form-level pass
+  fixed?: boolean;         // set by your type rule: nothing refines it
   confidence: number;      // 0..1, after the margin adjustment
   candidates: Candidate[]; // top alternatives, best first
   evidence: Evidence[];    // why the winning type won (or why the field is sensitive)
@@ -33,8 +34,8 @@ const MARGIN = 0.15;
 
 // How much each source is worth on its own. Sources in one group repeat each other (a label and a
 // placeholder usually say the same thing), so only the strongest in a group counts.
-const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1 };
-export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit' };
+const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1, rule: 1 };
+export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit', rule: 'rule' };
 // A radio group's question is its label.
 const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.

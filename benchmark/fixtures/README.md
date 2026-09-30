@@ -18,7 +18,14 @@ classification with that answer, so **label the truth, not what the engine does 
 - Every radio button in a group carries the group's type (a gender radio group is `gender` on
   each radio).
 - A fixture is one self-contained file: `<!doctype html>`, `<meta charset="utf-8">`, a `<title>`,
-  no external scripts, styles, fonts or images. Inline `<style>` is fine.
+  no external scripts, styles, fonts or images. Inline `<style>` is fine. Inline `<script>` is only
+  for custom widgets (below), and must not submit, fetch or change fields on its own.
+- **Custom widgets** built from ARIA roles need `data-expect` too, on the element that carries the
+  role: `role="checkbox"`, `role="switch"`, each `role="radio"` in a `role="radiogroup"`, a
+  `role="combobox"` that opens a `role="listbox"`, and rich-text editors (`contenteditable="true"`
+  or `role="textbox"` on a non-input element). Their inline script behaves like the real thing:
+  clicking a checkbox toggles `aria-checked`, clicking a combobox shows its options, clicking an
+  option selects it.
 - Keep every field visible (no `display:none`, no collapsed sections). Disabled or read-only
   fields are fine and still need `data-expect`.
 - Names are `NN-topic.html`. Regression fixtures for reported bugs go in `regressions/`.

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Leave request</title>
+<style>
+body{font:15px/1.45 Georgia,serif;max-width:640px;margin:2rem auto;padding:0 1rem;background:#fafafa}
+.f{margin:.8rem 0}
+.f label{display:block;margin-bottom:.2rem}
+input:not([type=checkbox]),select,textarea{width:100%;box-sizing:border-box;padding:.4rem}
+</style>
+</head>
+<body>
+<header><h1>People &amp; Culture</h1><h2>Request time off</h2></header>
+<main>
+<form data-form-type="other" action="#" method="post">
+  <div class="f"><label for="emp_n">Employee name</label>
+    <input id="emp_n" name="employee" autocomplete="name" data-expect="fullName"></div>
+  <div class="f"><label for="emp_id">Staff number</label>
+    <input id="emp_id" name="field_2" data-expect="unknown"></div>
+  <div class="f"><label for="dept">Department</label>
+    <select id="dept" name="field_3" data-expect="department">
+      <option value="">Please select</option><option>Finance</option><option>Engineering</option><option>Operations</option><option>Customer Success</option>
+    </select></div>
+  <div class="f"><label for="jt">Job title</label>
+    <input id="jt" name="field_4" data-expect="jobTitle"></div>
+  <div class="f"><label for="mgr">Line manager</label>
+    <input id="mgr" name="field_5" data-expect="fullName"></div>
+  <div class="f"><label for="lt">Type of leave</label>
+    <select id="lt" name="field_6" data-expect="unknown">
+      <option value="">Please select</option><option>Annual leave</option><option>Sick leave</option><option>Unpaid leave</option><option>Parental leave</option>
+    </select></div>
+  <div class="f"><label for="lv_from">From</label>
+    <input id="lv_from" name="leave_from" type="date" data-expect="startDate"></div>
+  <div class="f"><label for="lv_to">To (inclusive)</label>
+    <input id="lv_to" name="leave_to" type="date" data-after="#lv_from" data-expect="endDate"></div>
+  <div class="f"><label><input type="checkbox" name="half" data-expect="unknown"> The first day is a half day</label></div>
+  <div class="f"><label for="wd">Working days requested</label>
+    <input id="wd" name="field_10" type="number" min="0.5" step="0.5" data-expect="quantity"></div>
+  <div class="f"><label for="cov">Colleague covering for you</label>
+    <input id="cov" name="field_11" data-expect="fullName"></div>
+  <div class="f"><label for="ph">Phone number during leave</label>
+    <input id="ph" name="field_12" type="tel" data-expect="phone"></div>
+  <div class="f"><label for="em">Personal email</label>
+    <input id="em" name="field_13" type="email" autocomplete="email" data-expect="email"></div>
+  <div class="f"><label for="req_d">Date of request</label>
+    <input id="req_d" name="field_14" type="date" data-expect="date"></div>
+  <div class="f"><label for="cm">Comments for your manager</label>
+    <textarea id="cm" name="field_15" rows="3" data-expect="notes"></textarea></div>
+  <div class="f"><label><input type="checkbox" name="decl" data-expect="skip:consent"> I confirm that my remaining leave balance covers this request and that the information above is accurate.</label></div>
+  <button type="submit">Submit request</button>
+</form>
+</main>
+</body>
+</html>

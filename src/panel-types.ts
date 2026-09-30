@@ -36,4 +36,5 @@ export interface PanelReply {
   kept?: number;
   overlay?: boolean;
   forms?: Array<{ index: number; type: string; confidence: number; fields: number }>;
+  fixture?: { html: string; filename: string };
 }

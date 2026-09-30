@@ -1,8 +1,8 @@
 import {installFormPreload} from './form-preload';
-import { generateIdentities, generatePhones, generateValues, validateSettings, type Settings } from './data';
+import { fields, generateIdentities, generatePhones, generateValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
-import { runFillPage, runPanelAction } from './fill/inject';
+import { runExport, runFillPage, runPanelAction } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
@@ -282,6 +282,7 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     if(!msg.documentId) throw new Error('Refresh the field list first.');
     if(msg.type==='panel:fill') {await fillClickedTab(tab,msg.documentId);return inspectTab(tabId);}
     if(filling.has(tabId)) throw new Error('Wait for the current fill to finish.');
+    if(msg.type==='panel:export') return {...await inspectTab(tabId),fixture:await runExport({tabId},validateSettings((await chrome.storage.local.get('settings')).settings).typeRules)};
     if(msg.type==='panel:overlay') return {...await inspectTab(tabId),...await runPanelAction({tabId},'overlay',msg.documentId,msg.value==='on'?'on':'off')};
     if(msg.type==='panel:highlight' || msg.type==='panel:undo') {
       const action=msg.type==='panel:undo'?'undo':'highlight';
@@ -289,13 +290,18 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
       if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'DevFiller: last fill undone. Click to fill again.'});}
       return {...await inspectTab(tabId),...result};
     }
-    if(msg.type==='panel:exclude' || msg.type==='panel:rule') {
+    if(msg.type==='panel:exclude' || msg.type==='panel:rule' || msg.type==='panel:type') {
       if(!msg.fieldId) throw new Error('Choose a field first.');
       if(msg.type==='panel:rule' && (typeof msg.value!=='string' || !msg.value.trim() || msg.value.length>5000)) throw new Error('Enter a test value between 1 and 5,000 characters.');
+      if(msg.type==='panel:type' && (typeof msg.value!=='string' || ![...fields.map(([key])=>key as string),'unknown','auto'].includes(msg.value))) throw new Error('Choose a field type.');
       const field=await runPanelAction({tabId},'field',msg.documentId,msg.fieldId);
       if(!field || !('selector' in field) || !field.selector || !field.site) throw new Error('This field could not be located. Refresh the panel.');
       const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
-      if(msg.type==='panel:exclude') {
+      if(msg.type==='panel:type') {
+        // "auto" removes the rule and lets recognition decide again.
+        settings.typeRules=settings.typeRules.filter(rule=>rule.selector!==field.selector || rule.site!==field.site);
+        if(msg.value!=='auto') settings.typeRules.push({id:crypto.randomUUID(),selector:field.selector,site:field.site,type:msg.value as TypeRule['type']});
+      } else if(msg.type==='panel:exclude') {
         if(!settings.exclusions.rules.some(rule=>rule.match==='selector' && rule.value===field.selector && rule.site===field.site)) settings.exclusions.rules.push({id:crypto.randomUUID(),match:'selector',value:field.selector,site:field.site});
       } else {
         settings.custom=settings.custom.filter(rule=>rule.selector!==field.selector || rule.site!==field.site);
