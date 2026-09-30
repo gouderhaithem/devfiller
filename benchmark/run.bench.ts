@@ -10,6 +10,7 @@ import { calibration, regressions, score, type Baseline, type Current, type Pair
 import { formatReport, type FixtureScore, type PerfResult, type RunExtras } from './report';
 import { variantCases } from './variants';
 import { WIDGET_SELECTOR } from '../src/fill/widgets';
+import { TEST_CARDS } from '../src/fill/cards';
 
 // The benchmark injects the same bundle the extension ships, built straight from source.
 // BENCHMARK_ENTRY swaps in another engine entry, to compare engines on the same fixtures.
@@ -31,8 +32,13 @@ interface ControlState { value: string; checked: boolean }
 
 const values = generateValues('en');
 const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), phones: generatePhones(), localized: localizedValues('en'), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
-// The default settings, then every optional filler switched on: neither may touch a sensitive field.
-const FILL_SETTINGS: FillRequest[] = [base, { ...base, passwords: true, exclusions: { skipSearch: false, skipHeader: false, rules: [] } }];
+// Card fields off, then every optional filler switched on, test cards included. Neither may touch
+// a one-time code, bank or consent field; with test cards on, a card field may only get test data.
+const FILL_SETTINGS: FillRequest[] = [{ ...base, cards: 'off' }, { ...base, passwords: true, cards: 'success', exclusions: { skipSearch: false, skipHeader: false, rules: [] } }];
+const TEST_NUMBERS = Object.values(TEST_CARDS).map(card => card.number.replace(/\D/g, ''));
+// Test data for a card field: a test card number, a group of four, an expiry, the CVC, a name or "visa".
+const TEST_CARD_SHAPES = [/^\d{1,4}$/, /^\d{2}\s?[/-]?\s?\d{2}(?:\d{2})?$/, /^\d{4}-\d{2}$/, /^visa$/i, /^[\p{L} .'-]+$/u];
+const isTestCardData = (value: string) => !value || TEST_NUMBERS.includes(value.replace(/[\s-]/g, '')) || TEST_CARD_SHAPES.some(shape => shape.test(value.trim()));
 
 let engineScript = '';
 
@@ -106,7 +112,13 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
     const after = await readStates(page, sensitive);
     sensitive.forEach((control, i) => {
       const changed = before[i].value !== after[i].value || before[i].checked !== after[i].checked;
-      if (changed && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
+      const testCard = control.expect === 'skip:card' && settings.cards !== 'off' && isTestCardData(after[i].value);
+      if (changed && !testCard && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
+    });
+    // A card number never lands outside a card field.
+    const others = controls.filter(control => !control.omitted && control.expect !== 'skip:card');
+    (await readStates(page, others)).forEach((state, i) => {
+      if (TEST_NUMBERS.some(number => state.value.replace(/\D/g, '').includes(number)) && !leaks.some(leak => leak.control === others[i].html)) leaks.push({ fixture: name, expected: others[i].expect ?? 'unknown', control: others[i].html });
     });
     submits += await page.evaluate(() => (globalThis as typeof globalThis & { __submits: number }).__submits);
     // Relationships are checked after the fill with every filler on (passwords included).

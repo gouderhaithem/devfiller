@@ -1,4 +1,5 @@
 import { fields } from '../fields';
+import { PROTECTED_CARD, testCardRole } from './cards';
 import type { ControlSnapshot, Detection, FieldReport } from '../panel-types';
 import type { Control, ControlRun, FillContext } from './types';
 import { PASSWORD } from './dictionary';
@@ -24,7 +25,8 @@ export function skipReason(ctx: FillContext, el: Control): string {
   if (el instanceof HTMLInputElement && el.type === 'file') return 'File uploads are not supported';
   const ac = el.autocomplete || '';
   const { type } = classificationOf(ctx.classifications, el);
-  if (type === 'skip:card' || type === 'skip:otp') return 'Protected payment or verification field';
+  if (type === 'skip:card') return testCardRole(ctx, el) ? '' : PROTECTED_CARD;
+  if (type === 'skip:otp') return 'Protected payment or verification field';
   if (type === 'skip:iban') return 'Protected bank account field';
   if (type === 'skip:consent') return 'Consent field stays untouched';
   if (type === 'skip:session') return 'Session choice stays untouched';

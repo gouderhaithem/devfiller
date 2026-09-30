@@ -9,6 +9,7 @@ import { analyzePage } from './context';
 import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
 import { randomFor, secureRandom, type Random } from '../rng';
 import { alignPhones, otherNumber } from './phones';
+import { fillCard } from './cards';
 import { classifyWidget, listWidgets, WIDGET_SELECTOR } from './widgets';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
 import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
@@ -259,6 +260,8 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   if (ctx.traps.has(el)) return run('none', { reason: 'Hidden trap for bots' });
   // When the page keeps its fields in forms, a checkbox outside them is a page setting, not data.
   if (isChoice(el) && !el.form && ctx.inForms) return run('none', { reason: 'Outside the page\'s forms' });
+  // Card fields get test cards, masked CVC boxes included; every other sensitive field stays empty.
+  if (classificationOf(ctx.classifications, el).type === 'skip:card') return fillCard(ctx, el);
   if (isInput(el) && el.type === 'password' && !request.passwords) return NONE;
   const sig = controlSignals(el);
   const { type } = classificationOf(ctx.classifications, el);
