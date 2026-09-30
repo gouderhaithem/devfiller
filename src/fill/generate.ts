@@ -8,12 +8,12 @@ import { DATE_TYPES, TEXT_TYPES, isInput } from './extract';
 import { shouldExclude } from './exclude';
 import { normalize } from './normalize';
 
-export const random = (max: number) => max > 0 ? crypto.getRandomValues(new Uint32Array(1))[0] % max : 0;
-const pick = <T>(choices: readonly T[]) => choices[random(choices.length)];
+import { pickWith, secureRandom, type Random } from '../rng';
 
 const WORDS = ['Garden','River','Meadow','Forest','Ocean','Sunshine','Morning','Breeze','Willow','Orchard','Mountain','Valley','Rainbow','Cloud','Summer','Autumn','Winter','Spring','Harbor','Village','Market','Library','Workshop','Journey','Picnic','Lantern','Candle','Window','Basket','Flower','Apple','Orange','Cherry','Peach','Olive','Maple','Cedar','Robin','Sparrow','Butterfly','Welcome','Friendly','Peaceful','Bright','Fresh','Gentle','Calm','Kind','Home','Book','Tree','Leaf','Sky','Sun','Sea','Tea','Go','Be','We','Us','It','A','I'];
 const SENTENCES = ['The garden is quiet today.', 'A gentle breeze moves through the trees.', 'We enjoyed a walk beside the river.', 'The morning sun lights up the room.', 'Fresh flowers brighten the house.', 'A friendly welcome makes a lovely day.', 'The village market opens in the morning.', 'We found a peaceful place by the sea.'];
 const IDENTITY_KEYS = ['firstName','middleName','lastName','fullName','username','email'] as const;
+const PLACE_KEYS: ReadonlySet<FieldKey> = new Set(['country', 'state', 'city', 'district', 'postalCode', 'nationality']);
 
 // A value the resolver settled on, with where it came from.
 export interface Resolved { value: string; key?: FieldKey; literal: boolean; generic: boolean; ai: boolean }
@@ -25,9 +25,13 @@ export function readableText(ctx: FillContext, el: HTMLInputElement | HTMLTextAr
   const preferred = el instanceof HTMLTextAreaElement ? SENTENCES : WORDS;
   let choices = preferred.filter(word => word.length <= max && word.length >= min);
   if (!choices.length) choices = WORDS.filter(word => word.length <= max);
-  const different = choices.filter(word => word !== el.value);
+  const pick = <T>(list: readonly T[]) => pickWith(ctx.random(el), list);
+  // A fresh fill changes the text; a seeded one repeats it exactly.
+  const different = ctx.fresh || !ctx.request.seed ? choices.filter(word => word !== el.value) : [];
   if (different.length) choices = different;
-  const unused = choices.filter(word => !ctx.usedText.has(word));
+  // Fresh fills avoid repeating a word on the page. A seeded fill doesn't, so each field depends
+  // only on its own stream and adding a field never changes the others.
+  const unused = ctx.request.seed?.trim() ? [] : choices.filter(word => !ctx.usedText.has(word));
   if (unused.length) choices = unused;
   let value = pick(choices) || '';
   while (value && value.length < min) {
@@ -36,7 +40,7 @@ export function readableText(ctx: FillContext, el: HTMLInputElement | HTMLTextAr
     value += ` ${pick(fitting).toLowerCase()}`;
   }
   // Longer minimum lengths may produce the same phrase; choose a new opening word.
-  if (ctx.request.overwrite && value === el.value && value.includes(' ')) {
+  if (ctx.fresh && value === el.value && value.includes(' ')) {
     const [first, ...rest] = value.split(' ');
     const alternatives = WORDS.filter(word => word !== first && word.length <= first.length);
     if (alternatives.length) value = `${pick(alternatives)} ${rest.join(' ')}`;
@@ -45,16 +49,17 @@ export function readableText(ctx: FillContext, el: HTMLInputElement | HTMLTextAr
   return value;
 }
 
-const randomWeek = (date: string) => `${date.slice(0, 4)}-W${String(1 + random(52)).padStart(2, '0')}`;
+const randomWeek = (random: Random, date: string) => `${date.slice(0, 4)}-W${String(1 + random(52)).padStart(2, '0')}`;
 
 // The generic value for an unrecognized control when "Fill unknown fields" is on.
 export function fallbackValue(ctx: FillContext, el: Control): { value: string; generic: boolean } {
   const { date, time, color } = ctx.request.values;
+  const random = ctx.random(el);
   if (el instanceof HTMLTextAreaElement) return { value: readableText(ctx, el), generic: true };
   if (!isInput(el)) return { value: 'Sample', generic: false };
   const byType: Record<string, () => string> = {
     number: () => String(1 + random(1000)), range: () => String(random(101)), date: () => date, 'datetime-local': () => `${date}T${time}`,
-    month: () => date.slice(0, 7), week: () => randomWeek(date), time: () => time, color: () => color,
+    month: () => date.slice(0, 7), week: () => randomWeek(random, date), time: () => time, color: () => color,
   };
   return Object.hasOwn(byType, el.type) ? { value: byType[el.type](), generic: false } : { value: readableText(ctx, el), generic: true };
 }
@@ -63,7 +68,9 @@ export function fallbackValue(ctx: FillContext, el: Control): { value: string; g
 // Values are only compared locally; they never leave the page.
 export function coherentValues(request: FillRequest, controls: readonly Control[], exclusions: Exclusions): Values {
   let values = request.values;
-  if (request.mode === 'scan' || !request.overwrite || !(request.identities?.length || request.samples)) return values;
+  // A seed promises the same values every time, so there is nothing to vary.
+  if (request.mode === 'scan' || !request.overwrite || request.seed?.trim() || !(request.identities?.length || request.samples)) return values;
+  const pick = <T>(list: readonly T[]) => pickWith(secureRandom, list);
   const current = controls.filter(el => !el.disabled && !('readOnly' in el && el.readOnly) && el.getClientRects().length && !shouldExclude(el, exclusions))
     .map(el => ({ value: el.value.trim(), maxLength: 'maxLength' in el ? el.maxLength : -1 })).filter(el => el.value);
   const repeatsValue = (value: string) => current.some(el => (el.maxLength < 0 ? value : value.slice(0, el.maxLength)) === el.value);
@@ -126,7 +133,10 @@ function datePartOption(options: readonly HTMLOptionElement[], value: string, pa
 }
 
 export function chooseOption(ctx: FillContext, el: HTMLSelectElement, resolved: Resolved): string | undefined {
-  const { overwrite, fillUnknown } = ctx.request;
+  const { fillUnknown } = ctx.request;
+  // Places stay on the generated answer, so country, wilaya, city and phone agree on every fill.
+  const overwrite = ctx.fresh && !(resolved.key && PLACE_KEYS.has(resolved.key));
+  const pick = <T>(list: readonly T[]) => pickWith(ctx.random(el), list);
   const options = Array.from(el.options).filter(o => !o.disabled && !(o.parentElement instanceof HTMLOptGroupElement && o.parentElement.disabled));
   const eligible = options.filter(o => o.value && !PLACEHOLDER_OPTION.test(o.textContent || ''));
   const part = resolved.key && DATE_FIELD_TYPES.has(resolved.key) ? datePart(optionTexts(el)) : undefined;
@@ -144,7 +154,7 @@ export function fitNumber(ctx: FillContext, el: HTMLInputElement, resolved: Reso
   let number = Number(resolved.value);
   if (!Number.isFinite(number)) {
     if (!ctx.request.fillUnknown || resolved.ai) return undefined;
-    number = 1 + random(1000);
+    number = 1 + ctx.random(el)(1000);
   }
   const min = el.min !== '' ? Number(el.min) : el.type === 'range' ? 0 : -Infinity;
   const max = el.max !== '' ? Number(el.max) : el.type === 'range' ? 100 : Infinity;
@@ -153,7 +163,7 @@ export function fitNumber(ctx: FillContext, el: HTMLInputElement, resolved: Reso
   const base = Number.isFinite(min) ? min : Number(el.getAttribute('value') || 0);
   if (step > 0) number = base + Math.round((number - base) / step) * step;
   if (number > max && step > 0) number -= step;
-  if (ctx.request.overwrite && el.value !== '' && number === Number(el.value)) {
+  if (ctx.fresh && el.value !== '' && number === Number(el.value)) {
     const increment = step > 0 ? step : 0.01;
     if (number + increment <= max) number += increment;
     else if (number - increment >= min) number -= increment;
@@ -183,11 +193,11 @@ export function fitDate(ctx: FillContext, el: HTMLInputElement, resolved: Resolv
   if (el.type === 'month') value = value.slice(0, 7);
   const formatProbe = el.cloneNode() as HTMLInputElement; formatProbe.value = value;
   if (!formatProbe.value && ctx.request.fillUnknown && !resolved.ai) {
-    value = el.type === 'date' ? date : el.type === 'datetime-local' ? `${date}T${time}` : el.type === 'month' ? date.slice(0, 7) : el.type === 'week' ? randomWeek(date) : time;
+    value = el.type === 'date' ? date : el.type === 'datetime-local' ? `${date}T${time}` : el.type === 'month' ? date.slice(0, 7) : el.type === 'week' ? randomWeek(ctx.random(el), date) : time;
   }
   if (el.min && value < el.min) value = el.min;
   if (el.max && value > el.max) value = el.max;
-  if (ctx.request.overwrite && value === el.value) {
+  if (ctx.fresh && value === el.value) {
     const step = Math.max(1, Number(el.step) || (el.type === 'time' || el.type === 'datetime-local' ? 60 : 1));
     for (const direction of [1, -1]) {
       const next = nextDate(el, value, direction, step);
@@ -201,9 +211,10 @@ export function fitText(ctx: FillContext, el: HTMLInputElement | HTMLTextAreaEle
   const { request } = ctx;
   const key = resolved.key;
   const fit = (text: string) => el.maxLength < 0 ? text : text.slice(0, el.maxLength);
-  if (!resolved.literal && key && request.overwrite && fit(value) === el.value) {
+  if (!resolved.literal && key && ctx.fresh && fit(value) === el.value) {
     if (NUMERIC_KEYS.includes(key) && Number.isFinite(Number(value))) value = String(Number(value) + 1);
-    else if (key === 'phone') value = `+1 202 555 01${String((Number(value.slice(-2)) + 1) % 100).padStart(2, '0')}`;
+    // A phone number keeps its country format and changes its last two digits.
+    else if (key === 'phone' && /\d{2}$/.test(value)) value = `${value.slice(0, -2)}${String((Number(value.slice(-2)) + 1) % 100).padStart(2, '0')}`;
   }
   if (!request.fillUnknown || resolved.literal) return value;
   // Length requirements use complete words, never ID padding or character scrambling.
@@ -212,7 +223,7 @@ export function fitText(ctx: FillContext, el: HTMLInputElement | HTMLTextAreaEle
     while (value.length < el.minLength) {
       const fitting = (request.samples?.[key] || SENTENCES).filter(sentence => value.length + 1 + sentence.length <= max);
       if (!fitting.length) break;
-      value += ` ${pick(fitting)}`;
+      value += ` ${pickWith(ctx.random(el), fitting)}`;
     }
   }
   return el.maxLength >= 0 ? fit(value) : value;
@@ -237,7 +248,7 @@ export function fitValue(ctx: FillContext, el: Control, resolved: Resolved): str
   }
   if (!resolved.literal && isInput(el) && DATE_TYPES.includes(el.type)) value = fitDate(ctx, el, { ...resolved, value });
   if (!isInput(el) || TEXT_TYPES.includes(el.type)) value = fitText(ctx, el, resolved, value);
-  if (!resolved.literal && isInput(el) && el.type === 'color' && ctx.request.overwrite && value === el.value) {
+  if (!resolved.literal && isInput(el) && el.type === 'color' && ctx.fresh && value === el.value) {
     value = `#${((parseInt(value.slice(1), 16) + 1) % 0x1000000).toString(16).padStart(6, '0')}`;
   }
   return accepted(ctx, el, value);

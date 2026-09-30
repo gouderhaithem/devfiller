@@ -5,11 +5,7 @@ const common:FieldSamples = {
   website:['https://studio.example.com','https://garden.example.com','https://shop.example.com','https://portfolio.example.com'],
   password:['Garden-River-27!','Meadow-Sunshine-42!','Willow-Ocean-63!','Harbor-Forest-85!'],
   color:['#5370ce','#75a878','#d99454','#9869ad','#468e99'],
-  city:['Washington','Austin','Paris','Algiers'],
-  state:['District of Columbia','Texas','Île-de-France','Algiers'],
-  postalCode:['20001','78701','75001','16000'],
-  country:['United States','France','Algeria'],
-  nationality:['American','French','Algerian'],
+  // Places come from the region profiles, so city, postal code and country always agree.
   gender:['Female','Male','Prefer not to say'],
 };
 const localized:Record<Locale,FieldSamples> = {

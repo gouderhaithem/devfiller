@@ -35,7 +35,7 @@ HOW IT WORKS
 • Open the side panel (right-click the icon, or press Alt+Shift+F) to see which fields were filled or skipped and why, jump to a field, and undo the last fill.
 
 DATA THAT MAKES SENSE
-• 42 field types: names, usernames, emails, phones, addresses, companies, job titles, dates, numbers, messages and more.
+• 43 field types: names, usernames, emails, phones, addresses, companies, job titles, dates, numbers, messages and more.
 • Values fit together: the username and email match the generated name.
 • Recognizes labels in English, French and Arabic, and generates data in any of the three languages.
 • Respects input types, length limits, min/max values and dropdown options.

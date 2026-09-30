@@ -1,19 +1,19 @@
 {
   "summary": {
-    "fields": 453,
+    "fields": 464,
     "precision": 1,
     "recall": 1,
     "f1": 1,
     "accuracy": 1,
-    "unknownRate": 0.13245033112582782,
+    "unknownRate": 0.125,
     "falsePositiveRate": 0,
     "wrongRate": 0
   },
   "types": {
     "address": {
-      "support": 14,
-      "predicted": 14,
-      "correct": 14,
+      "support": 15,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -51,9 +51,9 @@
       "f1": 1
     },
     "city": {
-      "support": 14,
-      "predicted": 14,
-      "correct": 14,
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -75,9 +75,9 @@
       "f1": 1
     },
     "country": {
-      "support": 14,
-      "predicted": 14,
-      "correct": 14,
+      "support": 15,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -106,10 +106,18 @@
       "recall": 1,
       "f1": 1
     },
+    "district": {
+      "support": 1,
+      "predicted": 1,
+      "correct": 1,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
     "email": {
-      "support": 35,
-      "predicted": 35,
-      "correct": 35,
+      "support": 36,
+      "predicted": 36,
+      "correct": 36,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -139,9 +147,9 @@
       "f1": 1
     },
     "fullName": {
-      "support": 19,
-      "predicted": 19,
-      "correct": 19,
+      "support": 20,
+      "predicted": 20,
+      "correct": 20,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -179,9 +187,9 @@
       "f1": 1
     },
     "message": {
-      "support": 10,
-      "predicted": 10,
-      "correct": 10,
+      "support": 11,
+      "predicted": 11,
+      "correct": 11,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -219,9 +227,9 @@
       "f1": 1
     },
     "phone": {
-      "support": 29,
-      "predicted": 29,
-      "correct": 29,
+      "support": 32,
+      "predicted": 32,
+      "correct": 32,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -323,9 +331,9 @@
       "f1": 1
     },
     "state": {
-      "support": 9,
-      "predicted": 9,
-      "correct": 9,
+      "support": 10,
+      "predicted": 10,
+      "correct": 10,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -377,6 +385,10 @@
     "total": 299
   },
   "relations": {
+    "seeded repeat": {
+      "correct": 37,
+      "total": 37
+    },
     "confirmation": {
       "correct": 11,
       "total": 11
@@ -388,10 +400,14 @@
     "new differs": {
       "correct": 2,
       "total": 2
+    },
+    "phone follows the form": {
+      "correct": 3,
+      "total": 3
     }
   },
   "forms": {
-    "correct": 38,
-    "total": 44
+    "correct": 41,
+    "total": 47
   }
 }

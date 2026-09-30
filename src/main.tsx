@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Copy, FlaskConical, Plus, Settings2, Shuffle, Sparkles, Trash2, X } from 'lucide-react';
-import { defaults, fields, generateIdentities, generateValues, type Settings, type Values } from './data';
+import { defaults, fields, generateIdentities, generatePhones, generateValues, type Settings, type Values } from './data';
 import { generateSamples } from './samples';
 import type { FillResult } from './fill';
 import { runFillPage } from './fill/inject';
@@ -26,17 +26,17 @@ function App() {
   const [result,setResult] = useState<FillResult|null>(null);
   const [copied,setCopied] = useState('');
   const saveQueue = useRef(Promise.resolve());
-  useEffect(()=> { let active=true; readSettings().then(s=>{ if(active){setSettings(s);setValues(generateValues(s.locale));} }).catch(()=>{if(active)setError('Could not load your settings. You can still generate data.');}).finally(()=>{if(active)setReady(true);}); return()=>{active=false;}; },[]);
+  useEffect(()=> { let active=true; readSettings().then(s=>{ if(active){setSettings(s);setValues(generateValues(s.locale,s));} }).catch(()=>{if(active)setError('Could not load your settings. You can still generate data.');}).finally(()=>{if(active)setReady(true);}); return()=>{active=false;}; },[]);
   function update(next:Settings) {
     setSettings(next);
     saveQueue.current = saveQueue.current.then(()=>saveSettings(next)).catch(()=>setError('Could not save your settings. Please try again.'));
   }
-  function regenerate() { setValues(generateValues(settings.locale));setResult(null);setError(''); }
+  function regenerate() { setValues(generateValues(settings.locale,settings));setResult(null);setError(''); }
   async function fill() {
     setBusy(true);setError('');setResult(null);
-    const fresh = generateValues(settings.locale);setValues(fresh);
+    const fresh = generateValues(settings.locale,settings);setValues(fresh);
     try {
-      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale),samples:generateSamples(settings.locale),custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords };
+      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed),seed:settings.seed,custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords };
       if (isExtension()) {
         const [active] = await chrome.tabs.query({active:true,currentWindow:true});
         if (!active?.id) throw new Error('Open a webpage with a form, then try again.');
@@ -73,9 +73,12 @@ function App() {
           ['overwrite','Replace existing values','Overwrite fields that already have a value.'],
           ['fillUnknown','Fill unknown fields','Fill every editable field, even if its value is invalid.'],
           ['passwords','Generate test passwords','Fill password and confirmation fields.'],
-        ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}<p className="fine">Consent stays manual. Filling never submits forms automatically.</p></section>}
+        ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}
+          <label className="toggle-row setting-row"><span><strong>Addresses and phones</strong><small>Where cities, postal codes and phone numbers come from. A country chosen in the form still wins for phones.</small></span><select disabled={!ready||busy} value={settings.region} onChange={e=>{const next={...settings,region:e.target.value as Settings['region']};update(next);setValues(generateValues(next.locale,next));}}><option value="mixed">Mixed</option><option value="us">United States</option><option value="fr">France</option><option value="dz">Algeria</option></select></label>
+          <label className="toggle-row setting-row"><span><strong>Repeatable data</strong><small>Type a seed to get exactly the same values on every fill, for reproducible tests. Leave it empty for fresh data. Seeded fills don't use AI.</small></span><input type="text" value={settings.seed} maxLength={200} placeholder="e.g. checkout-test" disabled={!ready||busy} onChange={e=>{const next={...settings,seed:e.target.value};update(next);setValues(generateValues(next.locale,next));}}/></label>
+          <p className="fine">Consent stays manual. Filling never submits forms automatically.</p></section>}
         {tab==='gemini'?<GeminiPanel/>:tab==='excluded'?<ExclusionsPanel value={settings.exclusions} disabled={!ready||busy} onChange={exclusions=>update({...settings,exclusions})}/>:tab==='generate'?<>
-          <div className="section-heading"><h2>Generated identity</h2><label className="locale"><span className="sr-only">Data language</span><select disabled={!ready||busy} value={settings.locale} onChange={e=>{const locale=e.target.value as Settings['locale'];update({...settings,locale});setValues(generateValues(locale));setResult(null);}}><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select><ChevronDown size={13}/></label></div>
+          <div className="section-heading"><h2>Generated identity</h2><label className="locale"><span className="sr-only">Data language</span><select disabled={!ready||busy} value={settings.locale} onChange={e=>{const locale=e.target.value as Settings['locale'];update({...settings,locale});setValues(generateValues(locale,settings));setResult(null);}}><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select><ChevronDown size={13}/></label></div>
           <div className="identity"><span className="avatar">{values.firstName.slice(0,1)}{values.lastName.slice(0,1)}</span><div><strong dir="auto">{values.fullName}</strong><small>{values.jobTitle} · {values.company}</small></div><button className="icon" title="Generate another identity" aria-label="Generate another identity" onClick={regenerate} disabled={busy}><Shuffle size={17}/></button></div>
           <div className="values">{shown.map(([key,label])=><div className="value-row" key={key}><span>{label}</span><div><b dir="auto">{values[key]}</b><button className="copy" aria-label={`Copy ${label}`} onClick={()=>copy(key,values[key])}>{copied===key?<Check size={13}/>:<Copy size={13}/>}</button></div></div>)}</div>
           <button className="expand" aria-expanded={expanded} onClick={()=>setExpanded(!expanded)}>{expanded?<ChevronDown size={14}/>:<ChevronRight size={14}/>} {expanded?'Show fewer fields':`Explore all ${fields.length} field types`}</button>
@@ -87,7 +90,7 @@ function App() {
         {result&&<div className="notice success" role="status"><Check size={17}/><div><strong>{result.filled} {result.filled===1?'field':'fields'} filled</strong><small>{result.preserved} kept · {result.unmatched} unrecognized · {result.invalid} incompatible</small>{result.filled===0&&<small>Try enabling “Fill unknown fields” in settings.</small>}</div></div>}
 {!isExtension()&&<button className="fill" onClick={fill} disabled={!ready||busy}><Sparkles size={18}/>{busy?'Filling your form…':'Generate & fill'}<ArrowUpRight size={18}/></button>}
         {isExtension()&&<p className="helper">To fill a website, switch to its tab and click the DevFiller toolbar icon. These settings apply automatically. For field details and undo, right-click the icon → Open DevFiller panel, or press Alt + Shift + F.</p>}
-        <p className="footnote">New data with every click. {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
+        <p className="footnote">{settings.seed.trim()?`Seed “${settings.seed.trim()}”: the same data on every click.`:'New data with every click.'} {settings.overwrite?'Existing values will be replaced.':'Existing values are kept.'}</p>
       </div>
       <footer><span><span className="status-dot"/> Your browser, your test data</span><a className="welcome-link" href="./welcome.html" target="_blank" rel="noreferrer">Welcome guide ↗</a><span>v0.11.2</span></footer>
     </main>

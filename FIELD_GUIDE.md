@@ -1,6 +1,6 @@
 # Fields, labels, and types
 
-DevFiller recognizes these 42 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
+DevFiller recognizes these 43 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
 
 | Field | Typical native control | Recognized label examples |
 | --- | --- | --- |
@@ -23,7 +23,8 @@ DevFiller recognizes these 42 field types. The examples are its built-in aliases
 | Employee count | number / range | employee count, number of employees, company size, headcount, effectif, taille de l'entreprise, nombre de salariés, عدد الموظفين |
 | Street address | text | address, street address, address line 1, street, street and number, street name, addr, billing address, shipping address, delivery address, home address, adresse, adresse postale, rue, adresse de livraison, adresse de facturation, العنوان, عنوان الشارع, الشارع |
 | Apartment / suite | text | address line 2, address 2, apartment, suite, floor, building, complément adresse, complément d'adresse, appartement, bâtiment, étage, الشقة |
-| City | text | city, town, locality, ville, المدينة, مدينة |
+| City / commune | text | city, town, locality, municipality, ville, commune, municipalité, المدينة, مدينة, البلدية, بلدية |
+| District / daira | text | district, daira, daïra, borough, arrondissement, الدائرة, دائرة |
 | State / wilaya | select / text | state, province, region, county, wilaya, الولاية, ولاية, المحافظة |
 | Postal code | text | postal code, postcode, zip, zip code, cp, code postal, الرمز البريدي |
 | Country | select / text | country, country name, pays, البلد, الدولة |
@@ -97,7 +98,7 @@ Accuracy is measured, not guessed: see the [benchmark results](https://github.co
 
 | Area | Suggested additions |
 | --- | --- |
-| Regional data | Algerian wilayas/communes, French departments, local phone formats, language-independent locale choice |
+| Regional data | Every Algerian commune and daira, French departments, more countries |
 | Identity | Name prefixes/suffixes, aliases, pronouns, localized nationality choices |
 | Business | SKU, product name, order reference, invoice reference, tax fixtures, currency, discount, inventory count |
 | Travel | Departure/arrival, destination, booking reference, passenger count, duration |

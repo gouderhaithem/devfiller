@@ -1,5 +1,5 @@
 import {installFormPreload} from './form-preload';
-import { generateIdentities, generateValues, validateSettings, type Settings } from './data';
+import { generateIdentities, generatePhones, generateValues, validateSettings, type Settings } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
 import { runFillPage, runPanelAction } from './fill/inject';
@@ -130,7 +130,7 @@ async function prepareForPage(tabId:number,tab:chrome.tabs.Tab,documentId?:strin
     const settings=validateSettings(stored.settings),config=validateGemini(stored.gemini);
     if(!config.enabled || !config.apiKey || !settings.fillUnknown) return;
     const epoch=cacheEpoch;
-    const prepared=await prepareBatch(tabId,{...settings,values:generateValues(settings.locale)},settings,config,epoch,documentId);
+    const prepared=await prepareBatch(tabId,{...settings,values:generateValues(settings.locale,settings)},settings,config,epoch,documentId);
     if(epoch===cacheEpoch) await chrome.storage.session.set({geminiStatus:prepared.batch?`${providerSpec(config.provider).label} suggestions are ready. Click DevFiller to fill.`:prepared.note});
   } catch(error) {
     await chrome.storage.session.set({geminiStatus:error instanceof GeminiQuotaError?`${error.message} Local fallback is available.`:error instanceof Error?`${error.message} Fill will retry AI.`:'AI preparation failed. Fill will retry AI.'});
@@ -151,13 +151,14 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const stored=await chrome.storage.local.get(['settings','gemini']);
     const settings=validateSettings(stored.settings);
     const config=validateGemini(stored.gemini);
-    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale),identities:generateIdentities(settings.locale),samples:generateSamples(settings.locale)};
+    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale,settings),identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed)};
     let note='';
     let cacheKey:string | undefined;
     let batch:CachedBatch | undefined;
     let signatures:Map<string,string> | undefined;
     const epoch=cacheEpoch;
-    if(config.enabled && config.apiKey && settings.fillUnknown) {
+    // A seed promises the same data every time, which AI answers can't give: seeded fills stay local.
+    if(config.enabled && config.apiKey && settings.fillUnknown && !settings.seed.trim()) {
       try {
         await chrome.action.setTitle({tabId,title:'DevFiller: waiting for AI data…'});
         const prepared=await prepareBatch(tabId,request,settings,config,epoch,undefined,true);
@@ -263,7 +264,7 @@ chrome.commands.onCommand.addListener((command,tab)=>{
 });
 async function inspectTab(tabId:number) {
   const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
-  const reply=await runFillPage({tabId},{...settings,values:generateValues(settings.locale),mode:'inspect'});
+  const reply=await runFillPage({tabId},{...settings,values:generateValues(settings.locale,settings),mode:'inspect'});
   if(!reply) throw new Error('The page did not respond. Refresh to try again.');
   return {tabId,...reply};
 }

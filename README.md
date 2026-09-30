@@ -31,7 +31,7 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Side panel** | Inspect filled/skipped fields beside the website, highlight a control, and save a custom value or exclusion. |
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
-| **42 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
+| **43 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
 | **English, French & Arabic** | Recognize labels in all three languages and choose a language for generated data. |
 | **Custom values** | Map your own labels to exact test values, such as `Project code` → `PRJ-001`. |
 | **Field exclusions** | Protect fields by label or CSS selector, optionally scoped to a website. Search and navigation controls are skipped by default. |
@@ -120,7 +120,7 @@ A six-slide product walkthrough covers the filling workflow, supported fields, o
 - Your Gemini key stays in local extension storage, which is **not encrypted**, and is sent to Google for API authentication. No shared key is bundled.
 - DevFiller fills the **top-level document**. Frames, shadow DOM, rich-text editors, and custom widgets need additional adapters.
 - File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Filling never submits forms automatically.
-- Generated data is fictional. Finite sample pools can repeat, and website-specific validation may reject values. Address and phone regions do not necessarily match the selected language.
+- Generated data is fictional. Finite sample pools can repeat, and website-specific validation may reject values. Choose the region for addresses and phones in the options; French and Algerian phone numbers follow the real format and may be in use.
 
 The extension uses `activeTab`, `scripting`, `storage`, and `alarms`, plus `sidePanel` and `contextMenus` for the page companion. Automatic Gemini preparation requests optional HTTP/HTTPS website access. [Privacy policy](PRIVACY.md) · [Full privacy and permissions details →](docs/USER_GUIDE.md#privacy--permissions)
 
@@ -162,7 +162,7 @@ Google responses are simulated in automated tests. Live Gemini access, the nativ
 - [Brand assets](docs/brand/README.md): icon source and rebuild instructions.
 - [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications ([ready-to-paste listing](docs/store/LISTING.md)). Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
 
-For a bug report, include the browser version, reproduction steps, and a minimal form example with fictional data. Before opening a pull request, run the build and both test suites. Useful next areas include custom widget adapters, regional datasets, and repeatable seeded values.
+For a bug report, include the browser version, reproduction steps, and a minimal form example with fictional data. Before opening a pull request, run the build and both test suites. Useful next areas include custom widget adapters and more regional datasets.
 
 ## License
 

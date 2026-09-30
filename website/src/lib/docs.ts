@@ -24,7 +24,7 @@ export const DOC_GROUPS: { title: string; pages: DocPage[] }[] = [
     pages: [
       { slug: "side-panel", title: "Side panel", description: "Inspect every field, fix one, and undo a fill.", source: "website/content/docs/side-panel.md" },
       { slug: "generated-data", title: "Generated data", description: "Languages, replacement, unknown fields and passwords.", source: "website/content/docs/generated-data.md" },
-      { slug: "field-types", title: "Field types", description: "The 42 field types and the labels DevFiller recognizes.", source: "FIELD_GUIDE.md", cutAt: "## Additional ideas" },
+      { slug: "field-types", title: "Field types", description: "The 43 field types and the labels DevFiller recognizes.", source: "FIELD_GUIDE.md", cutAt: "## Additional ideas" },
       { slug: "custom-fields", title: "Custom fields", description: "Give a field an exact test value.", source: "website/content/docs/custom-fields.md" },
       { slug: "excluded-fields", title: "Excluded fields", description: "Keep fields untouched, everywhere or on one site.", source: "website/content/docs/excluded-fields.md" },
       { slug: "ai", title: "AI suggestions", description: "Optional Groq or Gemini suggestions for unusual fields.", source: "website/content/docs/ai.md" },

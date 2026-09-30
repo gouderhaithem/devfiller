@@ -5,7 +5,9 @@ import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, isVisi
 import { shouldExclude } from './exclude';
 import { classificationOf, isSensitive, usableKey, type Classification } from './classify';
 import { analyzePage } from './context';
-import { coherentValues, fallbackValue, fitValue, matchChoice, random, spellingsFor, type Resolved } from './generate';
+import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
+import { randomFor, secureRandom, type Random } from '../rng';
+import { alignPhones } from './phones';
 import { setNativeChecked, setNativeValue, snapshot } from './apply';
 import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
@@ -27,12 +29,12 @@ function fillRadioGroup(ctx: FillContext, el: HTMLInputElement): ControlRun {
   if (!request.overwrite && members.some(c => c.checked)) return run('preserved');
   const candidates = members.filter(c => isEditableChoice(c, ctx.visible.get(c)) && !isSensitive(classificationOf(ctx.classifications, c).type) && !CONSENT.test(normalize([c.name, c.id, c.getAttribute('aria-label') || '', ...Array.from(c.labels || []).map(l => l.textContent || '')].join(' '))));
   const different = candidates.filter(c => !c.checked);
-  const choices = request.overwrite && different.length ? different : candidates;
+  const choices = ctx.fresh && different.length ? different : candidates;
   if (!choices.length) return run('none', { reason: 'No option in this group can be selected' });
   // A recognized group ("Male / Female") picks the answer that matches the generated value.
   const key = usableKey(classificationOf(ctx.classifications, el), request.fillUnknown);
   const matching = key ? matchChoice(candidates, spellingsFor(ctx.values[key], key), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')]) : undefined;
-  const target = matching ?? choices[random(choices.length)];
+  const target = matching ?? choices[ctx.random(el)(choices.length)];
   for (const member of controls) if (member === target || (target.name && member instanceof HTMLInputElement && member.type === 'radio' && member.form === target.form && member.name === target.name)) ctx.touched.add(member);
   setNativeChecked(target, true);
   return run('filled');
@@ -47,7 +49,8 @@ function fillChoice(ctx: FillContext, el: HTMLInputElement, signals: readonly st
   if (el.type === 'radio') return fillRadioGroup(ctx, el);
   if (el.checked && !request.overwrite) return run('preserved');
   ctx.touched.add(el);
-  setNativeChecked(el, !el.checked);
+  // Fresh fills toggle the box; a seeded fill always gives it the same state.
+  setNativeChecked(el, request.seed?.trim() ? ctx.random(el)(2) === 1 : !el.checked);
   return run('filled');
 }
 
@@ -83,7 +86,7 @@ const addDays = (date: string, days: number) => { const day = new Date(`${date}T
 
 // An end date lands one to fourteen days after its start date (and no later than its max) when
 // generated values or limits would put it earlier.
-function afterStart(el: Control, found: Classification, resolved: Resolved, value: string): string {
+function afterStart(el: Control, found: Classification, resolved: Resolved, value: string, random: Random): string {
   const start = found.role === 'end' && !resolved.literal ? found.after?.value ?? '' : '';
   if (!ISO_DATE.test(start) || !ISO_DATE.test(value) || !(el instanceof HTMLInputElement) || !['date', 'datetime-local'].includes(el.type) || value.slice(0, 10) > start.slice(0, 10)) return value;
   const first = addDays(start.slice(0, 10), 1);
@@ -141,11 +144,12 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
   const { resolved, source, aiSuggestion } = resolution;
   const fitted = fitValue(ctx, el, resolved);
   if (fitted === undefined) return run('invalid', { source });
-  const value = afterStart(el, classificationOf(ctx.classifications, el), resolved, fitted);
+  const value = afterStart(el, classificationOf(ctx.classifications, el), resolved, fitted, ctx.random(el));
   ctx.touched.add(el);
   setNativeValue(el, value);
   if (el.value !== value) return run('invalid', { source });
   if (aiSuggestion !== undefined && ctx.result.used) ctx.result.used[`field_${index}`] = aiSuggestion;
+  if (resolved.key && !resolved.literal) ctx.filled.set(el, resolved.key);
   return run('filled', { source });
 }
 
@@ -161,6 +165,26 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   if (!request.passwords && (type === 'password' || sig.ac.includes('password') || sig.signals.some(s => PASSWORD.test(s)))) return NONE;
   if (isChoice(el)) return fillChoice(ctx, el, sig.signals);
   return fillValue(ctx, el, index, sig);
+}
+
+// With a seed, each field draws from its own stream, keyed by its name and how many fields before
+// it share that name, so adding a field elsewhere doesn't change the others.
+function fieldRandom(seed: string | undefined, controls: readonly Control[]): (el?: Control) => Random {
+  if (!seed?.trim()) return () => secureRandom;
+  const streams = new Map<Control, Random>();
+  const seen = new Map<string, number>();
+  const keys = new Map(controls.map(el => {
+    const name = `${el.tagName}|${el instanceof HTMLInputElement ? el.type : ''}|${el.name || el.id}`;
+    const count = seen.get(name) ?? 0;
+    seen.set(name, count + 1);
+    return [el, `${name}|${count}`];
+  }));
+  return el => {
+    if (!el) return secureRandom;
+    let stream = streams.get(el);
+    if (!stream) { stream = randomFor(seed, keys.get(el) ?? 'field'); streams.set(el, stream); }
+    return stream;
+  };
 }
 
 function tally(result: FillResult, outcome: Outcome) {
@@ -186,7 +210,7 @@ export function fillPage(request: FillRequest): FillResult {
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__formlyPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
-  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible };
+  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map() };
   if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
@@ -203,6 +227,7 @@ export function fillPage(request: FillRequest): FillResult {
       if (panel) panel.reports.set(el, controlReport(ctx, el, outcome));
     }
   });
+  alignPhones(ctx);
   if (panel && before) { finishFill(ctx, before); finalizeReport(ctx); }
   return result;
 }

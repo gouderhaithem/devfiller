@@ -1,6 +1,6 @@
 # Fill engine accuracy roadmap
 
-_Written 30 September 2026, against DevFiller 1.0.0. Phases A to D were implemented the same day; see [the benchmark results](../benchmark/RESULTS.md)._
+_Written 30 September 2026, against DevFiller 1.0.0. Phases A to E were implemented the same day; see [the benchmark results](../benchmark/RESULTS.md)._
 
 ## Goal
 
@@ -42,7 +42,7 @@ The benchmark in `benchmark/` measures every change, and the side panel shows ea
 | Gap | Example that goes wrong | Phase |
 | --- | --- | --- |
 | Form types are guessed from fields and words | A newsletter box with a "Sign up" button reads as a sign-up form | D follow-up |
-| Communes and dairas aren't in the vocabulary | A commune select is still unknown | E |
+| The Algeria profile covers 20 chef-lieux | Communes and dairas outside those 20 aren't generated or recognized from option lists | E follow-up |
 | No shadow DOM or iframe support | Web-component forms and embedded forms are skipped | F |
 | Filling very large forms | 1,000 fields classify in about 70 ms and fill in about 0.33 s | F |
 
@@ -135,6 +135,8 @@ interface Classification {
 - **Field order:** common sequences (first name → last name → email → phone → address) raise confidence.
 
 ### Phase E: Data
+
+**Status: done.** A seed in the options makes every value repeatable; regions (Mixed, United States, France, Algeria) keep places and phones consistent; phones follow the form's country or dial code; invalid and boundary values live in `src/testdata.ts` for the npm package. Decisions: a new `district` type (daira, arrondissement) and "commune" as a city; the Algeria profile holds the 58 wilayas (Law 19-12 of 2019) and the chef-lieux of 20 of them, not every commune, since the data is written by hand and should be checked against an official list before it grows.
 
 - **Seeded generation:** `seed` → the same identity and values on every run, for reproducible tests. Default fills stay random.
 - **Algeria profile:** wilaya, daira, commune, postal code, +213 mobile numbers, and names in French and Arabic, kept in a separate data module. Use an official administrative source, and record which version of the wilaya list it follows.

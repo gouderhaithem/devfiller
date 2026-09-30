@@ -3,7 +3,7 @@ import { build } from 'esbuild';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { fields, generateIdentities, generateValues, defaultExclusions } from '../src/data';
+import { fields, generateIdentities, generatePhones, generateValues, defaultExclusions } from '../src/data';
 import { generateSamples } from '../src/samples';
 import type { FillRequest, FillResult } from '../src/engine';
 import { calibration, regressions, score, type Baseline, type Current, type Pair } from './metrics';
@@ -29,7 +29,7 @@ interface ControlInfo { index: number; expect: string | null; omitted: boolean; 
 interface ControlState { value: string; checked: boolean }
 
 const values = generateValues('en');
-const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
+const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), phones: generatePhones(), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
 // The default settings, then every optional filler switched on: neither may touch a sensitive field.
 const FILL_SETTINGS: FillRequest[] = [base, { ...base, passwords: true, exclusions: { skipSearch: false, skipHeader: false, rules: [] } }];
 
@@ -114,10 +114,22 @@ function checkRelations(page: Page, fixture: string): Promise<Relation[]> {
       ['data-after', 'end after start', (a, b) => !!a && !!b && a > b],
       ['data-differs-from', 'new differs', (a, b) => !!a && !!b && a !== b],
     ];
-    return checks.flatMap(([attribute, kind, test]) => Array.from(document.querySelectorAll(`[${attribute}]`), el => {
+    const pairs = checks.flatMap(([attribute, kind, test]) => Array.from(document.querySelectorAll(`[${attribute}]`), el => {
       const other = document.querySelector(el.getAttribute(attribute)!);
       return { kind, ok: test(read(el), read(other)), detail: `${describe(el)} → "${read(el)}" vs "${read(other)}"` };
     }));
+    // Phone formats: +213 for Algeria, +33 for France, +1 for the United States.
+    const prefix: Record<string, string> = { dz: '+213', fr: '+33', us: '+1 ' };
+    const countryRegion = (text: string) => /alg|الجزائر|^dz$/i.test(text) ? 'dz' : /fran|فرنسا|^fr$/i.test(text) ? 'fr' : /united states|usa|états-unis|^us$/i.test(text) ? 'us' : '';
+    const phones = [
+      ...Array.from(document.querySelectorAll('[data-phone-region]'), el => ({ el, region: el.getAttribute('data-phone-region')! })),
+      ...Array.from(document.querySelectorAll('[data-phone-follows]'), el => {
+        const country = document.querySelector(el.getAttribute('data-phone-follows')!);
+        const text = country instanceof HTMLSelectElement ? country.selectedOptions[0]?.textContent ?? '' : read(country);
+        return { el, region: countryRegion(text.trim()) };
+      }),
+    ].map(({ el, region }) => ({ kind: 'phone follows the form', ok: !!region && read(el).startsWith(prefix[region]), detail: `${describe(el)} → "${read(el)}" for ${region || 'no country'}` }));
+    return [...pairs, ...phones];
   }, fixture);
 }
 
@@ -127,6 +139,22 @@ function formTypes(page: Page, result: FillResult) {
     const predicted = found.find(f => f.index === index)?.type ?? 'other';
     return expected ? [{ expected, predicted, action: form.getAttribute('action') || '' }] : [];
   }), result.forms ?? []);
+}
+
+// A seed gives the same data on every run: fill twice after reloading, then once more on the same
+// page with replacement on. All three must match.
+async function seededRepeat(page: Page, url: string, name: string): Promise<Relation> {
+  const seeded: FillRequest = { ...base, seed: 'benchmark', values: generateValues('en', { seed: 'benchmark' }), phones: generatePhones('benchmark') };
+  const snapshot = () => page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, select, textarea'), el => ['radio', 'checkbox'].includes(el.type) ? String(el.checked) : el.value).join('\u0001'));
+  await openWithEngine(page, url);
+  await runEngine(page, seeded);
+  const first = await snapshot();
+  await openWithEngine(page, url);
+  await runEngine(page, seeded);
+  const second = await snapshot();
+  await runEngine(page, seeded);
+  const third = await snapshot();
+  return { kind: 'seeded repeat', ok: first === second && second === third, detail: `${name}: ${first === second ? 'a refill on the same page changed values' : 'a new page load changed values'}` };
 }
 
 async function runVariants(page: Page) {
@@ -219,7 +247,7 @@ test('fill engine benchmark', async ({ page }) => {
     const found = await findLeaks(page, url, name, controls);
     leaks.push(...found.leaks);
     submits += found.submits;
-    (holdout ? holdoutRelations : relations).push(...found.relations);
+    (holdout ? holdoutRelations : relations).push(...found.relations, await seededRepeat(page, url, name));
   }
   const variants = await runVariants(page);
   const perf = await runPerf(page);

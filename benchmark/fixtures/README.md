@@ -25,7 +25,7 @@ classification with that answer, so **label the truth, not what the engine does 
 
 ## Types
 
-Use one of the 42 generator types:
+Use one of the 43 generator types:
 
 | Type | Meaning |
 | --- | --- |
@@ -39,7 +39,7 @@ Use one of the 42 generator types:
 | `company`, `jobTitle`, `department`, `industry`, `employeeCount` | |
 | `address` | Street address or address line 1 |
 | `address2` | Apartment, suite, address line 2 |
-| `city`, `state`, `postalCode`, `country` | `state` covers state, province, region and wilaya |
+| `city`, `district`, `state`, `postalCode`, `country` | `city` covers towns and communes (municipalities); `district` covers dairas, arrondissements and boroughs; `state` covers state, province, region and wilaya |
 | `website` | Website, homepage, portfolio or profile URL |
 | `bio`, `description`, `message`, `subject`, `notes` | Free text |
 | `quantity`, `price`, `amount`, `salary`, `percentage`, `rating` | Numbers |
@@ -68,3 +68,7 @@ These are checked after a fill with passwords on:
 - `data-same-as="<selector>"`: the field must end up with the same value as that field (confirmations)
 - `data-after="<selector>"`: a date that must come after that field's date (end dates)
 - `data-differs-from="<selector>"`: a value that must differ from that field's (a new password and the current one)
+- `data-phone-region="dz|fr|us"`: a phone number that must be written in that country's format
+- `data-phone-follows="<selector>"`: a phone number that must match the country chosen in that field
+
+Every fixture is also filled twice with the same seed, and must come out identical.

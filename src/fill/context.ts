@@ -27,7 +27,7 @@ const NEXT: Readonly<Partial<Record<FieldKey, readonly FieldKey[]>>> = {
 const FORM_WORDS: Readonly<Record<FormType, readonly string[]>> = {
   login: words(['login', 'log in', 'signin', 'sign in', 'connexion', 'se connecter', 'تسجيل الدخول']),
   signup: words(['register', 'registration', 'signup', 'sign up', 'join', 'create account', 'inscription', 'creer un compte', 'إنشاء حساب']),
-  checkout: words(['checkout', 'payment', 'pay', 'order', 'place order', 'cart', 'commande', 'paiement', 'panier', 'الدفع']),
+  checkout: words(['checkout', 'payment', 'pay', 'order', 'place order', 'cart', 'shipping', 'delivery', 'commande', 'commander', 'livraison', 'paiement', 'panier', 'الدفع', 'التوصيل']),
   booking: words(['booking', 'book', 'reservation', 'reservations', 'reserve', 'reserver', 'rdv', 'rendez vous', 'حجز']),
   contact: words(['contact', 'support', 'enquiry', 'inquiry', 'enquire', 'requests', 'تواصل', 'اتصل']),
   search: words(['search', 'recherche', 'بحث']),

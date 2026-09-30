@@ -1,5 +1,6 @@
 import type { FieldKey } from '../data';
 import { normalize } from './normalize';
+import { WILAYAS } from '../profiles/algeria';
 
 // What a list of options says about its field. A select or radio group whose answers are mostly
 // country names is a country, whatever its label says.
@@ -25,17 +26,9 @@ const NATIONALITIES = [
   'Indian', 'Indien', 'Indienne', 'Chinese', 'Chinois', 'Chinoise', 'Japanese', 'Japonais', 'Japonaise', 'Senegalese', 'Sénégalais', 'Sénégalaise', 'Malian', 'Malien', 'Malienne',
   'Ivorian', 'Ivoirien', 'Ivoirienne', 'Cameroonian', 'Camerounais', 'Camerounaise', 'Nigerian', 'Nigérian', 'Russian', 'Russe', 'Polish', 'Polonais', 'Greek', 'Grec', 'Grecque',
 ];
-// The 58 wilayas of the 2019 administrative reform, in French and Arabic, then US states and
-// French and Canadian regions.
-const WILAYAS = [
-  'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar', 'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Alger',
-  'Djelfa', 'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma', 'Constantine', 'Médéa', 'Mostaganem', "M'Sila", 'Mascara', 'Ouargla', 'Oran', 'El Bayadh',
-  'Illizi', 'Bordj Bou Arréridj', 'Boumerdès', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued', 'Khenchela', 'Souk Ahras', 'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent',
-  'Ghardaïa', 'Relizane', 'Timimoun', 'Bordj Badji Mokhtar', 'Ouled Djellal', 'Béni Abbès', 'In Salah', 'In Guezzam', 'Touggourt', 'Djanet', "El M'Ghair", 'El Meniaa',
-  'أدرار', 'الشلف', 'الأغواط', 'أم البواقي', 'باتنة', 'بجاية', 'بسكرة', 'بشار', 'البليدة', 'البويرة', 'تمنراست', 'تبسة', 'تلمسان', 'تيارت', 'تيزي وزو', 'الجزائر العاصمة',
-  'الجلفة', 'جيجل', 'سطيف', 'سعيدة', 'سكيكدة', 'سيدي بلعباس', 'عنابة', 'قالمة', 'قسنطينة', 'المدية', 'مستغانم', 'المسيلة', 'معسكر', 'ورقلة', 'وهران', 'البيض',
-  'إليزي', 'برج بوعريريج', 'بومرداس', 'الطارف', 'تندوف', 'تيسمسيلت', 'الوادي', 'خنشلة', 'سوق أهراس', 'تيبازة', 'ميلة', 'عين الدفلى', 'النعامة', 'عين تموشنت',
-  'غرداية', 'غليزان', 'تيميمون', 'برج باجي مختار', 'أولاد جلال', 'بني عباس', 'عين صالح', 'عين قزام', 'تقرت', 'جانت', 'المغير', 'المنيعة',
+// The wilayas (from the Algeria profile), then US states and French and Canadian regions.
+const WILAYA_NAMES = [...WILAYAS.flatMap(wilaya => [wilaya.fr, wilaya.ar]), 'Alger-Centre', 'الجزائر العاصمة'];
+const REGION_NAMES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana',
   'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
   'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee',
@@ -43,6 +36,7 @@ const WILAYAS = [
   'Île-de-France', 'Auvergne-Rhône-Alpes', 'Hauts-de-France', "Provence-Alpes-Côte d'Azur", 'Occitanie', 'Nouvelle-Aquitaine', 'Grand Est', 'Bretagne', 'Normandie', 'Pays de la Loire',
   'Centre-Val de Loire', 'Bourgogne-Franche-Comté', 'Corse', 'Ontario', 'Quebec', 'Québec', 'British Columbia', 'Alberta', 'Manitoba', 'Saskatchewan', 'Nova Scotia', 'New Brunswick',
 ];
+// Regions end here.
 const GENDERS = ['Male', 'Female', 'Man', 'Woman', 'Other', 'Non-binary', 'Prefer not to say', 'Homme', 'Femme', 'Masculin', 'Féminin', 'Autre', 'Non binaire', 'Je préfère ne pas répondre', 'ذكر', 'أنثى', 'آخر', 'M', 'F', 'H'];
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
@@ -68,17 +62,23 @@ export const GENDER_SPELLINGS: Readonly<Record<string, readonly string[]>> = {
   Male: ['Male', 'Man', 'Homme', 'Masculin', 'M', 'H', 'ذكر', 'Monsieur'],
   'Prefer not to say': ['Prefer not to say', 'Other', 'Autre', 'Je préfère ne pas répondre', 'Non-binary', 'آخر'],
 };
-// Region and wilaya spellings of the generated states.
+// Spellings of the generated states. A wilaya can appear by its French or Arabic name, or its code
+// ("16", "16 - Alger"); the code comes last because it must match exactly.
 export const STATE_SPELLINGS: Readonly<Record<string, readonly string[]>> = {
+  ...Object.fromEntries(WILAYAS.flatMap(wilaya => {
+    const english = wilaya.code === '16' ? ['Algiers', 'الجزائر العاصمة'] : [];
+    const spellings = [wilaya.fr, wilaya.ar, ...english, `${wilaya.code} - ${wilaya.fr}`, ...new Set([wilaya.code, String(Number(wilaya.code))])];
+    return [[wilaya.fr, spellings], [wilaya.ar, [wilaya.ar, ...spellings]]];
+  })),
   Algiers: ['Algiers', 'Alger', 'الجزائر', 'الجزائر العاصمة', '16'],
   'Île-de-France': ['Île-de-France', 'Ile de France', 'IDF'],
   'District of Columbia': ['District of Columbia', 'DC', 'Washington DC'],
-  Texas: ['Texas', 'TX'],
+  Texas: ['Texas', 'TX'], Illinois: ['Illinois', 'IL'], Washington: ['Washington', 'WA'],
 };
 
 const index = (words: readonly string[]) => new Set(words.map(normalize));
 export const OPTION_LISTS: ReadonlyArray<readonly [FieldKey, ReadonlySet<string>]> = [
-  ['country', index(COUNTRIES)], ['nationality', index(NATIONALITIES)], ['state', index(WILAYAS)], ['gender', index(GENDERS)],
+  ['country', index(COUNTRIES)], ['nationality', index(NATIONALITIES)], ['state', index([...WILAYA_NAMES, ...REGION_NAMES])], ['gender', index(GENDERS)],
 ];
 // Recognizes a month list by any of these names, full or abbreviated ("janv.", "Sept").
 export const MONTH_SET: ReadonlySet<string> = new Set([...index(MONTHS), ...MONTH_NAMES.flatMap(names => [...names])]);
