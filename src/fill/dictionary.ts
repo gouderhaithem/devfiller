@@ -34,7 +34,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   country: ['country', 'country name', 'pays', 'البلد', 'الدولة'],
   website: ['website', 'web site', 'url', 'homepage', 'home page', 'portfolio', 'linkedin', 'linked in', 'profile url', 'site', 'blog', 'site web', 'site internet', 'الموقع الإلكتروني', 'الموقع'],
   bio: ['bio', 'biography', 'about', 'about me', 'about you', 'about yourself', 'biographie', 'à propos', 'présentation', 'نبذة'],
-  description: ['description', 'details', 'product description', 'الوصف', 'التفاصيل'],
+  description: ['steps to reproduce', 'expected result', 'actual result', 'symptoms', 'symptômes', 'reason', 'purpose', 'description', 'details', 'product description', 'الوصف', 'التفاصيل'],
   message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
   subject: ['subject', 'topic', 'sujet', 'objet', 'الموضوع', 'موضوع'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
@@ -45,20 +45,20 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
     'sku', 'part number', 'part no', 'item code', 'product code', 'article code', 'ticket number', 'case number', 'file number', 'tracking number', 'batch number', 'lot number', 'serial number', 'delivery note',
     'référence', 'réf', 'numéro de commande', 'n° de commande', 'no de commande', 'numéro de facture', 'n° de facture', 'numéro de devis', 'n° de devis', 'bon de commande', 'bon de livraison', 'code article', 'numéro de dossier', 'n° de dossier', 'numéro de lot', 'numéro de série', 'n° de série',
     'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
-  quantity: ['quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
+  quantity: ['bedrooms', 'bathrooms', 'years', 'number of years', 'number of hours', 'hours per month', 'hours per week', 'number of days', 'quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
-  amount: ['amount', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
+  amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
     'montant', 'somme', 'revenu', 'revenus', 'dépenses', 'apport', 'acompte', "chiffre d'affaires", 'المبلغ', 'الدخل', 'المصاريف', 'الميزانية'],
   salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
   rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'how likely', 'likely to recommend', 'net promoter score', 'nps', 'stars', 'évaluation', 'التقييم'],
   date: ['date', 'event date', 'deadline', 'due date', 'travel date', 'select date', 'select a date', 'choose date', 'choose a date', 'pick a date', 'graduation date', 'joining date', 'date of joining', 'hire date', 'date of hire', 'choisir une date', 'اختر التاريخ', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
-  startDate: ['start date', 'check in', 'check-in date', 'arrival date', 'arrival', 'departure date', 'from date', 'date from', 'available from', 'availability date', 'date de début', "date d'arrivée", 'arrivée', 'date de départ', 'date de disponibilité', 'disponibilité', 'تاريخ البداية', 'تاريخ البدء', 'تاريخ الوصول'],
+  startDate: ['date of arrival', 'date of departure', 'start date', 'check in', 'check-in date', 'arrival date', 'arrival', 'departure date', 'from date', 'date from', 'available from', 'availability date', 'date de début', "date d'arrivée", 'arrivée', 'date de départ', 'date de disponibilité', 'disponibilité', 'تاريخ البداية', 'تاريخ البدء', 'تاريخ الوصول'],
   endDate: ['end date', 'check out', 'check-out date', 'return date', 'to date', 'date to', 'date de fin', 'date de retour', 'retour', 'تاريخ النهاية', 'تاريخ الانتهاء', 'تاريخ المغادرة', 'تاريخ العودة'],
   time: ['time', 'arrival time', 'session time', 'time slot', 'preferred time', 'heure', "heure d'arrivée", 'الوقت', 'الساعة'],
   color: ['color', 'colour', 'couleur', 'اللون'],
   search: ['search', 'q', 'query', 'keywords', 'keyword', 'recherche', 'rechercher', 'بحث', 'البحث'],
-  title: ['title', 'product title', 'ticket title', 'post title', 'article title', 'titre', 'العنوان المختصر'],
+  title: ['summary', 'headline', 'listing title', 'title', 'product title', 'ticket title', 'post title', 'article title', 'titre', 'العنوان المختصر'],
 };
 
 // Words that name many things, so they only count on their own or with other evidence:
@@ -77,7 +77,7 @@ export const QUALIFIERS: readonly string[] = ['billing', 'shipping', 'delivery',
 export const AUTOCOMPLETE: Readonly<Record<string, FieldKey>> = { username: 'username', name: 'fullName', 'given-name': 'firstName', 'family-name': 'lastName', email: 'email', tel: 'phone', 'tel-national': 'phone', organization: 'company', 'organization-title': 'jobTitle', 'street-address': 'address', 'address-line1': 'address', 'address-level2': 'city', 'address-level1': 'state', 'postal-code': 'postalCode', country: 'country', 'country-name': 'country', url: 'website', 'additional-name': 'middleName', bday: 'birthDate', sex: 'gender', 'address-line2': 'address2', 'new-password': 'password', 'current-password': 'password' };
 
 // What an input type or inputmode says about the field, and how strongly.
-export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.9], tel: ['phone', 0.85], url: ['website', 0.8], password: ['password', 0.95], color: ['color', 0.9], time: ['time', 0.7], date: ['date', 0.45], search: ['search', 0.9] };
+export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.9], tel: ['phone', 0.85], url: ['website', 0.8], password: ['password', 0.95], color: ['color', 0.9], time: ['time', 0.7], date: ['date', 0.55], search: ['search', 0.9] };
 export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.6], tel: ['phone', 0.6], url: ['website', 0.55], search: ['search', 0.6] };
 
 // Types each kind of control can hold. Anything else is pushed down, not ruled out.
@@ -125,11 +125,15 @@ const CONSENT_STEMS = ['consent', 'agre', 'subscri', 'newsletter', 'accept', 'ma
 // Whole words only: "sponsors" but not "sponsorship", "I authorize" but not "authorized to work",
 // "terms and conditions" but not medical conditions.
 // Sharing data counts too: usage data, analytics, telemetry, crash reports.
-const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'sponsor', 'sponsors', 'authorize', 'authorise', 'authorizes', 'authorises', 'authorizing', 'authorising', 'declaration', 'declarations', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'terms and conditions', 'the conditions', 'les conditions', 'general conditions', 'conditions of use', 'conditions of sale', 'conditions generales', 'conditions d utilisation', 'conditions de vente', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
+const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'sponsor', 'sponsors', 'authorize', 'authorise', 'authorizes', 'authorises', 'authorizing', 'authorising', 'declaration', 'declarations', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'terms and conditions', 'the conditions', 'les conditions', 'general conditions', 'conditions of use', 'conditions of sale', 'conditions generales', 'conditions d utilisation', 'conditions de vente', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'notification', 'notifications', 'alerts', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
 export const CONSENT = new RegExp(`(?:^| )(?:(?:${CONSENT_STEMS.join('|')})|(?:${CONSENT_WORDS.join('|')})(?= |$))|وافق|شروط|خصوصية|اشتراك|النشرة|العروض|التسويق|تلقي|اخبار|اشعارات|اسمح|اقر|اشهد|اتعهد|اصرح|اصادق|اؤكد`, 'u');
 // A checkbox that states something about the user ("I have read…", "I am over 18",
 // "Je certifie…", "J'ai lu…") is a declaration, never test data.
 export const DECLARATION = /^(?:i|im|i m|je|j)(?= )/u;
+// Words that describe rather than ask, in a radio group: "Joyfully accepts", "Returns accepted?",
+// "Oui, notification reçue". Removed before the group's question and answers are read for consent.
+export const DESCRIBING = /(?:^| )(?:accepts|accepted)(?= |$)/gu;
+export const DESCRIBING_ANSWER = /(?:^| )(?:accepts|accepted|notification|notifications|alerts)(?= |$)/gu;
 // Answers that make a question a scale, not a permission: "Strongly agree", "Neutral", "Very satisfied".
 // A scale never speaks for the person ("I agree to…") or names what consent is about.
 export const NOT_SCALE_ANSWER = /^(?:i|im|je|j)(?= )|(?:^| )(?:terms|privacy|policy|consent|cookies?|marketing|newsletter|conditions|essential)(?= |$)/u;
@@ -139,10 +143,15 @@ export const YES_NO = /^(?:yes|no|y|n|oui|non|نعم|لا|yes please|no thanks|o
 // Honeypots: fields a page hides from people to catch bots.
 // The whole hint must say so: "Leave blank if same as billing" is a real field.
 export const TRAP = /^(?:please )?(?:leave (?:this |it )?(?:field )?(?:empty|blank)|do not (?:fill|fill in|fill this|change)|don t (?:fill|fill in|fill this)(?: in)?|ne pas remplir|laisser vide|laissez vide|laissez ce champ vide|honeypot|اترك (?:هذا )?(?:الحقل )?فارغا)$/u;
-// Personal and legal ID numbers have no generator: "Passport number" is neither a count nor a reference.
-export const ID_NUMBER_WORDS = ['passport number', 'passport no', 'numéro de passeport', 'national id', 'national id number', 'id number', 'identity number', 'social security number', 'ssn', 'nin', "numéro d'identification", "numéro de carte d'identité", 'sécurité sociale', 'tax id', 'vat number', 'numéro de tva', 'رقم جواز السفر', 'رقم التعريف الوطني'];
+// Codes and personal or legal ID numbers have no generator: "Passport number" is neither a count nor a reference.
+export const ID_NUMBER_WORDS = ['promo code', 'promotional code', 'coupon', 'coupon code', 'discount code', 'voucher', 'voucher code', 'code promo', 'رمز العرض', 'رمز الخصم', 'كود الخصم', 'employee id', 'employee number', 'staff id', 'passport number', 'passport no', 'numéro de passeport', 'national id', 'national id number', 'id number', 'identity number', 'social security number', 'ssn', 'nin', "numéro d'identification", "numéro de carte d'identité", 'sécurité sociale', 'tax id', 'vat number', 'numéro de tva', 'رقم جواز السفر', 'رقم التعريف الوطني'];
 // A slug or permalink is part of a path, not a website.
 export const SLUG_WORDS = ['slug', 'url slug', 'permalink', 'url key'];
+// People other than the one filling the form: "Manager's name" is a person, and their contact
+// details are not the applicant's.
+export const PERSON_ROLES = ['manager', 'supervisor', 'host person', 'colleague', 'contact person', 'emergency', 'emergency contact', 'guardian', 'parent', 'father', 'mother', 'spouse', 'referee', 'landlord', 'tenant', 'co applicant', 'coapplicant', 'co borrower', 'co speaker', 'next of kin', 'beneficiary', 'witness', 'tuteur', 'responsable', 'conjoint', 'pere', 'mere', 'الولي', 'الاب', 'الام'];
+// Real words one edit from an alias: "employee" is not a typo of "employer".
+export const NOT_TYPOS: ReadonlySet<string> = new Set(['employee', 'employees', 'employed']);
 // Civility titles: "Mr", "Mme". A select of them is not the title of a thing.
 export const CIVILITY = /^(?:mr|mrs|ms|miss|mx|dr|prof|sir|madam|m|mme|mlle|monsieur|madame|mademoiselle|السيد|السيدة|الانسة)$/u;
 
@@ -197,6 +206,7 @@ export const PLAIN_CARD_PHRASES: ReadonlySet<string> = new Set(PLAIN_CARD_TERMS.
 export const DOCUMENT_PHRASES: readonly string[] = DOCUMENTS.map(normalize);
 export const SLUG_PHRASES: readonly string[] = SLUG_WORDS.map(normalize);
 export const ID_NUMBER_PHRASES: readonly string[] = ID_NUMBER_WORDS.map(normalize);
+export const PERSON_ROLE_PHRASES: readonly string[] = PERSON_ROLES.map(normalize);
 export const SENSITIVE_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_TERMS.card.map(normalize), otp: SENSITIVE_TERMS.otp.map(normalize), iban: SENSITIVE_TERMS.iban.map(normalize),
 };

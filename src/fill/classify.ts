@@ -2,7 +2,7 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CIVILITY, DECLARATION, DOCUMENT_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -87,7 +87,7 @@ function fuzzyMatches(text: string): Match[] {
   // Inside a longer label only longer words with the same first letter may be typos: "wage" is
   // one edit from "page", "estate" from "state", and "piece" from "pieces".
   for (const token of text.split(' ')) {
-    if (token.length < 6) continue;
+    if (token.length < 6 || NOT_TYPOS.has(token)) continue;
     for (const entry of FUZZY_POOL) if (entry.tokens.length === 1 && entry.name.length >= 5 && entry.name[0] === token[0] && Math.abs(token.length - entry.name.length) <= 1 && editDistance(token, entry.name, allowedEdits(entry.name)) <= allowedEdits(entry.name)) found.push([entry, 'fuzzy']);
   }
   return found;
@@ -180,8 +180,12 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   // A radio's own label is left out of its signals, but "I agree" on any answer in the group
   // makes the whole group a consent question.
   const own: Signal[] = isChoice(el) && el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
-  const texts = [...signals, ...own].filter(signal => TEXT_SOURCES.has(signal.source));
-  const found = texts.find(signal => CONSENT.test(signal.text)) ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && DECLARATION.test(signal.text));
+  // In a radio group, words that describe ("Returns accepted?", "Oui, notification reçue") aren't
+  // asking for permission; everything else still counts, answers included ("Yes, send me offers").
+  const radio = isChoice(el) && el.type === 'radio';
+  const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source)).map(signal => radio ? { ...signal, text: signal.text.replace(DESCRIBING, ' ') } : signal);
+  const answers = own.map(signal => ({ ...signal, text: signal.text.replace(DESCRIBING_ANSWER, ' ') }));
+  const found = [...texts, ...answers].find(signal => CONSENT.test(signal.text)) ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && DECLARATION.test(signal.text));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
 
@@ -203,6 +207,8 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   for (const key of named.length ? named : [type]) add(key, evidence);
 }
 
+// An option that is a date: "2026-05-01", "01/05/2026", or a year on its own ("2000 sq ft" isn't).
+const DATE_TEXT = /\d{4}-\d{2}|\d{1,2}[/.]\d{1,2}[/.]\d{2,4}|^\s*(?:19|20)\d{2}\s*$/;
 // Negative evidence: the kind of control pushes down types it can't hold.
 function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evidence[] {
   const found: Evidence[] = [];
@@ -222,7 +228,14 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   // A unit means a number: "Longueur (mm)" isn't a name or a city.
   const unit = unitOf(signals);
   if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
-  if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type)) push('type', 'select', 0.6);
+  const options = el instanceof HTMLSelectElement ? optionTexts(el) : [];
+  // A select of the person's own addresses may be an email; other selects can't hold one.
+  const emails = type === 'email' && options.some(text => /@/.test(text));
+  if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type) && !emails) push('type', 'select', 0.6);
+  // A radio group's answers are choices too: "About you" over Yes / No isn't a bio.
+  if (isChoice(el) && el.type === 'radio' && !SELECT_TYPES.has(type)) push('type', 'radio', 0.6);
+  // "7 days, 30 days, No expiration" are durations: a date select lists dates or their parts.
+  if (el instanceof HTMLSelectElement && DATE_FIELD_TYPES.has(type) && !options.some(text => DATE_TEXT.test(text)) && !datePart(options)) push('options', 'no dates among the options', 0.8);
   // The field's own words, not its section's: a "Search flights" heading doesn't make every
   // field in it a search box.
   const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source) && signal.source !== 'legend');
@@ -235,7 +248,7 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   const slug = type === 'website' && texts.find(signal => SLUG_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (slug) push(slug.source, slug.raw, 0.9);
   // "Mr / Mrs / Dr" is a civility, not the title of a thing.
-  if (type === 'title' && optionTexts(el).filter(text => CIVILITY.test(normalize(text))).length >= 2) push('options', 'civility titles', 0.9);
+  if (type === 'title' && (options.length ? options : optionTexts(el)).filter(text => CIVILITY.test(normalize(text))).length >= 2) push('options', 'civility titles', 0.9);
   return found;
 }
 
@@ -274,9 +287,13 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   }
   const part = datePart(texts);
   if (part) found.push(['date', { source: 'options', signal: `${part} options`, weight: 0.55, match: 'options' }]);
+  // "08:00, 08:30…" are times; "maya@example.com…" are the person's addresses.
+  const share = (pattern: RegExp) => texts.filter(text => pattern.test(text.trim())).length / texts.length;
+  if (share(/^\d{1,2}[:h]\d{2}(?:\s?[ap]\.?m\.?)?$/i) >= 0.6) found.push(['time', { source: 'options', signal: 'clock times', weight: 0.7, match: 'options' }]);
+  if (share(/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i) >= 0.5) found.push(['email', { source: 'options', signal: 'email addresses', weight: 0.7, match: 'options' }]);
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
-  if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.5, match: 'options' }]);
+  if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);
   return found;
 }
 
@@ -314,7 +331,10 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
       const either = / (?:or|ou|او) /u.test(` ${signal.text} `) ? 0.6 : 1;
       // One word in a long question ("…work in the country of this position?") is not its topic.
       const aside = signal.source === 'legend' && signal.text.split(' ').length > 6 ? 0.7 : 1;
-      for (const [entry, kind] of matchText(signal.text)) {
+      // "Manager's name", "Name of host": a generic "name" beside a person's role is that person's name.
+      const person = PERSON_ROLE_PHRASES.some(phrase => contains(signal.text, phrase));
+      for (const [entry, found] of matchText(signal.text)) {
+        const kind: MatchKind = found === 'generic' && entry.key === 'fullName' && person ? 'word' : found;
         const strength = (MATCH_STRENGTH[kind] ?? 0) * (kind === 'exact' ? 1 : either) * (WORD_MATCHES.has(kind) ? aside : 1);
         add(entry.key, { source: signal.source, signal: signal.raw, weight: Math.min(0.95, base * boost * strength), match: kind });
       }
@@ -381,11 +401,15 @@ function isYesNo(el: HTMLSelectElement): boolean {
   return answers.length >= 1 && answers.length <= 3 && answers.every(text => YES_NO.test(text));
 }
 
+const GENERAL_TYPE: Readonly<Partial<Record<FieldKey, FieldKey>>> = { birthDate: 'date', startDate: 'date', endDate: 'date' };
+
 // Scores every candidate type and applies the margin rule.
 function rank(el: Control, signals: Signal[], answers?: readonly string[], grouped = false): Classification {
   const candidates = [...collectEvidence(el, signals, answers, grouped)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score).slice(0, 3);
-  const [top, runnerUp] = candidates;
+  const [top] = candidates;
   if (!top) return { type: 'unknown', confidence: 0, candidates, evidence: [] };
+  // "Date" is the general form of a birth, start or end date: it agrees with them, it isn't a rival.
+  const runnerUp = candidates.slice(1).find(candidate => GENERAL_TYPE[top.type] !== candidate.type);
   const confidence = Math.max(0, Math.min(1, top.score - Math.max(0, MARGIN - (top.score - (runnerUp?.score ?? 0))) * 2));
   return { type: confidence >= THRESHOLDS.low ? top.type : 'unknown', confidence, candidates, evidence: top.evidence };
 }

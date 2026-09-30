@@ -48,6 +48,8 @@ export function placeholderShape(raw: string): PlaceholderShape | undefined {
   if (DECIMAL.test(example)) return { kind: 'decimal', decimals: example.split(/[.,]/)[1].length, separator: example.includes(',') ? ',' : '.' };
   if (INTEGER.test(example)) return { kind: 'integer', digits: example.length };
   const phoneDigits = example.replace(/[^\dXx]/g, '').length;
+  // "2026.3.1", "v1.4.2": a version or an address, not a phone number.
+  if (/^v?\d+(?:\.\d+){1,3}$/i.test(example)) return undefined;
   if (PHONE.test(example) && phoneDigits >= 6 && phoneDigits <= 15) return { kind: 'phone' };
   // Only an explicit "e.g." makes words an example: "Enter your city" is an instruction.
   if (hasPrefix && example.length <= 40 && !/[?!]$/.test(example)) return { kind: 'example', text: example.replace(/[.…]+$/, '') };

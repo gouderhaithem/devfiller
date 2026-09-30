@@ -10,9 +10,9 @@ export interface Unit { symbol: string; kind: UnitKind; per?: string } // per: "
 const UNITS: ReadonlyArray<readonly [UnitKind, readonly string[]]> = [
   ['area', ['mm²', 'mm2', 'cm²', 'cm2', 'm²', 'm2', 'ft²', 'ft2', 'sq ft', 'ha']],
   ['volume', ['m³', 'm3', 'cm³', 'cm3', 'l', 'ml', 'cl', 'litres', 'liters', 'gal']],
-  ['length', ['mm', 'cm', 'm', 'km', 'in', 'inch', 'inches', 'ft', 'feet', 'yd', 'µm']],
+  ['length', ['mm', 'cm', 'm', 'km', 'in', 'inch', 'inches', 'ft', 'feet', 'yd', 'µm', 'mi', 'mile', 'miles']],
   ['weight', ['mg', 'g', 'kg', 't', 'tonnes', 'tons', 'lb', 'lbs', 'oz']],
-  ['count', ['u', 'pcs', 'pc', 'pieces', 'pièces', 'unités', 'units', 'qty']],
+  ['count', ['u', 'pcs', 'pc', 'pieces', 'pièces', 'unités', 'units', 'qty', 'days', 'hours', 'weeks', 'months', 'years', 'nights', 'minutes', 'jours', 'heures', 'semaines', 'mois', 'ans', 'nuits']],
   ['percent', ['%', 'pct', 'percent']],
   ['currency', ['€', 'eur', '$', 'usd', '£', 'gbp', 'da', 'dzd', 'dinars', 'د.ج', 'دج']],
 ];

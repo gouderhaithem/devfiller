@@ -33,7 +33,7 @@ classification with that answer, so **label the truth, not what the engine does 
 
 ## Types
 
-Use one of the 46 generator types:
+Use one of the 48 generator types:
 
 | Type | Meaning |
 | --- | --- |
@@ -44,6 +44,8 @@ Use one of the 46 generator types:
 | `phone` | Phone, mobile, telephone. A fax number is `unknown` |
 | `password` | Every password box: current, new and confirmation |
 | `birthDate`, `age`, `gender`, `nationality` | |
+| `year` | A year on its own: graduation year, year of manufacture, start or end year |
+| `experience` | Years of experience |
 | `company`, `jobTitle`, `department`, `industry`, `employeeCount` | |
 | `address` | Street address or address line 1 |
 | `address2` | Apartment, suite, address line 2 |

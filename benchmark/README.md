@@ -28,6 +28,23 @@ control's markup to `benchmark/results/latest.json`.
 - **Performance**: classify and full-fill time on generated 50 to 1,000 field forms, against the
   roadmap targets. Reported, not gated, because CI machines vary.
 
+## Measuring without fooling ourselves
+
+Every fix is tuned on the forms that exposed it, so those forms stop being a fair test the moment
+they're fixed. The first Form Lab round showed it: 78% → 90% on the pages it was tuned on, and no
+change on 30 new pages. So:
+
+- **Keep a sealed set.** Write new held-out forms before a round of fixes starts, and don't open
+  them or their results until the fixes are done. Report the sealed number first.
+- **Retire a set once it has been tuned on.** It becomes regression fixtures; write a fresh sealed
+  set for the next round.
+- **Fix mechanisms, not labels.** A fix names the rule that was wrong ("a date input with no words
+  is a date") and holds for forms nobody has written yet. Adding a page's exact wording as an alias
+  only raises that page's score.
+- **Check what got worse, not only what got better.** Compare field by field against the previous
+  engine on the sealed set; a regression there is a bug in the fix, fixed and disclosed.
+- **Label blind.** Whoever labels a form never sees the engine's answers.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,

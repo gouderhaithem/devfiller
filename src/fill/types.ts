@@ -37,6 +37,8 @@ export interface FillContext {
   readonly filled: Map<Control, FieldKey>;           // recognized values written, for the phone pass
   readonly inForms: boolean;                         // whether the page's fields live in <form> elements
   readonly traps: ReadonlySet<Control>;              // honeypots, measured once, before any value is written
+  readonly other: Values;                            // someone else's details: an emergency contact, a manager
+  readonly others: Set<Control>;                     // fields filled with them, so phones stay distinct
 }
 
 export type Outcome = 'filled' | 'preserved' | 'unmatched' | 'invalid' | 'none';

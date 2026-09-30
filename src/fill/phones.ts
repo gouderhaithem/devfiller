@@ -34,8 +34,20 @@ function formRegions(ctx: FillContext): Map<HTMLFormElement | null, Region> {
   return regions;
 }
 
-// Among our regions, an Arabic-language form is Algerian.
-const languageRegion = (el: Control): Region | undefined => /^ar\b/i.test(el.closest('[lang]')?.getAttribute('lang') || '') ? 'dz' : undefined;
+// Among our regions, an Arabic-language form is Algerian and a French-language one French.
+function languageRegion(el: Control): Region | undefined {
+  const lang = (el.closest('[lang]')?.getAttribute('lang') || '').toLowerCase();
+  return /^ar\b/.test(lang) ? 'dz' : /^fr\b/.test(lang) ? 'fr' : undefined;
+}
+
+// A form that asks for a US state, and has no country field, is American. A sample of states is
+// enough: a US state select lists all fifty, so five of these is a clear sign.
+const US_STATES = new Set(['alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'florida', 'georgia', 'illinois', 'new york', 'ohio', 'texas', 'washington', 'virginia', 'michigan', 'pennsylvania', 'massachusetts', 'oregon', 'nevada']);
+function stateRegion(ctx: FillContext, form: HTMLFormElement | null): Region | undefined {
+  const states = ctx.controls.find((el): el is HTMLSelectElement => el instanceof HTMLSelectElement && el.form === form && usableKey(classificationOf(ctx.classifications, el), true) === 'state');
+  if (!states) return undefined;
+  return Array.from(states.options).filter(option => US_STATES.has((option.textContent || '').trim().toLowerCase())).length >= 5 ? 'us' : undefined;
+}
 
 // "05XX XX XX XX", "06 12 34 56 78" or a ten-character limit: the field wants a national number.
 const wantsNational = (el: Control) => hints(el).some(hint => /^0\d/.test(hint)) || ('maxLength' in el && el.maxLength > 0 && el.maxLength <= 10);
@@ -45,6 +57,15 @@ function national(phone: string, region: Region, short: boolean): string {
   const digits = phone.slice(DIAL_CODE[region].length).replace(/\D/g, '');
   if (region === 'us') return short ? digits : `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   return short ? `0${digits}` : `0${phone.slice(DIAL_CODE[region].length + 1)}`;
+}
+
+// Another person's number: the same country and format, different last two digits, wherever they
+// sit ("+44 7700 900123 (mobile)").
+export function otherNumber(phone: string): string {
+  const positions = Array.from(phone.matchAll(/\d/g), match => match.index!);
+  if (positions.length < 2) return phone;
+  const [a, b] = positions.slice(-2);
+  return Array.from(phone, (char, i) => i === a ? String((Number(char) + 3) % 10) : i === b ? String((Number(char) + 7) % 10) : char).join('');
 }
 
 // Phone numbers follow the form: a dial code on the field, then the country chosen in the form,
@@ -62,9 +83,10 @@ export function alignPhones(ctx: FillContext) {
   for (const [el, key] of ctx.filled) {
     if (key !== 'phone') continue;
     const current = regionOfValue(el.value);
-    const region = DIAL_HINTS.find(([pattern]) => hints(el).some(hint => pattern.test(hint)))?.[1] ?? countries.get(el.form) ?? languageRegion(el) ?? current;
+    const region = DIAL_HINTS.find(([pattern]) => hints(el).some(hint => pattern.test(hint)))?.[1] ?? countries.get(el.form) ?? languageRegion(el) ?? stateRegion(ctx, el.form) ?? current;
     if (!region) continue;
-    const international = current === region ? el.value : phones[region];
+    const own = current === region ? el.value : phones[region];
+    const international = own && ctx.others.has(el) && current !== region ? otherNumber(own) : own;
     if (!international) continue;
     const short = 'maxLength' in el && el.maxLength > 0 && el.maxLength <= 10;
     const phone = wantsNational(el) ? national(international, region, short) : international;
