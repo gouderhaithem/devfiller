@@ -1,6 +1,6 @@
 # DevFiller plan
 
-Project: DevFiller (`form-filler`)
+Project: DevFiller (`devfiller`)
 
 ## Confirmed requirements
 

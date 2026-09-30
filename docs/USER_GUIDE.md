@@ -36,7 +36,7 @@ Click the extension icon to fill the current website. Click again for fresh valu
 You’ll need Node.js and npm to build from source.
 
 ```sh
-cd /path/to/form-filler
+cd /path/to/devfiller
 npm ci
 npm run build
 ```

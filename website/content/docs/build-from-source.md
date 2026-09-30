@@ -1,10 +1,10 @@
-DevFiller is open source under the [MIT license](https://github.com/gouderhaithem/form-filler/blob/main/LICENSE). This page is for contributors. To use DevFiller, [install it from the Chrome Web Store](/docs/install/), which keeps it up to date.
+DevFiller is open source under the [MIT license](https://github.com/gouderhaithem/devfiller/blob/main/LICENSE). This page is for contributors. To use DevFiller, [install it from the Chrome Web Store](/docs/install/), which keeps it up to date.
 
 ## Run it locally
 
 ```sh
-git clone https://github.com/gouderhaithem/form-filler.git
-cd form-filler
+git clone https://github.com/gouderhaithem/devfiller.git
+cd devfiller
 npm ci
 npm run dev        # options preview and demo forms at http://127.0.0.1:5187
 ```
@@ -36,7 +36,7 @@ npm run package            # release/devfiller-<version>.zip for the Chrome Web 
 npm run store-assets       # store screenshots and promo tile
 ```
 
-The [benchmark](https://github.com/gouderhaithem/form-filler/tree/main/benchmark) scores the fill engine on labelled forms in English, French and Arabic, and on held-out forms it was never tuned on. [How recognition works](/docs/how-it-works/) explains the engine.
+The [benchmark](https://github.com/gouderhaithem/devfiller/tree/main/benchmark) scores the fill engine on labelled forms in English, French and Arabic, and on held-out forms it was never tuned on. [How recognition works](/docs/how-it-works/) explains the engine.
 
 Browser tests load the built extension in a throwaway profile and cover toolbar filling, the side panel, settings, exclusions, forms that change, and the AI cache. AI providers are simulated.
 
@@ -55,4 +55,4 @@ Browser tests load the built extension in a throwaway profile and cover toolbar 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on [GitHub](https://github.com/gouderhaithem/form-filler). For a bug, include your browser version, the steps, and a small example form with fictional data. Run the build and both test suites before opening a pull request.
+Bug reports and pull requests are welcome on [GitHub](https://github.com/gouderhaithem/devfiller). For a bug, include your browser version, the steps, and a small example form with fictional data. Run the build and both test suites before opening a pull request.

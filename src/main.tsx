@@ -48,7 +48,7 @@ function App() {
       } else {
         const demo = document.querySelector<HTMLIFrameElement>('#demo-form');
         if (!demo?.contentWindow) throw new Error('Demo form is still loading. Try again.');
-        demo.contentWindow.postMessage({type:'formly-fill',request},window.location.origin);
+        demo.contentWindow.postMessage({type:'devfiller-fill',request},window.location.origin);
       }
     } catch(e) {
       const message = e instanceof Error ? e.message : 'Something went wrong.';
@@ -56,7 +56,7 @@ function App() {
     } finally { setBusy(false); }
   }
   useEffect(()=>{
-    const listener=(event:MessageEvent)=>{ if(event.origin===window.location.origin && event.source===document.querySelector<HTMLIFrameElement>('#demo-form')?.contentWindow && event.data?.type==='formly-result') setResult(event.data.result); };
+    const listener=(event:MessageEvent)=>{ if(event.origin===window.location.origin && event.source===document.querySelector<HTMLIFrameElement>('#demo-form')?.contentWindow && event.data?.type==='devfiller-result') setResult(event.data.result); };
     window.addEventListener('message',listener);return()=>window.removeEventListener('message',listener);
   },[]);
   async function copy(key:string,value:string) {

@@ -36,4 +36,4 @@ export interface FillContext {
 export type Outcome = 'filled' | 'preserved' | 'unmatched' | 'invalid' | 'none';
 export interface ControlRun { outcome: Outcome; source: string; aiSkipped?: boolean; reason?: string }
 
-export type PageState = typeof globalThis & { __formlyDocumentId?:string; __formlyPanel?:PanelPageState };
+export type PageState = typeof globalThis & { __devfillerDocumentId?:string; __devfillerPanel?:PanelPageState };

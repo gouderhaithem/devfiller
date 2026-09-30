@@ -23,4 +23,4 @@ File uploads, hidden, disabled and read-only fields, card and bank details, one-
 | AI values don't appear | Check the key with **Test key**, and read the status under the suggestion cache. A quota error falls back to local values. |
 | The panel says page access is needed | Click the DevFiller icon once on that site, or reopen the panel from the icon's menu. |
 
-Still stuck? [Open an issue](https://github.com/gouderhaithem/form-filler/issues) with your browser version and the steps, and attach the form: **Export as test fixture** in the side panel saves its structure, never the values in it.
+Still stuck? [Open an issue](https://github.com/gouderhaithem/devfiller/issues) with your browser version and the steps, and attach the form: **Export as test fixture** in the side panel saves its structure, never the values in it.
