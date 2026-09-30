@@ -52,9 +52,19 @@ Two more kinds of answer:
 
 - `unknown`: the page doesn't give enough evidence, or the field means something with no
   generator (promo code, reference number, national ID, captcha, fax, "how did you hear about us",
-  a "remember me" checkbox, an interests checkbox list).
+  an interests checkbox list).
 - `skip:<kind>`: a sensitive field that must never be filled.
   - `skip:card`: card number, expiry, CVV/CVC, cardholder name
   - `skip:otp`: one-time, verification, SMS or 2FA codes
   - `skip:iban`: IBAN, BIC/SWIFT, RIB, bank account number
-  - `skip:consent`: terms, privacy, newsletter or marketing consent checkboxes
+  - `skip:consent`: terms, privacy, newsletter, marketing or permission checkboxes, and declarations ("I certify…")
+  - `skip:session`: "Remember me", "Keep me signed in" and similar session choices (skipped, but not counted as a leak)
+
+## Relationships
+
+These are checked after a fill with passwords on:
+
+- `data-form-type` on a `<form>`: `login`, `signup`, `checkout`, `booking`, `contact`, `search` or `other`
+- `data-same-as="<selector>"`: the field must end up with the same value as that field (confirmations)
+- `data-after="<selector>"`: a date that must come after that field's date (end dates)
+- `data-differs-from="<selector>"`: a value that must differ from that field's (a new password and the current one)

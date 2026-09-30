@@ -17,7 +17,7 @@
 <main>
   <h1>Créer votre compte</h1>
   <p>Rejoignez la Librairie du Quai et profitez de la livraison offerte dès 35 €.</p>
-  <form action="/inscription" method="post" class="form-inscription" autocomplete="on">
+  <form action="/inscription" method="post" class="form-inscription" autocomplete="on" data-form-type="signup">
     <div class="form-group">
       <label for="civilite">Civilité</label>
       <select id="civilite" name="civilite" class="form-control" data-expect="unknown">
@@ -41,7 +41,7 @@
     </div>
     <div class="form-group">
       <label for="email2">Confirmation de l'e-mail</label>
-      <input type="email" id="email2" name="email_confirmation" class="form-control" autocomplete="off" required data-expect="email">
+      <input type="email" id="email2" name="email_confirmation" class="form-control" autocomplete="off" required data-expect="email" data-same-as="#email">
     </div>
     <div class="form-group">
       <label for="mdp">Mot de passe</label>
@@ -49,7 +49,7 @@
     </div>
     <div class="form-group">
       <label for="mdp2">Confirmer le mot de passe</label>
-      <input type="password" id="mdp2" name="mot_de_passe_confirmation" class="form-control" minlength="8" autocomplete="new-password" required data-expect="password">
+      <input type="password" id="mdp2" name="mot_de_passe_confirmation" class="form-control" minlength="8" autocomplete="new-password" required data-expect="password" data-same-as="#mdp">
     </div>
     <div class="form-group">
       <label for="naissance">Date de naissance</label>

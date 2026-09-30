@@ -90,7 +90,8 @@ export function score(pairs: readonly Pair[]): Metrics {
   return { summary: summarize(pairs), types: scoreTypes(pairs), confusions: confusions(pairs) };
 }
 
-export interface Baseline { summary: Summary; types: Record<string, TypeStats>; leaks: number; variants: { correct: number; total: number } }
+export interface Tally { correct: number; total: number }
+export interface Baseline { summary: Summary; types: Record<string, TypeStats>; leaks: number; variants: Tally; relations?: Record<string, Tally>; forms?: Tally }
 export interface Current extends Baseline { submits: number; requests: number }
 
 // Returns every reason the run is worse than the baseline. Empty means the gate passes.
@@ -110,6 +111,11 @@ export function regressions(current: Current, baseline: Baseline | undefined): s
     if (before.recall !== null && (now?.recall ?? 0) + epsilon < before.recall) problems.push(`${type} recall fell from ${pct(before.recall)} to ${pct(now?.recall ?? 0)}`);
   }
   if (current.variants.correct < baseline.variants.correct) problems.push(`spelling variants fell from ${baseline.variants.correct} to ${current.variants.correct} correct`);
+  for (const [kind, before] of Object.entries(baseline.relations ?? {})) {
+    const now = current.relations?.[kind]?.correct ?? 0;
+    if (now < before.correct) problems.push(`${kind} checks fell from ${before.correct} to ${now} passing`);
+  }
+  if (baseline.forms && (current.forms?.correct ?? 0) < baseline.forms.correct) problems.push(`form types fell from ${baseline.forms.correct} to ${current.forms?.correct ?? 0} correct`);
   return problems;
 }
 

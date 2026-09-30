@@ -13,7 +13,7 @@
 <body>
 <main>
   <h1>Account &amp; newsletter preferences</h1>
-  <form action="/settings" method="post">
+  <form action="/settings" method="post" data-form-type="other">
     <section>
       <h2>Profile</h2>
       <div class="f">
@@ -26,7 +26,7 @@
       </div>
       <div class="f">
         <label for=":r3:">Confirm email</label>
-        <input id=":r3:" name="email_confirm" type="email" data-expect="email">
+        <input id=":r3:" name="email_confirm" type="email" data-expect="email" data-same-as="[name=email]">
       </div>
       <div class="f">
         <label for=":r4:">Mobile number</label>
@@ -68,11 +68,11 @@
       </div>
       <div class="f">
         <label for="pw1">New password</label>
-        <input id="pw1" name="pw_new" type="password" autocomplete="new-password" data-expect="password">
+        <input id="pw1" name="pw_new" type="password" autocomplete="new-password" data-expect="password" data-differs-from="#pw0">
       </div>
       <div class="f">
         <label for="pw2">Repeat new password</label>
-        <input id="pw2" name="pw_new2" type="password" autocomplete="new-password" data-expect="password">
+        <input id="pw2" name="pw_new2" type="password" autocomplete="new-password" data-expect="password" data-same-as="#pw1">
       </div>
       <div class="f">
         <label for="code">Verification code we just emailed you</label>
@@ -96,7 +96,7 @@
       </fieldset>
       <p><label><input type="checkbox" name="digest" data-expect="skip:consent"> Yes, send me the weekly digest</label></p>
       <p><label><input type="checkbox" name="partners" data-expect="skip:consent"> Share my email with selected partners so they can send me promotions</label></p>
-      <p><label><input type="checkbox" name="keep" data-expect="unknown"> Keep me signed in on this device</label></p>
+      <p><label><input type="checkbox" name="keep" data-expect="skip:session"> Keep me signed in on this device</label></p>
     </section>
 
     <button type="submit">Save changes</button>

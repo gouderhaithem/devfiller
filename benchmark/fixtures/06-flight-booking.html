@@ -16,7 +16,7 @@
 <body>
 <main>
   <h1>Where to next?</h1>
-  <form action="/flights/book" method="post">
+  <form action="/flights/book" method="post" data-form-type="booking">
     <div>
       <label><input type="radio" name="trip" value="rt" checked data-expect="unknown"> Round trip</label>
       <label><input type="radio" name="trip" value="ow" data-expect="unknown"> One way</label>
@@ -33,7 +33,7 @@
         <input type="date" name="d1" data-expect="startDate">
       </label>
       <label>Return date
-        <input type="date" name="d2" data-expect="endDate">
+        <input type="date" name="d2" data-expect="endDate" data-after="[name=d1]">
       </label>
       <label>Passengers
         <input type="number" name="pax" min="1" max="9" value="1" data-expect="quantity">

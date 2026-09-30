@@ -23,7 +23,7 @@
 </header>
 <main>
   <h1>Welcome back</h1>
-  <form action="/session" method="post" autocomplete="on">
+  <form action="/session" method="post" autocomplete="on" data-form-type="login">
     <div class="form-group">
       <label for="login-email">Email address</label>
       <input class="form-control" type="email" id="login-email" name="session[email]" autocomplete="email" required data-expect="email">
@@ -33,13 +33,13 @@
       <input class="form-control" type="password" id="login-pass" name="session[password]" autocomplete="current-password" required data-expect="password">
     </div>
     <div class="form-group">
-      <label><input type="checkbox" name="remember" value="1" data-expect="unknown"> Remember me on this device</label>
+      <label><input type="checkbox" name="remember" value="1" data-expect="skip:session"> Remember me on this device</label>
     </div>
     <button type="submit" class="btn btn-primary">Sign in</button>
   </form>
 
   <hr>
-  <form action="/session/sms" method="post">
+  <form action="/session/sms" method="post" data-form-type="other">
     <h2>Prefer a text message?</h2>
     <div class="form-group">
       <label for="sms-phone">Mobile number</label>
@@ -52,7 +52,7 @@
     <button type="submit" class="btn">Verify and sign in</button>
   </form>
 <footer>
-  <form action="/newsletter" method="post">
+  <form action="/newsletter" method="post" data-form-type="other">
     <label for="nl-email">Get product news</label><br>
     <input type="email" id="nl-email" name="newsletter_email" placeholder="you@example.com" data-expect="email">
     <label><input type="checkbox" name="nl_consent" data-expect="skip:consent"> I agree to receive marketing emails</label>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Checkout</title></head>
+<body>
+<main>
+  <h1>Checkout</h1>
+  <form action="/pay" method="post" data-form-type="checkout">
+    <section class="shipping">
+      <h2>Shipping</h2>
+      <p><label for="s-name">Name</label><input id="s-name" name="ship_name" data-expect="fullName"></p>
+      <p><label for="s-addr">Address</label><input id="s-addr" name="ship_addr" data-expect="address"></p>
+      <p><label for="s-city">City</label><input id="s-city" name="ship_city" data-expect="city"></p>
+    </section>
+    <section class="payment">
+      <h2>Payment</h2>
+      <!-- Next to card fields, "Name" is the cardholder: never filled. -->
+      <p><label for="p-name">Name</label><input id="p-name" name="pay_name" data-expect="skip:card"></p>
+      <p><label for="p-num">Card number</label><input id="p-num" name="pay_num" inputmode="numeric" data-expect="skip:card"></p>
+      <p><label for="p-exp">MM / YY</label><input id="p-exp" name="pay_exp" data-expect="skip:card"></p>
+      <p><label for="p-cvc">CVC</label><input id="p-cvc" name="pay_cvc" data-expect="skip:card"></p>
+    </section>
+    <button type="submit">Pay</button>
+  </form>
+</main>
+</body>
+</html>

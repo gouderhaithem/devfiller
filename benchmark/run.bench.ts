@@ -19,8 +19,9 @@ const BASELINE = resolve('benchmark/baseline.json');
 const RESULTS = resolve('benchmark/results');
 const UPDATE = process.env.BENCHMARK_UPDATE === '1';
 const PERF_TARGETS: Array<[number, number]> = [[50, 50], [100, 100], [500, 200], [1000, 200]];
+// Leaks count these. `skip:session` (remember me) is skipped too, but it isn't private data.
 const SENSITIVE = ['skip:card', 'skip:otp', 'skip:iban', 'skip:consent'];
-const ALLOWED = new Set<string>([...fields.map(([key]) => key), 'unknown', ...SENSITIVE]);
+const ALLOWED = new Set<string>([...fields.map(([key]) => key), 'unknown', ...SENSITIVE, 'skip:session']);
 const OMITTED = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
 
 type Engine = { fillPage: (request: FillRequest) => FillResult };
@@ -68,6 +69,7 @@ function readStates(page: Page, indexes: number[]) {
 
 async function classifyFixture(page: Page, name: string, controls: ControlInfo[]) {
   const result = await runEngine(page, { ...base, mode: 'classify' });
+  const forms = await formTypes(page, result);
   const predicted = new Map((result.classified ?? []).map(field => [field.index, field]));
   const pairs: Pair[] = [];
   for (const control of controls) {
@@ -78,13 +80,14 @@ async function classifyFixture(page: Page, name: string, controls: ControlInfo[]
     const answer = predicted.get(control.index)!;
     pairs.push({ fixture: name, index: control.index, expected: control.expect!, predicted: answer.type, confidence: answer.confidence, html: control.html });
   }
-  return pairs;
+  return { pairs, forms };
 }
 
 async function findLeaks(page: Page, url: string, name: string, controls: ControlInfo[]) {
-  const sensitive = controls.filter(control => control.expect?.startsWith('skip:'));
+  const sensitive = controls.filter(control => SENSITIVE.includes(control.expect ?? ''));
   const leaks: RunExtras['leaks'] = [];
   let submits = 0;
+  let relations: Relation[] = [];
   for (const settings of FILL_SETTINGS) {
     await openWithEngine(page, url);
     const before = await readStates(page, sensitive.map(control => control.index));
@@ -95,8 +98,35 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
       if (changed && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
     });
     submits += await page.evaluate(() => (globalThis as typeof globalThis & { __submits: number }).__submits);
+    // Relationships are checked after the fill with every filler on (passwords included).
+    relations = await checkRelations(page, name);
   }
-  return { leaks, submits };
+  return { leaks, submits, relations };
+}
+
+interface Relation { kind: string; ok: boolean; detail: string }
+function checkRelations(page: Page, fixture: string): Promise<Relation[]> {
+  return page.evaluate(name => {
+    const read = (el: Element | null) => el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement ? el.value : '';
+    const describe = (el: Element) => `${name}: ${el.outerHTML.slice(0, 100)}`;
+    const checks: Array<[string, string, (a: string, b: string) => boolean]> = [
+      ['data-same-as', 'confirmation', (a, b) => !!a && a === b],
+      ['data-after', 'end after start', (a, b) => !!a && !!b && a > b],
+      ['data-differs-from', 'new differs', (a, b) => !!a && !!b && a !== b],
+    ];
+    return checks.flatMap(([attribute, kind, test]) => Array.from(document.querySelectorAll(`[${attribute}]`), el => {
+      const other = document.querySelector(el.getAttribute(attribute)!);
+      return { kind, ok: test(read(el), read(other)), detail: `${describe(el)} → "${read(el)}" vs "${read(other)}"` };
+    }));
+  }, fixture);
+}
+
+function formTypes(page: Page, result: FillResult) {
+  return page.evaluate(found => Array.from(document.forms).flatMap((form, index) => {
+    const expected = form.getAttribute('data-form-type');
+    const predicted = found.find(f => f.index === index)?.type ?? 'other';
+    return expected ? [{ expected, predicted, action: form.getAttribute('action') || '' }] : [];
+  }), result.forms ?? []);
 }
 
 async function runVariants(page: Page) {
@@ -170,6 +200,8 @@ test('fill engine benchmark', async ({ page }) => {
   const holdoutNames = await folder('holdout');
   const pairs: Pair[] = [];
   const holdoutPairs: Pair[] = [];
+  const relations: Relation[] = [];
+  const formChecks: Array<{ fixture: string; expected: string; predicted: string; action: string }> = [];
   const fixtures: FixtureScore[] = [];
   const leaks: RunExtras['leaks'] = [];
   let submits = 0;
@@ -177,26 +209,33 @@ test('fill engine benchmark', async ({ page }) => {
     const url = pathToFileURL(resolve(FIXTURES, name)).href;
     await openWithEngine(page, url);
     const controls = await describeControls(page);
-    const fixturePairs = await classifyFixture(page, name, controls);
-    if (holdoutNames.includes(name)) { holdoutPairs.push(...fixturePairs); } else { pairs.push(...fixturePairs); }
-    if (!holdoutNames.includes(name)) fixtures.push({ fixture: name, fields: fixturePairs.length, correct: fixturePairs.filter(p => p.expected === p.predicted).length });
+    const { pairs: fixturePairs, forms } = await classifyFixture(page, name, controls);
+    const holdout = holdoutNames.includes(name);
+    if (!holdout) formChecks.push(...forms.map(form => ({ fixture: name, ...form })));
+    if (holdout) holdoutPairs.push(...fixturePairs); else pairs.push(...fixturePairs);
+    if (!holdout) fixtures.push({ fixture: name, fields: fixturePairs.length, correct: fixturePairs.filter(p => p.expected === p.predicted).length });
     const found = await findLeaks(page, url, name, controls);
     leaks.push(...found.leaks);
     submits += found.submits;
+    if (!holdout) relations.push(...found.relations);
   }
   const variants = await runVariants(page);
   const perf = await runPerf(page);
   const metrics = score(pairs);
-  const current: Current = { summary: metrics.summary, types: metrics.types, leaks: leaks.length, variants: { correct: variants.correct, total: variants.total }, submits, requests };
+  const relationTally = Object.fromEntries([...new Set(relations.map(r => r.kind))].map(kind => [kind, { correct: relations.filter(r => r.kind === kind && r.ok).length, total: relations.filter(r => r.kind === kind).length }]));
+  const formTally = { correct: formChecks.filter(f => f.expected === f.predicted).length, total: formChecks.length };
+  const current: Current = { summary: metrics.summary, types: metrics.types, leaks: leaks.length, variants: { correct: variants.correct, total: variants.total }, submits, requests, relations: relationTally, forms: formTally };
   const baseline = await readBaseline();
   const problems = regressions(current, UPDATE ? undefined : baseline);
   const bands = [['high', 0.9], ['medium', 0.7], ['low', 0.5]] as const;
   const held = holdoutPairs.length ? { fixtures: holdoutNames.length, summary: score(holdoutPairs).summary, confusions: score(holdoutPairs).confusions } : undefined;
-  const report = formatReport(metrics, { fixtures, leaks, submits, requests, variants, perf, calibration: calibration(pairs, bands), holdout: held, problems });
+  const report = formatReport(metrics, { fixtures, leaks, submits, requests, variants, perf, calibration: calibration(pairs, bands), holdout: held, problems,
+    relations: relationTally, relationFailures: relations.filter(r => !r.ok).map(r => `${r.kind}: ${r.detail}`),
+    forms: { ...formTally, mistakes: formChecks.filter(f => f.expected !== f.predicted).map(f => `${f.fixture} ${f.action}: expected ${f.expected}, got ${f.predicted}`) } });
   await mkdir(RESULTS, { recursive: true });
   await writeFile(resolve(RESULTS, 'latest.md'), `# Benchmark run\n\n${report}\n`);
   await writeFile(resolve(RESULTS, 'latest.json'), JSON.stringify({ ...current, perf, mistakes: pairs.filter(p => p.expected !== p.predicted), holdoutMistakes: holdoutPairs.filter(p => p.expected !== p.predicted) }, null, 2));
-  if (UPDATE) await writeFile(BASELINE, `${JSON.stringify({ summary: current.summary, types: current.types, leaks: current.leaks, variants: current.variants }, null, 2)}\n`);
+  if (UPDATE) await writeFile(BASELINE, `${JSON.stringify({ summary: current.summary, types: current.types, leaks: current.leaks, variants: current.variants, relations: current.relations, forms: current.forms }, null, 2)}\n`);
   console.log(`\n${report}\n`);
   expect(problems, problems.join('\n')).toEqual([]);
 });

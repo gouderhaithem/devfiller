@@ -17,7 +17,7 @@
 <body>
 <main>
   <h1>إنشاء حساب جديد</h1>
-  <form action="/register" method="post">
+  <form action="/register" method="post" data-form-type="signup">
     <div class="field">
       <label for="first">الاسم</label>
       <input type="text" id="first" name="first_name" autocomplete="given-name" required data-expect="firstName">
@@ -40,7 +40,7 @@
     </div>
     <div class="field">
       <label for="pass2">تأكيد كلمة المرور</label>
-      <input type="password" id="pass2" name="password_confirm" class="ltr" minlength="8" autocomplete="new-password" required data-expect="password">
+      <input type="password" id="pass2" name="password_confirm" class="ltr" minlength="8" autocomplete="new-password" required data-expect="password" data-same-as="#pass">
     </div>
     <div class="field">
       <label for="bdate">تاريخ الميلاد</label>

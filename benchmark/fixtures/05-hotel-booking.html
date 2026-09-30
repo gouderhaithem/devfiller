@@ -16,12 +16,12 @@
 <body>
 <main>
   <h1>Reserve a room</h1>
-  <form action="/reservations" method="post">
+  <form action="/reservations" method="post" data-form-type="booking">
     <label for="ci">Check-in</label>
     <input type="date" id="ci" name="arrival" min="2026-10-01" required data-expect="startDate">
 
     <label for="co">Check-out</label>
-    <input type="date" id="co" name="departure" min="2026-10-02" required data-expect="endDate">
+    <input type="date" id="co" name="departure" min="2026-10-02" required data-expect="endDate" data-after="#ci">
 
     <label for="guests">Number of guests</label>
     <input type="number" id="guests" name="guests" min="1" max="6" value="2" data-expect="quantity">

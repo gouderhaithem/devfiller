@@ -12,7 +12,7 @@
 <body>
 <main>
   <h1>Reserve your rental car</h1>
-  <form action="/reserve" method="post">
+  <form action="/reserve" method="post" data-form-type="booking">
     <fieldset>
       <legend>Trip details</legend>
       <label for="pu-branch">Pick-up branch</label>
@@ -30,7 +30,7 @@
       <input type="time" id="t1" name="tm_from" data-expect="time">
 
       <label for="d2">Return date</label>
-      <input type="date" id="d2" name="dt_to" data-expect="endDate">
+      <input type="date" id="d2" name="dt_to" data-expect="endDate" data-after="#d1">
 
       <label for="t2">Return time</label>
       <input type="text" id="t2" name="tm_to" placeholder="HH:MM" data-expect="time">

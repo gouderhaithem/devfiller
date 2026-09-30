@@ -17,7 +17,7 @@
 </head>
 <body>
 <main>
-  <form action="/checkout" method="post">
+  <form action="/checkout" method="post" data-form-type="checkout">
     <section id="billing">
       <h2>Billing address</h2>
       <div class="f">
@@ -105,7 +105,7 @@
       </div>
       <div class="f">
         <label for="c-email2">Confirm email</label>
-        <input type="email" id="c-email2" name="email_confirm" data-expect="email">
+        <input type="email" id="c-email2" name="email_confirm" data-expect="email" data-same-as="#c-email">
       </div>
       <div class="f">
         <label for="c-home">Home phone</label>

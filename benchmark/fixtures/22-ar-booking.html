@@ -17,7 +17,7 @@
 <body>
 <main>
   <h1>احجز إقامتك</h1>
-  <form action="/booking" method="post">
+  <form action="/booking" method="post" data-form-type="booking">
     <div class="grid">
       <div class="full">
         <label for="b-name">الاسم الكامل</label>
@@ -37,7 +37,7 @@
       </div>
       <div>
         <label for="b-departure">تاريخ المغادرة</label>
-        <input type="date" id="b-departure" name="departure" min="2026-01-01" required data-expect="endDate">
+        <input type="date" id="b-departure" name="departure" min="2026-01-01" required data-expect="endDate" data-after="#b-arrival">
       </div>
       <div>
         <label for="b-guests">عدد الأشخاص</label>

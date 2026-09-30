@@ -10,6 +10,9 @@ export interface RunExtras {
   variants: { correct: number; total: number; failures: Array<{ name: string; expect: string; predicted: string }> };
   perf: PerfResult[];
   calibration: Band[];
+  relations: Record<string, { correct: number; total: number }>;
+  forms: { correct: number; total: number; mistakes: string[] };
+  relationFailures: string[];
   holdout?: { fixtures: number; summary: Summary; confusions: Metrics['confusions'] };
   problems: string[];
 }
@@ -40,6 +43,12 @@ export function formatReport(metrics: Metrics, extras: RunExtras): string {
     row(['Form submissions', extras.submits]),
     row(['Network requests', extras.requests]),
     row(['Spelling variants correct', `${extras.variants.correct} / ${extras.variants.total}`]),
+    '',
+    '## Relationships and form types',
+    header(['Check', 'Passing']),
+    ...Object.entries(extras.relations).map(([kind, t]) => row([kind, `${t.correct} / ${t.total}`])),
+    row(['form type', `${extras.forms.correct} / ${extras.forms.total}`]),
+    ...(extras.relationFailures.length || extras.forms.mistakes.length ? ['', ...extras.relationFailures.map(f => `- ✗ ${f}`), ...extras.forms.mistakes.map(f => `- ✗ ${f}`)] : []),
     '',
     '## Per type',
     typeTable(metrics.types),

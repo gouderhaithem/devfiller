@@ -18,7 +18,7 @@
 <body>
 <main>
   <h1>Join Acme</h1>
-  <form class="needs-validation" action="/register" method="post">
+  <form class="needs-validation" action="/register" method="post" data-form-type="signup">
     <div class="row mb-3">
       <div>
         <label class="form-label" for="first_name">First name</label>
@@ -35,7 +35,7 @@
     </div>
     <div class="mb-3">
       <label class="form-label" for="email2">Confirm email</label>
-      <input type="email" class="form-control" id="email2" name="email_confirmation" autocomplete="email" required data-expect="email">
+      <input type="email" class="form-control" id="email2" name="email_confirmation" autocomplete="email" required data-expect="email" data-same-as="#email">
     </div>
     <div class="mb-3">
       <label class="form-label" for="pw">Password</label>
@@ -43,7 +43,7 @@
     </div>
     <div class="mb-3">
       <label class="form-label" for="pw2">Confirm password</label>
-      <input type="password" class="form-control" id="pw2" name="password_confirmation" autocomplete="new-password" minlength="8" required data-expect="password">
+      <input type="password" class="form-control" id="pw2" name="password_confirmation" autocomplete="new-password" minlength="8" required data-expect="password" data-same-as="#pw">
     </div>
     <div class="mb-3">
       <label class="form-label" for="dob">Date of birth</label>
