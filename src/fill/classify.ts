@@ -7,6 +7,7 @@ import {
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isInput, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
 import { MONTH_SET, OPTION_LISTS } from './vocabulary';
+import { unitOf, type UnitKind } from './units';
 import { normalize } from './normalize';
 
 export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
@@ -32,8 +33,8 @@ const MARGIN = 0.15;
 
 // How much each source is worth on its own. Sources in one group repeat each other (a label and a
 // placeholder usually say the same thing), so only the strongest in a group counts.
-const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1 };
-export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form' };
+const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1 };
+export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit' };
 // A radio group's question is its label.
 const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.
@@ -63,7 +64,8 @@ function editDistance(a: string, b: string, limit: number): number {
   return previous[b.length];
 }
 
-const allowedEdits = (alias: string) => alias.replace(/ /g, '').length >= 10 ? 2 : 1;
+// Two typos only in one long word: across a phrase, two edits turn "project code" into "product code".
+const allowedEdits = (alias: string) => !alias.includes(' ') && alias.length >= 10 ? 2 : 1;
 
 // Typos: "Emial", "Frist name", "usrname". Only when nothing specific matched.
 function fuzzyMatches(text: string): Match[] {
@@ -76,9 +78,9 @@ function fuzzyMatches(text: string): Match[] {
   }
   if (found.length) return found;
   // Inside a longer label only longer words with the same first letter may be typos: "wage" is
-  // one edit from "page", and "estate" from "state".
+  // one edit from "page", "estate" from "state", and "piece" from "pieces".
   for (const token of text.split(' ')) {
-    if (token.length < 5) continue;
+    if (token.length < 6) continue;
     for (const entry of FUZZY_POOL) if (entry.tokens.length === 1 && entry.name.length >= 5 && entry.name[0] === token[0] && Math.abs(token.length - entry.name.length) <= 1 && editDistance(token, entry.name, allowedEdits(entry.name)) <= allowedEdits(entry.name)) found.push([entry, 'fuzzy']);
   }
   return found;
@@ -179,6 +181,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
     else if (el.type === 'color' && type !== 'color') push('type', 'color', 0.7);
   }
   if (el instanceof HTMLTextAreaElement && !MULTILINE_TYPES.has(type)) push('type', 'textarea', 0.5);
+  // A unit means a number: "Longueur (mm)" isn't a name or a city.
+  const unit = unitOf(signals);
+  if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
   if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type)) push('type', 'select', 0.6);
   const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source));
   const search = type !== 'search' && texts.find(signal => SEARCH_PHRASES.some(phrase => contains(signal.text, phrase)));
@@ -187,6 +192,12 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   if (confirm) push(confirm.source, confirm.raw, 0.4);
   return found;
 }
+
+// What a unit beside the label says: "(mm)" is a measurement, "(u)" a count, "(%)" a percentage.
+const UNIT_TYPES: Readonly<Record<UnitKind, readonly [FieldKey, number]>> = {
+  length: ['measurement', 0.6], weight: ['measurement', 0.6], area: ['measurement', 0.6], volume: ['measurement', 0.6],
+  count: ['quantity', 0.6], percent: ['percentage', 0.7], currency: ['amount', 0.55],
+};
 
 export type DatePart = 'day' | 'month' | 'year';
 const numbersIn = (texts: readonly string[]) => texts.map(text => Number(text)).filter(n => Number.isInteger(n));
@@ -226,6 +237,13 @@ function collectEvidence(el: Control, signals: readonly Signal[]): Map<FieldKey,
   const add = (type: FieldKey, evidence: Evidence) => byType.set(type, [...(byType.get(type) ?? []), evidence]);
   const options = optionTexts(el);
   for (const [type, evidence] of optionEvidence(options, signals)) add(type, evidence);
+  const unit = unitOf(signals);
+  if (unit) {
+    // Money is an amount unless the label says price; a rate ("$/h", "€/m²") is a price.
+    const perUnit = unit.kind === 'currency' && unit.per;
+    const [type, weight] = perUnit ? ['price', 0.6] as const : UNIT_TYPES[unit.kind];
+    add(type, { source: 'unit', signal: unit.symbol, weight, match: 'type' });
+  }
   // A radio group's question, or the legend over split day/month/year selects, is their label.
   const radio = (isChoice(el) && el.type === 'radio') || !!datePart(options);
   // With no meaningful name or id, what the person reads is all there is, so it counts a bit more.
@@ -261,7 +279,10 @@ function scoreType(el: Control, type: FieldKey, evidence: readonly Evidence[], s
   }
   const kept = [...strongest.values()].sort((a, b) => b.weight - a.weight);
   const penalties = against(el, type, signals);
-  const positive = 1 - kept.reduce((rest, item) => rest * (1 - item.weight), 1);
+  // Generic words ("nom", "date") only count with other evidence: on their own, however many, they
+  // stay below the threshold.
+  const onlyGeneric = kept.every(item => item.match === 'generic');
+  const positive = Math.min(onlyGeneric ? THRESHOLDS.low - 0.05 : 1, 1 - kept.reduce((rest, item) => rest * (1 - item.weight), 1));
   const score = penalties.reduce((value, item) => value * (1 + item.weight), positive);
   return { type, score, evidence: [...kept, ...penalties] };
 }

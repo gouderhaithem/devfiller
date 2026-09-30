@@ -57,7 +57,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">What it fills, and what it leaves alone</h2>
         <p className="mt-4 max-w-2xl text-ink-soft">
-          43 field types, matched by label, name, placeholder or autocomplete. Values fit together: the username and email
+          45 field types, matched by label, name, placeholder or autocomplete. Values fit together: the username and email
           follow the generated name.
         </p>
         <div className="mt-10 grid gap-12 md:grid-cols-2">

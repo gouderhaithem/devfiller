@@ -165,8 +165,9 @@ export function formType(form: HTMLFormElement, types: readonly string[], roles:
   if (has('message', 'subject', 'description') && has('email', 'phone') && !has('password', 'skip:card') && fields <= 10) scores.contact = 0.7;
   for (const [type, list] of Object.entries(FORM_WORDS) as [FormType, readonly string[]][]) {
     if (!list.some(word => contains(text, word))) continue;
-    // "survey", "settings", "profile": words that say this isn't one of the common kinds.
-    scores[type] = type === 'other' ? 0.75 : 1 - (1 - scores[type]) * 0.5;
+    // "survey", "settings", "profile": words that say this isn't one of the common kinds. Other words
+    // only confirm what the fields suggest: an "order" form with no address or card isn't a checkout.
+    scores[type] = type === 'other' ? 0.75 : scores[type] > 0 ? 1 - (1 - scores[type]) * 0.5 : 0;
   }
   const [best, score] = (Object.entries(scores) as [FormType, number][]).sort((x, y) => y[1] - x[1])[0];
   return score >= THRESHOLDS.low ? { type: best, confidence: Math.round(score * 100) / 100 } : { type: 'other', confidence: 0 };

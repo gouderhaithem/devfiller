@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>New work order</title></head>
+<body>
+<main>
+  <h1>New work order</h1>
+  <form action="/work-orders" method="post" data-form-type="other">
+    <p><label for="wo">Work order #</label><input id="wo" name="wo_number" data-expect="reference" data-value-pattern="^[A-Z]{2,4}-"></p>
+    <p><label for="po">PO number</label><input id="po" name="po" inputmode="numeric" pattern="[0-9]{8}" data-expect="reference" data-value-pattern="^\d{8}$"></p>
+    <p><label for="part">Part number</label><input id="part" name="part_no" data-expect="reference" data-value-pattern="^[A-Z]{2,4}-"></p>
+    <p><label for="inv">Invoice no.</label><input id="inv" name="invoice" data-expect="reference" data-value-pattern="^INV-"></p>
+    <p><label for="len">Length (in)</label><input id="len" name="length" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d+(\.\d+)?$"></p>
+    <p><label for="dia">Diameter (mm)</label><input id="dia" name="diameter" type="number" min="1" max="500" data-expect="measurement" data-value-pattern="^\d+(\.\d+)?$"></p>
+    <p><label for="wt">Weight (lb)</label><input id="wt" name="weight" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d+(\.\d+)?$"></p>
+    <p><label for="area">Surface area (m²)</label><input id="area" name="area" data-expect="measurement" data-value-pattern="^\d+(\.\d+)?$"></p>
+    <p><label for="labor">Labor rate ($/h)</label><input id="labor" name="rate" inputmode="decimal" data-expect="price" data-value-pattern="^\d+(\.\d{2})?$"></p>
+    <p><label for="scrap">Scrap allowance (%)</label><input id="scrap" name="scrap" inputmode="numeric" data-expect="percentage" data-value-pattern="^\d{1,3}$"></p>
+    <p><label for="pcs">Pieces per batch</label><input id="pcs" name="pcs" inputmode="numeric" data-expect="quantity" data-value-pattern="^\d+$"></p>
+    <p><label for="bin">Bin location</label><input id="bin" name="bin" data-expect="unknown"></p>
+    <p><label for="op">Operation code</label><input id="op" name="op" inputmode="numeric" data-expect="unknown" data-value-pattern="^\d+$"></p>
+    <button type="submit">Create work order</button>
+  </form>
+</main>
+</body>
+</html>

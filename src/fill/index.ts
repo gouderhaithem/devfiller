@@ -1,4 +1,5 @@
 import type { ControlSnapshot } from '../panel-types';
+import type { FieldKey } from '../data';
 import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome, PageState, UnknownField } from './types';
 import { CONSENT, CONTEXTUAL_KEYS, MACHINE_ID, PASSWORD } from './dictionary';
 import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, isVisible, legendText, listControls, type ControlSignals } from './extract';
@@ -8,6 +9,7 @@ import { analyzePage } from './context';
 import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
 import { randomFor, secureRandom, type Random } from '../rng';
 import { alignPhones } from './phones';
+import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
 import { setNativeChecked, setNativeValue, snapshot } from './apply';
 import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
@@ -84,6 +86,13 @@ function relatedValue(ctx: FillContext, found: Classification, key: string): { v
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 const addDays = (date: string, days: number) => { const day = new Date(`${date}T00:00:00Z`); day.setUTCDate(day.getUTCDate() + days); return day.toISOString().slice(0, 10); };
 
+// Measurements and references are shaped by their field; numbers get the page's decimal separator.
+function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey): string {
+  if (key === 'measurement') return measurementValue(el, found, ctx.random(el));
+  if (key === 'reference') return referenceValue(el, found, ctx.random(el), ctx.values.date.slice(0, 4));
+  return DECIMAL_KEYS.has(key) ? localizeDecimal(el, ctx.values[key]) : ctx.values[key];
+}
+
 // An end date lands one to fourteen days after its start date (and no later than its max) when
 // generated values or limits would put it earlier.
 function afterStart(el: Control, found: Classification, resolved: Resolved, value: string, random: Random): string {
@@ -112,7 +121,7 @@ function resolveValue(ctx: FillContext, el: Control, index: number, sig: Control
     const found = classificationOf(ctx.classifications, el);
     const key = usableKey(found, request.fillUnknown);
     const related = key && relatedValue(ctx, found, key);
-    if (key) resolved = { value: related ? related.value : ctx.values[key], key, literal: !!related?.literal, generic: false, ai: false };
+    if (key) resolved = { value: related ? related.value : shapedValue(ctx, el, found, key), key, literal: !!related?.literal, generic: false, ai: false };
   }
   // Contextual text must reach AI even when a familiar label matched a local sample.
   // Explicit rules and coherent identity/contact fields keep their existing generators.

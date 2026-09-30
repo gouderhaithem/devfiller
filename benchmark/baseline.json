@@ -1,11 +1,11 @@
 {
   "summary": {
-    "fields": 464,
+    "fields": 496,
     "precision": 1,
     "recall": 1,
     "f1": 1,
     "accuracy": 1,
-    "unknownRate": 0.125,
+    "unknownRate": 0.13306451612903225,
     "falsePositiveRate": 0,
     "wrongRate": 0
   },
@@ -59,9 +59,9 @@
       "f1": 1
     },
     "color": {
-      "support": 1,
-      "predicted": 1,
-      "correct": 1,
+      "support": 2,
+      "predicted": 2,
+      "correct": 2,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -186,6 +186,14 @@
       "recall": 1,
       "f1": 1
     },
+    "measurement": {
+      "support": 8,
+      "predicted": 8,
+      "correct": 8,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
     "message": {
       "support": 11,
       "predicted": 11,
@@ -219,9 +227,9 @@
       "f1": 1
     },
     "percentage": {
-      "support": 1,
-      "predicted": 1,
-      "correct": 1,
+      "support": 2,
+      "predicted": 2,
+      "correct": 2,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -243,17 +251,17 @@
       "f1": 1
     },
     "price": {
-      "support": 1,
-      "predicted": 1,
-      "correct": 1,
+      "support": 2,
+      "predicted": 2,
+      "correct": 2,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "quantity": {
-      "support": 8,
-      "predicted": 8,
-      "correct": 8,
+      "support": 11,
+      "predicted": 11,
+      "correct": 11,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -262,6 +270,14 @@
       "support": 6,
       "predicted": 6,
       "correct": 6,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "reference": {
+      "support": 10,
+      "predicted": 10,
+      "correct": 10,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -386,8 +402,8 @@
   },
   "relations": {
     "seeded repeat": {
-      "correct": 37,
-      "total": 37
+      "correct": 39,
+      "total": 39
     },
     "confirmation": {
       "correct": 11,
@@ -404,10 +420,14 @@
     "phone follows the form": {
       "correct": 3,
       "total": 3
+    },
+    "value shape": {
+      "correct": 20,
+      "total": 20
     }
   },
   "forms": {
-    "correct": 41,
-    "total": 47
+    "correct": 45,
+    "total": 49
   }
 }

@@ -58,6 +58,9 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await website.goto('http://127.0.0.1:5188/demo.html');
     const requests=()=>worker.evaluate(()=>(globalThis as typeof globalThis & {testRequests:unknown[]}).testRequests);
     await expect.poll(async()=>(await requests()).length).toBe(1);
+    // The request reaches the mock before the batch is stored, so wait for the batch itself.
+    const cachedBatch=()=>worker.evaluate(async()=>Object.entries(await chrome.storage.session.get(null)).some(([key])=>key.startsWith('gemini-cache:')));
+    await expect.poll(cachedBatch).toBe(true);
     const remaining=await worker.evaluate(async()=>{
       const all=await chrome.storage.session.get(null);
       const batch=Object.entries(all).find(([key])=>key.startsWith('gemini-cache:'))![1];
@@ -98,6 +101,7 @@ test('Gemini main tab, automatic reload preparation, cache reuse, expiry and fal
     await expect(options.getByLabel('API key',{exact:true})).toHaveValue('fake-key-for-local-tests');
     await website.reload();
     await expect.poll(async()=>(await requests()).length).toBe(2);
+    await expect.poll(cachedBatch).toBe(true);
     const newRemaining=await worker.evaluate(async()=>Object.entries(await chrome.storage.session.get(null)).find(([key])=>key.startsWith('gemini-cache:'))![1].expiresAt-Date.now());
     expect(newRemaining).toBeGreaterThan(60000);expect(newRemaining).toBeLessThanOrEqual(2*60000);
     await worker.evaluate(async()=>{const all=await chrome.storage.session.get(null);for(const [key,value] of Object.entries(all))if(key.startsWith('gemini-cache:'))await chrome.storage.session.set({[key]:{...value,expiresAt:Date.now()-1}});});

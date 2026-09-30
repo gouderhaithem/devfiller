@@ -8,8 +8,8 @@ export const fields = [
   ['email','Email'], ['phone','Phone'], ['password','Password'], ['birthDate','Date of birth'], ['age','Age'], ['gender','Gender'], ['nationality','Nationality'],
   ['company','Company'], ['jobTitle','Job title'], ['department','Department'], ['industry','Industry'], ['employeeCount','Employee count'],
   ['address','Street address'], ['address2','Apartment / suite'], ['city','City / commune'], ['district','District / daira'], ['state','State / wilaya'], ['postalCode','Postal code'], ['country','Country'],
-  ['website','Website'], ['bio','Biography'], ['description','Description'], ['message','Message'], ['subject','Subject'], ['notes','Notes'],
-  ['quantity','Quantity'], ['price','Price'], ['amount','Amount'], ['salary','Salary'], ['percentage','Percentage'], ['rating','Rating'],
+  ['website','Website'], ['reference','Reference / order number'], ['bio','Biography'], ['description','Description'], ['message','Message'], ['subject','Subject'], ['notes','Notes'],
+  ['quantity','Quantity'], ['measurement','Measurement'], ['price','Price'], ['amount','Amount'], ['salary','Salary'], ['percentage','Percentage'], ['rating','Rating'],
   ['date','Date'], ['startDate','Start date'], ['endDate','End date'], ['time','Time'], ['color','Color'], ['search','Search'], ['title','Title'],
 ] as const;
 export type FieldKey = typeof fields[number][0];
@@ -94,6 +94,7 @@ export function generateValues(locale:Locale,options:GenerateOptions={}):Values 
     company:sample('company'),jobTitle:sample('jobTitle'),department:sample('department'),industry:sample('industry'),employeeCount:String(1+random(500)),
     address:sample('address'),address2:sample('address2'),city:place.city,district:place.district,state:place.state,postalCode:place.postalCode,country:place.country,website:sample('website'),
     bio:sample('bio'),description:sample('description'),message:sample('message'),subject:sample('subject'),notes:sample('notes'),
+    reference:`REF-${String(10000+random(90000))}`,measurement:String(10+random(4990)),
     quantity:String(1+random(100)),price:((1+random(99999))/100).toFixed(2),amount:String(1+random(10000)),salary:String(20000+random(180000)),percentage:String(random(101)),rating:String(1+random(5)),date:start.toISOString().slice(0,10),startDate:start.toISOString().slice(0,10),endDate:end.toISOString().slice(0,10),time,color:sample('color'),search:sample('search'),title:sample('title'),
   };
   if(!seeded) previousValues[memory]=values;

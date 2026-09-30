@@ -25,7 +25,7 @@ classification with that answer, so **label the truth, not what the engine does 
 
 ## Types
 
-Use one of the 43 generator types:
+Use one of the 45 generator types:
 
 | Type | Meaning |
 | --- | --- |
@@ -43,6 +43,8 @@ Use one of the 43 generator types:
 | `website` | Website, homepage, portfolio or profile URL |
 | `bio`, `description`, `message`, `subject`, `notes` | Free text |
 | `quantity`, `price`, `amount`, `salary`, `percentage`, `rating` | Numbers |
+| `measurement` | A physical quantity: length, width, height, thickness, weight, diameter, surface, volume |
+| `reference` | An identifier of a record: order, invoice, reference, SKU, purchase order, ticket, part, lot or serial number. Personal and legal IDs (passport, national ID, VAT, tax, licence or registration numbers) and promo or referral codes are `unknown` |
 | `date` | A date with no more specific role |
 | `startDate`, `endDate` | Start/end, departure/return, check-in/check-out |
 | `time`, `color`, `search` | |
@@ -51,7 +53,7 @@ Use one of the 43 generator types:
 Two more kinds of answer:
 
 - `unknown`: the page doesn't give enough evidence, or the field means something with no
-  generator (promo code, reference number, national ID, captcha, fax, "how did you hear about us",
+  generator (promo code, national ID, captcha, fax, "how did you hear about us",
   an interests checkbox list).
 - `skip:<kind>`: a sensitive field that must never be filled.
   - `skip:card`: card number, expiry, CVV/CVC, cardholder name
@@ -70,5 +72,6 @@ These are checked after a fill with passwords on:
 - `data-differs-from="<selector>"`: a value that must differ from that field's (a new password and the current one)
 - `data-phone-region="dz|fr|us"`: a phone number that must be written in that country's format
 - `data-phone-follows="<selector>"`: a phone number that must match the country chosen in that field
+- `data-value-pattern="<regex>"`: the value written must match (a number, a code, a decimal comma)
 
 Every fixture is also filled twice with the same seed, and must come out identical.

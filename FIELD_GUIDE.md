@@ -1,6 +1,6 @@
 # Fields, labels, and types
 
-DevFiller recognizes these 43 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
+DevFiller recognizes these 45 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
 
 | Field | Typical native control | Recognized label examples |
 | --- | --- | --- |
@@ -10,7 +10,7 @@ DevFiller recognizes these 43 field types. The examples are its built-in aliases
 | Middle name | text | middle name, second prénom, الاسم الأوسط |
 | Last name | text | last name, lastname, lname, surname, family name, nom, nom de famille, اللقب, اسم العائلة |
 | Email | email / text | email, e-mail, mail, email address, e-mail address, courriel, adresse électronique, adresse mail, adresse e-mail, البريد الإلكتروني, البريد |
-| Phone | tel / text | phone, phone number, telephone, tel, mobile, mobile number, cell, cellphone, cell phone, gsm, whatsapp, contact number, numéro de téléphone, portable, téléphone portable, numéro de portable, الهاتف, رقم الهاتف, هاتف, الجوال, رقم الجوال, الهاتف المحمول |
+| Phone | tel / text | phone, phone number, area code, telephone, tel, mobile, mobile number, cell, cellphone, cell phone, gsm, whatsapp, contact number, numéro de téléphone, portable, téléphone portable, numéro de portable, الهاتف, رقم الهاتف, هاتف, الجوال, رقم الجوال, الهاتف المحمول |
 | Password | password (opt-in) | password, confirm password, repeat password, pwd, passwd, pass, mot de passe, confirmation mot de passe, mdp, كلمة المرور, تأكيد كلمة المرور |
 | Date of birth | date | date of birth, birth date, birthday, dob, date de naissance, date naissance, تاريخ الميلاد |
 | Age | number / range | age, how old, العمر |
@@ -34,7 +34,9 @@ DevFiller recognizes these 43 field types. The examples are its built-in aliases
 | Message | textarea / text | message, comment, your message, cover letter, msg, commentaire, votre message, lettre de motivation, motivation, الرسالة, رسالة, تعليق |
 | Subject | text | subject, topic, sujet, objet, الموضوع, موضوع |
 | Notes | textarea / text | notes, note, order notes, special requests, instructions, delivery instructions, remarks, remarques, remarque, observations, ملاحظات |
-| Quantity | number / range | quantity, qty, number of guests, guests, passengers, attendees, number of attendees, number of people, travellers, travelers, pax, quantité, nombre de personnes, nombre d'exemplaires, exemplaires, nombre de participants, الكمية, عدد الأشخاص, عدد المسافرين |
+| Measurement | text | length, width, height, depth, thickness, diameter, radius, weight, unit weight, net weight, gross weight, mass, area, surface area, volume, dimensions, longueur, largeur, hauteur, profondeur, épaisseur, diamètre, rayon, poids, poids unitaire, poids net, poids brut, masse, superficie, surface habitable, الطول, العرض, الارتفاع, العمق, السمك, القطر, الوزن, المساحة, الحجم |
+| Reference / order number | text | reference, ref, reference number, ref no, order number, order no, order id, order reference, work order, purchase order, po number, invoice number, invoice no, quote number, sku, part number, part no, item code, product code, article code, ticket number, case number, file number, tracking number, batch number, lot number, serial number, delivery note, référence, réf, numéro de commande, n° de commande, no de commande, numéro de facture, n° de facture, numéro de devis, n° de devis, bon de commande, bon de livraison, code article, numéro de dossier, n° de dossier, numéro de lot, numéro de série, n° de série, رقم الطلب, المرجع, رقم المرجع, رقم الفاتورة, رقم الملف |
+| Quantity | number / range | quantity, qty, number of, nombre de, pieces, pcs, units, pièces, unités, number of guests, guests, passengers, attendees, number of attendees, number of people, travellers, travelers, pax, quantité, nombre de personnes, nombre d'exemplaires, exemplaires, nombre de participants, الكمية, عدد الأشخاص, عدد المسافرين |
 | Price | number / range | price, unit price, cost, prix, prix unitaire, tarif, coût, السعر, الثمن |
 | Amount | number / range | amount, total, total amount, montant, somme, المبلغ |
 | Salary | number / range | salary, expected salary, salary expectations, annual salary, wage, salaire, rémunération, prétentions salariales, prétentions, الراتب, الأجر |
@@ -54,6 +56,7 @@ DevFiller never guesses silently. For every field it collects evidence, scores e
 
 - **Evidence**, strongest first: the `autocomplete` token, the input type, the visible label or accessible name, the `name` and `id`, the placeholder, text beside the field, and its fieldset legend. For a radio group, the group's question counts as its label. Generated names such as `field_7`, `mat-input-3` or `:r5:` are ignored.
 - **Matching**: a whole-label match beats a phrase inside the label, which beats a single word (`userEmail`, `contact_phone`). Glued words (`billingcity`, `phonenumber`), plurals and one-letter typos (`Emial`, `Frist name`) count for less. Common words like "name", "date" or "title" only count on their own, so "Project name" isn't mistaken for a person's name.
+- **Units**: a unit beside the label says what the field holds. `(mm)`, `[kg]`, `m²` or `en litres` make it a measurement, `(u)` or `pcs` a count, `(%)` a percentage, `(€)`, `(DA)` or `($)` an amount, and a rate such as `($/h)` a price.
 - **Against**: the kind of control pushes down types it can't hold. A password box isn't an email, a `type="number"` field isn't a city, and a field that mentions "search" isn't a shipping address.
 - **Confidence**: agreeing signals raise it. When the top two types are close, as in "Email or phone", the field is treated as ambiguous and the confidence drops.
 
@@ -62,6 +65,12 @@ DevFiller never guesses silently. For every field it collects evidence, scores e
 | High (90% and up) or medium (70–89%) | Fills the field with that type's value |
 | Low (50–69%) | Fills it only when **Fill unknown fields** is on; otherwise explains why it was skipped |
 | Below 50% | Treats the field as unknown: generic text when **Fill unknown fields** is on, or AI suggestions when AI is on |
+
+### Values that fit the field
+
+- **Measurements** are sized for their dimension and unit: a thickness in mm between 1 and 40, a length in mm in the hundreds or thousands, a weight in kg with a decimal. French pages get a decimal comma (`12,5`).
+- **References** look like real ones: `CMD-2030-0421` for a commande, `FAC-…` for a facture, `INV-…`, `PO-…` or `SKU-…` in English, digits only when the field asks for digits (`pattern="[0-9]{8}"`, `inputmode="numeric"`), and a short code such as `C7` when the field allows only a few characters. Each fill gives a new one.
+- **Numeric fields** that DevFiller can't otherwise recognize (`inputmode="numeric"` or `"decimal"`, or a digits-only pattern) get digits, never a word.
 
 ### The form as a whole
 

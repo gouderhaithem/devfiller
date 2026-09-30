@@ -129,7 +129,9 @@ function checkRelations(page: Page, fixture: string): Promise<Relation[]> {
         return { el, region: countryRegion(text.trim()) };
       }),
     ].map(({ el, region }) => ({ kind: 'phone follows the form', ok: !!region && read(el).startsWith(prefix[region]), detail: `${describe(el)} → "${read(el)}" for ${region || 'no country'}` }));
-    return [...pairs, ...phones];
+    // The shape of what was written: a number, a code, a decimal comma.
+    const shapes = Array.from(document.querySelectorAll('[data-value-pattern]'), el => ({ kind: 'value shape', ok: new RegExp(el.getAttribute('data-value-pattern')!).test(read(el)), detail: `${describe(el)} → "${read(el)}"` }));
+    return [...pairs, ...phones, ...shapes];
   }, fixture);
 }
 

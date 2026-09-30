@@ -122,7 +122,31 @@ country or wilaya option, that seeded generic text shifted when a field was adde
 phone hints misread French landlines and compact numbers. All are fixed and tested. Its data
 checks confirmed the wilaya codes, names and chef-lieu postal codes.
 
-## Confidence calibration
+## Measurements, references and units
+
+Added after a real production-planning form filled "N° de commande", "Longueur (mm)" and
+"Poids unitaire (kg)" with words. Two fixtures rebuild that kind of form (French, and an English
+work order with imperial units), and `data-value-pattern` checks the shape of each value.
+
+| | Before | After |
+| --- | --- | --- |
+| Values with the right shape (a number, a code, a decimal comma) | 2 / 20 | 20 / 20 |
+| Measurement fields recognized | 0 / 8 | 8 / 8 |
+| Reference fields recognized | 0 / 10 | 10 / 10 |
+| Precision / recall on the main fixtures (496 fields) | 99.8% / 94.9% | 100% / 100% |
+| Form types | 41 / 49 | 45 / 49 |
+| Held-out precision / recall | 96.8% / 84.4% | 96.4% / 88.3% |
+
+Six fixture fields were relabelled `reference` under the new definition (an order, invoice, SKU,
+purchase-order, reference or property-reference number), four in the main set and two held out;
+personal and legal numbers and promo codes stay `unknown`. On the held-out set one more field
+is now called a reference that the labels call unknown, which is the small precision drop. Rules
+that came out of this work, all general: generic words alone can't reach the threshold however
+many there are, a currency means an amount unless the label says price or it's a rate, and a
+form's words only confirm a type its fields suggest (which also fixed a sign-up and a sign-in
+misread).
+
+
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.
 

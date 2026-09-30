@@ -31,7 +31,7 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Side panel** | Inspect filled/skipped fields beside the website, highlight a control, and save a custom value or exclusion. |
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
-| **43 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
+| **45 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
 | **English, French & Arabic** | Recognize labels in all three languages and choose a language for generated data. |
 | **Custom values** | Map your own labels to exact test values, such as `Project code` → `PRJ-001`. |
 | **Field exclusions** | Protect fields by label or CSS selector, optionally scoped to a website. Search and navigation controls are skipped by default. |

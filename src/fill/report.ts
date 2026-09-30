@@ -34,7 +34,7 @@ export function skipReason(ctx: FillContext, el: Control): string {
 }
 
 const TYPE_LABELS: Readonly<Record<string, string>> = { ...Object.fromEntries(fields), unknown: 'Unknown', 'skip:card': 'Card details', 'skip:otp': 'One-time code', 'skip:iban': 'Bank details', 'skip:consent': 'Consent', 'skip:session': 'Session choice' };
-const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form' };
+const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form', unit: 'unit' };
 const typeLabel = (type: FieldType | string) => TYPE_LABELS[type] ?? type;
 
 // "autocomplete=tel", "label “Téléphone”", "against: type=email".

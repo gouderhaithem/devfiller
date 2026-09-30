@@ -10,7 +10,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   middleName: ['middle name', 'second prénom', 'الاسم الأوسط'],
   lastName: ['last name', 'lastname', 'lname', 'surname', 'family name', 'nom', 'nom de famille', 'اللقب', 'اسم العائلة'],
   email: ['email', 'e-mail', 'mail', 'email address', 'e-mail address', 'courriel', 'adresse électronique', 'adresse mail', 'adresse e-mail', 'البريد الإلكتروني', 'البريد'],
-  phone: ['phone', 'phone number', 'telephone', 'tel', 'mobile', 'mobile number', 'cell', 'cellphone', 'cell phone', 'gsm', 'whatsapp', 'contact number', 'numéro de téléphone', 'portable', 'téléphone portable', 'numéro de portable', 'الهاتف', 'رقم الهاتف', 'هاتف', 'الجوال', 'رقم الجوال', 'الهاتف المحمول'],
+  phone: ['phone', 'phone number', 'area code', 'telephone', 'tel', 'mobile', 'mobile number', 'cell', 'cellphone', 'cell phone', 'gsm', 'whatsapp', 'contact number', 'numéro de téléphone', 'portable', 'téléphone portable', 'numéro de portable', 'الهاتف', 'رقم الهاتف', 'هاتف', 'الجوال', 'رقم الجوال', 'الهاتف المحمول'],
   password: ['password', 'confirm password', 'repeat password', 'pwd', 'passwd', 'pass', 'mot de passe', 'confirmation mot de passe', 'mdp', 'كلمة المرور', 'تأكيد كلمة المرور'],
   birthDate: ['date of birth', 'birth date', 'birthday', 'dob', 'date de naissance', 'date naissance', 'تاريخ الميلاد'],
   age: ['age', 'how old', 'العمر'],
@@ -34,7 +34,13 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
   subject: ['subject', 'topic', 'sujet', 'objet', 'الموضوع', 'موضوع'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
-  quantity: ['quantity', 'qty', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين'],
+  measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
+    'longueur', 'largeur', 'hauteur', 'profondeur', 'épaisseur', 'diamètre', 'rayon', 'poids', 'poids unitaire', 'poids net', 'poids brut', 'masse', 'superficie', 'surface habitable', 'الطول', 'العرض', 'الارتفاع', 'العمق', 'السمك', 'القطر', 'الوزن', 'المساحة', 'الحجم'],
+  reference: ['reference', 'ref', 'reference number', 'ref no', 'order number', 'order no', 'order id', 'order reference', 'work order', 'purchase order', 'po number', 'invoice number', 'invoice no', 'quote number',
+    'sku', 'part number', 'part no', 'item code', 'product code', 'article code', 'ticket number', 'case number', 'file number', 'tracking number', 'batch number', 'lot number', 'serial number', 'delivery note',
+    'référence', 'réf', 'numéro de commande', 'n° de commande', 'no de commande', 'numéro de facture', 'n° de facture', 'numéro de devis', 'n° de devis', 'bon de commande', 'bon de livraison', 'code article', 'numéro de dossier', 'n° de dossier', 'numéro de lot', 'numéro de série', 'n° de série',
+    'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
+  quantity: ['quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
   amount: ['amount', 'total', 'total amount', 'montant', 'somme', 'المبلغ'],
   salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
@@ -51,7 +57,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
 
 // Words that name many things, so they only count on their own or with other evidence:
 // "Project name" is not a person's name, and "Delivery date" is only a date with type="date".
-export const GENERIC_WORDS: ReadonlySet<string> = new Set(['name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
+export const GENERIC_WORDS: ReadonlySet<string> = new Set(['area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
 
 // Single words developers glue to others: userEmail → "useremail", billingCity → "billingcity".
 export const COMPOUND_WORDS: ReadonlySet<string> = new Set(['email', 'courriel', 'phone', 'mobile', 'telephone', 'address', 'adresse', 'city', 'ville', 'country', 'company', 'website', 'username', 'password', 'postcode', 'zipcode', 'birthday', 'firstname', 'lastname', 'surname', 'salary', 'quantity', 'price', 'amount', 'gender', 'nationality', 'department', 'message', 'subject', 'description']);
@@ -69,7 +75,7 @@ export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.6], tel: ['phone', 0.6], url: ['website', 0.55], search: ['search', 0.6] };
 
 // Types each kind of control can hold. Anything else is pushed down, not ruled out.
-export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
+export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
 export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
@@ -121,7 +127,7 @@ export const MACHINE_ID = /\b[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\b|(?:^|
 export const CONTEXTUAL_KEYS: readonly FieldKey[] = ['bio','description','message','subject','notes','title','company','jobTitle','department','industry','search'];
 // Text types that may be lengthened with more readable sample sentences to meet a minimum length.
 export const EXTENDABLE_KEYS: readonly FieldKey[] = ['company','jobTitle','department','industry','address','bio','description','message','subject','notes','search','title'];
-export const NUMERIC_KEYS: readonly FieldKey[] = ['age','employeeCount','quantity','price','amount','salary','percentage','rating'];
+export const NUMERIC_KEYS: readonly FieldKey[] = ['measurement','age','employeeCount','quantity','price','amount','salary','percentage','rating'];
 
 // Lookup tables, built once when the engine loads.
 export interface AliasEntry { key: FieldKey; name: string; tokens: readonly string[]; generic: boolean }

@@ -30,6 +30,7 @@ With a seed, the same form gets the same identity and the same values every time
 - **Safe by design.** Emails and websites use `example.com`. US phone numbers use the fictional range 202-555-01xx.
 - **Places that fit together.** The city, postal code, district, state or wilaya, country, nationality and phone number all come from the same country. With **Algeria**, you get the chef-lieu of one of 20 wilayas (for example Oran, daira of Oran, 31000), a `+213` mobile number and Algerian names, in Arabic script when the data language is Arabic.
 - **Phones follow the form.** When the form asks for a country, or the phone field shows a dial code such as `+213` or `+33`, the number is written in that country's format. French and Algerian numbers follow the real format and may be in use, so never use them to send messages.
+- **Numbers where numbers belong.** Lengths, weights and other measurements are sized for their unit (`Épaisseur (mm)` gets a few millimetres, `Longueur (mm)` a few thousand). Order, invoice and part numbers look like real references (`CMD-2030-0421`). Fields that ask for digits get digits.
 - **Within the field's rules.** Numbers respect min, max and step; dates respect their range; dropdowns and radio buttons get a real option, different from the last one when possible.
 
 The pools are finite, so values repeat over time, and a website's own validation may still reject a value.

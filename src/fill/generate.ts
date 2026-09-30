@@ -2,6 +2,7 @@ import type { Exclusions, FieldKey, Identity, Values } from '../data';
 import type { Control, FillContext, FillRequest } from './types';
 import { COUNTRY_SPELLINGS, DATE_FIELD_TYPES, EXTENDABLE_KEYS, NUMERIC_KEYS, PLACEHOLDER_OPTION } from './dictionary';
 import { datePart } from './classify';
+import { numericFallback } from './specific';
 import { optionTexts } from './extract';
 import { GENDER_SPELLINGS, MONTH_NAMES, STATE_SPELLINGS } from './vocabulary';
 import { DATE_TYPES, TEXT_TYPES, isInput } from './extract';
@@ -57,6 +58,8 @@ export function fallbackValue(ctx: FillContext, el: Control): { value: string; g
   const random = ctx.random(el);
   if (el instanceof HTMLTextAreaElement) return { value: readableText(ctx, el), generic: true };
   if (!isInput(el)) return { value: 'Sample', generic: false };
+  const number = numericFallback(el, random);
+  if (number !== undefined) return { value: number, generic: false };
   const byType: Record<string, () => string> = {
     number: () => String(1 + random(1000)), range: () => String(random(101)), date: () => date, 'datetime-local': () => `${date}T${time}`,
     month: () => date.slice(0, 7), week: () => randomWeek(random, date), time: () => time, color: () => color,
