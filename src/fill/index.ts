@@ -1,10 +1,10 @@
 import type { ControlSnapshot } from '../panel-types';
-import type { FieldKey } from '../data';
+import type { FieldKey, Values } from '../data';
 import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome, PageState, UnknownField } from './types';
-import { CONSENT, CONTEXTUAL_KEYS, COUNTRY_CODES, MACHINE_ID, PASSWORD } from './dictionary';
-import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, isScale, isTrap, isVisible, legendText, listControls, optionTexts, radioScope, type ControlSignals } from './extract';
+import { ARABIC_NAMES, CONSENT, CONTEXTUAL_KEYS, COUNTRY_CODES, MACHINE_ID, PASSWORD } from './dictionary';
+import { controlSignals, isChoice, isDatePicker, isEditableChoice, isFillable, pickerTarget, isInput, isScale, isTrap, isVisible, legendText, listControls, optionTexts, radioScope, type ControlSignals } from './extract';
 import { shouldExclude } from './exclude';
-import { classificationOf, isSensitive, usableKey, type Classification } from './classify';
+import { classificationOf, isSensitive, SOURCE_GROUP, usableKey, type Classification } from './classify';
 import { analyzePage } from './context';
 import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
 import { randomFor, secureRandom, type Random } from '../rng';
@@ -17,9 +17,18 @@ import { setNativeChecked, setNativeValue, snapshot } from './apply';
 import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
 import { findCustomRule } from './rules';
+import { fieldLocale, valuesIn } from './language';
 
 export type { ClassifiedField, FillRequest, FillResult, SuggestedField, UnknownField } from './types';
 export { panelPageAction } from './panel';
+
+// The values for this field: Arabic ones for a field written in Arabic, when the fill brought them.
+const localeOf = (ctx: FillContext, el: Control) => fieldLocale(el, classificationOf(ctx.classifications, el).signals);
+const valuesFor = (ctx: FillContext, el: Control): Values => valuesIn(ctx.localized, ctx.values, localeOf(ctx, el));
+
+const BIRTH_WORDS = ['birth', 'born', 'dob', 'naissance', 'ne en', 'ميلاد', 'الميلاد', 'الولادة'].map(normalize);
+// "Year of birth", or a Year select under "Date of birth": the birth year, not a graduation year.
+const aboutBirth = (found: Classification) => (found.signals ?? []).some(signal => ['visible', 'attribute', 'context'].includes(SOURCE_GROUP[signal.source]) && BIRTH_WORDS.some(word => ` ${signal.text} `.includes(` ${word} `)));
 
 const run = (outcome: Outcome, extra: Partial<ControlRun> = {}): ControlRun => ({ outcome, source: 'local data', ...extra });
 const NONE = run('none');
@@ -41,7 +50,7 @@ function fillRadioGroup(ctx: FillContext, el: HTMLInputElement): ControlRun {
   if (!choices.length) return run('none', { reason: 'No option in this group can be selected' });
   // A recognized group ("Male / Female") picks the answer that matches the generated value.
   const key = usableKey(classificationOf(ctx.classifications, el), request.fillUnknown);
-  const matching = key ? matchChoice(candidates, spellingsFor(ctx.values[key], key), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')]) : undefined;
+  const matching = key ? matchChoice(candidates, spellingsFor(valuesFor(ctx, el)[key], key), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')]) : undefined;
   const target = matching ?? choices[ctx.random(el)(choices.length)];
   for (const member of controls) if (member === target || (target.name && member instanceof HTMLInputElement && member.type === 'radio' && member.form === target.form && member.name === target.name)) ctx.touched.add(member);
   setNativeChecked(target, true);
@@ -104,11 +113,15 @@ function countryCode(el: Control, country: string): string {
 
 // Measurements and references are shaped by their field; numbers get the page's decimal separator.
 function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey): string {
+  const values = valuesFor(ctx, el);
   if (key === 'measurement') return measurementValue(el, found, ctx.random(el));
-  if (key === 'country') return countryCode(el, ctx.values.country);
-  if (key === 'reference') return referenceValue(el, found, ctx.random(el), ctx.values.date.slice(0, 4));
-  if (DATE_FIELD_TYPES.has(key)) return formatDateText(el, ctx.values[key]);
-  return DECIMAL_KEYS.has(key) ? localizeDecimal(el, ctx.values[key]) : ctx.values[key];
+  const arabicText = !(el instanceof HTMLSelectElement) && localeOf(ctx, el) === 'ar';
+  if (key === 'country') { const code = countryCode(el, values.country); return arabicText && code === values.country ? ARABIC_NAMES[code] ?? code : code; }
+  if (key === 'nationality' && arabicText) return ARABIC_NAMES[values.nationality] ?? values.nationality;
+  if (key === 'reference') return referenceValue(el, found, ctx.random(el), values.date.slice(0, 4));
+  if (key === 'year') return aboutBirth(found) ? values.birthDate.slice(0, 4) : values.year;
+  if (DATE_FIELD_TYPES.has(key)) return formatDateText(el, values[key]);
+  return DECIMAL_KEYS.has(key) ? localizeDecimal(el, values[key]) : values[key];
 }
 
 // An end date lands one to fourteen days after its start date (and no later than its max) when
@@ -174,7 +187,7 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
   // and AI suggestions are written as they are.
   const reshape = !resolved.literal && !resolved.ai && !(el instanceof HTMLSelectElement);
   // Dates are reshaped from the ISO date, not from the format the field first got.
-  const original = resolved.key && DATE_FIELD_TYPES.has(resolved.key) && !resolved.generic ? ctx.values[resolved.key] : fitted ?? resolved.value;
+  const original = resolved.key && DATE_FIELD_TYPES.has(resolved.key) && !resolved.generic ? valuesFor(ctx, el)[resolved.key] : fitted ?? resolved.value;
   const otherPhones = resolved.key === 'phone' ? Object.values(ctx.request.phones ?? {}) : [];
   const options = reshape ? alternatives(el, resolved.generic ? undefined : resolved.key, original, ctx.random(el), otherPhones) : [];
   if (reshape) fitted = firstValid(el, [...(fitted === undefined ? [] : [fitted]), ...options]) ?? fitted;
@@ -184,9 +197,41 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
   ctx.touched.add(el);
   setNativeValue(el, value);
   if (el.value !== value) return run('invalid', { source });
+  if (isDatePicker(el)) pickerWritten(ctx, el, resolved);
   if (aiSuggestion !== undefined && ctx.result.used) ctx.result.used[`field_${index}`] = aiSuggestion;
   if (resolved.key && !resolved.literal) ctx.filled.set(el, resolved.key);
   return run('filled', { source });
+}
+
+// Pickers parse what was typed when a key goes up or the field loses focus. A flatpickr alt input
+// only shows the date: the hidden input beside it holds the ISO date the form submits.
+function pickerWritten(ctx: FillContext, el: Control, resolved: Resolved) {
+  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+  el.dispatchEvent(new FocusEvent('blur'));
+  const target = pickerTarget(el);
+  const iso = resolved.key && DATE_FIELD_TYPES.has(resolved.key) ? valuesFor(ctx, el)[resolved.key] : '';
+  if (target && ISO_DATE.test(iso)) { ctx.touched.add(target); setNativeValue(target, iso.slice(0, 10)); }
+}
+
+const IDENTITY_TYPES: ReadonlySet<string> = new Set(['firstName', 'middleName', 'lastName', 'fullName', 'username', 'email']);
+// What an Arabic field takes from the Arabic values: words and places. Dates, numbers, passwords,
+// phones, usernames and emails stay shared, so every field describes the same person.
+const WRITTEN_KEYS: readonly FieldKey[] = ['firstName', 'middleName', 'lastName', 'fullName', 'company', 'jobTitle', 'department', 'industry', 'address', 'address2', 'city', 'district', 'state', 'postalCode', 'country', 'nationality', 'bio', 'description', 'message', 'subject', 'notes', 'search', 'title', 'material'];
+
+// The main values and, when a field is written in Arabic, the Arabic ones. A page that asks for a
+// name in Arabic describes the Arabic person everywhere: its Latin name fields get the same person
+// in Latin script, so names, username and email agree.
+function pageValues(request: FillRequest, controls: readonly Control[], exclusions: FillContext['exclusions'], classifications: FillContext['classifications']): Pick<FillContext, 'values' | 'localized'> {
+  const main = request.mode === 'inspect' ? request.values : coherentValues(request, controls, exclusions);
+  const data = request.localized?.ar;
+  const arabicFields = data ? controls.filter(el => fieldLocale(el, classificationOf(classifications, el).signals) === 'ar') : [];
+  if (!data || !arabicFields.length) return { values: main, localized: {} };
+  const arabic = request.mode === 'inspect' ? data.values : coherentValues({ ...request, ...data }, controls, exclusions);
+  const asksName = arabicFields.some(el => IDENTITY_TYPES.has(classificationOf(classifications, el).type));
+  const latin = asksName ? data.latin?.find(person => person.username === arabic.username) : undefined;
+  const values = latin ? { ...main, ...latin } : main;
+  const written = Object.fromEntries(WRITTEN_KEYS.map(key => [key, arabic[key]]));
+  return { values, localized: { ar: { ...values, ...written } } };
 }
 
 function processControl(ctx: FillContext, el: Control, index: number): ControlRun {
@@ -253,11 +298,11 @@ export function fillPage(request: FillRequest): FillResult {
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__devfillerPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
   const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map(), inForms: controls.some(el => el.form), traps: new Set(controls.filter(isTrap)) };
-  if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
+  if (request.mode === 'inspect') { finalizeReport({ ...base, ...pageValues(request, controls, exclusions, analysis.fields) }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
   if (request.mode !== 'scan') forgetAlternatives();
-  const ctx: FillContext = { ...base, values: coherentValues(request, controls, exclusions) };
+  const ctx: FillContext = { ...base, ...pageValues(request, controls, exclusions, analysis.fields) };
   controls.forEach((el, index) => {
     let outcome: ControlRun = NONE;
     try {

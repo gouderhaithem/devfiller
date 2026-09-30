@@ -15,6 +15,8 @@ export interface FieldReport {
   value?: string;
   editable: boolean;
   detected?: Detection;
+  // Why the field is excluded: your rules (by id), or the header and search settings.
+  excluded?: { rules: string[]; header: boolean; search: boolean };
 }
 export interface ControlSnapshot { value: string; checked?: boolean; selected?: boolean[] }
 export interface UndoEntry { element: Control; before: ControlSnapshot; after: ControlSnapshot }

@@ -75,6 +75,9 @@ export function generateValues(locale:Locale,options:GenerateOptions={}):Values 
   const age = 18 + random(53);
   const birth = new Date(now); birth.setUTCFullYear(birth.getUTCFullYear()-age); birth.setUTCDate(birth.getUTCDate()-1-random(364));
   const actualAge = now.getUTCFullYear()-birth.getUTCFullYear() - (now.toISOString().slice(5,10)<birth.toISOString().slice(5,10)?1:0);
+  // A degree comes 21 to 25 years after birth, and never after this year; experience fits the age.
+  const graduation = Math.min(now.getUTCFullYear(), birth.getUTCFullYear()+21+random(5));
+  const experience = random(Math.max(1, Math.min(25, actualAge-21))+1);
   const start = new Date(future); start.setUTCDate(start.getUTCDate()+random(365));
   const end = new Date(start); end.setUTCDate(end.getUTCDate()+1+random(30));
   const time = `${String(random(24)).padStart(2,'0')}:${String(random(60)).padStart(2,'0')}`;
@@ -85,7 +88,7 @@ export function generateValues(locale:Locale,options:GenerateOptions={}):Values 
   const place=pickWith(random,newPlaces.length?newPlaces:places);
   const values:Values = {
     ...person,phone:PHONES[region](random),
-    password:sample('password'),birthDate:birth.toISOString().slice(0,10),age:String(actualAge),gender:sample('gender'),nationality:place.nationality,
+    password:sample('password'),birthDate:birth.toISOString().slice(0,10),age:String(actualAge),year:String(graduation),experience:String(experience),gender:sample('gender'),nationality:place.nationality,
     company:sample('company'),jobTitle:sample('jobTitle'),department:sample('department'),industry:sample('industry'),employeeCount:String(1+random(500)),
     address:sample('address'),address2:sample('address2'),city:place.city,district:place.district,state:place.state,postalCode:place.postalCode,country:place.country,website:sample('website'),
     bio:sample('bio'),description:sample('description'),message:sample('message'),subject:sample('subject'),notes:sample('notes'),
@@ -94,6 +97,16 @@ export function generateValues(locale:Locale,options:GenerateOptions={}):Values 
   };
   if(!seeded) previousValues[memory]=values;
   return values;
+}
+// Arabic values for fields written in Arabic when the extension's language is another one. With
+// mixed regions they're Algerian, so names, cities and wilayas are all in Arabic script.
+// `latin` holds the same people in Latin script (same usernames), so a form with Arabic and Latin
+// name fields can describe one person in both.
+export interface LocalizedValues { values:Values; identities:Identity[]; samples:ReturnType<typeof generateSamples>; latin:Identity[] }
+export function localizedValues(locale:Locale,options:GenerateOptions={}):Partial<Record<Locale,LocalizedValues>> {
+  if(locale==='ar') return {};
+  const region:RegionSetting=!options.region || options.region==='mixed' ? 'dz' : options.region;
+  return {ar:{values:generateValues('ar',{...options,region}),identities:generateIdentities('ar',region),samples:generateSamples('ar'),latin:generateIdentities(locale,region)}};
 }
 export function validateSettings(value:unknown):Settings {
   if (!value || typeof value !== 'object') return defaults;

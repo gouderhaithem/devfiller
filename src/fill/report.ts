@@ -3,9 +3,9 @@ import type { ControlSnapshot, Detection, FieldReport } from '../panel-types';
 import type { Control, ControlRun, FillContext } from './types';
 import { PASSWORD } from './dictionary';
 import { classificationOf, isSensitive, THRESHOLDS, usableKey, type Classification, type Evidence, type FieldType } from './classify';
-import { controlSignals, displayLabel, fieldSignals, isChoice, isVisible, OMITTED_TYPES } from './extract';
+import { controlSignals, displayLabel, fieldSignals, isChoice, isDatePicker, isVisible, OMITTED_TYPES } from './extract';
 import { findCustomRule } from './rules';
-import { shouldExclude } from './exclude';
+import { exclusionCause, shouldExclude } from './exclude';
 import { snapshot } from './apply';
 
 const EXCLUDED = 'Excluded by your settings';
@@ -18,7 +18,7 @@ export function skipReason(ctx: FillContext, el: Control): string {
   if (el instanceof HTMLInputElement && OMITTED_TYPES.includes(el.type)) return 'omit';
   if (!(ctx.visible.get(el) ?? isVisible(el))) return 'omit';
   if (el.disabled || el.matches(':disabled')) return 'Disabled field';
-  if ('readOnly' in el && el.readOnly) return 'Read-only field';
+  if ('readOnly' in el && el.readOnly && !isDatePicker(el)) return 'Read-only field';
   if (el.closest('[inert]')) return 'Inactive section';
   if (shouldExclude(el, ctx.exclusions)) return EXCLUDED;
   if (el instanceof HTMLInputElement && el.type === 'file') return 'File uploads are not supported';
@@ -34,7 +34,7 @@ export function skipReason(ctx: FillContext, el: Control): string {
 }
 
 const TYPE_LABELS: Readonly<Record<string, string>> = { ...Object.fromEntries(fields), unknown: 'Unknown', 'skip:card': 'Card details', 'skip:otp': 'One-time code', 'skip:iban': 'Bank details', 'skip:consent': 'Consent', 'skip:session': 'Session choice' };
-const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form', unit: 'unit', rule: 'your type rule' };
+const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form', unit: 'unit', rule: 'your type rule', format: 'format' };
 const typeLabel = (type: FieldType | string) => TYPE_LABELS[type] ?? type;
 
 // "autocomplete=tel", "label “Téléphone”", "against: type=email".
@@ -58,7 +58,8 @@ export function reportFor(ctx: FillContext, el: Control): FieldReport {
   const reason = skipReason(ctx, el);
   // Say up front when a fill will leave the field alone, but keep it open for a custom rule.
   const unmatched = !reason && willNotMatch(ctx, el) ? unmatchedReason(ctx, el) : '';
-  return { id, label: displayLabel(el), status: reason || unmatched ? 'skipped' : 'ready', reason: reason || unmatched || 'Ready to fill', editable: !reason || reason === EXCLUDED, detected: detection(classificationOf(ctx.classifications, el)) };
+  const excluded = reason === EXCLUDED ? exclusionCause(el, ctx.exclusions) : undefined;
+  return { id, label: displayLabel(el), status: reason || unmatched ? 'skipped' : 'ready', reason: reason || unmatched || 'Ready to fill', editable: !reason || reason === EXCLUDED, detected: detection(classificationOf(ctx.classifications, el)), ...(excluded ? { excluded } : {}) };
 }
 
 // With guessing off, a field without a custom rule or a confident type gets no value.

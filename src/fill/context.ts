@@ -90,6 +90,18 @@ function passwordRoles(pass: Pass) {
   }
 }
 
+// "Interview date" after "Available from" is its own date, not the end of the start date. A bare
+// "Date", a date with no words, an end word ("Policy expiry date") or the start's own subject
+// ("Policy start date" → "Policy renewal date") still makes it the end.
+const END_WORDS = words(['end', 'expiry', 'expiration', 'expires', 'until', 'deadline', 'due', 'return', 'fin', 'échéance', 'limite', 'retour', 'انتهاء', 'نهاية', 'العودة']);
+const DATE_WORDS = new Set(words(['date', 'start', 'from', 'du', 'de', 'of', 'the', 'le', 'la', 'تاريخ']));
+const labelWords = (signals: readonly Signal[]) => signals.filter(signal => SOURCE_GROUP[signal.source] === 'visible').flatMap(signal => signal.text.split(' ')).filter(word => word && !DATE_WORDS.has(word));
+function ownDate(start: readonly Signal[], signals: readonly Signal[]): boolean {
+  const own = labelWords(signals);
+  if (!own.length || own.some(word => END_WORDS.includes(word))) return false;
+  const subject = new Set(labelWords(start));
+  return !own.some(word => subject.has(word));
+}
 const isDateInput = (el: Control) => el instanceof HTMLInputElement && (el.type === 'date' || el.type === 'datetime-local');
 
 // Start and end dates: "Arrival" then "Departure", "From"/"To", "Du"/"Au", "من"/"إلى", or an
@@ -102,7 +114,7 @@ function dateRoles(pass: Pass) {
     const [sa, sb] = [pass.signals(a), pass.signals(b)];
     const fromTo = startsWith(sa, FROM_WORDS) && startsWith(sb, TO_WORDS);
     const leaving = first.type === 'startDate' && second.type === 'startDate' && mentions(sb, DEPARTURE_WORDS);
-    const follows = first.type === 'startDate' && (second.type === 'unknown' || second.type === 'date');
+    const follows = first.type === 'startDate' && (second.type === 'unknown' || (second.type === 'date' && !ownDate(sa, sb)));
     const precedes = (first.type === 'unknown' || first.type === 'date') && second.type === 'endDate';
     if (fromTo || precedes) retype(pass, a, 'startDate', 'start', evidence(`before ${quote(b)}`, 0.8));
     if (fromTo || leaving || follows) retype(pass, b, 'endDate', 'end', evidence(`after ${quote(a)}`, 0.8), { after: a });

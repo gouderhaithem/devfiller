@@ -1,5 +1,5 @@
 import {installFormPreload} from './form-preload';
-import { fields, generateIdentities, generatePhones, generateValues, validateSettings, type Settings, type TypeRule } from './data';
+import { fields, generateIdentities, generatePhones, generateValues, localizedValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
 import { fixRejected, runExport, runFillPage, runPanelAction } from './fill/inject';
@@ -156,7 +156,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const stored=await chrome.storage.local.get(['settings','gemini']);
     const settings=validateSettings(stored.settings);
     const config=validateGemini(stored.gemini);
-    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale,settings),identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed)};
+    const request:FillRequest={...settings,expectedDocument,values:generateValues(settings.locale,settings),identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed),localized:localizedValues(settings.locale,settings)};
     let note='';
     let cacheKey:string | undefined;
     let batch:CachedBatch | undefined;
@@ -311,6 +311,20 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
       const result=await runPanelAction({tabId},action,msg.documentId,msg.fieldId ?? '');
       if(action==='undo') {await chrome.action.setBadgeText({tabId,text:''});await chrome.action.setTitle({tabId,title:'DevFiller: last fill undone. Click to fill again.'});}
       return {...await inspectTab(tabId),...result};
+    }
+    if(msg.type==='panel:include') {
+      // Removes the exclusion rules that match this field. The header and search settings apply to
+      // every site, so they are changed in Options instead.
+      if(!msg.fieldId) throw new Error('Choose a field first.');
+      const shown=await inspectTab(tabId);
+      if(shown.documentId!==msg.documentId) throw new Error('This page changed. Refresh the field list.');
+      const excluded=shown.fields?.find(field=>field.id===msg.fieldId)?.excluded;
+      if(!excluded) throw new Error('This field is not excluded. Refresh the field list.');
+      if(!excluded.rules.length) throw new Error(excluded.header?'This field is in the page header or navigation. Turn off “Skip headers and navigation” in Options to fill it.':'This is a search field. Turn off “Skip search fields” in Options to fill it.');
+      const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
+      settings.exclusions.rules=settings.exclusions.rules.filter(rule=>!excluded.rules.includes(rule.id));
+      await chrome.storage.local.set({settings});await clearCache();
+      return inspectTab(tabId);
     }
     if(msg.type==='panel:exclude' || msg.type==='panel:rule' || msg.type==='panel:type') {
       if(!msg.fieldId) throw new Error('Choose a field first.');

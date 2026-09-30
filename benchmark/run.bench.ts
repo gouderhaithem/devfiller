@@ -3,7 +3,7 @@ import { build } from 'esbuild';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { fields, generateIdentities, generatePhones, generateValues, defaultExclusions } from '../src/data';
+import { fields, generateIdentities, generatePhones, generateValues, localizedValues, defaultExclusions } from '../src/data';
 import { generateSamples } from '../src/samples';
 import type { FillRequest, FillResult } from '../src/engine';
 import { calibration, regressions, score, type Baseline, type Current, type Pair } from './metrics';
@@ -30,7 +30,7 @@ interface ControlInfo { index: number; expect: string | null; omitted: boolean; 
 interface ControlState { value: string; checked: boolean }
 
 const values = generateValues('en');
-const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), phones: generatePhones(), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
+const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), phones: generatePhones(), localized: localizedValues('en'), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
 // The default settings, then every optional filler switched on: neither may touch a sensitive field.
 const FILL_SETTINGS: FillRequest[] = [base, { ...base, passwords: true, exclusions: { skipSearch: false, skipHeader: false, rules: [] } }];
 
@@ -161,7 +161,7 @@ function formTypes(page: Page, result: FillResult) {
 // A seed gives the same data on every run: fill twice after reloading, then once more on the same
 // page with replacement on. All three must match.
 async function seededRepeat(page: Page, url: string, name: string): Promise<Relation> {
-  const seeded: FillRequest = { ...base, seed: 'benchmark', values: generateValues('en', { seed: 'benchmark' }), phones: generatePhones('benchmark') };
+  const seeded: FillRequest = { ...base, seed: 'benchmark', values: generateValues('en', { seed: 'benchmark' }), phones: generatePhones('benchmark'), localized: localizedValues('en', { seed: 'benchmark' }) };
   const snapshot = () => page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, select, textarea'), el => ['radio', 'checkbox'].includes(el.type) ? String(el.checked) : el.value).join('\u0001'));
   await openWithEngine(page, url);
   await runEngine(page, seeded);

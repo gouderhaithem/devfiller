@@ -5,9 +5,10 @@ import {
   CIVILITY, DECLARATION, DOCUMENT_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
-import { autocompleteToken, describeSignals, isChoice, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
+import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
 import { MONTH_SET, OPTION_LISTS } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
+import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
 import { normalize } from './normalize';
 
 export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
@@ -35,8 +36,8 @@ const MARGIN = 0.15;
 
 // How much each source is worth on its own. Sources in one group repeat each other (a label and a
 // placeholder usually say the same thing), so only the strongest in a group counts.
-const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1, rule: 1 };
-export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit', rule: 'rule' };
+const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1, rule: 1, format: 1 };
+export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit', rule: 'rule', format: 'format' };
 // A radio group's question is its label.
 const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.
@@ -184,6 +185,24 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
 
+// A date or time format in the placeholder ("MM/DD/YYYY") outranks type="tel", which some date
+// fields use to get a numeric keyboard.
+const showsDateOrTime = (el: Control) => ['date', 'time'].includes(placeholderShape(placeholderOf(el))?.kind ?? '');
+
+// What the field's format says: a placeholder shaped like an email, a URL, a phone number, a date
+// or a year, or a date picker's markup. A date format backs whichever date the words name.
+function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (type: FieldKey, evidence: Evidence) => void) {
+  const placeholder = placeholderOf(el);
+  const shape = placeholderShape(placeholder);
+  const hinted = shape && SHAPE_TYPES[shape.kind];
+  const picker = !hinted && isDatePicker(el) ? ['date', 0.8] as const : undefined;
+  const [type, weight] = hinted ?? picker ?? [];
+  if (!type || !weight) return;
+  const evidence: Evidence = { source: 'format', signal: picker ? 'date picker' : placeholder, weight, match: 'type' };
+  const named = type === 'date' ? [...byType.keys()].filter(key => DATE_FIELD_TYPES.has(key)) : [];
+  for (const key of named.length ? named : [type]) add(key, evidence);
+}
+
 // Negative evidence: the kind of control pushes down types it can't hold.
 function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evidence[] {
   const found: Evidence[] = [];
@@ -192,7 +211,7 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
     const ac = (el.getAttribute('autocomplete') || '').toLowerCase();
     if ((el.type === 'password' || ac.includes('password')) && type !== 'password') push('type', 'password', 0.9);
     else if (el.type === 'email' && type !== 'email') push('type', 'email', 0.6);
-    else if (el.type === 'tel' && type !== 'phone') push('type', 'tel', 0.6);
+    else if (el.type === 'tel' && type !== 'phone' && !showsDateOrTime(el)) push('type', 'tel', 0.6);
     else if (el.type === 'url' && type !== 'website') push('type', 'url', 0.6);
     else if ((el.type === 'number' || el.type === 'range') && !NUMERIC_TYPES.has(type)) push('type', el.type, 0.6);
     else if (['date', 'datetime-local', 'month', 'week'].includes(el.type) && !DATE_FIELD_TYPES.has(type)) push('type', el.type, 0.7);
@@ -287,7 +306,7 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
     } else if (signal.source === 'type' || signal.source === 'inputmode') {
       const hints = signal.source === 'type' ? INPUT_TYPE_HINTS : INPUT_MODE_HINTS;
       const value = signal.raw.toLowerCase();
-      if (Object.hasOwn(hints, value)) add(hints[value][0], { source: signal.source, signal: value, weight: hints[value][1], match: 'type' });
+      if (Object.hasOwn(hints, value) && !(value === 'tel' && showsDateOrTime(el))) add(hints[value][0], { source: signal.source, signal: value, weight: hints[value][1], match: 'type' });
     } else {
       const base = signal.source === 'legend' && radio ? RADIO_LEGEND_WEIGHT : signal.source === 'title' && titleIsName ? SOURCE_WEIGHT.label : SOURCE_WEIGHT[signal.source];
       const boost = SOURCE_GROUP[signal.source] === 'visible' ? visibleBoost : 1;
@@ -301,6 +320,7 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
       }
     }
   }
+  if (isInput(el) || el instanceof HTMLTextAreaElement) formatEvidence(el, byType, add);
   return byType;
 }
 

@@ -12,10 +12,12 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Email | email / text | email, e-mail, mail, email address, e-mail address, courriel, adresse électronique, adresse mail, adresse e-mail, البريد الإلكتروني, البريد |
 | Phone | tel / text | phone, phone number, area code, telephone, tel, mobile, mobile number, cell, cellphone, cell phone, gsm, whatsapp, contact number, numéro de téléphone, portable, téléphone portable, numéro de portable, الهاتف, رقم الهاتف, هاتف, الجوال, رقم الجوال, الهاتف المحمول |
 | Password | password (opt-in) | password, confirm password, repeat password, pwd, passwd, pass, mot de passe, confirmation mot de passe, mdp, كلمة المرور, تأكيد كلمة المرور |
-| Date of birth | date | date of birth, birth date, birthday, dob, date de naissance, date naissance, تاريخ الميلاد |
+| Date of birth | date | date of birth, birth date, birthday, dob, born on, né le, née le, né(e) le, date de naissance, date naissance, تاريخ الميلاد |
 | Age | number / range | age, how old, العمر |
 | Gender | select / text | gender, sex, genre, sexe, الجنس |
 | Nationality | text | nationality, citizenship, nationalité, الجنسية |
+| Year | text / number | year, graduation year, year of graduation, year graduated, graduated in, class of, completion year, year of completion, year obtained, passing year, year of passing, birth year, year of birth, model year, year of manufacture, construction year, year built, année, année d'obtention, année d'obtention du diplôme, année du diplôme, année de diplôme, année de naissance, année de fabrication, année de construction, السنة, سنة التخرج, سنة الحصول, سنة الميلاد, سنة الصنع |
+| Years of experience | text / number | years of experience, year of experience, years experience, experience years, experience in years, years of work experience, years of professional experience, work experience years, total experience, total years of experience, yoe, experience, années d'expérience, nombre d'années d'expérience, années d'expérience professionnelle, expérience années, expérience en années, expérience, سنوات الخبرة, عدد سنوات الخبرة, سنوات الخبرة المهنية, الخبرة |
 | Company | text | company, company name, organization, organisation, organization name, org, employer, business name, entreprise, société, nom de l'entreprise, raison sociale, الشركة, اسم الشركة, المؤسسة |
 | Job title | text | job title, profession, position, occupation, fonction, poste, titre du poste, المهنة, المسمى الوظيفي, الوظيفة |
 | Department | text | department, dept, division, département, service, القسم |
@@ -43,7 +45,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Salary | number / range | salary, expected salary, salary expectations, annual salary, wage, salaire, rémunération, prétentions salariales, prétentions, الراتب, الأجر |
 | Percentage | number / range | percentage, percent, discount, discount percentage, pct, pourcentage, remise, النسبة |
 | Rating | number / range | rating, score, satisfaction, satisfied, how satisfied, how likely, likely to recommend, net promoter score, nps, stars, évaluation, التقييم |
-| Date | date | date, event date, delivery date, appointment date, release date, publication date, expiry, expiry date, expiration, expiration date, valid until, issue date, date d'expiration, date de validité, date de délivrance, date de livraison, date du rendez-vous, التاريخ, تاريخ الموعد |
+| Date | date | date, event date, deadline, due date, travel date, select date, select a date, choose date, choose a date, pick a date, graduation date, joining date, date of joining, hire date, date of hire, choisir une date, اختر التاريخ, delivery date, appointment date, release date, publication date, expiry, expiry date, expiration, expiration date, valid until, issue date, date d'expiration, date de validité, date de délivrance, date de livraison, date du rendez-vous, التاريخ, تاريخ الموعد |
 | Start date | date | start date, check in, check-in date, arrival date, arrival, departure date, from date, date from, available from, availability date, date de début, date d'arrivée, arrivée, date de départ, date de disponibilité, disponibilité, تاريخ البداية, تاريخ البدء, تاريخ الوصول |
 | End date | date | end date, check out, check-out date, return date, to date, date to, date de fin, date de retour, retour, تاريخ النهاية, تاريخ الانتهاء, تاريخ المغادرة, تاريخ العودة |
 | Time | time | time, arrival time, session time, time slot, preferred time, heure, heure d'arrivée, الوقت, الساعة |
