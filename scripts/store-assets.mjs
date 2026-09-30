@@ -125,7 +125,10 @@ try {
 
   const icon = dataUrl(await readFile(join(DIST, 'icons/icon-128.png')));
   await compose(context, 'promo-small-440x280.jpg', { width: 440, height: 280 },
-    `<div style="height:100%;display:flex;align-items:center;gap:22px;padding:0 34px;background:linear-gradient(135deg,#f4f6fd,#e3e9fa)"><img src="${icon}" width="96" height="96"><div><div style="font-size:40px;font-weight:700;letter-spacing:-1px;color:#23304f">devfiller</div><div style="font-size:17px;line-height:1.35;color:#4a5680;margin-top:6px">Fill any form with<br>realistic test data<br>in one click.</div></div></div>`);
+    `<div style="height:100%;display:flex;align-items:center;gap:22px;padding:0 34px;background:linear-gradient(135deg,#f4f6fd,#e3e9fa)"><img src="${icon}" width="96" height="96"><div><div style="font-size:40px;font-weight:700;letter-spacing:-1px;color:#23304f">Dev<span style="color:#5370ce">Filler</span></div><div style="font-size:17px;line-height:1.35;color:#4a5680;margin-top:6px">Fill any form with<br>realistic test data<br>in one click.</div></div></div>`);
+  // The marquee: the name and promise on the left, the side panel's field list on the right.
+  await compose(context, 'promo-marquee-1400x560.jpg', { width: 1400, height: 560 },
+    `<div style="height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0 0 110px;background:linear-gradient(135deg,#f4f6fd,#e3e9fa);overflow:hidden"><div><div style="display:flex;align-items:center;gap:22px"><img src="${icon}" width="104" height="104"><div style="font-size:72px;font-weight:700;letter-spacing:-2px;color:#23304f">Dev<span style="color:#5370ce">Filler</span></div></div><div style="font-size:30px;line-height:1.4;color:#4a5680;margin-top:26px">Fill any form with realistic test data<br>in one click. It reads each field first.</div></div><div style="align-self:flex-end;height:500px;overflow:hidden;margin-right:90px;border:1px solid #d9dff0;border-bottom:0;border-radius:12px 12px 0 0;box-shadow:0 18px 50px rgba(35,48,79,.16)"><img src="${dataUrl(panelShot)}" style="display:block;width:${PANEL_WIDTH}px"></div></div>`);
 } finally {
   await context.close();
   await rm(profile, { recursive: true, force: true });

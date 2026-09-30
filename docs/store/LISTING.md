@@ -1,6 +1,6 @@
 # Chrome Web Store listing: ready to paste
 
-Copy each block into the matching field of the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole). Keep it in sync with [PRIVACY.md](../../PRIVACY.md) if behaviour changes.
+Run `npm run store-listing` and open `docs/store/listing.html` in a browser for copy buttons and image previews. Copy each block into the matching field of the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole). Keep it in sync with [PRIVACY.md](../../PRIVACY.md) if behaviour changes.
 
 ## Package
 
@@ -71,8 +71,11 @@ No account, no DevFiller server, no analytics. Settings stay in your browser.
 5. `5-welcome.jpg`
 
 **Small promo tile:** `docs/store/promo-small-440x280.jpg`
+**Marquee promo tile:** `docs/store/promo-marquee-1400x560.jpg`
 **Homepage URL:** `https://www.devfiller.com`
 **Support URL:** `https://github.com/gouderhaithem/form-filler/issues`
+**Official URL:** leave as None until www.devfiller.com is verified in Google Search Console.
+**Mature content:** No
 
 ## Privacy tab
 
