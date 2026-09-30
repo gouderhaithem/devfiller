@@ -31,7 +31,7 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
 | **46 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
-| **Measured recognition** | Every field scored from all its clues, the form read as a whole, and a confidence and the evidence shown in the side panel. Card, bank, one-time-code and consent fields are never filled. |
+| **Measured recognition** | Every field scored from all its clues, the form read as a whole, and a confidence and the evidence shown in the side panel. Card fields get sandbox test cards (4242 4242 4242 4242 and the declined, insufficient-funds, expired and incorrect-CVC cards), never real ones; bank, one-time-code and consent fields are never filled. |
 | **Fits the site's validation** | Values follow each field's rules, and a value the site rejects is written another way. |
 | **Custom widgets** | ARIA switches, checkboxes, radio groups, dropdowns and rich-text editors are filled too. |
 | **Repeatable and regional data** | A seed gives the same data every run; addresses and phones come from the United States, France or Algeria (69 wilayas, real communes). |

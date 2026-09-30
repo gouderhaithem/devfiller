@@ -55,7 +55,21 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 
 ## How recognition works
 
-DevFiller scores every clue a field gives (its `autocomplete` token, type, label, name, placeholder, nearby text, units and the answers it offers), reads the form as a whole, and fills a field only when the evidence is strong enough. Card, bank, one-time-code and consent fields are recognized so they're never filled. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/devfiller/blob/main/benchmark/RESULTS.md).
+DevFiller scores every clue a field gives (its `autocomplete` token, type, label, name, placeholder, nearby text, units and the answers it offers), reads the form as a whole, and fills a field only when the evidence is strong enough. Card fields are recognized and filled with sandbox test cards (never real ones); bank, one-time-code and consent fields are recognized so they're never filled.
+
+## Test cards
+
+Choose the result to test under **Fill settings → Test cards**. Every card works with any future expiry (DevFiller writes December, three years ahead) and any CVC (it writes 123).
+
+| Scenario | Test card |
+| --- | --- |
+| Successful payment (default) | 4242 4242 4242 4242 |
+| Declined card | 4000 0000 0000 0002 |
+| Insufficient funds | 4000 0000 0000 9995 |
+| Expired card | 4000 0000 0000 0069 |
+| Incorrect CVC | 4000 0000 0000 0127 |
+
+The number is written the way the field takes it: spaced, digits only, or one group of four per box. **Leave card fields empty** turns this off. A coupon or gift-card box, a card PIN and any field that doesn't say which part of the card it is stay empty. Payment forms inside a provider's iframe (Stripe Elements, for example) can't be reached, because DevFiller fills the page's own frame only. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/devfiller/blob/main/benchmark/RESULTS.md).
 
 ## Generic control coverage
 
