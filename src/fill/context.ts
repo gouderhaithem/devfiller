@@ -1,8 +1,8 @@
 import type { FieldKey, TypeRule } from '../data';
 import type { Control, FormInsight } from './types';
 import { classifyField, datePart, isSensitive, SOURCE_GROUP, THRESHOLDS, type Classification, type Evidence, type FieldRole } from './classify';
-import { CONFIRMABLE_TYPES, DATE_FIELD_TYPES, PAIR_PHRASES } from './dictionary';
-import { describeSignals, displayLabel, indexRadios, isChoice, isVisible, OMITTED_TYPES, optionTexts, type Signal } from './extract';
+import { AUTOCOMPLETE, CONFIRMABLE_TYPES, DATE_FIELD_TYPES, PAIR_PHRASES } from './dictionary';
+import { autocompleteToken, describeSignals, displayLabel, indexRadios, isChoice, isVisible, OMITTED_TYPES, optionTexts, type Signal } from './extract';
 import { normalize } from './normalize';
 
 // The second pass: after each field is classified on its own, read each form as a whole.
@@ -90,6 +90,18 @@ function passwordRoles(pass: Pass) {
   }
 }
 
+// "Interview date" after "Available from" is its own date, not the end of the start date. A bare
+// "Date", a date with no words, an end word ("Policy expiry date") or the start's own subject
+// ("Policy start date" → "Policy renewal date") still makes it the end.
+const END_WORDS = words(['end', 'expiry', 'expiration', 'expires', 'until', 'deadline', 'due', 'return', 'fin', 'échéance', 'limite', 'retour', 'انتهاء', 'نهاية', 'العودة']);
+const DATE_WORDS = new Set(words(['date', 'start', 'from', 'du', 'de', 'of', 'the', 'le', 'la', 'تاريخ']));
+const labelWords = (signals: readonly Signal[]) => signals.filter(signal => SOURCE_GROUP[signal.source] === 'visible').flatMap(signal => signal.text.split(' ')).filter(word => word && !DATE_WORDS.has(word));
+function ownDate(start: readonly Signal[], signals: readonly Signal[]): boolean {
+  const own = labelWords(signals);
+  if (!own.length || own.some(word => END_WORDS.includes(word))) return false;
+  const subject = new Set(labelWords(start));
+  return !own.some(word => subject.has(word));
+}
 const isDateInput = (el: Control) => el instanceof HTMLInputElement && (el.type === 'date' || el.type === 'datetime-local');
 
 // Start and end dates: "Arrival" then "Departure", "From"/"To", "Du"/"Au", "من"/"إلى", or an
@@ -102,7 +114,7 @@ function dateRoles(pass: Pass) {
     const [sa, sb] = [pass.signals(a), pass.signals(b)];
     const fromTo = startsWith(sa, FROM_WORDS) && startsWith(sb, TO_WORDS);
     const leaving = first.type === 'startDate' && second.type === 'startDate' && mentions(sb, DEPARTURE_WORDS);
-    const follows = first.type === 'startDate' && (second.type === 'unknown' || second.type === 'date');
+    const follows = first.type === 'startDate' && (second.type === 'unknown' || (second.type === 'date' && !ownDate(sa, sb)));
     const precedes = (first.type === 'unknown' || first.type === 'date') && second.type === 'endDate';
     if (fromTo || precedes) retype(pass, a, 'startDate', 'start', evidence(`before ${quote(b)}`, 0.8));
     if (fromTo || leaving || follows) retype(pass, b, 'endDate', 'end', evidence(`after ${quote(a)}`, 0.8), { after: a });
@@ -111,6 +123,19 @@ function dateRoles(pass: Pass) {
 }
 
 const isDateLike = (el: Control, type: string) => DATE_FIELD_TYPES.has(type as FieldKey) || (el instanceof HTMLInputElement && ['date', 'month'].includes(el.type)) || (el instanceof HTMLSelectElement && !!datePart(optionTexts(el)));
+// Fields that could hold card data: text, a number or a select. A time or a URL can't.
+const couldHoldCard = (el: Control) => el instanceof HTMLSelectElement || (el instanceof HTMLInputElement && ['text', 'tel', 'password', 'number', ''].includes(el.type));
+// A field that says what it is, such as autocomplete="bday", keeps its type beside card fields.
+const declared = (el: Control) => { const token = autocompleteToken(el).toLowerCase(); return Object.hasOwn(AUTOCOMPLETE, token); };
+
+// "Expiry" or "PIN" is card data only on a page that has a card field (a checkout may split its card
+// across forms); elsewhere it is a passport expiry or an account PIN, and gets the type its words give.
+function confirmCards(fields: Map<Control, Classification>) {
+  const card = [...fields.values()].some(found => found.type === 'skip:card' && !found.unconfirmed);
+  for (const [el, found] of fields) {
+    if (found.unconfirmed) fields.set(el, card ? { ...found, unconfirmed: undefined } : { ...found.unconfirmed, signals: found.signals });
+  }
+}
 
 // In the same section as card fields, a name is the cardholder's, a month, year or date is the
 // card's expiry, and anything unrecognized is most likely card data too: none of them is filled.
@@ -126,7 +151,10 @@ function cardSection(pass: Pass, all: readonly Control[]) {
   for (const el of all) {
     const found = get(pass, el);
     const name = NAME_TYPES.has(found.type) && !/shipping|billing/.test((el.getAttribute('autocomplete') || '').toLowerCase());
-    if (!name && !isDateLike(el, found.type) && !(found.type === 'unknown' && !isChoice(el))) continue;
+    if (declared(el) && !name) continue;
+    // A plain or unrecognized date is the card's expiry; a birthday or a named start date is not.
+    const expiry = isDateLike(el, found.type) && (found.type === 'date' || found.type === 'unknown' || found.confidence < THRESHOLDS.medium);
+    if (!name && !expiry && !(found.type === 'unknown' && couldHoldCard(el))) continue;
     for (let node = el.parentElement, depth = 0; node && depth < 4 && node !== el.form && node !== document.body; node = node.parentElement, depth++) {
       if (!sections.has(node)) continue;
       if (!sections.get(node)) update(pass, el, { type: 'skip:card', role: name ? 'cardholder' : undefined, confidence: 1 }, { source: 'form', signal: name ? 'a name beside card fields' : 'beside card fields', weight: 1, match: 'sensitive' });
@@ -201,14 +229,14 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
   const fields = new Map<Control, Classification>();
   indexRadios(controls);
   try {
-    for (const el of controls) {
-      if (!classifiable(el)) continue;
-      const found = classifyField(el);
-      const rule = rules.length ? ruleFor(el, rules) : undefined;
-      // A sensitive field stays sensitive even if a rule says otherwise: it is never filled.
-      fields.set(el, rule && !isSensitive(found.type) ? { ...found, type: rule.type, confidence: rule.type === 'unknown' ? 0 : 1, candidates: [], evidence: [{ source: 'rule', signal: 'set for this site', weight: 1, match: 'context' }], fixed: true } : found);
-    }
+    for (const el of controls) if (classifiable(el)) fields.set(el, classifyField(el));
   } finally { indexRadios(undefined); }
+  confirmCards(fields);
+  // A sensitive field stays sensitive even if a rule says otherwise: it is never filled.
+  if (rules.length) for (const [el, found] of fields) {
+    const rule = ruleFor(el, rules);
+    if (rule && !isSensitive(found.type)) fields.set(el, { ...found, type: rule.type, confidence: rule.type === 'unknown' ? 0 : 1, candidates: [], evidence: [{ source: 'rule', signal: 'set for this site', weight: 1, match: 'context' }], fixed: true });
+  }
   const signals = (el: Control) => fields.get(el)?.signals ?? describeSignals(el);
   const groups = new Map<HTMLFormElement | null, Control[]>();
   for (const el of fields.keys()) { const members = groups.get(el.form) ?? []; members.push(el); groups.set(el.form, members); }

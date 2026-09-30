@@ -106,11 +106,13 @@ test('toolbar action fills the target website directly and options persist',asyn
       await expect.poll(()=>worker.evaluate(tabId=>chrome.action.getBadgeText({tabId}),tabId)).toMatch(/^[1-9][0-9]*$/);
       const after=await snapshot();
       for(const [key,value] of Object.entries(after)) {expect(value,key).not.toBe('');expect(value,key).not.toBe(before[key]);}
-      expect(after.first).toMatch(/^[A-Za-z]+$/);expect(after.last).toMatch(/^[A-Za-z]+$/);
-      expect(after.username).toBe(`${after.first}.${after.last}`.toLowerCase());
+      // "اللقب" is labelled in Arabic: it gets the Arabic last name of the same person the Latin
+      // fields describe, so the username still starts with the first name.
+      expect(after.first).toMatch(/^[A-Za-z]+$/);expect(after.last).toMatch(/^[\u0600-\u06FF ]+$/);
+      expect(after.username.startsWith(`${after.first.toLowerCase()}.`)).toBe(true);
       expect(after.email).toBe(`${after.username}@example.com`);
       expect(after.company).toMatch(/^[A-Za-z ]+$/);expect(after.job).toMatch(/^[A-Za-z ]+$/);
-      expect(after.address).toMatch(/^\d{1,3} [A-Za-z ]+$/);expect(after.message).toMatch(/^[A-Za-z ,.?]+$/);
+      expect(after.address).toMatch(/^\d{1,3} [\u0600-\u06FF ]+$/);expect(after.message).toMatch(/^[A-Za-z ,.?]+$/);
       before=after;
       await expect(website.locator('#header-search')).toHaveValue('Find something');
       await expect(website.locator('#header-language')).toHaveValue('en');

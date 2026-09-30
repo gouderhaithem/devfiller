@@ -1,7 +1,7 @@
 import type { Exclusions, FieldKey, Identity, Values } from '../data';
 import type { Control, FillContext, FillRequest } from './types';
 import { COUNTRY_SPELLINGS, DATE_FIELD_TYPES, EXTENDABLE_KEYS, NUMERIC_KEYS, PLACEHOLDER_OPTION } from './dictionary';
-import { datePart } from './classify';
+import { datePart, SOURCE_GROUP } from './classify';
 import { numericFallback } from './specific';
 import { optionTexts } from './extract';
 import { GENDER_SPELLINGS, MONTH_NAMES, STATE_SPELLINGS } from './vocabulary';
@@ -10,9 +10,13 @@ import { shouldExclude } from './exclude';
 import { normalize } from './normalize';
 
 import { pickWith, secureRandom, type Random } from '../rng';
+import { placeholderValue } from './placeholder';
+import { fieldLocale } from './language';
 
 const WORDS = ['Garden','River','Meadow','Forest','Ocean','Sunshine','Morning','Breeze','Willow','Orchard','Mountain','Valley','Rainbow','Cloud','Summer','Autumn','Winter','Spring','Harbor','Village','Market','Library','Workshop','Journey','Picnic','Lantern','Candle','Window','Basket','Flower','Apple','Orange','Cherry','Peach','Olive','Maple','Cedar','Robin','Sparrow','Butterfly','Welcome','Friendly','Peaceful','Bright','Fresh','Gentle','Calm','Kind','Home','Book','Tree','Leaf','Sky','Sun','Sea','Tea','Go','Be','We','Us','It','A','I'];
 const SENTENCES = ['The garden is quiet today.', 'A gentle breeze moves through the trees.', 'We enjoyed a walk beside the river.', 'The morning sun lights up the room.', 'Fresh flowers brighten the house.', 'A friendly welcome makes a lovely day.', 'The village market opens in the morning.', 'We found a peaceful place by the sea.'];
+const ARABIC_WORDS = ['حديقة','نهر','مرج','غابة','بحر','شمس','صباح','نسيم','بستان','جبل','وادي','سحابة','صيف','خريف','شتاء','ربيع','ميناء','قرية','سوق','مكتبة','ورشة','رحلة','فانوس','نافذة','زهرة','تفاحة','زيتون','أرز','لطيف','هادئ','جميل','مشرق','بيت','كتاب','شجرة','سماء'];
+const ARABIC_SENTENCES = ['الحديقة هادئة اليوم.', 'نسيم لطيف يمر بين الأشجار.', 'استمتعنا بنزهة على ضفة النهر.', 'شمس الصباح تضيء الغرفة.', 'الزهور تزين البيت.', 'السوق يفتح أبوابه في الصباح.', 'وجدنا مكانا هادئا قرب البحر.', 'الترحيب الطيب يصنع يوما جميلا.'];
 const IDENTITY_KEYS = ['firstName','middleName','lastName','fullName','username','email'] as const;
 const PLACE_KEYS: ReadonlySet<FieldKey> = new Set(['country', 'state', 'city', 'district', 'postalCode', 'nationality']);
 
@@ -23,9 +27,12 @@ export interface Resolved { value: string; key?: FieldKey; literal: boolean; gen
 export function readableText(ctx: FillContext, el: HTMLInputElement | HTMLTextAreaElement): string {
   const max = el.maxLength < 0 ? Infinity : el.maxLength;
   const min = Math.max(0, el.minLength);
-  const preferred = el instanceof HTMLTextAreaElement ? SENTENCES : WORDS;
+  // A field written in Arabic gets Arabic words.
+  const arabic = fieldLocale(el, ctx.classifications.get(el)?.signals) === 'ar';
+  const words = arabic ? ARABIC_WORDS : WORDS;
+  const preferred = el instanceof HTMLTextAreaElement ? arabic ? ARABIC_SENTENCES : SENTENCES : words;
   let choices = preferred.filter(word => word.length <= max && word.length >= min);
-  if (!choices.length) choices = WORDS.filter(word => word.length <= max);
+  if (!choices.length) choices = words.filter(word => word.length <= max);
   const pick = <T>(list: readonly T[]) => pickWith(ctx.random(el), list);
   // A fresh fill changes the text; a seeded one repeats it exactly.
   const different = ctx.fresh || !ctx.request.seed ? choices.filter(word => word !== el.value) : [];
@@ -36,18 +43,27 @@ export function readableText(ctx: FillContext, el: HTMLInputElement | HTMLTextAr
   if (unused.length) choices = unused;
   let value = pick(choices) || '';
   while (value && value.length < min) {
-    const fitting = WORDS.filter(word => value.length + 1 + word.length <= max);
+    const fitting = words.filter(word => value.length + 1 + word.length <= max);
     if (!fitting.length) break;
-    value += ` ${pick(fitting).toLowerCase()}`;
+    value += ` ${arabic ? pick(fitting) : pick(fitting).toLowerCase()}`;
   }
   // Longer minimum lengths may produce the same phrase; choose a new opening word.
   if (ctx.fresh && value === el.value && value.includes(' ')) {
     const [first, ...rest] = value.split(' ');
-    const alternatives = WORDS.filter(word => word !== first && word.length <= first.length);
+    const alternatives = words.filter(word => word !== first && word.length <= first.length);
     if (alternatives.length) value = `${pick(alternatives)} ${rest.join(' ')}`;
   }
   ctx.usedText.add(value);
   return value;
+}
+
+// Labels that ask for a count or a number of years, months or days: "How many…", "Nombre de…",
+// "عدد…", "Duration (months)". They get a small number, not a word.
+const COUNT_WORDS = ['how many', 'how much', 'number', 'no of', 'count', 'numero', 'رقم', 'years', 'months', 'weeks', 'days', 'hours', 'nombre', 'combien', 'annees', 'mois', 'semaines', 'jours', 'heures', 'عدد', 'كم', 'سنوات', 'اشهر', 'ايام', 'ساعات'].map(normalize);
+function countFallback(ctx: FillContext, el: HTMLInputElement, random: Random): string | undefined {
+  if (!['text', 'search', ''].includes(el.type)) return undefined;
+  const texts = (ctx.classifications.get(el)?.signals ?? []).filter(signal => SOURCE_GROUP[signal.source] === 'visible').map(signal => signal.text);
+  return texts.some(text => COUNT_WORDS.some(word => ` ${text} `.includes(` ${word} `))) ? String(1 + random(12)) : undefined;
 }
 
 const randomWeek = (random: Random, date: string) => `${date.slice(0, 4)}-W${String(1 + random(52)).padStart(2, '0')}`;
@@ -60,6 +76,9 @@ export function fallbackValue(ctx: FillContext, el: Control): { value: string; g
   if (!isInput(el)) return { value: 'Sample', generic: false };
   const number = numericFallback(el, random);
   if (number !== undefined) return { value: number, generic: false };
+  // A placeholder example says what the field wants: "e.g. 2019", "0.00", "Ex: Paris".
+  const shaped = TEXT_TYPES.includes(el.type) ? placeholderValue(el, random, ctx.request.values.year || date.slice(0, 4)) ?? countFallback(ctx, el, random) : undefined;
+  if (shaped !== undefined) return { value: shaped, generic: false };
   const byType: Record<string, () => string> = {
     number: () => String(1 + random(1000)), range: () => String(random(101)), date: () => date, 'datetime-local': () => `${date}T${time}`,
     month: () => date.slice(0, 7), week: () => randomWeek(random, date), time: () => time, color: () => color,

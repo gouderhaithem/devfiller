@@ -12,10 +12,14 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   email: ['email', 'e-mail', 'mail', 'email address', 'e-mail address', 'courriel', 'adresse électronique', 'adresse mail', 'adresse e-mail', 'البريد الإلكتروني', 'البريد'],
   phone: ['phone', 'phone number', 'area code', 'telephone', 'tel', 'mobile', 'mobile number', 'cell', 'cellphone', 'cell phone', 'gsm', 'whatsapp', 'contact number', 'numéro de téléphone', 'portable', 'téléphone portable', 'numéro de portable', 'الهاتف', 'رقم الهاتف', 'هاتف', 'الجوال', 'رقم الجوال', 'الهاتف المحمول'],
   password: ['password', 'confirm password', 'repeat password', 'pwd', 'passwd', 'pass', 'mot de passe', 'confirmation mot de passe', 'mdp', 'كلمة المرور', 'تأكيد كلمة المرور'],
-  birthDate: ['date of birth', 'birth date', 'birthday', 'dob', 'date de naissance', 'date naissance', 'تاريخ الميلاد'],
+  birthDate: ['date of birth', 'birth date', 'birthday', 'dob', 'born on', 'né le', 'née le', 'né(e) le', 'date de naissance', 'date naissance', 'تاريخ الميلاد'],
   age: ['age', 'how old', 'العمر'],
   gender: ['gender', 'sex', 'genre', 'sexe', 'الجنس'],
   nationality: ['nationality', 'citizenship', 'nationalité', 'الجنسية'],
+  year: ['year', 'graduation year', 'year of graduation', 'year graduated', 'graduated in', 'class of', 'completion year', 'year of completion', 'year obtained', 'passing year', 'year of passing', 'birth year', 'year of birth', 'model year', 'year of manufacture', 'construction year', 'year built',
+    'année', "année d'obtention", "année d'obtention du diplôme", 'année du diplôme', 'année de diplôme', 'année de naissance', 'année de fabrication', 'année de construction', 'السنة', 'سنة التخرج', 'سنة الحصول', 'سنة الميلاد', 'سنة الصنع'],
+  experience: ['years of experience', 'year of experience', 'years experience', 'experience years', 'experience in years', 'years of work experience', 'years of professional experience', 'work experience years', 'total experience', 'total years of experience', 'yoe', 'experience',
+    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة'],
   company: ['company', 'company name', 'organization', 'organisation', 'organization name', 'org', 'employer', 'business name', 'entreprise', 'société', "nom de l'entreprise", 'raison sociale', 'الشركة', 'اسم الشركة', 'المؤسسة'],
   jobTitle: ['job title', 'profession', 'position', 'occupation', 'fonction', 'poste', 'titre du poste', 'المهنة', 'المسمى الوظيفي', 'الوظيفة'],
   department: ['department', 'dept', 'division', 'département', 'service', 'القسم'],
@@ -41,13 +45,14 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
     'sku', 'part number', 'part no', 'item code', 'product code', 'article code', 'ticket number', 'case number', 'file number', 'tracking number', 'batch number', 'lot number', 'serial number', 'delivery note',
     'référence', 'réf', 'numéro de commande', 'n° de commande', 'no de commande', 'numéro de facture', 'n° de facture', 'numéro de devis', 'n° de devis', 'bon de commande', 'bon de livraison', 'code article', 'numéro de dossier', 'n° de dossier', 'numéro de lot', 'numéro de série', 'n° de série',
     'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
-  quantity: ['quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين'],
+  quantity: ['quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
-  amount: ['amount', 'total', 'total amount', 'montant', 'somme', 'المبلغ'],
+  amount: ['amount', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
+    'montant', 'somme', 'revenu', 'revenus', 'dépenses', 'apport', 'acompte', "chiffre d'affaires", 'المبلغ', 'الدخل', 'المصاريف', 'الميزانية'],
   salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
-  rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'stars', 'évaluation', 'التقييم'],
-  date: ['date', 'event date', 'delivery date', 'appointment date', 'release date', 'publication date', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
+  rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'how likely', 'likely to recommend', 'net promoter score', 'nps', 'stars', 'évaluation', 'التقييم'],
+  date: ['date', 'event date', 'deadline', 'due date', 'travel date', 'select date', 'select a date', 'choose date', 'choose a date', 'pick a date', 'graduation date', 'joining date', 'date of joining', 'hire date', 'date of hire', 'choisir une date', 'اختر التاريخ', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
   startDate: ['start date', 'check in', 'check-in date', 'arrival date', 'arrival', 'departure date', 'from date', 'date from', 'available from', 'availability date', 'date de début', "date d'arrivée", 'arrivée', 'date de départ', 'date de disponibilité', 'disponibilité', 'تاريخ البداية', 'تاريخ البدء', 'تاريخ الوصول'],
   endDate: ['end date', 'check out', 'check-out date', 'return date', 'to date', 'date to', 'date de fin', 'date de retour', 'retour', 'تاريخ النهاية', 'تاريخ الانتهاء', 'تاريخ المغادرة', 'تاريخ العودة'],
   time: ['time', 'arrival time', 'session time', 'time slot', 'preferred time', 'heure', "heure d'arrivée", 'الوقت', 'الساعة'],
@@ -58,7 +63,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
 
 // Words that name many things, so they only count on their own or with other evidence:
 // "Project name" is not a person's name, and "Delivery date" is only a date with type="date".
-export const GENERIC_WORDS: ReadonlySet<string> = new Set(['grade', 'area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
+export const GENERIC_WORDS: ReadonlySet<string> = new Set(['year', 'annee', 'السنة', 'experience', 'الخبرة', 'grade', 'area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
 
 // Single words developers glue to others: userEmail → "useremail", billingCity → "billingcity".
 export const COMPOUND_WORDS: ReadonlySet<string> = new Set(['email', 'courriel', 'phone', 'mobile', 'telephone', 'address', 'adresse', 'city', 'ville', 'country', 'company', 'website', 'username', 'password', 'postcode', 'zipcode', 'birthday', 'firstname', 'lastname', 'surname', 'salary', 'quantity', 'price', 'amount', 'gender', 'nationality', 'department', 'message', 'subject', 'description']);
@@ -76,7 +81,7 @@ export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.6], tel: ['phone', 0.6], url: ['website', 0.55], search: ['search', 0.6] };
 
 // Types each kind of control can hold. Anything else is pushed down, not ruled out.
-export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
+export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['year', 'experience', 'measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
 export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
@@ -87,10 +92,20 @@ export const SEARCH_WORDS = ['search', 'recherche', 'rechercher', 'بحث', 'ا�
 export type SensitiveKind = 'card' | 'otp' | 'iban';
 // Sensitive fields are recognized so they can be skipped, never filled. Phrases match whole words.
 export const SENSITIVE_TERMS: Readonly<Record<SensitiveKind, readonly string[]>> = {
-  card: ['card', 'credit card', 'debit card', 'card number', 'cardnumber', 'creditcard', 'cc number', 'cc num', 'ccnumber', 'card no', 'name on card', 'cardholder', 'card holder', 'card expiry', 'card expiration', 'expiry', 'expiry date', 'expiration', 'expiration date', 'expiration month', 'expiration year', 'exp month', 'exp year', 'exp date', 'cc exp', 'mm yy', 'mm aa', 'pin', 'pin code', 'card pin', 'security pin', 'date d expiration', 'date d expiration de la carte', 'carte', 'cvv', 'cvv2', 'cvc', 'cvc2', 'ccv', 'csc', 'security code', 'card verification', 'card security code', 'numéro de carte', 'numéro carte', 'carte bancaire', 'carte de crédit', 'titulaire de la carte', 'nom sur la carte', 'cryptogramme', 'cb numero', 'رقم البطاقة', 'البطاقة البنكية', 'بطاقة الائتمان', 'رمز الأمان'],
+  card: ['card', 'credit card', 'debit card', 'card number', 'cardnumber', 'creditcard', 'cc number', 'cc num', 'ccnumber', 'card no', 'name on card', 'cardholder', 'card holder', 'card expiry', 'card expiration', 'cc exp', 'mm yy', 'mm aa', 'card pin', 'date d expiration de la carte', 'cvv', 'cvv2', 'cvc', 'cvc2', 'ccv', 'csc', 'security code', 'card verification', 'card security code', 'numéro de carte', 'numéro carte', 'carte bancaire', 'carte de crédit', 'titulaire de la carte', 'nom sur la carte', 'cryptogramme', 'cb numero', 'رقم البطاقة', 'البطاقة البنكية', 'بطاقة الائتمان', 'رمز الأمان'],
   otp: ['one time', 'one time code', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
   iban: ['iban', 'bic', 'swift', 'swift code', 'rib', 'account no', 'acct no', 'acct number', 'account num', 'routing', 'aba', 'bank code', "relevé d'identité bancaire", 'bank account', 'bank account number', 'account number', 'account holder', 'routing number', 'sort code', 'numéro de compte', 'compte bancaire', 'titulaire du compte', 'code banque', 'code guichet', 'numéro ccp', 'compte ccp', 'رقم الحساب', 'الحساب البنكي', 'الحساب المصرفي'],
 };
+// Words a card field uses that other documents use too: "Passport expiry", "Choose a PIN". They only
+// mean card data when the form also has a card field.
+export const WEAK_CARD_TERMS: readonly string[] = ['expiry', 'expiry date', 'expiration', 'expiration date', 'expiration month', 'expiration year', 'exp month', 'exp year', 'exp date', 'pin', 'pin code', 'security pin', 'date d expiration', 'carte'];
+// Cards that aren't payment cards, named right beside the card word: "Numéro de carte d'identité",
+// "Library card number". They only override the plain card words, never "credit card" or "CVV".
+export const OTHER_CARDS: readonly string[] = ['id card', 'identity card', 'national id card', 'passport card', 'residence card', 'residency card', 'membership card', 'member card', 'loyalty card', 'library card', 'student card', 'insurance card', 'health card', 'carte d identite', 'carte identite', 'carte nationale', 'carte d identite nationale', 'carte sejour', 'carte fidelite', 'carte bibliotheque', 'carte de sejour', 'carte de resident', 'carte vitale', 'carte grise', 'carte chifa', 'carte de fidelite', 'carte d etudiant', 'carte etudiant', 'carte de bibliotheque', 'carte de membre', 'بطاقة التعريف', 'بطاقة الهوية', 'بطاقة الشفاء'];
+// Plain card words another card can own: "ID card number" is not a payment card number.
+export const PLAIN_CARD_TERMS: readonly string[] = ['card', 'card number', 'cardnumber', 'card no', 'numéro de carte', 'numéro carte', 'carte'];
+// Documents whose dates and codes use card words: "Passport expiry", "Certificate expiration".
+export const DOCUMENTS: readonly string[] = ['passport', 'passeport', 'identity', 'identite', 'licence', 'license', 'permis', 'certificate', 'certification', 'certificat', 'permit', 'residence', 'sejour', 'policy', 'insurance', 'assurance', 'membership', 'subscription', 'abonnement', 'warranty', 'garantie', 'contract', 'contrat', 'document', 'جواز السفر', 'الرخصة', 'الشهادة'];
 // A fieldset about card or bank details makes every text field inside it sensitive.
 // Glued names: ccnum, cardcvc, cardNumber written as one word, sepaiban.
 export const SENSITIVE_GLUED: Readonly<Record<SensitiveKind, RegExp>> = {
@@ -106,17 +121,39 @@ export const SENSITIVE_SECTIONS: Readonly<Record<SensitiveKind, readonly string[
 // Consent checkboxes: terms, privacy, newsletters and marketing. Latin stems match a word's start.
 // Three kinds: agreeing to terms, permission (j'autorise, I give permission), and asking for
 // messages (email me, keep me updated, recevoir les actualités).
-const CONSENT_STEMS = ['consent', 'agre', 'subscri', 'newsletter', 'accept', 'marketing', 'offer', 'promot', 'partner', 'sponsor', 'optin', 'receive', 'recevoir', 'confidentialite', 'abonn', 'offre', 'partenaire', 'authoris', 'authoriz', 'autoris', 'permission', 'actualite'];
+const CONSENT_STEMS = ['consent', 'agre', 'subscri', 'newsletter', 'accept', 'marketing', 'offer', 'promot', 'partner', 'optin', 'receive', 'recevoir', 'confidentialite', 'abonn', 'offre', 'partenaire', 'autoris', 'permission', 'actualite'];
+// Whole words only: "sponsors" but not "sponsorship", "I authorize" but not "authorized to work",
+// "terms and conditions" but not medical conditions.
 // Sharing data counts too: usage data, analytics, telemetry, crash reports.
-const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'conditions', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
+const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'sponsor', 'sponsors', 'authorize', 'authorise', 'authorizes', 'authorises', 'authorizing', 'authorising', 'declaration', 'declarations', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'terms and conditions', 'the conditions', 'les conditions', 'general conditions', 'conditions of use', 'conditions of sale', 'conditions generales', 'conditions d utilisation', 'conditions de vente', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
 export const CONSENT = new RegExp(`(?:^| )(?:(?:${CONSENT_STEMS.join('|')})|(?:${CONSENT_WORDS.join('|')})(?= |$))|وافق|شروط|خصوصية|اشتراك|النشرة|العروض|التسويق|تلقي|اخبار|اشعارات|اسمح|اقر|اشهد|اتعهد|اصرح|اصادق|اؤكد`, 'u');
 // A checkbox that states something about the user ("I have read…", "I am over 18",
 // "Je certifie…", "J'ai lu…") is a declaration, never test data.
 export const DECLARATION = /^(?:i|im|i m|je|j)(?= )/u;
+// Answers that make a question a scale, not a permission: "Strongly agree", "Neutral", "Very satisfied".
+// A scale never speaks for the person ("I agree to…") or names what consent is about.
+export const NOT_SCALE_ANSWER = /^(?:i|im|je|j)(?= )|(?:^| )(?:terms|privacy|policy|consent|cookies?|marketing|newsletter|conditions|essential)(?= |$)/u;
+export const SCALE_ANSWER = /(?:^| )(?:strongly|somewhat|disagree|neutral|agree|satisfied|dissatisfied|unsatisfied|likely|unlikely|pas du tout|plutot|tout a fait|d accord|neutre|satisfait|insatisfait|بشدة|محايد|موافق|راض)(?= |$)/u;
+// A select that only asks yes or no.
+export const YES_NO = /^(?:yes|no|y|n|oui|non|نعم|لا|yes please|no thanks|opt in|opt out)$/u;
+// Honeypots: fields a page hides from people to catch bots.
+// The whole hint must say so: "Leave blank if same as billing" is a real field.
+export const TRAP = /^(?:please )?(?:leave (?:this |it )?(?:field )?(?:empty|blank)|do not (?:fill|fill in|fill this|change)|don t (?:fill|fill in|fill this)(?: in)?|ne pas remplir|laisser vide|laissez vide|laissez ce champ vide|honeypot|اترك (?:هذا )?(?:الحقل )?فارغا)$/u;
+// Personal and legal ID numbers have no generator: "Passport number" is neither a count nor a reference.
+export const ID_NUMBER_WORDS = ['passport number', 'passport no', 'numéro de passeport', 'national id', 'national id number', 'id number', 'identity number', 'social security number', 'ssn', 'nin', "numéro d'identification", "numéro de carte d'identité", 'sécurité sociale', 'tax id', 'vat number', 'numéro de tva', 'رقم جواز السفر', 'رقم التعريف الوطني'];
+// A slug or permalink is part of a path, not a website.
+export const SLUG_WORDS = ['slug', 'url slug', 'permalink', 'url key'];
+// Civility titles: "Mr", "Mme". A select of them is not the title of a thing.
+export const CIVILITY = /^(?:mr|mrs|ms|miss|mx|dr|prof|sir|madam|m|mme|mlle|monsieur|madame|mademoiselle|السيد|السيدة|الانسة)$/u;
 
 export const PASSWORD = /password|mot de passe|كلمة المرور/u;
 // Placeholder options such as "Select…" or "Choose a country" are never picked at random.
 export const PLACEHOLDER_OPTION = /select|choose|choisir|selectionner|اختر/i;
+// Two- and three-letter codes, for fields that only take a code.
+export const COUNTRY_CODES: Readonly<Record<string, readonly [string, string]>> = { 'United States': ['US', 'USA'], France: ['FR', 'FRA'], Algeria: ['DZ', 'DZA'] };
+// Countries and nationalities stay in English in the values so options match; a text field
+// written in Arabic takes the Arabic name.
+export const ARABIC_NAMES: Readonly<Record<string, string>> = { Algeria: 'الجزائر', France: 'فرنسا', 'United States': 'الولايات المتحدة', Algerian: 'جزائري', French: 'فرنسي', American: 'أمريكي' };
 export const COUNTRY_SPELLINGS: Readonly<Record<string, readonly string[]>> = {
   'United States': ['United States','US','USA','États-Unis','الولايات المتحدة'],
   France: ['France','FR','فرنسا'],
@@ -129,7 +166,7 @@ export const MACHINE_ID = /\b[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\b|(?:^|
 export const CONTEXTUAL_KEYS: readonly FieldKey[] = ['bio','description','message','subject','notes','title','company','jobTitle','department','industry','search'];
 // Text types that may be lengthened with more readable sample sentences to meet a minimum length.
 export const EXTENDABLE_KEYS: readonly FieldKey[] = ['company','jobTitle','department','industry','address','bio','description','message','subject','notes','search','title'];
-export const NUMERIC_KEYS: readonly FieldKey[] = ['measurement','age','employeeCount','quantity','price','amount','salary','percentage','rating'];
+export const NUMERIC_KEYS: readonly FieldKey[] = ['year','experience','measurement','age','employeeCount','quantity','price','amount','salary','percentage','rating'];
 
 // Lookup tables, built once when the engine loads.
 export interface AliasEntry { key: FieldKey; name: string; tokens: readonly string[]; generic: boolean }
@@ -141,7 +178,9 @@ const group = <T>(entries: readonly T[], keyOf: (entry: T) => string) => {
 export const ALIAS_ENTRIES: readonly AliasEntry[] = (Object.entries(ALIASES) as [FieldKey, readonly string[]][])
   .flatMap(([key, names]) => names.map(raw => { const name = normalize(raw); return { key, name, tokens: name.split(' '), generic: GENERIC_WORDS.has(name) }; }));
 export const EXACT = group(ALIAS_ENTRIES, entry => entry.name);
-export const WORDS = group(ALIAS_ENTRIES.filter(entry => entry.tokens.length === 1), entry => entry.name);
+// Aliases that only count as the whole signal: "q" is a search box, "q_a" is not.
+const WHOLE_ONLY: ReadonlySet<string> = new Set(['q']);
+export const WORDS = group(ALIAS_ENTRIES.filter(entry => entry.tokens.length === 1 && !WHOLE_ONLY.has(entry.name)), entry => entry.name);
 // Multi-word aliases by first word, longest first, so "address line 2" wins over "address".
 export const PHRASES = group([...ALIAS_ENTRIES.filter(entry => entry.tokens.length > 1)].sort((a, b) => b.tokens.length - a.tokens.length || b.name.length - a.name.length), entry => entry.tokens[0]);
 // "phonenumber", "dateofbirth", "codepostal": multi-word aliases written as one word.
@@ -152,6 +191,12 @@ export const COMPOUND_PARTS = new Map<string, AliasEntry[]>([
 ]);
 // Candidates for typo matching: specific aliases long enough that one edit is still telling.
 export const FUZZY_POOL: readonly AliasEntry[] = ALIAS_ENTRIES.filter(entry => !entry.generic && entry.name.replace(/ /g, '').length >= 4);
+export const WEAK_CARD_PHRASES: readonly string[] = WEAK_CARD_TERMS.map(normalize);
+export const OTHER_CARD_PHRASES: readonly string[] = OTHER_CARDS.map(normalize);
+export const PLAIN_CARD_PHRASES: ReadonlySet<string> = new Set(PLAIN_CARD_TERMS.map(normalize));
+export const DOCUMENT_PHRASES: readonly string[] = DOCUMENTS.map(normalize);
+export const SLUG_PHRASES: readonly string[] = SLUG_WORDS.map(normalize);
+export const ID_NUMBER_PHRASES: readonly string[] = ID_NUMBER_WORDS.map(normalize);
 export const SENSITIVE_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_TERMS.card.map(normalize), otp: SENSITIVE_TERMS.otp.map(normalize), iban: SENSITIVE_TERMS.iban.map(normalize),
 };

@@ -1,13 +1,13 @@
 {
   "summary": {
-    "fields": 770,
-    "precision": 0.9904153354632588,
-    "recall": 0.9672386895475819,
-    "f1": 0.978689818468824,
-    "accuracy": 0.9675324675324676,
-    "unknownRate": 0.18701298701298702,
-    "falsePositiveRate": 0.031007751937984496,
-    "wrongRate": 0.007792207792207792
+    "fields": 817,
+    "precision": 0.990990990990991,
+    "recall": 0.9705882352941176,
+    "f1": 0.9806835066864785,
+    "accuracy": 0.9706242350061199,
+    "unknownRate": 0.18482252141982863,
+    "falsePositiveRate": 0.029197080291970802,
+    "wrongRate": 0.0073439412484700125
   },
   "types": {
     "address": {
@@ -35,9 +35,9 @@
       "f1": 1
     },
     "amount": {
-      "support": 6,
-      "predicted": 6,
-      "correct": 6,
+      "support": 9,
+      "predicted": 9,
+      "correct": 9,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -51,12 +51,12 @@
       "f1": 1
     },
     "birthDate": {
-      "support": 21,
-      "predicted": 20,
-      "correct": 20,
+      "support": 23,
+      "predicted": 22,
+      "correct": 22,
       "precision": 1,
-      "recall": 0.9523809523809523,
-      "f1": 0.975609756097561
+      "recall": 0.9565217391304348,
+      "f1": 0.9777777777777777
     },
     "city": {
       "support": 26,
@@ -83,20 +83,20 @@
       "f1": 0.9285714285714286
     },
     "country": {
-      "support": 19,
-      "predicted": 19,
-      "correct": 19,
+      "support": 20,
+      "predicted": 20,
+      "correct": 20,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "date": {
-      "support": 9,
-      "predicted": 8,
-      "correct": 6,
-      "precision": 0.75,
-      "recall": 0.6666666666666666,
-      "f1": 0.7058823529411765
+      "support": 12,
+      "predicted": 11,
+      "correct": 9,
+      "precision": 0.8181818181818182,
+      "recall": 0.75,
+      "f1": 0.7826086956521738
     },
     "department": {
       "support": 1,
@@ -139,25 +139,25 @@
       "f1": 1
     },
     "endDate": {
-      "support": 9,
-      "predicted": 9,
-      "correct": 9,
+      "support": 11,
+      "predicted": 11,
+      "correct": 11,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "firstName": {
-      "support": 19,
-      "predicted": 19,
-      "correct": 19,
+      "support": 20,
+      "predicted": 20,
+      "correct": 20,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "fullName": {
-      "support": 26,
-      "predicted": 26,
-      "correct": 26,
+      "support": 27,
+      "predicted": 27,
+      "correct": 27,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -187,12 +187,12 @@
       "f1": 0.9473684210526316
     },
     "lastName": {
-      "support": 20,
-      "predicted": 19,
-      "correct": 19,
+      "support": 21,
+      "predicted": 20,
+      "correct": 20,
       "precision": 1,
-      "recall": 0.95,
-      "f1": 0.9743589743589743
+      "recall": 0.9523809523809523,
+      "f1": 0.975609756097561
     },
     "material": {
       "support": 3,
@@ -275,17 +275,17 @@
       "f1": 0.8571428571428571
     },
     "quantity": {
-      "support": 15,
-      "predicted": 12,
-      "correct": 12,
+      "support": 19,
+      "predicted": 17,
+      "correct": 17,
       "precision": 1,
-      "recall": 0.8,
-      "f1": 0.888888888888889
+      "recall": 0.8947368421052632,
+      "f1": 0.9444444444444444
     },
     "rating": {
-      "support": 6,
-      "predicted": 6,
-      "correct": 6,
+      "support": 22,
+      "predicted": 22,
+      "correct": 22,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -323,12 +323,12 @@
       "f1": 1
     },
     "skip:consent": {
-      "support": 60,
-      "predicted": 62,
-      "correct": 60,
-      "precision": 0.967741935483871,
+      "support": 63,
+      "predicted": 65,
+      "correct": 63,
+      "precision": 0.9692307692307692,
       "recall": 1,
-      "f1": 0.9836065573770492
+      "f1": 0.9843749999999999
     },
     "skip:iban": {
       "support": 9,
@@ -355,12 +355,12 @@
       "f1": 1
     },
     "startDate": {
-      "support": 14,
-      "predicted": 13,
-      "correct": 13,
+      "support": 16,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
-      "recall": 0.9285714285714286,
-      "f1": 0.962962962962963
+      "recall": 0.9375,
+      "f1": 0.967741935483871
     },
     "state": {
       "support": 15,
@@ -418,20 +418,20 @@
   },
   "relations": {
     "accepted by the page": {
-      "correct": 509,
-      "total": 509
+      "correct": 532,
+      "total": 532
     },
     "seeded repeat": {
-      "correct": 56,
-      "total": 56
+      "correct": 59,
+      "total": 59
     },
     "confirmation": {
       "correct": 14,
       "total": 14
     },
     "end after start": {
-      "correct": 9,
-      "total": 9
+      "correct": 11,
+      "total": 11
     },
     "new differs": {
       "correct": 3,
@@ -442,12 +442,12 @@
       "total": 3
     },
     "value shape": {
-      "correct": 29,
-      "total": 29
+      "correct": 31,
+      "total": 31
     }
   },
   "forms": {
-    "correct": 59,
-    "total": 66
+    "correct": 66,
+    "total": 73
   }
 }

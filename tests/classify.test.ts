@@ -171,7 +171,7 @@ describe('review regressions', () => {
   it('does not treat a checkbox about a card as card data', () => {
     expect(typeOf('<label><input type="checkbox"> Mémoriser cette carte</label>')).toBe('unknown');
   });
-  it.each([['Page size', 'unknown'], ['Down payment', 'unknown'], ['Bank statement', 'unknown'], ['Real estate', 'unknown'], ['Headphone model', 'unknown']])('does not stretch "%s" into a known type', (label, expected) => {
+  it.each([['Page size', 'unknown'], ['Payment terms', 'unknown'], ['Bank statement', 'unknown'], ['Real estate', 'unknown'], ['Headphone model', 'unknown']])('does not stretch "%s" into a known type', (label, expected) => {
     expect(typeOf(`<label for="x">${label}</label><input id="x">`)).toBe(expected);
   });
   it('still reads glued names with a meaningful rest', () => {
