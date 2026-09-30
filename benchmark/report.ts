@@ -13,7 +13,7 @@ export interface RunExtras {
   relations: Record<string, { correct: number; total: number }>;
   forms: { correct: number; total: number; mistakes: string[] };
   relationFailures: string[];
-  holdout?: { fixtures: number; summary: Summary; confusions: Metrics['confusions'] };
+  holdout?: { fixtures: number; summary: Summary; confusions: Metrics['confusions']; forms: { correct: number; total: number }; relations: { correct: number; total: number } };
   problems: string[];
 }
 
@@ -74,6 +74,7 @@ export function formatReport(metrics: Metrics, extras: RunExtras): string {
     sections.push('', '## Held-out fixtures', 'Forms the engine was never tuned on. Reported, and gated only on leaks and safety.', '',
       header(['Fixtures', 'Fields', 'Precision', 'Recall', 'F1', 'Unknown rate', 'Wrong-type rate']),
       row([extras.holdout.fixtures, h.fields, pct(h.precision), pct(h.recall), pct(h.f1), pct(h.unknownRate), pct(h.wrongRate)]),
+      '', `Form types: ${extras.holdout.forms.correct} / ${extras.holdout.forms.total}. Relationship checks: ${extras.holdout.relations.correct} / ${extras.holdout.relations.total}.`,
       '', header(['Expected', 'Predicted', 'Count']),
       ...extras.holdout.confusions.slice(0, 15).map(c => row([`\`${c.expected}\``, `\`${c.predicted}\``, c.count])));
   }

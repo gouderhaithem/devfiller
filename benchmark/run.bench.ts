@@ -202,6 +202,8 @@ test('fill engine benchmark', async ({ page }) => {
   const holdoutPairs: Pair[] = [];
   const relations: Relation[] = [];
   const formChecks: Array<{ fixture: string; expected: string; predicted: string; action: string }> = [];
+  const holdoutForms: typeof formChecks = [];
+  const holdoutRelations: Relation[] = [];
   const fixtures: FixtureScore[] = [];
   const leaks: RunExtras['leaks'] = [];
   let submits = 0;
@@ -211,13 +213,13 @@ test('fill engine benchmark', async ({ page }) => {
     const controls = await describeControls(page);
     const { pairs: fixturePairs, forms } = await classifyFixture(page, name, controls);
     const holdout = holdoutNames.includes(name);
-    if (!holdout) formChecks.push(...forms.map(form => ({ fixture: name, ...form })));
+    (holdout ? holdoutForms : formChecks).push(...forms.map(form => ({ fixture: name, ...form })));
     if (holdout) holdoutPairs.push(...fixturePairs); else pairs.push(...fixturePairs);
     if (!holdout) fixtures.push({ fixture: name, fields: fixturePairs.length, correct: fixturePairs.filter(p => p.expected === p.predicted).length });
     const found = await findLeaks(page, url, name, controls);
     leaks.push(...found.leaks);
     submits += found.submits;
-    if (!holdout) relations.push(...found.relations);
+    (holdout ? holdoutRelations : relations).push(...found.relations);
   }
   const variants = await runVariants(page);
   const perf = await runPerf(page);
@@ -228,7 +230,8 @@ test('fill engine benchmark', async ({ page }) => {
   const baseline = await readBaseline();
   const problems = regressions(current, UPDATE ? undefined : baseline);
   const bands = [['high', 0.9], ['medium', 0.7], ['low', 0.5]] as const;
-  const held = holdoutPairs.length ? { fixtures: holdoutNames.length, summary: score(holdoutPairs).summary, confusions: score(holdoutPairs).confusions } : undefined;
+  const held = holdoutPairs.length ? { fixtures: holdoutNames.length, summary: score(holdoutPairs).summary, confusions: score(holdoutPairs).confusions,
+    forms: { correct: holdoutForms.filter(f => f.expected === f.predicted).length, total: holdoutForms.length }, relations: { correct: holdoutRelations.filter(r => r.ok).length, total: holdoutRelations.length } } : undefined;
   const report = formatReport(metrics, { fixtures, leaks, submits, requests, variants, perf, calibration: calibration(pairs, bands), holdout: held, problems,
     relations: relationTally, relationFailures: relations.filter(r => !r.ok).map(r => `${r.kind}: ${r.detail}`),
     forms: { ...formTally, mistakes: formChecks.filter(f => f.expected !== f.predicted).map(f => `${f.fixture} ${f.action}: expected ${f.expected}, got ${f.predicted}`) } });

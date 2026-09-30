@@ -1,6 +1,6 @@
 # Fill engine accuracy roadmap
 
-_Written 30 September 2026, against DevFiller 1.0.0. Phases A, B and C were implemented the same day; see [the benchmark results](../benchmark/RESULTS.md)._
+_Written 30 September 2026, against DevFiller 1.0.0. Phases A to D were implemented the same day; see [the benchmark results](../benchmark/RESULTS.md)._
 
 ## Goal
 
@@ -26,13 +26,14 @@ especially for sensitive fields.
 
 ## Where the engine is today
 
-After phases A to C, the engine lives in `src/fill/` and ships as `dist/fill-engine.js`. For each control it:
+After phases A to D, the engine lives in `src/fill/` and ships as `dist/fill-engine.js`. For each control it:
 
 1. Applies a custom rule if one matches (a side panel selector rule, then an exact label rule)
 2. Detects sensitive fields (card, one-time code, bank, consent) and skips them
 3. Scores candidate types from every signal: `autocomplete`, input type and `inputmode`, label, accessible name, `name`/`id`, placeholder, nearby text and legend, with negative evidence from the control's kind
-4. Uses the winning type at medium confidence and up, or at low confidence when **Fill unknown fields** is on
-5. Otherwise treats the field as unknown: generic readable words, or an AI suggestion when AI is on
+4. Reads each form as a whole: select and radio answers, confirmation pairs, password roles, start and end dates, cardholder names, field order and the form's type
+5. Uses the winning type at medium confidence and up, or at low confidence when **Fill unknown fields** is on
+6. Otherwise treats the field as unknown: generic readable words, or an AI suggestion when AI is on
 
 The benchmark in `benchmark/` measures every change, and the side panel shows each field's type, confidence and evidence.
 
@@ -40,12 +41,10 @@ The benchmark in `benchmark/` measures every change, and the side panel shows ea
 
 | Gap | Example that goes wrong | Phase |
 | --- | --- | --- |
-| `<select>` options aren't used to classify | A dropdown listing Algeria, France and Germany with no label isn't a country (its "Select country" placeholder option is used) | D |
-| No relationships between fields | "Confirm email" and "Repeat password" aren't tied to the field before them | D |
-| Date roles only come from labels | "Departure date" is always a start date, even on a hotel form where it means check-out | D |
-| No form-level context | A login form and a checkout form are treated the same way | D |
+| Form types are guessed from fields and words | A newsletter box with a "Sign up" button reads as a sign-up form | D follow-up |
+| Communes and dairas aren't in the vocabulary | A commune select is still unknown | E |
 | No shadow DOM or iframe support | Web-component forms and embedded forms are skipped | F |
-| A full fill of a very large form is slow | 1,000 fields classify in about 50 ms, but filling them takes about 1.7 s | F |
+| Filling very large forms | 1,000 fields classify in about 70 ms and fill in about 0.33 s | F |
 
 ## Phases
 
@@ -53,7 +52,7 @@ The phases are ordered by dependency. Each one ends with the benchmark numbers t
 
 ### Phase A: Benchmark (do this first)
 
-**Status: done.** `npm run benchmark` runs 31 fixtures (406 fields), 12 held-out fixtures, spelling variants and performance, and fails CI on leaks, submissions, network requests or any drop in precision or recall.
+**Status: done.** `npm run benchmark` runs 36 fixtures (453 fields, one of them a regression fixture), 12 held-out fixtures, relationship and form-type checks, spelling variants and performance, and fails CI on leaks, submissions, network requests or any drop in precision or recall.
 
 Without a benchmark, every other phase is guesswork.
 
@@ -124,6 +123,8 @@ interface Classification {
 **Done when:** precision is the same or better on every field type, overall recall rises, and the unknown rate is reported and within an agreed limit.
 
 ### Phase D: Form context and relationships
+
+**Status: done.** Decisions made along the way: "remember me" checkboxes are a `skip:session` kind (skipped, not counted as leaks); a name field in the same section as card fields is the cardholder and is skipped, while a shipping name in its own section is filled; a current password gets a different sample from the new one; radio groups and selects pick the answer matching the generated value ("Femme" for a female identity).
 
 - **`<select>` options:** country lists, gender, wilayas and months each identify their field type.
 - **Radio groups** classified as a whole: gender, payment method, contact preference.

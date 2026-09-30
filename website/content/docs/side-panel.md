@@ -6,6 +6,8 @@ The panel lists every form field on the page as **filled**, **skipped** or **inc
 
 Under each field's name, the panel shows what DevFiller recognized it as and how sure it is, for example **Phone · 96%**. Protected fields (card, bank, one-time code and consent) say so, and fields it couldn't recognize say **Type not recognized**. Select a field to see the evidence behind it, such as `autocomplete=tel` or `label “Téléphone”`, and any close alternatives. Fields under 70% are only filled when **Fill unknown fields** is on.
 
+Above the list, the panel names the kind of form it found, such as **Checkout form** or **Sign-up form**.
+
 **Show field types on the page** labels every field on the website itself with its type and confidence. It never changes a field. Click **Hide field types on the page** to remove the labels.
 
 Click **Fill this page** in the panel to fill, or **Fill again** for new values. The list refreshes when you switch tabs or the page changes, and every few seconds while the panel is open. Click the refresh button to update it now.

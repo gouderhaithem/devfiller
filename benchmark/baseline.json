@@ -1,19 +1,19 @@
 {
   "summary": {
-    "fields": 406,
+    "fields": 453,
     "precision": 1,
     "recall": 1,
     "f1": 1,
     "accuracy": 1,
-    "unknownRate": 0.14532019704433496,
+    "unknownRate": 0.13245033112582782,
     "falsePositiveRate": 0,
     "wrongRate": 0
   },
   "types": {
     "address": {
-      "support": 13,
-      "predicted": 13,
-      "correct": 13,
+      "support": 14,
+      "predicted": 14,
+      "correct": 14,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -43,17 +43,17 @@
       "f1": 1
     },
     "birthDate": {
-      "support": 10,
-      "predicted": 10,
-      "correct": 10,
+      "support": 13,
+      "predicted": 13,
+      "correct": 13,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "city": {
-      "support": 13,
-      "predicted": 13,
-      "correct": 13,
+      "support": 14,
+      "predicted": 14,
+      "correct": 14,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -75,9 +75,9 @@
       "f1": 1
     },
     "country": {
-      "support": 13,
-      "predicted": 13,
-      "correct": 13,
+      "support": 14,
+      "predicted": 14,
+      "correct": 14,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -107,9 +107,9 @@
       "f1": 1
     },
     "email": {
-      "support": 33,
-      "predicted": 33,
-      "correct": 33,
+      "support": 35,
+      "predicted": 35,
+      "correct": 35,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -123,9 +123,9 @@
       "f1": 1
     },
     "endDate": {
-      "support": 3,
-      "predicted": 3,
-      "correct": 3,
+      "support": 8,
+      "predicted": 8,
+      "correct": 8,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -139,17 +139,17 @@
       "f1": 1
     },
     "fullName": {
-      "support": 18,
-      "predicted": 18,
-      "correct": 18,
+      "support": 19,
+      "predicted": 19,
+      "correct": 19,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "gender": {
-      "support": 11,
-      "predicted": 11,
-      "correct": 11,
+      "support": 16,
+      "predicted": 16,
+      "correct": 16,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -187,9 +187,9 @@
       "f1": 1
     },
     "nationality": {
-      "support": 3,
-      "predicted": 3,
-      "correct": 3,
+      "support": 4,
+      "predicted": 4,
+      "correct": 4,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -203,9 +203,9 @@
       "f1": 1
     },
     "password": {
-      "support": 14,
-      "predicted": 14,
-      "correct": 14,
+      "support": 20,
+      "predicted": 20,
+      "correct": 20,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -219,9 +219,9 @@
       "f1": 1
     },
     "phone": {
-      "support": 27,
-      "predicted": 27,
-      "correct": 27,
+      "support": 29,
+      "predicted": 29,
+      "correct": 29,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -243,9 +243,9 @@
       "f1": 1
     },
     "quantity": {
-      "support": 7,
-      "predicted": 7,
-      "correct": 7,
+      "support": 8,
+      "predicted": 8,
+      "correct": 8,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -267,25 +267,25 @@
       "f1": 1
     },
     "search": {
-      "support": 5,
-      "predicted": 5,
-      "correct": 5,
+      "support": 6,
+      "predicted": 6,
+      "correct": 6,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "skip:card": {
-      "support": 8,
-      "predicted": 8,
-      "correct": 8,
+      "support": 12,
+      "predicted": 12,
+      "correct": 12,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "skip:consent": {
-      "support": 31,
-      "predicted": 31,
-      "correct": 31,
+      "support": 32,
+      "predicted": 32,
+      "correct": 32,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -306,18 +306,26 @@
       "recall": 1,
       "f1": 1
     },
+    "skip:session": {
+      "support": 4,
+      "predicted": 4,
+      "correct": 4,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
     "startDate": {
-      "support": 5,
-      "predicted": 5,
-      "correct": 5,
+      "support": 10,
+      "predicted": 10,
+      "correct": 10,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "state": {
-      "support": 8,
-      "predicted": 8,
-      "correct": 8,
+      "support": 9,
+      "predicted": 9,
+      "correct": 9,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -347,9 +355,9 @@
       "f1": 1
     },
     "username": {
-      "support": 5,
-      "predicted": 5,
-      "correct": 5,
+      "support": 6,
+      "predicted": 6,
+      "correct": 6,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -367,5 +375,23 @@
   "variants": {
     "correct": 299,
     "total": 299
+  },
+  "relations": {
+    "confirmation": {
+      "correct": 11,
+      "total": 11
+    },
+    "end after start": {
+      "correct": 8,
+      "total": 8
+    },
+    "new differs": {
+      "correct": 2,
+      "total": 2
+    }
+  },
+  "forms": {
+    "correct": 38,
+    "total": 44
   }
 }

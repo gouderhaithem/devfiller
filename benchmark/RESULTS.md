@@ -72,7 +72,37 @@ wrong type, against 0.4% before, and two of the five are sensitive-side skips). 
 (amounts, quantities and cities worded unusually) and date roles that only context reveals, which
 is Phase D work.
 
-## Confidence calibration
+## Phase D: form context and relationships
+
+Five fixtures were added for Phase D (unlabelled selects and radio groups, confirmation pairs,
+password roles, date roles and a cardholder name), and every `<form>` was labelled with its type.
+The Phase C engine was measured on them before any Phase D code was written.
+
+| | Phase C | Phase D |
+| --- | --- | --- |
+| Fields (36 fixtures) | 453 | 453 |
+| Precision | 99.5% | 100.0% |
+| Recall | 94.1% | 100.0% |
+| Sensitive-field leaks | 1 (a cardholder name) | 0 |
+| Confirmation fields hold the same value | 11 / 11 | 11 / 11 |
+| End dates after start dates | 3 / 8 | 8 / 8 |
+| New password differs from the current one | 0 / 2 | 2 / 2 |
+| Form types | 19 / 44 (all "other") | 38 / 44 |
+| Held-out precision / recall | 96.7% / 82.6% | 96.8% / 83.7% |
+| Held-out form types / relationship checks | — | 9 / 12, 5 / 5 |
+
+The same caveat as Phase C applies: the main fixtures were used while building Phase D, so their
+100% is an upper bound. On the held-out forms Phase D fixed one date role and added no new
+mistakes. The six remaining form-type misses on the main fixtures are judgement calls (an SMS
+verification step read as sign-in, a newsletter box as sign-up, an event registration as a
+booking, and three name-and-password forms labelled "other" read as sign-ups); the labels were
+left as they were rather than changed to match the engine.
+
+The Phase D code review found two more ways to fill a sensitive field (a card-expiry date retyped
+as an end date, and expiry month and year selects beside a card number) and a crash on dates in
+another format. All three are fixed and covered by tests.
+
+
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.
 
@@ -96,9 +126,11 @@ Median of several runs on generated forms, in a laptop's headless Chromium.
 | 500 | 86.8 ms | 3.5 ms | 21.7 ms | 441.9 ms | < 200 ms |
 | 1,000 | 156.6 ms | 6.7 ms | 46.2 ms | 1,504.7 ms | < 200 ms |
 
-Phase B's speed-up comes from normalizing the aliases once instead of for every field. Filling
-(not classifying) a 1,000-field form still takes about a second and a half, mostly because each value
-written makes the next visibility check recalculate styles. That's a follow-up, not a target miss.
+After the visibility fix, a full fill of 1,000 fields takes 0.3–0.6 s depending on machine load. In Phase D, classifying 1,000 fields takes about 70–100 ms, because it also measures which fields are visible so it can judge each form's type.
+
+Phase B's speed-up comes from normalizing the aliases once instead of for every field. Before the visibility fix, filling
+(not classifying) a 1,000-field form took about a second and a half, mostly because each value
+written made the next visibility check recalculate styles.
 
 ## Known limits of these numbers
 

@@ -62,7 +62,20 @@ DevFiller never guesses silently. For every field it collects evidence, scores e
 | Low (50–69%) | Fills it only when **Fill unknown fields** is on; otherwise explains why it was skipped |
 | Below 50% | Treats the field as unknown: generic text when **Fill unknown fields** is on, or AI suggestions when AI is on |
 
-**Sensitive fields are recognized so they can be skipped, never filled**: card numbers, expiry, CVV and cardholder names; one-time, SMS and 2FA codes; IBAN, BIC, RIB and bank account fields; and consent checkboxes for terms, privacy, newsletters, marketing or permissions. This holds whatever your settings are.
+### The form as a whole
+
+After each field is scored on its own, DevFiller reads each form as a whole:
+
+- **Answers count as evidence.** A select or radio group whose options are mostly countries, wilayas (the 58 of the 2019 reform), US states, French or Canadian regions, nationalities or genders is recognized from them, with or without a label. Day, month and year selects under a "Date of birth" legend are filled with the parts of one date.
+- **Matching answers.** Radio groups and selects pick the option that matches the generated value: "Femme", "Féminin" or "أنثى" for a female identity, "16 - Alger" for Algiers.
+- **Confirmations.** A field that says "Confirm", "Repeat" or "Retype" repeats the email, password, phone or username just before it, with exactly the value written there.
+- **Passwords.** On a change-password form, the current password gets a different value from the new one and its confirmation.
+- **Dates.** "Arrival" and "Departure", "From" and "To", "Du" and "Au", "من" and "إلى", or an unlabelled date after a start date become a start and an end date. The end date always falls after the start date, even when the start has a later `min`.
+- **Payment sections.** A "Name" field in the same section as card fields is the cardholder's name, so it's skipped. A shipping name in its own section is filled.
+- **Order.** A weak guess that fits the field before it ("Surname" after "First name") gains a little confidence.
+- **Form type.** Each form is recognized as a sign-in, sign-up, checkout, booking, contact or search form, or none of these. The side panel shows it.
+
+**Sensitive fields are recognized so they can be skipped, never filled**: card numbers, expiry, CVV and cardholder names; one-time, SMS and 2FA codes; IBAN, BIC, RIB and bank account fields; and consent checkboxes for terms, privacy, newsletters, marketing, permissions or declarations ("I certify…"). "Remember me" and "Keep me signed in" stay as you set them. This holds whatever your settings are.
 
 The side panel shows each field's type, confidence and evidence, for example "Phone, 96%: autocomplete=tel, label “Téléphone”". **Show field types on the page** draws the same labels over the form.
 
