@@ -1,7 +1,7 @@
 import type { ControlSnapshot } from '../panel-types';
 import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome, PageState, UnknownField } from './types';
 import { CONSENT, CONTEXTUAL_KEYS, MACHINE_ID, PASSWORD } from './dictionary';
-import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, legendText, listControls, type ControlSignals } from './extract';
+import { controlSignals, isChoice, isEditableChoice, isFillable, isInput, isVisible, legendText, listControls, type ControlSignals } from './extract';
 import { shouldExclude } from './exclude';
 import { classificationOf, classifyControl, isSensitive, usableKey } from './classify';
 import { coherentValues, fallbackValue, fitValue, random, type Resolved } from './generate';
@@ -24,7 +24,7 @@ function fillRadioGroup(ctx: FillContext, el: HTMLInputElement): ControlRun {
   const members = controls.filter((c): c is HTMLInputElement => c instanceof HTMLInputElement && c.type === 'radio' && c.form === el.form && (el.name ? c.name === el.name : c === el));
   if (members.some(member => shouldExclude(member, ctx.exclusions))) return run('none', { reason: 'Another option in this group is excluded' });
   if (!request.overwrite && members.some(c => c.checked)) return run('preserved');
-  const candidates = members.filter(c => isEditableChoice(c) && !isSensitive(classificationOf(ctx.classifications, c).type) && !CONSENT.test(normalize([c.name, c.id, c.getAttribute('aria-label') || '', ...Array.from(c.labels || []).map(l => l.textContent || '')].join(' '))));
+  const candidates = members.filter(c => isEditableChoice(c, ctx.visible.get(c)) && !isSensitive(classificationOf(ctx.classifications, c).type) && !CONSENT.test(normalize([c.name, c.id, c.getAttribute('aria-label') || '', ...Array.from(c.labels || []).map(l => l.textContent || '')].join(' '))));
   const different = candidates.filter(c => !c.checked);
   const choices = request.overwrite && different.length ? different : candidates;
   if (!choices.length) return run('none', { reason: 'No option in this group can be selected' });
@@ -115,7 +115,7 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
 
 function processControl(ctx: FillContext, el: Control, index: number): ControlRun {
   const { request } = ctx;
-  if (!isFillable(el) || shouldExclude(el, ctx.exclusions)) return NONE;
+  if (!isFillable(el, ctx.visible.get(el)) || shouldExclude(el, ctx.exclusions)) return NONE;
   if (isInput(el) && ['hidden', 'file', 'submit', 'button', 'reset', 'image'].includes(el.type)) return NONE;
   if (isInput(el) && el.type === 'password' && !request.passwords) return NONE;
   const sig = controlSignals(el);
@@ -147,7 +147,7 @@ export function fillPage(request: FillRequest): FillResult {
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__formlyPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
-  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: new Map() };
+  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: new Map(), visible: new Map(controls.map(el => [el, isVisible(el)])) };
   if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }

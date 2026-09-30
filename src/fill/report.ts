@@ -16,7 +16,7 @@ const UNSURE = 'Not sure this is';
 export function skipReason(ctx: FillContext, el: Control): string {
   const { request } = ctx;
   if (el instanceof HTMLInputElement && OMITTED_TYPES.includes(el.type)) return 'omit';
-  if (!isVisible(el)) return 'omit';
+  if (!(ctx.visible.get(el) ?? isVisible(el))) return 'omit';
   if (el.disabled || el.matches(':disabled')) return 'Disabled field';
   if ('readOnly' in el && el.readOnly) return 'Read-only field';
   if (el.closest('[inert]')) return 'Inactive section';

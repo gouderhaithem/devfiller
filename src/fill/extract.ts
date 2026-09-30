@@ -17,8 +17,10 @@ const isReadOnly = (el: Control) => 'readOnly' in el && el.readOnly;
 const isDisabled = (el: Control) => el.disabled || el.matches(':disabled');
 
 // Controls the user could type into or click right now.
-export const isFillable = (el: Control) => !isDisabled(el) && !isReadOnly(el) && !el.closest('[inert]') && isVisible(el);
-export const isEditableChoice = (el: HTMLInputElement) => !isDisabled(el) && !el.closest('[inert]') && isVisible(el);
+// `visible` lets a fill pass in visibility measured before it wrote anything: checking styles
+// after each write forces the browser to recalculate them, which is slow on large forms.
+export const isFillable = (el: Control, visible = isVisible(el)) => !isDisabled(el) && !isReadOnly(el) && !el.closest('[inert]') && visible;
+export const isEditableChoice = (el: HTMLInputElement, visible = isVisible(el)) => !isDisabled(el) && !el.closest('[inert]') && visible;
 
 export const labelText = (el: Control) => Array.from(el.labels || []).map(label => label.textContent || '').join(' ');
 export const labelledByText = (el: Control) => (el.getAttribute('aria-labelledby') || '').split(/\s+/).map(id => document.getElementById(id)?.textContent || '').join(' ');

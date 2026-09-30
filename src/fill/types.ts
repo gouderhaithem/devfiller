@@ -23,6 +23,7 @@ export interface FillContext {
   readonly usedText: Set<string>;
   readonly touched: Set<Control>;
   readonly classifications: Map<Control, Classification>;
+  readonly visible: ReadonlyMap<Control, boolean>; // measured once, before any value is written
 }
 
 export type Outcome = 'filled' | 'preserved' | 'unmatched' | 'invalid' | 'none';
