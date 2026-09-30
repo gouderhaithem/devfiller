@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Dossier client — validation de l'application</title></head>
+<body>
+<main>
+  <h1>Nouveau dossier</h1>
+  <!-- The app checks each field in JavaScript and sets aria-invalid, as most frameworks do. -->
+  <form action="/dossiers" method="post" data-form-type="other">
+    <p><label for="tel">Téléphone mobile</label><input id="tel" name="tel" type="tel" data-check="^0[5-7]\d{8}$" data-expect="phone" data-value-pattern="^0[5-7]\d{8}$"></p>
+    <p><label for="nais">Date de naissance</label><input id="nais" name="naissance" data-check="^\d{4}-\d{2}-\d{2}$" data-expect="birthDate" data-value-pattern="^\d{4}-\d{2}-\d{2}$"></p>
+    <p><label for="cp">Code postal</label><input id="cp" name="cp" data-check="^\d{5}$" data-expect="postalCode" data-value-pattern="^\d{5}$"></p>
+    <p><label for="dos">N° de dossier</label><input id="dos" name="dossier" data-check="^\d{6,10}$" data-expect="reference" data-value-pattern="^\d{6,10}$"></p>
+    <p><label for="mt">Montant (DA)</label><input id="mt" name="montant" data-check="^\d+(\.\d{1,2})?$" data-expect="amount" data-value-pattern="^\d+(\.\d{1,2})?$"></p>
+    <p><label for="code">Code agence</label><input id="code" name="agence" pattern="[A-Z]{2}-[0-9]{4}" data-expect="unknown" data-value-pattern="^[A-Z]{2}-\d{4}$"></p>
+    <p><label for="nom">Nom</label><input id="nom" name="nom" data-expect="lastName"></p>
+    <button type="submit">Créer</button>
+  </form>
+  <script>
+    for (const field of document.querySelectorAll('[data-check]')) {
+      const rule = new RegExp(field.dataset.check);
+      const check = () => field.setAttribute('aria-invalid', String(!rule.test(field.value)));
+      field.addEventListener('input', check);
+      field.addEventListener('blur', check);
+    }
+  </script>
+</main>
+</body>
+</html>

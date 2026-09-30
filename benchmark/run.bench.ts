@@ -24,7 +24,7 @@ const SENSITIVE = ['skip:card', 'skip:otp', 'skip:iban', 'skip:consent'];
 const ALLOWED = new Set<string>([...fields.map(([key]) => key), 'unknown', ...SENSITIVE, 'skip:session']);
 const OMITTED = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
 
-type Engine = { fillPage: (request: FillRequest) => FillResult };
+type Engine = { fillPage: (request: FillRequest) => FillResult; revalidate: () => { retried: number } };
 interface ControlInfo { index: number; expect: string | null; omitted: boolean; html: string }
 interface ControlState { value: string; checked: boolean }
 
@@ -92,6 +92,11 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
     await openWithEngine(page, url);
     const before = await readStates(page, sensitive.map(control => control.index));
     await runEngine(page, settings);
+    // What the extension does after a fill: let the page validate, then retry rejected values.
+    await page.evaluate(async () => {
+      const engine = (globalThis as unknown as { __devfiller: Engine }).__devfiller;
+      for (let round = 0; round < 4; round++) { await new Promise(resolve => setTimeout(resolve, 30)); if (!engine.revalidate().retried) break; }
+    });
     const after = await readStates(page, sensitive.map(control => control.index));
     sensitive.forEach((control, i) => {
       const changed = before[i].value !== after[i].value || before[i].checked !== after[i].checked;
@@ -129,9 +134,13 @@ function checkRelations(page: Page, fixture: string): Promise<Relation[]> {
         return { el, region: countryRegion(text.trim()) };
       }),
     ].map(({ el, region }) => ({ kind: 'phone follows the form', ok: !!region && read(el).startsWith(prefix[region]), detail: `${describe(el)} → "${read(el)}" for ${region || 'no country'}` }));
+    // Whether the page accepts each value written: its own rules and its aria-invalid verdict.
+    const accepted = Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[data-expect], textarea[data-expect]'))
+      .filter(el => !['checkbox', 'radio', 'hidden', 'file'].includes(el.type) && !el.getAttribute('data-expect')!.startsWith('skip:') && el.value)
+      .map(el => ({ kind: 'accepted by the page', ok: el.checkValidity() && el.getAttribute('aria-invalid') !== 'true', detail: `${describe(el)} → "${el.value}"` }));
     // The shape of what was written: a number, a code, a decimal comma.
     const shapes = Array.from(document.querySelectorAll('[data-value-pattern]'), el => ({ kind: 'value shape', ok: new RegExp(el.getAttribute('data-value-pattern')!).test(read(el)), detail: `${describe(el)} → "${read(el)}"` }));
-    return [...pairs, ...phones, ...shapes];
+    return [...pairs, ...phones, ...shapes, ...accepted];
   }, fixture);
 }
 

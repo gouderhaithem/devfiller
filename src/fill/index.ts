@@ -10,6 +10,8 @@ import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, typ
 import { randomFor, secureRandom, type Random } from '../rng';
 import { alignPhones } from './phones';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
+import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
+import { DATE_FIELD_TYPES } from './dictionary';
 import { setNativeChecked, setNativeValue, snapshot } from './apply';
 import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
@@ -90,6 +92,7 @@ const addDays = (date: string, days: number) => { const day = new Date(`${date}T
 function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey): string {
   if (key === 'measurement') return measurementValue(el, found, ctx.random(el));
   if (key === 'reference') return referenceValue(el, found, ctx.random(el), ctx.values.date.slice(0, 4));
+  if (DATE_FIELD_TYPES.has(key)) return formatDateText(el, ctx.values[key]);
   return DECIMAL_KEYS.has(key) ? localizeDecimal(el, ctx.values[key]) : ctx.values[key];
 }
 
@@ -151,9 +154,18 @@ function fillValue(ctx: FillContext, el: Control, index: number, sig: ControlSig
   const resolution = resolveValue(ctx, el, index, sig);
   if ('done' in resolution) return resolution.done;
   const { resolved, source, aiSuggestion } = resolution;
-  const fitted = fitValue(ctx, el, resolved);
+  let fitted = fitValue(ctx, el, resolved);
+  // Other ways to write the value, for a field whose rules reject the first one. Your own values
+  // and AI suggestions are written as they are.
+  const reshape = !resolved.literal && !resolved.ai && !(el instanceof HTMLSelectElement);
+  // Dates are reshaped from the ISO date, not from the format the field first got.
+  const original = resolved.key && DATE_FIELD_TYPES.has(resolved.key) && !resolved.generic ? ctx.values[resolved.key] : fitted ?? resolved.value;
+  const otherPhones = resolved.key === 'phone' ? Object.values(ctx.request.phones ?? {}) : [];
+  const options = reshape ? alternatives(el, resolved.generic ? undefined : resolved.key, original, ctx.random(el), otherPhones) : [];
+  if (reshape) fitted = firstValid(el, [...(fitted === undefined ? [] : [fitted]), ...options]) ?? fitted;
   if (fitted === undefined) return run('invalid', { source });
   const value = afterStart(el, classificationOf(ctx.classifications, el), resolved, fitted, ctx.random(el));
+  rememberAlternatives(el, options.filter(option => option !== value));
   ctx.touched.add(el);
   setNativeValue(el, value);
   if (el.value !== value) return run('invalid', { source });
@@ -223,6 +235,7 @@ export function fillPage(request: FillRequest): FillResult {
   if (request.mode === 'inspect') { finalizeReport({ ...base, values: request.values }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
+  if (request.mode !== 'scan') forgetAlternatives();
   const ctx: FillContext = { ...base, values: coherentValues(request, controls, exclusions) };
   controls.forEach((el, index) => {
     let outcome: ControlRun = NONE;

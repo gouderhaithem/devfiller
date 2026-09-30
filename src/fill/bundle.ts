@@ -2,6 +2,7 @@
 // It runs in the extension's isolated world, so the page itself can't reach the engine.
 import { fillPage, panelPageAction } from './index';
 import { exportFixture } from './export';
+import { revalidate } from './validation';
 import type { EngineGlobal } from './inject';
 
-(globalThis as EngineGlobal).__devfiller = { fillPage, panelPageAction, exportFixture };
+(globalThis as EngineGlobal).__devfiller = { fillPage, panelPageAction, exportFixture, revalidate };

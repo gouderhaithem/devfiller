@@ -1,11 +1,12 @@
 // Extension-side helpers: inject the bundled engine, then call it in the same isolated world.
 import type { fillPage, panelPageAction } from './index';
 import type { exportFixture } from './export';
+import type { revalidate } from './validation';
 import type { TypeRule } from '../data';
 import type { FillRequest, FillResult } from './types';
 
 export const ENGINE_FILE = 'fill-engine.js';
-export interface Engine { fillPage: typeof fillPage; panelPageAction: typeof panelPageAction; exportFixture: typeof exportFixture }
+export interface Engine { fillPage: typeof fillPage; panelPageAction: typeof panelPageAction; exportFixture: typeof exportFixture; revalidate: typeof revalidate }
 export type EngineGlobal = typeof globalThis & { __devfiller?: Engine };
 type PanelAction = Parameters<typeof panelPageAction>[0];
 
@@ -18,6 +19,20 @@ export async function runFillPage(target: chrome.scripting.InjectionTarget, requ
   await injectEngine(target);
   const [reply] = await chrome.scripting.executeScript({ target, func: (req: FillRequest) => (globalThis as EngineGlobal).__devfiller?.fillPage(req), args: [request] });
   return reply?.result ?? undefined;
+}
+
+// The page's own validation runs after our events, sometimes a moment later: wait, then retry the
+// next way of writing each value the page rejected, for up to four rounds.
+export async function fixRejected(target: chrome.scripting.InjectionTarget): Promise<number> {
+  let fixed = 0;
+  for (let round = 0; round < 4; round++) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const [reply] = await chrome.scripting.executeScript({ target, func: () => (globalThis as EngineGlobal).__devfiller?.revalidate() });
+    const retried = reply?.result?.retried ?? 0;
+    fixed += retried;
+    if (!retried) break;
+  }
+  return fixed;
 }
 
 export async function runExport(target: chrome.scripting.InjectionTarget, rules: TypeRule[]): Promise<ReturnType<typeof exportFixture>> {

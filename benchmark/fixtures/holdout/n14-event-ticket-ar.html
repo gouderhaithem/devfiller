@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>شراء تذاكر الحفل</title>
+<style>
+body{font:15px/1.6 Tahoma,Arial,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem}
+label{display:block;margin-top:.7rem;font-weight:bold}
+input:not([type=checkbox]),select{width:100%;box-sizing:border-box;padding:.4rem}
+.ltr{direction:ltr;text-align:left}
+.pay{border:1px dashed #888;padding:.5rem 1rem;margin-top:1rem}
+</style>
+</head>
+<body>
+<header><h1>مهرجان الصيف - حجز التذاكر</h1></header>
+<main>
+<form data-form-type="checkout" action="#" method="post">
+  <label for="t_fn">الاسم</label>
+  <input id="t_fn" name="field_1" autocomplete="given-name" data-expect="firstName">
+  <label for="t_ln">اللقب</label>
+  <input id="t_ln" name="field_2" autocomplete="family-name" data-expect="lastName">
+  <label for="t_em">البريد الإلكتروني لاستلام التذاكر</label>
+  <input id="t_em" name="field_3" type="email" class="ltr" data-expect="email">
+  <label for="t_ph">رقم الهاتف</label>
+  <input id="t_ph" name="field_4" type="tel" class="ltr" data-phone-region="dz" data-expect="phone">
+  <label for="t_ct">المدينة</label>
+  <input id="t_ct" name="field_5" data-expect="city">
+
+  <label for="t_ty">نوع التذكرة</label>
+  <select id="t_ty" name="field_6" data-expect="unknown">
+    <option value="">اختر</option><option>عادية</option><option>VIP</option><option>عائلية</option>
+  </select>
+  <label for="t_qt">عدد التذاكر</label>
+  <input id="t_qt" name="field_7" type="number" min="1" max="10" data-expect="quantity">
+  <label for="t_dt">تاريخ الحفل</label>
+  <input id="t_dt" name="field_8" type="date" data-expect="date">
+  <label for="t_or">رقم الطلب السابق (اختياري)</label>
+  <input id="t_or" name="field_9" class="ltr" data-value-pattern="^[A-Za-z0-9][A-Za-z0-9\-_/]{3,}$" data-expect="reference">
+  <label for="t_pr">رمز التخفيض</label>
+  <input id="t_pr" name="field_10" class="ltr" data-expect="unknown">
+
+  <div class="pay">
+    <label for="cc_n">رقم البطاقة</label>
+    <input id="cc_n" name="cardnumber" class="ltr" inputmode="numeric" autocomplete="cc-number" data-expect="skip:card">
+    <label for="cc_e">تاريخ الانتهاء (شهر/سنة)</label>
+    <input id="cc_e" name="exp" class="ltr" placeholder="MM/YY" autocomplete="cc-exp" data-expect="skip:card">
+    <label for="cc_c">رمز الأمان (CVV)</label>
+    <input id="cc_c" name="field_13" class="ltr" maxlength="4" data-expect="skip:card">
+    <label for="cc_h">اسم حامل البطاقة</label>
+    <input id="cc_h" name="field_14" data-expect="skip:card">
+  </div>
+  <label for="t_otp">رمز التحقق المرسل عبر رسالة قصيرة</label>
+  <input id="t_otp" name="field_15" class="ltr" inputmode="numeric" maxlength="6" data-expect="skip:otp">
+
+  <label style="font-weight:normal"><input type="checkbox" name="tos" data-expect="skip:consent"> أوافق على شروط البيع وسياسة الاسترجاع.</label>
+  <label style="font-weight:normal"><input type="checkbox" name="nl" data-expect="skip:consent"> أرغب في تلقي أخبار الحفلات القادمة.</label>
+  <p><button type="submit">ادفع الآن</button></p>
+</form>
+</main>
+</body>
+</html>

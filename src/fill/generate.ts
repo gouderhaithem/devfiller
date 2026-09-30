@@ -189,6 +189,19 @@ function nextDate(el: HTMLInputElement, value: string, direction: number, step: 
   return el.type === 'date' ? d.toISOString().slice(0, 10) : el.type === 'time' ? d.toISOString().slice(11, 19) : d.toISOString().slice(0, 19);
 }
 
+// A time on the field's step grid, counted from its min: step="1800" allows 10:00 and 10:30.
+const seconds = (time: string) => { const [h, m, sec] = time.split(':').map(Number); return (h || 0) * 3600 + (m || 0) * 60 + (sec || 0); };
+function snapTime(el: HTMLInputElement, value: string): string {
+  const step = Number(el.step);
+  if (!/^\d{2}:\d{2}/.test(value) || !(step > 0) || el.step === 'any') return value;
+  const base = el.min ? seconds(el.min) : 0;
+  let snapped = base + Math.round((seconds(value) - base) / step) * step;
+  if (el.max && snapped > seconds(el.max)) snapped -= step;
+  if (snapped < base) snapped = base;
+  const hh = String(Math.floor(snapped / 3600) % 24).padStart(2, '0'), mm = String(Math.floor(snapped / 60) % 60).padStart(2, '0'), ss = snapped % 60;
+  return ss ? `${hh}:${mm}:${String(ss).padStart(2, '0')}` : `${hh}:${mm}`;
+}
+
 export function fitDate(ctx: FillContext, el: HTMLInputElement, resolved: Resolved): string {
   const { date, time } = ctx.request.values;
   let value = resolved.value;
@@ -200,6 +213,7 @@ export function fitDate(ctx: FillContext, el: HTMLInputElement, resolved: Resolv
   }
   if (el.min && value < el.min) value = el.min;
   if (el.max && value > el.max) value = el.max;
+  if (el.type === 'time') value = snapTime(el, value);
   if (ctx.fresh && value === el.value) {
     const step = Math.max(1, Number(el.step) || (el.type === 'time' || el.type === 'datetime-local' ? 60 : 1));
     for (const direction of [1, -1]) {

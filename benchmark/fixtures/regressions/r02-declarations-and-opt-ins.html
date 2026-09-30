@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: Arabic declarations and "opt me in"</title></head>
+<body>
+<main>
+  <!-- Found by the second held-out set on 30 September 2026: these were ticked by a fill. -->
+  <form action="/prefs" method="post" data-form-type="other">
+    <p dir="rtl" lang="ar"><label><input type="checkbox" name="d1" data-expect="skip:consent"> أصرّح بأن المعلومات المقدمة صحيحة.</label></p>
+    <p dir="rtl" lang="ar"><label><input type="checkbox" name="d2" data-expect="skip:consent"> أقر بصحة البيانات المذكورة أعلاه</label></p>
+    <p><label><input type="checkbox" name="o1" data-expect="skip:consent"> Opt me in to beta programme communications</label></p>
+    <p><label><input type="checkbox" name="o2" data-expect="skip:consent"> Send me product communications</label></p>
+    <p><label><input type="checkbox" name="k1" data-expect="unknown"> Show advanced options</label></p>
+    <button type="submit">Save</button>
+  </form>
+</main>
+</body>
+</html>

@@ -19,7 +19,8 @@ classification with that answer, so **label the truth, not what the engine does 
   each radio).
 - A fixture is one self-contained file: `<!doctype html>`, `<meta charset="utf-8">`, a `<title>`,
   no external scripts, styles, fonts or images. Inline `<style>` is fine. Inline `<script>` is only
-  for custom widgets (below), and must not submit, fetch or change fields on its own.
+  for custom widgets (below) or app-style validation that sets `aria-invalid`, and must not
+  submit, fetch or change fields on its own.
 - **Custom widgets** built from ARIA roles need `data-expect` too, on the element that carries the
   role: `role="checkbox"`, `role="switch"`, each `role="radio"` in a `role="radiogroup"`, a
   `role="combobox"` that opens a `role="listbox"`, and rich-text editors (`contenteditable="true"`
