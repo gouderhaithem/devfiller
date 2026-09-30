@@ -189,7 +189,7 @@ describe('Gemini scanning and suggestions',()=>{
     expect(field('description').value).toBe('A garden project.');
   });
   it('does not replace malformed AI numeric or date data with random local values',()=>{
-    document.body.innerHTML='<input id="measurement" type="number"><input id="appointment" type="date">';
+    document.body.innerHTML='<input id="measurement" type="number"><input id="appointment" type="datetime-local">';
     const run={...request,aiRequired:true,fillUnknown:true};
     const fields=fillPage({...run,mode:'scan'}).unknown!;
     const suggestions=Object.fromEntries(fields.map(field=>[field.id,{signature:field.signature!,values:['not a valid native value']}]));

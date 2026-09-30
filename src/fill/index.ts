@@ -1,14 +1,15 @@
 import type { ControlSnapshot } from '../panel-types';
 import type { FieldKey, Values } from '../data';
 import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome, PageState, UnknownField } from './types';
-import { ARABIC_NAMES, CONSENT, CONTEXTUAL_KEYS, COUNTRY_CODES, MACHINE_ID, PASSWORD } from './dictionary';
+import { ARABIC_NAMES, CONSENT, CONTEXTUAL_KEYS, COUNTRY_CODES, MACHINE_ID, PASSWORD, PERSON_ROLE_PHRASES } from './dictionary';
 import { controlSignals, isChoice, isDatePicker, isEditableChoice, isFillable, pickerTarget, isInput, isScale, isTrap, isVisible, legendText, listControls, optionTexts, radioScope, type ControlSignals } from './extract';
 import { shouldExclude } from './exclude';
 import { classificationOf, isSensitive, SOURCE_GROUP, usableKey, type Classification } from './classify';
 import { analyzePage } from './context';
 import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, type Resolved } from './generate';
 import { randomFor, secureRandom, type Random } from '../rng';
-import { alignPhones } from './phones';
+import { alignPhones, otherNumber } from './phones';
+import { fillCard } from './cards';
 import { classifyWidget, listWidgets, WIDGET_SELECTOR } from './widgets';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
 import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
@@ -111,6 +112,15 @@ function countryCode(el: Control, country: string): string {
   return codes && (length === 2 || length === 3) ? codes[length - 2] : country;
 }
 
+// An emergency contact's, a manager's or a guardian's name, email and phone are not the applicant's.
+const PERSON_KEYS: ReadonlySet<FieldKey> = new Set(['fullName', 'firstName', 'middleName', 'lastName', 'username', 'email', 'phone']);
+const OWN_WORDS: ReadonlySet<string> = new Set(['visible', 'attribute', 'context']);
+function aboutSomeoneElse(found: Classification, key: FieldKey): boolean {
+  if (!PERSON_KEYS.has(key)) return false;
+  const texts = (found.signals ?? []).filter(signal => OWN_WORDS.has(SOURCE_GROUP[signal.source])).map(signal => ` ${signal.text} `);
+  return texts.some(text => PERSON_ROLE_PHRASES.some(phrase => text.includes(` ${phrase} `)));
+}
+
 // Measurements and references are shaped by their field; numbers get the page's decimal separator.
 function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey): string {
   const values = valuesFor(ctx, el);
@@ -152,7 +162,9 @@ function resolveValue(ctx: FillContext, el: Control, index: number, sig: Control
     const found = classificationOf(ctx.classifications, el);
     const key = usableKey(found, request.fillUnknown);
     const related = key && relatedValue(ctx, found, key);
-    if (key) resolved = { value: related ? related.value : shapedValue(ctx, el, found, key), key, literal: !!related?.literal, generic: false, ai: false };
+    const someoneElse = !!key && !related && aboutSomeoneElse(found, key);
+    if (someoneElse) ctx.others.add(el);
+    if (key) resolved = { value: related ? related.value : someoneElse ? ctx.other[key] : shapedValue(ctx, el, found, key), key, literal: !!related?.literal, generic: false, ai: false };
   }
   // Contextual text must reach AI even when a familiar label matched a local sample.
   // Explicit rules and coherent identity/contact fields keep their existing generators.
@@ -221,6 +233,13 @@ const WRITTEN_KEYS: readonly FieldKey[] = ['firstName', 'middleName', 'lastName'
 // The main values and, when a field is written in Arabic, the Arabic ones. A page that asks for a
 // name in Arabic describes the Arabic person everywhere: its Latin name fields get the same person
 // in Latin script, so names, username and email agree.
+// The page's values, and another person's for an emergency contact or a manager. With no second
+// identity to use, only the phone differs.
+function people<T extends Pick<FillContext, 'values' | 'localized'>>(request: FillRequest, own: T): T & Pick<FillContext, 'other' | 'others'> {
+  const someone = request.identities?.find(identity => identity.email !== own.values.email && identity.fullName !== own.values.fullName);
+  return { ...own, other: { ...own.values, ...someone, phone: otherNumber(own.values.phone) }, others: new Set() };
+}
+
 function pageValues(request: FillRequest, controls: readonly Control[], exclusions: FillContext['exclusions'], classifications: FillContext['classifications']): Pick<FillContext, 'values' | 'localized'> {
   const main = request.mode === 'inspect' ? request.values : coherentValues(request, controls, exclusions);
   const data = request.localized?.ar;
@@ -241,6 +260,8 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   if (ctx.traps.has(el)) return run('none', { reason: 'Hidden trap for bots' });
   // When the page keeps its fields in forms, a checkbox outside them is a page setting, not data.
   if (isChoice(el) && !el.form && ctx.inForms) return run('none', { reason: 'Outside the page\'s forms' });
+  // Card fields get test cards, masked CVC boxes included; every other sensitive field stays empty.
+  if (classificationOf(ctx.classifications, el).type === 'skip:card') return fillCard(ctx, el);
   if (isInput(el) && el.type === 'password' && !request.passwords) return NONE;
   const sig = controlSignals(el);
   const { type } = classificationOf(ctx.classifications, el);
@@ -298,11 +319,11 @@ export function fillPage(request: FillRequest): FillResult {
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__devfillerPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
   const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map(), inForms: controls.some(el => el.form), traps: new Set(controls.filter(isTrap)) };
-  if (request.mode === 'inspect') { finalizeReport({ ...base, ...pageValues(request, controls, exclusions, analysis.fields) }); return result; }
+  if (request.mode === 'inspect') { finalizeReport({ ...base, ...people(request, pageValues(request, controls, exclusions, analysis.fields)) }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
   if (request.mode !== 'scan') forgetAlternatives();
-  const ctx: FillContext = { ...base, ...pageValues(request, controls, exclusions, analysis.fields) };
+  const ctx: FillContext = { ...base, ...people(request, pageValues(request, controls, exclusions, analysis.fields)) };
   controls.forEach((el, index) => {
     let outcome: ControlRun = NONE;
     try {

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: radio groups, money, counts and codes</title></head>
+<body>
+<main>
+  <!-- Found by the second set of Form Lab pages on 30 September 2026: a section heading gave
+       radios a free-text type, "accepts" and "accepted" read as consent, notification settings
+       didn't, counts became a rating scale, money and durations were missed, a version number read
+       as a phone, "Employee ID" as an employer and an offer code as a width. -->
+  <form action="/listing" method="post" data-form-type="other">
+    <fieldset><legend>About you</legend><p>Mortgage in principle?</p>
+      <label><input type="radio" name="mortgage" value="yes" data-expect="unknown"> Yes</label>
+      <label><input type="radio" name="mortgage" value="no" data-expect="unknown"> No</label>
+      <label><input type="radio" name="mortgage" value="in_progress" data-expect="unknown"> In progress</label>
+    </fieldset>
+    <fieldset><legend>Will you attend?</legend>
+      <label><input type="radio" name="rsvp" value="yes" data-expect="unknown"> Joyfully accepts</label>
+      <label><input type="radio" name="rsvp" value="no" data-expect="unknown"> Regretfully declines</label>
+    </fieldset>
+    <fieldset><legend>Email notifications</legend>
+      <label><input type="checkbox" name="notify_mentions" data-expect="skip:consent"> When someone mentions me</label>
+      <label><input type="checkbox" name="notify_security" data-expect="skip:consent"> Security alerts</label>
+    </fieldset>
+    <select name="beds" aria-label="Bedrooms, at least" data-expect="quantity"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+    <label for="sub">Subtotal</label><input id="sub" name="subtotal" type="number" step="0.01" data-expect="amount">
+    <label for="dv">Declared value</label><input id="dv" name="declared_value" inputmode="decimal" data-expect="amount">
+    <label for="yl">Years with a full licence</label><input id="yl" name="licence_years" type="number" min="0" data-expect="quantity">
+    <label for="hd">Handling time (days)</label><input id="hd" name="handling" type="number" min="0" data-expect="quantity">
+    <label for="mi">Annual mileage (miles)</label><input id="mi" name="annual_mileage" type="number" data-expect="measurement">
+    <label for="ver">Version</label><input id="ver" name="product_version" placeholder="e.g. 2026.3.1" data-expect="unknown">
+    <label for="emp">Employee ID</label><input id="emp" name="emp_id" placeholder="E-10482" data-expect="unknown">
+    <label for="promo">Coupon code</label><input id="promo" name="coupon" data-expect="unknown">
+    <p dir="rtl" lang="ar"><label for="offer">رمز العرض</label><input id="offer" name="offer_code" data-expect="unknown"></p>
+    <button type="submit">Save</button>
+  </form>
+</main>
+</body>
+</html>

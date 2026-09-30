@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Copy, FlaskConical, Plus, Settings2, Shuffle, Sparkles, Trash2, X } from 'lucide-react';
-import { defaults, fields, generateIdentities, generatePhones, generateValues, type Settings, type Values } from './data';
+import { cardSettings, defaults, fields, generateIdentities, generatePhones, generateValues, type Settings, type Values } from './data';
 import { generateSamples } from './samples';
 import type { FillResult } from './fill';
 import { runFillPage } from './fill/inject';
@@ -38,7 +38,7 @@ function App() {
     setBusy(true);setError('');setResult(null);
     const fresh = generateValues(settings.locale,settings);setValues(fresh);
     try {
-      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed),seed:settings.seed,typeRules:settings.typeRules,custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords };
+      const request = { exclusions:settings.exclusions,values:fresh,identities:generateIdentities(settings.locale,settings.region),samples:generateSamples(settings.locale),phones:generatePhones(settings.seed),seed:settings.seed,typeRules:settings.typeRules,custom:settings.custom,overwrite:settings.overwrite,fillUnknown:settings.fillUnknown,passwords:settings.passwords,cards:settings.cards };
       if (isExtension()) {
         const [active] = await chrome.tabs.query({active:true,currentWindow:true});
         if (!active?.id) throw new Error('Open a webpage with a form, then try again.');
@@ -76,6 +76,7 @@ function App() {
           ['fillUnknown','Fill unknown fields','Fill every editable field, even if its value is invalid.'],
           ['passwords','Generate test passwords','Fill password and confirmation fields.'],
         ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}
+          <label className="toggle-row setting-row"><span><strong>Test cards</strong><small>Card fields get a sandbox test card, never a real one, with a future expiry and any CVC. Pick the payment result to test.</small></span><select disabled={!ready||busy} value={settings.cards} onChange={e=>update({...settings,cards:e.target.value as Settings['cards']})}>{cardSettings.map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
           <label className="toggle-row setting-row"><span><strong>Addresses and phones</strong><small>Where cities, postal codes and phone numbers come from. A country chosen in the form still wins for phones.</small></span><select disabled={!ready||busy} value={settings.region} onChange={e=>{const next={...settings,region:e.target.value as Settings['region']};update(next);setValues(generateValues(next.locale,next));}}><option value="mixed">Mixed</option><option value="us">United States</option><option value="fr">France</option><option value="dz">Algeria</option></select></label>
           <label className="toggle-row setting-row"><span><strong>Repeatable data</strong><small>Type a seed to get exactly the same values on every fill, for reproducible tests. Leave it empty for fresh data. Seeded fills don't use AI.</small></span><input type="text" value={settings.seed} maxLength={200} placeholder="e.g. checkout-test" disabled={!ready||busy} onChange={e=>{const next={...settings,seed:e.target.value};update(next);setValues(generateValues(next.locale,next));}}/></label>
           <p className="fine">Consent stays manual. Filling never submits forms automatically.</p></section>}

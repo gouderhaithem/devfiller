@@ -42,6 +42,9 @@ const mentions = (signals: readonly Signal[], phrases: readonly string[]) => tex
 // "From", "Du 12 au 14": the visible label starts with the word.
 const visibleText = (signals: readonly Signal[]) => signals.find(signal => SOURCE_GROUP[signal.source] === 'visible')?.text ?? '';
 const startsWith = (signals: readonly Signal[], list: readonly string[]) => { const text = visibleText(signals); return list.some(word => text === word || text.startsWith(`${word} `)); };
+// "Period from", "Valid to": the label ends with the word. French articles ("de", "au") end too many labels.
+const ARTICLES: ReadonlySet<string> = new Set(['de', 'du', 'au']);
+const endsWith = (signals: readonly Signal[], list: readonly string[]) => { const text = visibleText(signals); return list.some(word => !ARTICLES.has(word) && text.endsWith(` ${word}`)); };
 const evidence = (signal: string, weight: number): Evidence => ({ source: 'form', signal, weight, match: 'context' });
 const quote = (el: Control) => `“${displayLabel(el).slice(0, 40)}”`;
 
@@ -98,7 +101,8 @@ const DATE_WORDS = new Set(words(['date', 'start', 'from', 'du', 'de', 'of', 'th
 const labelWords = (signals: readonly Signal[]) => signals.filter(signal => SOURCE_GROUP[signal.source] === 'visible').flatMap(signal => signal.text.split(' ')).filter(word => word && !DATE_WORDS.has(word));
 function ownDate(start: readonly Signal[], signals: readonly Signal[]): boolean {
   const own = labelWords(signals);
-  if (!own.length || own.some(word => END_WORDS.includes(word))) return false;
+  // "Departure" or "Leaving on" after an arrival ends the stay.
+  if (!own.length || own.some(word => END_WORDS.includes(word) || DEPARTURE_WORDS.includes(word))) return false;
   const subject = new Set(labelWords(start));
   return !own.some(word => subject.has(word));
 }
@@ -112,7 +116,7 @@ function dateRoles(pass: Pass) {
     const a = dates[k], b = dates[k + 1];
     const first = get(pass, a), second = get(pass, b);
     const [sa, sb] = [pass.signals(a), pass.signals(b)];
-    const fromTo = startsWith(sa, FROM_WORDS) && startsWith(sb, TO_WORDS);
+    const fromTo = (startsWith(sa, FROM_WORDS) && startsWith(sb, TO_WORDS)) || (endsWith(sa, FROM_WORDS) && endsWith(sb, TO_WORDS));
     const leaving = first.type === 'startDate' && second.type === 'startDate' && mentions(sb, DEPARTURE_WORDS);
     const follows = first.type === 'startDate' && (second.type === 'unknown' || (second.type === 'date' && !ownDate(sa, sb)));
     const precedes = (first.type === 'unknown' || first.type === 'date') && second.type === 'endDate';

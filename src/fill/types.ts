@@ -1,6 +1,6 @@
 import type { FieldReport, PanelPageState, Control } from '../panel-types';
 import type { Classification } from './classify';
-import type { FieldKey, TypeRule } from '../data';
+import type { CardSetting, FieldKey, TypeRule } from '../data';
 import type { Random } from '../rng';
 import type { CustomField, Values, Exclusions, Identity, Locale, LocalizedValues } from '../data';
 import type { FieldSamples } from '../samples';
@@ -13,7 +13,7 @@ export interface ClassifiedField { index:number; type:string; confidence:number 
 export interface SuggestedField { signature:string; values:string[] }
 // Values in another language, for fields written in it: an Arabic label on an English setup.
 export type LocalizedData = Pick<LocalizedValues, 'values'> & Partial<LocalizedValues>;
-export interface FillRequest { localized?:Partial<Record<Locale,LocalizedData>>; typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
+export interface FillRequest { cards?:CardSetting; localized?:Partial<Record<Locale,LocalizedData>>; typeRules?:TypeRule[]; seed?:string; phones?:Partial<Record<'us'|'fr'|'dz',string>>; aiRequired?:boolean; samples?:FieldSamples; identities?:Identity[]; exclusions?:Exclusions; mode?:'scan'|'inspect'|'classify'; suggestionsExpireAt?:number; suggestions?:Record<string,SuggestedField>; expectedDocument?:string; values: Values; custom: CustomField[]; overwrite: boolean; fillUnknown: boolean; passwords: boolean }
 // `index` is the form's position in document.forms.
 export interface FormInsight { index:number; type:string; confidence:number; fields:number }
 export interface FillResult { widgets?:ClassifiedField[]; forms?:FormInsight[]; classified?:ClassifiedField[]; fields?:FieldReport[]; canUndo?:boolean; unknown?:UnknownField[]; documentId?:string; origin?:string; used?:Record<string,string>; stale?:boolean; filled: number; preserved: number; unmatched: number; invalid: number }
@@ -37,6 +37,8 @@ export interface FillContext {
   readonly filled: Map<Control, FieldKey>;           // recognized values written, for the phone pass
   readonly inForms: boolean;                         // whether the page's fields live in <form> elements
   readonly traps: ReadonlySet<Control>;              // honeypots, measured once, before any value is written
+  readonly other: Values;                            // someone else's details: an emergency contact, a manager
+  readonly others: Set<Control>;                     // fields filled with them, so phones stay distinct
 }
 
 export type Outcome = 'filled' | 'preserved' | 'unmatched' | 'invalid' | 'none';

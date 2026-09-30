@@ -227,6 +227,48 @@ Not fixed here: forms inside iframes are still out of reach, because the extensi
 engine into the top frame only; form types were right for 32 of 46 forms; and fields in hidden
 wizard steps are filled only once their step is shown, which is by design.
 
+## Form Lab, second round: 45 more pages
+
+Every fix from the first round was tested on 30 new Form Lab pages (31–60), written blind, and
+then on 15 more (61–75) written while this round's fixes were being made and not looked at until
+they were done. The first round's gains didn't carry over: pages 1–30 went from 78.4% to 90.2%, but
+the new pages 31–60 scored 87.3% before this round, the same as before the first round's fixes (87.1%).
+
+| F1 | Before this round | After |
+| --- | --- | --- |
+| **Held-out pages 61–75** (345 fields, never tuned on) | **82.3%** | **83.1%** |
+| Pages 31–60, which this round was tuned on | 87.3% | 92.9% |
+| Pages 1–30 | 90.2% | 90.7% |
+| All 75 pages (1,875 fields) | 87.6% | 90.2% |
+
+On the held-out pages, recall rose from 76.1% to 79.5% and exact accuracy from 78.6% to 80.9%;
+start and end dates now come out in order (12 of 15 relationship checks, from 4). Precision fell,
+from 89.5% to 86.9%. Field by field, 10 answers got better and 2 worse, and both are years the engine reads as `year`, a type
+the labelling guide didn't list yet. A code review also caught a consent leak in a first version
+of the radio-answer rule ("Yes, please send me offers" under a neutral question); it was fixed
+before these numbers were taken. No sensitive field or honeypot was filled on any of the 75
+pages. **The 10-point gap between the tuned pages (92.9%) and the held-out ones (83.1%) is the number to watch.**
+
+Fixed, each by mechanism rather than by page, with fixtures `r07` and `r08`:
+
+- **Dates:** a date input with no recognizable words is a date, not unknown; a pair whose labels
+  end in from/to ("Period from", "Period to") is a start and an end; "Departure" after an arrival
+  ends the stay; split birth-date selects no longer tie between birth date and date; a select of
+  durations ("7 days") is not a date.
+- **Times:** selects and radio groups of clock times are times.
+- **Other people:** "Manager's name", "Name of host person" are full names, and an emergency
+  contact's, manager's or guardian's name, email and phone get a second identity instead of the
+  applicant's.
+- **Radio groups:** a section heading no longer gives radios a free-text type ("About you" → bio);
+  third-person "accepts" and "accepted" aren't consent, and an answer makes its group consent only
+  when it agrees to something ("Oui, notification reçue" doesn't). Notification settings are consent.
+- **Vocabulary and units:** bedrooms, bathrooms, subtotals, declared values, durations ("(days)",
+  "Years with…"), miles, summaries and headlines, symptoms, steps and reasons; a numbered select is no
+  longer a rating scale on its own.
+- **Look-alikes:** a version number isn't a phone, "Employee ID" isn't an employer, and promo,
+  coupon and offer codes have no type.
+- **Phones:** a French-language form gets a French number and a form with a US state select a US one.
+
 ## Confidence calibration
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.
