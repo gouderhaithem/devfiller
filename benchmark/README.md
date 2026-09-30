@@ -37,5 +37,10 @@ mean to accept, and say why in the commit.
 
 ## Adding a fixture
 
+The quickest way to add a real form: open it, open the DevFiller side panel and click **Export as
+test fixture**. The file keeps the form's structure and labels, never the values people typed, and
+labels each control with DevFiller's answer (or the type you set with **This field is**). Check
+every `data-expect` against the page, correct it, and save it in `fixtures/regressions/`.
+
 Every reported bug becomes a fixture in `fixtures/regressions/` before it's fixed. Label the
 truth a person would give, not what the engine does: see the [labelling guide](fixtures/README.md).

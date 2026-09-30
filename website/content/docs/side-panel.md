@@ -18,6 +18,11 @@ Select a field to:
 
 - **Save field rule**: give this field a fixed test value on this website. The rule targets that exact field and takes priority over everything else. Use **Fill again** to apply it.
 - **Exclude this field**: skip it on this website from now on.
+- **This field is**: tell DevFiller what the field holds when it guessed wrong, for example that "Nom du repère" is a title. The type is saved for this field on this website and wins over recognition, but it never unlocks a card, bank, code or consent field.
+
+## Export a form as a test fixture
+
+**Export as test fixture**, below the field list, downloads the page's forms as an HTML file: their structure and labels, each field marked with the type DevFiller gives it (or the one you set). Values people typed, hidden fields, scripts, images and the site's address are removed. Use it to report a form DevFiller gets wrong, or to add it to your own tests.
 
 Both appear in the options afterwards, under [Custom fields](/docs/custom-fields/) and [Excluded fields](/docs/excluded-fields/), where you can edit or delete them. If the website changes its markup, create the rule again.
 
