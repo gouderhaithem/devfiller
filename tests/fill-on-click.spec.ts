@@ -1,4 +1,5 @@
-import { test, expect, chromium } from '@playwright/test';
+import {launchExtension} from './helpers/extension';
+import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { mkdtemp, rm, cp, readFile, writeFile } from 'node:fs/promises';
@@ -15,7 +16,7 @@ test('by default the AI runs only when Fill is clicked',async()=>{
   const manifest=JSON.parse(await readFile(resolve(path,'manifest.json'),'utf8'));
   manifest.host_permissions.push('http://*/*','https://*/*');
   await writeFile(resolve(path,'manifest.json'),JSON.stringify(manifest));
-  const context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${path}`,`--load-extension=${path}`]});
+  const context=await launchExtension(profile,path);
   try {
     const id=createHash('sha256').update(path).digest('hex').slice(0,32).replace(/[0-9a-f]/g,c=>String.fromCharCode(97+parseInt(c,16)));
     const worker=context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');

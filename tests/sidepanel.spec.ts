@@ -1,5 +1,6 @@
+import {launchExtension} from './helpers/extension';
 import {attachPanel} from './helpers/native-panel';
-import {test,expect,chromium} from '@playwright/test';
+import {test,expect} from '@playwright/test';
 import {mkdtemp,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
@@ -8,7 +9,7 @@ test('native panel inspects, fills, edits rules, excludes, undoes, and follows n
   test.setTimeout(60000);
   const profile=await mkdtemp(resolve(tmpdir(),'formly-panel-test-'));
   const extension=resolve('dist');
-  const context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,args:['--enable-unsafe-extension-debugging',`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});
+  const context=await launchExtension(profile,extension);
   try{
     const worker=context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
     const id=worker.url().split('/')[2];
