@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateIdentities, generatePhones, generateValues, validateSettings, fields } from '../src/data';
 import { generateSamples } from '../src/samples';
 import { PLACES, WILAYAS, WILAYA_LIST_VERSION } from '../src/profiles/algeria';
+import { GENERATED_PLACES } from '../src/profiles/regions';
+import { COMMUNES } from '../src/profiles/algeria-communes';
 import { seededRandom } from '../src/rng';
 import { boundaryValues, invalidValues, mismatchedConfirmation, INVALID_VALUES } from '../src/testdata';
 import { fillPage, type FillRequest } from '../src/fill';
@@ -81,16 +83,25 @@ describe('regions', () => {
 });
 
 describe('Algeria profile data', () => {
-  it('lists the 58 wilayas in code order, each with a French and an Arabic name', () => {
-    expect(WILAYA_LIST_VERSION).toMatch(/58 wilayas/);
-    expect(WILAYAS).toHaveLength(58);
-    expect(WILAYAS.map(w => w.code)).toEqual(Array.from({ length: 58 }, (_, i) => String(i + 1).padStart(2, '0')));
+  it('lists the 69 wilayas of the 2026 law in code order, each with a French and an Arabic name', () => {
+    expect(WILAYA_LIST_VERSION).toMatch(/69 wilayas: Law 26-06/);
+    expect(WILAYAS).toHaveLength(69);
+    expect(WILAYAS.map(w => w.code)).toEqual(Array.from({ length: 69 }, (_, i) => String(i + 1).padStart(2, '0')));
+    expect(WILAYAS.slice(58).map(w => w.fr)).toEqual(['Aflou', 'Barika', 'El Kantara', 'Bir El Ater', 'El Aricha', 'Ksar Chellala', 'Aïn Oussara', 'Messaad', 'Ksar El Boukhari', 'Bou Saâda', 'El Abiodh Sidi Cheikh']);
     for (const w of WILAYAS) { expect(w.fr).toMatch(/\p{Script=Latin}/u); expect(w.ar).toMatch(/[؀-ۿ]/); }
     expect(WILAYAS[15]).toMatchObject({ code: '16', fr: 'Alger' });
   });
   it('gives each place the postal code of its wilaya', () => {
     for (const place of PLACES) expect(place.postalCode).toBe(`${place.wilaya}000`);
     expect(PLACES.find(p => p.wilaya === '16')).toMatchObject({ commune: { fr: 'Alger-Centre' }, daira: { fr: "Sidi M'Hamed" } });
+  });
+  it('generates any commune of wilayas 1 to 58 with its daira, from the imported dataset', () => {
+    expect(COMMUNES.length).toBeGreaterThan(1400);
+    expect(GENERATED_PLACES.length).toBeGreaterThan(1300);
+    expect(GENERATED_PLACES.every(place => Number(place.wilaya) <= 58 && place.postalCode === `${place.wilaya}000` && place.daira.fr && place.daira.ar)).toBe(true);
+    expect(GENERATED_PLACES.find(place => place.commune.fr === 'Bab El Oued')).toMatchObject({ wilaya: '16' });
+    const cities = new Set(Array.from({ length: 40 }, () => generateValues('fr', { region: 'dz' }).city));
+    expect(cities.size).toBeGreaterThan(20);
   });
 });
 

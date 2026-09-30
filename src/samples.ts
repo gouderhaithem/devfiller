@@ -23,6 +23,7 @@ const localized:Record<Locale,FieldSamples> = {
     notes:['Please contact me in the morning.','The team is ready to review the proposal.','We can discuss the details at our next meeting.','Please send a copy of the updated schedule.'],
     search:['design ideas','garden tools','local workshops','new books'],
     title:['Meadow project','Harbor launch','Garden workshop','Willow collection'],
+    material:['S235JR steel','S355J2 steel','304L stainless steel','6061-T6 aluminium','Galvanized steel'],
   },
   fr:{
     company:['Atelier du Cèdre','Studio Horizon','Maison des Idées','Jardin Créatif'],
@@ -38,6 +39,7 @@ const localized:Record<Locale,FieldSamples> = {
     notes:['Merci de me contacter le matin.','Notre équipe peut examiner la proposition.','Nous pouvons en parler lors de la prochaine réunion.','Merci de transmettre le planning mis à jour.'],
     search:['idées de création','outils de jardin','ateliers locaux','nouveaux livres'],
     title:['Projet Horizon','Atelier du Jardin','Collection Printemps','Rencontre Créative'],
+    material:['Acier S235JR','Acier S355J2','Inox 304L','Aluminium 6061-T6','Acier galvanisé'],
   },
   ar:{
     company:['استوديو الأرز','مختبر الأفكار','ورشة الزيتون','دار الإبداع'],
@@ -53,6 +55,7 @@ const localized:Record<Locale,FieldSamples> = {
     notes:['يرجى التواصل معي في الصباح.','الفريق مستعد لمراجعة المقترح.','يمكن مناقشة التفاصيل في الاجتماع المقبل.','يرجى إرسال نسخة من الجدول الجديد.'],
     search:['أفكار التصميم','أدوات الحديقة','ورشات محلية','كتب جديدة'],
     title:['مشروع الأفق','ورشة الحديقة','مجموعة الربيع','لقاء الإبداع'],
+    material:['فولاذ S235JR','فولاذ S355J2','فولاذ مقاوم للصدأ 304L','ألومنيوم 6061-T6'],
   },
 };
 export function generateSamples(locale:Locale):FieldSamples {

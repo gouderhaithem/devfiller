@@ -36,6 +36,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
   measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
     'longueur', 'largeur', 'hauteur', 'profondeur', 'épaisseur', 'diamètre', 'rayon', 'poids', 'poids unitaire', 'poids net', 'poids brut', 'masse', 'superficie', 'surface habitable', 'الطول', 'العرض', 'الارتفاع', 'العمق', 'السمك', 'القطر', 'الوزن', 'المساحة', 'الحجم'],
+  material: ['material', 'materials', 'raw material', 'steel grade', 'material grade', 'grade', 'alloy', 'matière', 'matériau', 'matière première', 'nuance', "nuance d'acier", 'alliage', 'المادة', 'نوع المادة'],
   reference: ['reference', 'ref', 'reference number', 'ref no', 'order number', 'order no', 'order id', 'order reference', 'work order', 'purchase order', 'po number', 'invoice number', 'invoice no', 'quote number',
     'sku', 'part number', 'part no', 'item code', 'product code', 'article code', 'ticket number', 'case number', 'file number', 'tracking number', 'batch number', 'lot number', 'serial number', 'delivery note',
     'référence', 'réf', 'numéro de commande', 'n° de commande', 'no de commande', 'numéro de facture', 'n° de facture', 'numéro de devis', 'n° de devis', 'bon de commande', 'bon de livraison', 'code article', 'numéro de dossier', 'n° de dossier', 'numéro de lot', 'numéro de série', 'n° de série',
@@ -57,7 +58,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
 
 // Words that name many things, so they only count on their own or with other evidence:
 // "Project name" is not a person's name, and "Delivery date" is only a date with type="date".
-export const GENERIC_WORDS: ReadonlySet<string> = new Set(['area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
+export const GENERIC_WORDS: ReadonlySet<string> = new Set(['grade', 'area', 'ref', 'mass', 'units', 'length', 'volume', 'weight', 'height', 'name', 'nom', 'date', 'time', 'heure', 'title', 'titre', 'service', 'score', 'details', 'login', 'region', 'الاسم', 'total', 'site', 'pass', 'about', 'note', 'arrival', 'arrivee', 'retour', 'position', 'cell', 'handle', 'discount', 'remise', 'motivation', 'org', 'fonction', 'poste', 'division', 'sector', 'secteur', 'cost', 'street', 'rue', 'building', 'floor', 'topic']);
 
 // Single words developers glue to others: userEmail → "useremail", billingCity → "billingcity".
 export const COMPOUND_WORDS: ReadonlySet<string> = new Set(['email', 'courriel', 'phone', 'mobile', 'telephone', 'address', 'adresse', 'city', 'ville', 'country', 'company', 'website', 'username', 'password', 'postcode', 'zipcode', 'birthday', 'firstname', 'lastname', 'surname', 'salary', 'quantity', 'price', 'amount', 'gender', 'nationality', 'department', 'message', 'subject', 'description']);
@@ -78,7 +79,7 @@ export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
-export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
+export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
 export const CONFIRMABLE_TYPES: ReadonlySet<FieldKey> = new Set(['email', 'password', 'phone', 'username']);
 export const CONFIRM_WORDS = ['confirm', 'confirmation', 'repeat', 're enter', 'retype', 'verify', 'again', 'confirmer', 'تاكيد', 'اعادة'];
 export const SEARCH_WORDS = ['search', 'recherche', 'rechercher', 'بحث', 'البحث'];

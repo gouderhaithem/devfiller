@@ -42,7 +42,7 @@ The benchmark in `benchmark/` measures every change, and the side panel shows ea
 | Gap | Example that goes wrong | Phase |
 | --- | --- | --- |
 | Form types are guessed from fields and words | A newsletter box with a "Sign up" button reads as a sign-up form | D follow-up |
-| The Algeria profile covers 20 chef-lieux | Communes and dairas outside those 20 aren't generated or recognized from option lists | E follow-up |
+| Algerian postal codes per commune | Generated addresses use the wilaya's main postal code (31000), not the commune's own | E follow-up |
 | No shadow DOM or iframe support | Web-component forms and embedded forms are skipped | F |
 | Filling very large forms | 1,000 fields classify in about 70 ms and fill in about 0.33 s | F |
 

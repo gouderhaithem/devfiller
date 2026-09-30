@@ -1,4 +1,4 @@
-import { fields } from '../data';
+import { fields } from '../fields';
 import type { ControlSnapshot, Detection, FieldReport } from '../panel-types';
 import type { Control, ControlRun, FillContext } from './types';
 import { PASSWORD } from './dictionary';

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Livraison — wilaya et commune</title></head>
+<body>
+<main>
+  <h1>Adresse de livraison</h1>
+  <form action="/livraison-dz" method="post" data-form-type="checkout">
+    <p><label for="nom">Nom complet</label><input id="nom" name="nom" data-expect="fullName"></p>
+    <p><label for="w">Wilaya</label><select id="w" name="wilaya" data-expect="state">
+      <option value="">Choisir</option><option value="16">16 - Alger</option><option value="31">31 - Oran</option><option value="59">59 - Aflou</option><option value="60">60 - Barika</option><option value="68">68 - Bou Saâda</option></select></p>
+    <!-- The commune list is reloaded for the chosen wilaya; here, the communes of Alger. -->
+    <p><select name="c2" data-expect="city"><option value="">—</option><option>Bab El Oued</option><option>Hydra</option><option>El Biar</option><option>Kouba</option><option>Bir Mourad Raïs</option><option>Hussein Dey</option></select></p>
+    <p><label for="d">Daïra</label><input id="d" name="daira" data-expect="district"></p>
+    <p><label for="a">Adresse</label><input id="a" name="adresse" data-expect="address"></p>
+    <p><label for="t">Téléphone</label><input id="t" name="tel" type="tel" placeholder="05XX XX XX XX" data-expect="phone"></p>
+    <p><label for="m">Matière</label><select id="m" name="matiere" data-expect="material"><option>S235JR</option><option>S355J2</option><option>Inox 304L</option></select></p>
+    <button type="submit">Commander</button>
+  </form>
+</main>
+</body>
+</html>

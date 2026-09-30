@@ -2,10 +2,12 @@ import type { Random } from '../rng';
 
 // Algeria profile data, kept apart from the generator so it can be reviewed and updated on its own.
 //
-// Wilayas: the 58 wilayas of Law 84-09 of 4 February 1984 on the territorial organisation of the
-// country, as amended by Law 19-12 of 11 December 2019, which promoted ten delegated wilayas
-// (codes 49 to 58). Check for a later reform before relying on this list for anything official.
-export const WILAYA_LIST_VERSION = '58 wilayas: Law 84-09 of 4 February 1984, as amended by Law 19-12 of 11 December 2019';
+// Wilayas: the 69 wilayas of Law 26-06 of 4 April 2026 (JO n° 25 of 5 April 2026), which amended
+// Law 84-09 of 4 February 1984 and added eleven wilayas (codes 59 to 69) to the 58 of Law 19-12 of
+// 11 December 2019. The numbering of 59 to 69 follows the law; one outlet published a different
+// order when the reform was announced in November 2025. Services move to the new wilayas until
+// 31 December 2026, so forms may still list 58.
+export const WILAYA_LIST_VERSION = '69 wilayas: Law 26-06 of 4 April 2026 (JO n° 25 of 5 April 2026)';
 
 export interface Wilaya { code: string; fr: string; ar: string }
 export const WILAYAS: readonly Wilaya[] = ([
@@ -18,12 +20,15 @@ export const WILAYAS: readonly Wilaya[] = ([
   ['Tipaza', 'تيبازة'], ['Mila', 'ميلة'], ['Aïn Defla', 'عين الدفلى'], ['Naâma', 'النعامة'], ['Aïn Témouchent', 'عين تموشنت'], ['Ghardaïa', 'غرداية'], ['Relizane', 'غليزان'],
   ['Timimoun', 'تيميمون'], ['Bordj Badji Mokhtar', 'برج باجي مختار'], ['Ouled Djellal', 'أولاد جلال'], ['Béni Abbès', 'بني عباس'], ['In Salah', 'عين صالح'],
   ['In Guezzam', 'عين قزام'], ['Touggourt', 'تقرت'], ['Djanet', 'جانت'], ["El M'Ghair", 'المغير'], ['El Meniaa', 'المنيعة'],
+  ['Aflou', 'أفلو'], ['Barika', 'بريكة'], ['El Kantara', 'القنطرة'], ['Bir El Ater', 'بئر العاتر'], ['El Aricha', 'العريشة'], ['Ksar Chellala', 'قصر الشلالة'],
+  ['Aïn Oussara', 'عين وسارة'], ['Messaad', 'مسعد'], ['Ksar El Boukhari', 'قصر البخاري'], ['Bou Saâda', 'بوسعادة'], ['El Abiodh Sidi Cheikh', 'الأبيض سيدي الشيخ'],
 ] as const).map(([fr, ar], i) => ({ code: String(i + 1).padStart(2, '0'), fr, ar }));
 
-// The chef-lieu of 20 wilayas: its commune, its daira and the postal code of Algérie Poste's
-// scheme, the wilaya code followed by 000. The chef-lieu commune and daira share the wilaya's
-// name except in Algiers, where the commune is Alger-Centre in the daira of Sidi M'Hamed.
+// A commune with its daira and wilaya.
 export interface Place { wilaya: string; commune: { fr: string; ar: string }; daira: { fr: string; ar: string }; postalCode: string }
+
+// The chef-lieu of 20 wilayas, kept as a small, hand-checked sample. The chef-lieu commune and
+// daira share the wilaya's name except in Algiers (Alger-Centre, in the daira of Sidi M'Hamed).
 const CHEFS_LIEUX = ['02', '05', '06', '07', '09', '13', '15', '16', '17', '19', '21', '23', '25', '26', '27', '30', '31', '35', '42', '47'];
 export const PLACES: readonly Place[] = CHEFS_LIEUX.map(code => {
   const wilaya = WILAYAS.find(entry => entry.code === code)!;

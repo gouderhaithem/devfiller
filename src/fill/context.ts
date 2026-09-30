@@ -16,6 +16,7 @@ const NEW_WORDS = words(['new', 'nouveau', 'nouvelle', 'الجديدة', 'الج
 const FROM_WORDS = words(['from', 'du', 'de', 'start', 'begin', 'depuis', 'من']);
 const TO_WORDS = words(['to', 'au', 'until', 'end', 'jusqu au', 'الى', 'حتى']);
 const DEPARTURE_WORDS = words(['departure', 'depart', 'départ', 'leaving', 'المغادرة']);
+const SPECIFY_WORDS = words(['specify', 'please specify', 'other', 'précisez', 'préciser', 'autre', 'autres', 'حدد', 'أخرى']);
 const NAME_TYPES: ReadonlySet<string> = new Set(['fullName', 'firstName', 'lastName']);
 const ADDRESS_TYPES: ReadonlySet<string> = new Set(['address', 'address2', 'city', 'postalCode', 'state', 'country']);
 // Fields that usually follow each other. A fitting neighbour raises a weak guess.
@@ -134,6 +135,20 @@ function cardSection(pass: Pass, all: readonly Control[]) {
   }
 }
 
+// "Grade — précisez", "Other (please specify)": a text field that completes the choice just before
+// it, and shares a word of its label, holds the same kind of value.
+function specifyCompanions(pass: Pass) {
+  pass.members.forEach((el, i) => {
+    if (i === 0 || !(el instanceof HTMLInputElement) || !['text', ''].includes(el.type) || !mentions(pass.signals(el), SPECIFY_WORDS)) return;
+    const choice = pass.members[i - 1];
+    const found = get(pass, choice);
+    if (!(choice instanceof HTMLSelectElement || isChoice(choice)) || found.type === 'unknown' || isSensitive(found.type) || get(pass, el).confidence >= THRESHOLDS.medium) return;
+    const own = new Set(visibleText(pass.signals(el)).split(' ').filter(word => word.length > 2 && !SPECIFY_WORDS.includes(word)));
+    if (!visibleText(pass.signals(choice)).split(' ').some(word => own.has(word))) return;
+    retype(pass, el, found.type as FieldKey, undefined, evidence(`completes ${quote(choice)}`, 0.7));
+  });
+}
+
 // Weak guesses that fit their neighbours ("Last name" after "First name") gain confidence.
 function fieldOrder(pass: Pass) {
   pass.members.forEach((el, i) => {
@@ -205,6 +220,7 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     passwordRoles(pass);
     dateRoles(pass);
     cardSection(pass, members);
+    specifyCompanions(pass);
     fieldOrder(pass);
     if (!form) continue;
     // A form is judged by what the user can see: hidden fields and hidden forms don't count.

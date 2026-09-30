@@ -21,8 +21,8 @@
       <div class="field"><label for=":r8:">Référence*</label><input id=":r8:" name="reperes[0][reference]" type="text" maxlength="3" required data-expect="reference" data-value-pattern="^[A-Z0-9]{1,3}$"></div>
       <div class="field"><label for=":r9:">Type</label><select id=":r9:" name="reperes[0][type]" data-expect="unknown"><option>Poutre</option><option>Poteau</option><option>Platine</option></select></div>
       <div class="field"><label for=":ra:">Couleur</label><select id=":ra:" name="reperes[0][couleur]" data-expect="color"><option>ZAM</option><option>RAL 7016</option><option>RAL 9010</option><option>Galvanisé</option></select></div>
-      <div class="field"><label for=":rb:">Grade</label><select id=":rb:" name="reperes[0][grade]" data-expect="unknown"><option>S235</option><option>S355</option><option>Autre</option></select></div>
-      <div class="field"><label for=":rc:">Grade — précisez*</label><input id=":rc:" name="reperes[0][grade_autre]" type="text" data-expect="unknown"></div>
+      <div class="field"><label for=":rb:">Grade</label><select id=":rb:" name="reperes[0][grade]" data-expect="material"><option>S235</option><option>S355</option><option>Autre</option></select></div>
+      <div class="field"><label for=":rc:">Grade — précisez*</label><input id=":rc:" name="reperes[0][grade_autre]" type="text" data-expect="material"></div>
       <div class="field"><label for=":rd:">Priorité</label><select id=":rd:" name="reperes[0][priorite]" data-expect="unknown"><option>Basse</option><option>Normale</option><option>Haute</option></select></div>
       <div class="field"><label for=":re:">Longueur (mm)</label><input id=":re:" name="reperes[0][longueur]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d{2,5}(,\d+)?$"></div>
       <div class="field"><label for=":rf:">Largeur (mm)</label><input id=":rf:" name="reperes[0][largeur]" type="text" inputmode="decimal" data-expect="measurement" data-value-pattern="^\d{2,5}(,\d+)?$"></div>

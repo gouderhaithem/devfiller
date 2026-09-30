@@ -1,5 +1,16 @@
 import type { Random } from '../rng';
-import { mobileNumber, PLACES, WILAYAS } from './algeria';
+import { mobileNumber, WILAYAS, type Place } from './algeria';
+import { COMMUNES } from './algeria-communes';
+
+// Generated addresses use every commune of wilayas 1 to 58, with the wilaya's main postal code (the
+// wilaya code followed by 000): postal codes in the eleven new wilayas are still being settled.
+// Kept here, not in the engine, because only data generation needs it.
+export const GENERATED_PLACES: readonly Place[] = COMMUNES.filter(([code]) => code <= 58).map(([code, fr, ar, dairaFr, dairaAr]) => {
+  const wilaya = String(code).padStart(2, '0');
+  return { wilaya, commune: { fr, ar }, daira: { fr: dairaFr, ar: dairaAr }, postalCode: `${wilaya}000` };
+});
+
+
 
 export type Region = 'us' | 'fr' | 'dz';
 export const REGIONS: readonly Region[] = ['us', 'fr', 'dz'];
@@ -29,13 +40,19 @@ const fr: Location[] = [
   { city: 'Toulouse', state: 'Occitanie', postalCode: '31000', district: 'Capitole', country: 'France', nationality: 'French' },
 ];
 
-// Algerian places in French, or in Arabic when the data language is Arabic.
+// Algerian communes in French, or in Arabic when the data language is Arabic. Built once.
+const algerianPlaces = new Map<boolean, Location[]>();
 function algeria(arabic: boolean): Location[] {
-  return PLACES.map(place => {
-    const wilaya = WILAYAS.find(entry => entry.code === place.wilaya)!;
-    const pick = (name: { fr: string; ar: string }) => arabic ? name.ar : name.fr;
-    return { city: pick(place.commune), state: pick(wilaya), postalCode: place.postalCode, district: pick(place.daira), country: 'Algeria', nationality: 'Algerian' };
-  });
+  let places = algerianPlaces.get(arabic);
+  if (!places) {
+    places = GENERATED_PLACES.map(place => {
+      const wilaya = WILAYAS.find(entry => entry.code === place.wilaya)!;
+      const pick = (name: { fr: string; ar: string }) => arabic ? name.ar : name.fr;
+      return { city: pick(place.commune), state: pick(wilaya), postalCode: place.postalCode, district: pick(place.daira), country: 'Algeria', nationality: 'Algerian' };
+    });
+    algerianPlaces.set(arabic, places);
+  }
+  return places;
 }
 
 export function locationsFor(region: Region, arabic: boolean): readonly Location[] {

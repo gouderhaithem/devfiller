@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Check, ChevronRight, CircleMinus, Download, ExternalLink, Eye, ListFilter, PanelRight, RefreshCw, Settings2, ShieldCheck, Sparkles, Tags, Undo2, X } from 'lucide-react';
-import { fields as FIELD_TYPES } from './data';
+import { fields as FIELD_TYPES } from './fields';
 import { isExtension } from './storage';
 import type { Detection, FieldReport, PanelReply } from './panel-types';
 import './sidepanel.css';

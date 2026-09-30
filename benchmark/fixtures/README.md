@@ -33,7 +33,7 @@ classification with that answer, so **label the truth, not what the engine does 
 
 ## Types
 
-Use one of the 45 generator types:
+Use one of the 46 generator types:
 
 | Type | Meaning |
 | --- | --- |
@@ -51,6 +51,7 @@ Use one of the 45 generator types:
 | `website` | Website, homepage, portfolio or profile URL |
 | `bio`, `description`, `message`, `subject`, `notes` | Free text |
 | `quantity`, `price`, `amount`, `salary`, `percentage`, `rating` | Numbers |
+| `material` | A material or grade: steel grade (S235JR), stainless (304L), alloy, raw material |
 | `measurement` | A physical quantity: length, width, height, thickness, weight, diameter, surface, volume |
 | `reference` | An identifier of a record: order, invoice, reference, SKU, purchase order, ticket, part, lot or serial number. Personal and legal IDs (passport, national ID, VAT, tax, licence or registration numbers) and promo or referral codes are `unknown` |
 | `date` | A date with no more specific role |

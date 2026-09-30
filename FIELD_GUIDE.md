@@ -1,6 +1,6 @@
 # Fields, labels, and types
 
-DevFiller recognizes these 45 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
+DevFiller recognizes these 46 field types. The examples are its built-in aliases, not a promise that every website uses a recognizable label. Custom rules extend the catalog and always win. Matching ignores case, accents, Arabic diacritics and how the name is written, so `phone_number`, `phoneNumber`, `PHONE-NUMBER` and `numéro de téléphone` are all the same signal.
 
 | Field | Typical native control | Recognized label examples |
 | --- | --- | --- |
@@ -35,6 +35,7 @@ DevFiller recognizes these 45 field types. The examples are its built-in aliases
 | Subject | text | subject, topic, sujet, objet, الموضوع, موضوع |
 | Notes | textarea / text | notes, note, order notes, special requests, instructions, delivery instructions, remarks, remarques, remarque, observations, ملاحظات |
 | Measurement | text | length, width, height, depth, thickness, diameter, radius, weight, unit weight, net weight, gross weight, mass, area, surface area, volume, dimensions, longueur, largeur, hauteur, profondeur, épaisseur, diamètre, rayon, poids, poids unitaire, poids net, poids brut, masse, superficie, surface habitable, الطول, العرض, الارتفاع, العمق, السمك, القطر, الوزن, المساحة, الحجم |
+| Material / grade | text | material, materials, raw material, steel grade, material grade, grade, alloy, matière, matériau, matière première, nuance, nuance d'acier, alliage, المادة, نوع المادة |
 | Reference / order number | text | reference, ref, reference number, ref no, order number, order no, order id, order reference, work order, purchase order, po number, invoice number, invoice no, quote number, sku, part number, part no, item code, product code, article code, ticket number, case number, file number, tracking number, batch number, lot number, serial number, delivery note, référence, réf, numéro de commande, n° de commande, no de commande, numéro de facture, n° de facture, numéro de devis, n° de devis, bon de commande, bon de livraison, code article, numéro de dossier, n° de dossier, numéro de lot, numéro de série, n° de série, رقم الطلب, المرجع, رقم المرجع, رقم الفاتورة, رقم الملف |
 | Quantity | number / range | quantity, qty, number of, nombre de, pieces, pcs, units, pièces, unités, number of guests, guests, passengers, attendees, number of attendees, number of people, travellers, travelers, pax, quantité, nombre de personnes, nombre d'exemplaires, exemplaires, nombre de participants, الكمية, عدد الأشخاص, عدد المسافرين |
 | Price | number / range | price, unit price, cost, prix, prix unitaire, tarif, coût, السعر, الثمن |
@@ -76,7 +77,7 @@ DevFiller never guesses silently. For every field it collects evidence, scores e
 
 After each field is scored on its own, DevFiller reads each form as a whole:
 
-- **Answers count as evidence.** A select or radio group whose options are mostly countries, wilayas (the 58 of the 2019 reform), US states, French or Canadian regions, nationalities or genders is recognized from them, with or without a label. Day, month and year selects under a "Date of birth" legend are filled with the parts of one date.
+- **Answers count as evidence.** A select or radio group whose options are mostly countries, wilayas (the 69 of Law 26-06 of 2026), Algerian communes, US states, French or Canadian regions, nationalities, genders or materials (S235JR, 304L, 6061-T6) is recognized from them, with or without a label. Day, month and year selects under a "Date of birth" legend are filled with the parts of one date.
 - **Matching answers.** Radio groups and selects pick the option that matches the generated value: "Femme", "Féminin" or "أنثى" for a female identity, "16 - Alger" for Algiers.
 - **Confirmations.** A field that says "Confirm", "Repeat" or "Retype" repeats the email, password, phone or username just before it, with exactly the value written there.
 - **Passwords.** On a change-password form, the current password gets a different value from the new one and its confirmation.
@@ -107,7 +108,7 @@ Accuracy is measured, not guessed: see the [benchmark results](https://github.co
 
 | Area | Suggested additions |
 | --- | --- |
-| Regional data | Every Algerian commune and daira, French departments, more countries |
+| Regional data | Algerian postal codes per commune (from an Algérie Poste source), French departments, more countries |
 | Identity | Name prefixes/suffixes, aliases, pronouns, localized nationality choices |
 | Business | SKU, product name, order reference, invoice reference, tax fixtures, currency, discount, inventory count |
 | Travel | Departure/arrival, destination, booking reference, passenger count, duration |

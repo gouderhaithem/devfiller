@@ -1,6 +1,7 @@
 import type { FieldKey } from '../data';
 import { normalize } from './normalize';
 import { WILAYAS } from '../profiles/algeria';
+import { COMMUNE_NAMES as COMMUNE_LIST } from '../profiles/algeria-commune-names';
 
 // What a list of options says about its field. A select or radio group whose answers are mostly
 // country names is a country, whatever its label says.
@@ -76,9 +77,17 @@ export const STATE_SPELLINGS: Readonly<Record<string, readonly string[]>> = {
   Texas: ['Texas', 'TX'], Illinois: ['Illinois', 'IL'], Washington: ['Washington', 'WA'],
 };
 
+// Steel, stainless and aluminium grades and common materials. "Other" is left out: it ends many lists.
+const MATERIALS = ['S185', 'S235', 'S235JR', 'S235J2', 'S275', 'S275JR', 'S275J2', 'S355', 'S355JR', 'S355J2', 'S355K2', 'S420', 'S460', 'E24', 'E36', '304', '304L', '316', '316L', '430', '1.4301', '1.4404', '6060', '6061', '6061-T6', '6063', '7075', '5083', 'Acier', 'Steel', 'Inox', 'Stainless steel', 'Aluminium', 'Aluminum', 'Galvanisé', 'Galvanized', 'Cuivre', 'Copper', 'Laiton', 'Brass', 'Fonte', 'Cast iron', 'Titane', 'Titanium', 'Bronze', 'Zinc', 'PVC', 'PEHD', 'HDPE', 'Polypropylène', 'Polypropylene', 'Bois', 'Wood', 'فولاذ', 'ألومنيوم', 'نحاس'];
+
 const index = (words: readonly string[]) => new Set(words.map(normalize));
+// Every chef-lieu shares its wilaya's name, so communes that are also wilaya names are left out of
+// the city list: otherwise every wilaya select would look like a city select too.
+const WILAYA_KEYS = index(WILAYA_NAMES);
+const COMMUNE_NAMES = COMMUNE_LIST.split('|').filter(name => !WILAYA_KEYS.has(normalize(name)));
 export const OPTION_LISTS: ReadonlyArray<readonly [FieldKey, ReadonlySet<string>]> = [
   ['country', index(COUNTRIES)], ['nationality', index(NATIONALITIES)], ['state', index([...WILAYA_NAMES, ...REGION_NAMES])], ['gender', index(GENDERS)],
+  ['city', index(COMMUNE_NAMES)], ['material', index(MATERIALS)],
 ];
 // Recognizes a month list by any of these names, full or abbreviated ("janv.", "Sept").
 export const MONTH_SET: ReadonlySet<string> = new Set([...index(MONTHS), ...MONTH_NAMES.flatMap(names => [...names])]);

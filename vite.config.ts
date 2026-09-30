@@ -9,7 +9,7 @@ function fillEngine(): Plugin {
     name: 'devfiller-fill-engine',
     apply: 'build',
     async closeBundle() {
-      await build({ entryPoints: ['src/fill/bundle.ts'], outfile: 'dist/fill-engine.js', bundle: true, format: 'iife', target: 'chrome118', legalComments: 'none', logLevel: 'warning' });
+      await build({ entryPoints: ['src/fill/bundle.ts'], outfile: 'dist/fill-engine.js', bundle: true, format: 'iife', target: 'chrome118', minify: true, charset: 'utf8', legalComments: 'none', logLevel: 'warning' });
     },
   };
 }

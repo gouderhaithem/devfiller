@@ -31,7 +31,7 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Side panel** | Inspect filled/skipped fields beside the website, highlight a control, and save a custom value or exclusion. |
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
-| **45 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
+| **46 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
 | **English, French & Arabic** | Recognize labels in all three languages and choose a language for generated data. |
 | **Custom values** | Map your own labels to exact test values, such as `Project code` → `PRJ-001`. |
 | **Field exclusions** | Protect fields by label or CSS selector, optionally scoped to a website. Search and navigation controls are skipped by default. |
@@ -158,6 +158,7 @@ Google responses are simulated in automated tests. Live Gemini access, the nativ
 
 - [User guide](docs/USER_GUIDE.md): settings, custom rules, exclusions, cache behavior, and practical limits.
 - [Field guide](FIELD_GUIDE.md): supported categories, aliases, and coverage ideas.
+- [Third-party notices](THIRD_PARTY_NOTICES.md): the Algerian communes dataset and its licence.
 - [Implementation notes](PLAN.md): project evolution and future ideas.
 - [Brand assets](docs/brand/README.md): icon source and rebuild instructions.
 - [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications ([ready-to-paste listing](docs/store/LISTING.md)). Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
