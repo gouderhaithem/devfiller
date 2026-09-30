@@ -14,9 +14,15 @@ const source = process.argv[2];
 if (!source) { console.error('Usage: node scripts/import-algeria-communes.mjs path/to/communes.json'); process.exit(1); }
 const raw = JSON.parse(readFileSync(source, 'utf8'));
 const list = Array.isArray(raw) ? raw : raw.communes ?? Object.values(raw);
-const clean = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+// NFKC turns the Arabic presentation forms some entries use (ﷲ, ﻻ, ﺳ…) back into ordinary letters, so
+// names match what forms write; invisible direction marks are dropped.
+const clean = text => String(text ?? '').normalize('NFKC').replace(/[\u200e\u200f\u202a-\u202e]/g, '').replace(/\s+/g, ' ').trim();
+// Arabic names the dataset gets wrong: a Kabyle spelling with a Persian letter, and two spellings in
+// one field. Keyed by wilaya code and French name.
+const ARABIC_FIXES = { '34|Ouled Sidi Brahim': 'أولاد سيدي إبراهيم', '44|Ain Defla': 'عين الدفلى' };
 const rows = list
   .map(c => [Number(c.wilaya_code), clean(c.name), clean(c.name_ar), clean(c.daira), clean(c.daira_ar)])
+  .map(([code, name, ar, daira, dairaAr]) => [code, name, ARABIC_FIXES[`${code}|${name}`] ?? ar, daira, dairaAr])
   .filter(([code, name, ar, daira, dairaAr]) => code >= 1 && code <= 69 && name && ar && daira && dairaAr)
   .sort((a, b) => a[0] - b[0] || a[1].localeCompare(b[1]));
 const skipped = list.length - rows.length;

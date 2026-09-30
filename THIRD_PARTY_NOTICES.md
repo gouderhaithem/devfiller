@@ -2,7 +2,7 @@
 
 ## Algeria administrative divisions
 
-`src/profiles/algeria-communes.ts` is generated from [algeria-wilayas-communes](https://github.com/me-yasserzaouag/algeria-wilayas-communes) by Yasser Zaouag, which follows JO n° 25 of 5 April 2026 (Law 26-06 of 4 April 2026). Only commune, daira and wilaya names are used.
+`src/profiles/algeria-communes.ts` is generated from [algeria-wilayas-communes](https://github.com/me-yasserzaouag/algeria-wilayas-communes) by Yasser Zaouag, which follows JO n° 25 of 5 April 2026 (Law 26-06 of 4 April 2026). Only commune, daira and wilaya names are used. Names are Unicode-normalized (NFKC, direction marks removed), and two Arabic names are corrected; see `scripts/import-algeria-communes.mjs`.
 
 ```
 MIT License

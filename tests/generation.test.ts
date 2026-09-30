@@ -54,6 +54,11 @@ describe('regions', () => {
       else expect(v.state).toMatch(/^[\p{Script=Latin}' -]+$/u);
     }
   });
+  it('writes every commune and daira in ordinary Arabic letters, as forms do', () => {
+    // No presentation forms (ﷲ, ﻻ) or invisible direction marks, which never match a form's options.
+    const odd = COMMUNES.flatMap(([, , commune, , daira]) => [commune, daira]).filter(name => !/^[؀-ۿ\s]+$/.test(name));
+    expect(odd).toEqual([]);
+  });
   it('writes Algerian names in Arabic script for Arabic and Latin script otherwise', () => {
     expect(generateIdentities('ar', 'dz')[0].firstName).toBe('أمين');
     expect(generateIdentities('fr', 'dz')[0]).toMatchObject({ firstName: 'Amine', lastName: 'Bensalah', username: 'amine.bensalah' });
