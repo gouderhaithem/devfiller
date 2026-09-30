@@ -15,7 +15,7 @@ function Welcome() {
   const sample=round<0?null:examples[round%examples.length];
   return <div className="welcome-shell">
     <header className="welcome-header">
-      <a className="welcome-brand" href="./welcome.html" aria-label="DevFiller welcome"><img src="./icons/icon-128.png" alt="" width="42" height="42"/>devfiller<span>YOUR FORM, FILLED.</span></a>
+      <a className="welcome-brand" href="./welcome.html" aria-label="DevFiller welcome"><img src="./icons/icon-128.png" alt="" width="42" height="42"/><strong className="wordmark">Dev<b className="wordmark-accent">Filler</b></strong><span>YOUR FORM, FILLED.</span></a>
       <a className="settings-link" href="./index.html">Open settings <ArrowUpRight size={16}/></a>
     </header>
     <main>

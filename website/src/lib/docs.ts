@@ -71,7 +71,8 @@ function applyStoreLink(markdown: string) {
 
 /** Reads a page's Markdown at build time, dropping its own H1 because the layout renders the title. */
 export async function loadDoc(page: DocPage) {
-  let markdown = await readFile(path.join(repoRoot, page.source), "utf8");
+  // Only runs while pages prerender (unknown slugs 404), so the server build needn't trace these files.
+  let markdown = await readFile(path.join(/*turbopackIgnore: true*/ repoRoot, page.source), "utf8");
   if (page.cutAt) markdown = markdown.split(page.cutAt)[0];
   return applyStoreLink(markdown.replace(/^# .*\n+/, ""));
 }

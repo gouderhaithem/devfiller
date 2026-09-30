@@ -15,6 +15,7 @@ const groups = [
     title: "Project",
     links: [
       { href: site.repo, label: "Source code" },
+      { href: "/support/", label: "Contact support" },
       { href: site.issues, label: "Report an issue" },
       { href: "/privacy/", label: "Privacy policy" },
     ],

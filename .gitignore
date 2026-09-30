@@ -18,3 +18,4 @@ release/
 
 # Benchmark output (the baseline is committed)
 benchmark/results/
+docs/store/listing.html
