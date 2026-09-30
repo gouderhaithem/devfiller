@@ -62,6 +62,10 @@ Website authors write the field labels and placeholders, so they may mention som
 - Turn off AI or choose **Remove saved key** in Options to stop all third-party requests and clear cached suggestions.
 - Uninstall DevFiller to delete everything it stored.
 
+## The website's support form
+
+The extension never uses this form. If you write in through <https://www.devfiller.com/support/>, your name, email address, topic, message and the optional page address are sent by email to the maintainer through [Resend](https://resend.com), an email delivery service, so the maintainer can reply. The website doesn't store the message. The emails are kept only as long as needed to answer you, and you can ask for yours to be deleted.
+
 ## Changes and contact
 
-If this policy changes, the updated version will be published at this address with a new date. For questions, open an issue at <https://github.com/gouderhaithem/form-filler/issues>.
+If this policy changes, the updated version will be published at this address with a new date. For questions, use the [support form](https://www.devfiller.com/support/) or open an issue at <https://github.com/gouderhaithem/form-filler/issues>.

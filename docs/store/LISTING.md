@@ -73,7 +73,7 @@ No account, no DevFiller server, no analytics. Settings stay in your browser.
 **Small promo tile:** `docs/store/promo-small-440x280.jpg`
 **Marquee promo tile:** `docs/store/promo-marquee-1400x560.jpg`
 **Homepage URL:** `https://www.devfiller.com`
-**Support URL:** `https://github.com/gouderhaithem/form-filler/issues`
+**Support URL:** `https://www.devfiller.com/support/`
 **Official URL:** leave as None until www.devfiller.com is verified in Google Search Console.
 **Mature content:** No
 

@@ -5,6 +5,7 @@ import { installHref, installLabel, site } from "@/lib/site";
 const links = [
   { href: "/docs/", label: "Docs" },
   { href: "/#roadmap", label: "Roadmap" },
+  { href: "/support/", label: "Support" },
   { href: "/privacy/", label: "Privacy" },
   { href: site.repo, label: "GitHub" },
 ];
