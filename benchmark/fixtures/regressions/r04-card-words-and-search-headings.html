@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: passport expiry, identity cards and a "Search flights" heading</title></head>
+<body>
+<main>
+  <!-- Found by the Form Lab held-out pages on 30 September 2026. "Passport expiry" was read as a
+       card expiry, which then made the whole passenger card skipped; a "Search flights" legend
+       pushed every field in the form down to unknown. -->
+  <form action="/flights" method="post" data-form-type="booking">
+    <fieldset>
+      <legend>Search flights</legend>
+      <label for="depart">Departure date</label><input id="depart" name="depart_date" type="date" data-expect="startDate">
+      <label for="ret">Return date</label><input id="ret" name="return_date" type="date" data-expect="endDate" data-after="#depart">
+      <label for="pax">Passengers</label><input id="pax" name="passenger_count" type="number" min="1" max="9" data-expect="quantity">
+    </fieldset>
+    <fieldset>
+      <legend>Passenger 1</legend>
+      <div class="grid">
+        <div><label for="fn">First name</label><input id="fn" name="passengers[0][first_name]" autocomplete="section-pax1 given-name" data-expect="firstName"></div>
+        <div><label for="ln">Last name</label><input id="ln" name="passengers[0][last_name]" autocomplete="section-pax1 family-name" data-expect="lastName"></div>
+        <div><label for="dob">Date of birth</label><input id="dob" name="passengers[0][dob]" type="date" autocomplete="section-pax1 bday" data-expect="birthDate"></div>
+        <div><label for="pp">Passport number</label><input id="pp" name="passengers[0][passport_number]" data-expect="unknown"></div>
+        <div><label for="pexp">Passport expiry</label><input id="pexp" name="passengers[0][passport_expiry]" type="date" data-expect="date"></div>
+      </div>
+    </fieldset>
+    <button type="submit">Continue</button>
+  </form>
+  <form action="/etat-civil" method="post" lang="fr" data-form-type="other">
+    <div class="grid">
+      <div><label for="cni">Numéro de carte d'identité</label><input id="cni" name="numero_carte_identite" inputmode="numeric" maxlength="9" data-expect="unknown"></div>
+      <div><label for="deliv">Date de délivrance</label><input id="deliv" name="date_delivrance" type="date" data-expect="date"></div>
+      <div><label for="cert">Certification expiry</label><input id="cert" name="certification_expiry" type="date" data-expect="date"></div>
+    </div>
+    <button type="submit">Envoyer</button>
+  </form>
+</main>
+</body>
+</html>

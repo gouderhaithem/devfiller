@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: guest counts, money, title-only fields and short codes</title></head>
+<body>
+<main>
+  <!-- Found by the Form Lab held-out pages on 30 September 2026: counts and money had no alias,
+       "q_a" read as a search box, a title was the only name a field had, a two-letter country
+       code got "Un" and a URL slug got a website. -->
+  <form action="/book" method="post" data-form-type="booking">
+    <label for="ci">Check-in</label><input id="ci" name="check_in" type="date" data-expect="startDate">
+    <label for="co">Check-out</label><input id="co" name="check_out" type="date" data-expect="endDate" data-after="#ci">
+    <label for="adults">Adults</label><input id="adults" name="adults" type="number" min="1" max="10" data-expect="quantity">
+    <label for="children">Children</label><input id="children" name="children" type="number" min="0" max="8" data-expect="quantity">
+    <label for="rooms">Rooms</label><input id="rooms" name="rooms" type="number" min="1" max="5" data-expect="quantity">
+    <button type="submit">Book</button>
+  </form>
+  <form action="/loan" method="post" data-form-type="other">
+    <label for="income">Monthly income</label><input id="income" name="monthly_income" type="number" min="0" step="0.01" data-expect="amount">
+    <label for="expenses">Monthly expenses</label><input id="expenses" name="monthly_expenses" type="number" min="0" step="0.01" data-expect="amount">
+    <label for="down">Down payment</label><input id="down" name="down_payment" type="number" min="0" step="100" data-expect="amount">
+    <button type="submit">Apply</button>
+  </form>
+  <form action="/quick" method="post" data-form-type="other">
+    <input name="q_a" title="Full name" data-expect="fullName">
+    <input name="q_d" title="Birth date (DD/MM/YYYY)" data-expect="birthDate" data-value-pattern="^\d{2}/\d{2}/\d{4}$">
+    <label for="cc">Country code</label><input id="cc" name="country_code" pattern="^[A-Z]{2}$" minlength="2" maxlength="2" data-expect="country" data-value-pattern="^[A-Z]{2}$">
+    <label for="slug">URL slug</label><input id="slug" name="product[slug]" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="insulated-water-bottle-750ml" data-expect="unknown">
+    <button type="submit">Save</button>
+  </form>
+</main>
+</body>
+</html>

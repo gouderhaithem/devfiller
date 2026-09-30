@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: rating scales, questions about the person and declarations</title></head>
+<body>
+<main>
+  <!-- Found by the Form Lab held-out pages on 30 September 2026. "How much do you agree" made a
+       Likert scale a consent question, "authorized to work", "sponsorship" and medical
+       "conditions" were read as consent, while a newsletter select and declarations under a plain
+       heading were filled. -->
+  <form action="/survey" method="post" data-form-type="other">
+    <fieldset>
+      <legend>How much do you agree with these statements?</legend>
+      <table>
+        <tr><th>The website was easy to navigate.</th>
+          <td><input type="radio" name="likert_navigation" value="1" aria-label="Easy to navigate: Strongly disagree" data-expect="rating"></td>
+          <td><input type="radio" name="likert_navigation" value="2" aria-label="Easy to navigate: Disagree" data-expect="rating"></td>
+          <td><input type="radio" name="likert_navigation" value="3" aria-label="Easy to navigate: Neutral" data-expect="rating"></td>
+          <td><input type="radio" name="likert_navigation" value="4" aria-label="Easy to navigate: Agree" data-expect="rating"></td>
+          <td><input type="radio" name="likert_navigation" value="5" aria-label="Easy to navigate: Strongly agree" data-expect="rating"></td></tr>
+      </table>
+    </fieldset>
+    <p>How likely are you to recommend us to a friend or colleague? (0 = not at all likely, 10 = extremely likely)</p>
+    <div class="choices">
+      <label><input type="radio" name="nps" value="0" data-expect="rating"> 0</label><label><input type="radio" name="nps" value="1" data-expect="rating"> 1</label><label><input type="radio" name="nps" value="2" data-expect="rating"> 2</label><label><input type="radio" name="nps" value="3" data-expect="rating"> 3</label><label><input type="radio" name="nps" value="4" data-expect="rating"> 4</label><label><input type="radio" name="nps" value="5" data-expect="rating"> 5</label><label><input type="radio" name="nps" value="6" data-expect="rating"> 6</label><label><input type="radio" name="nps" value="7" data-expect="rating"> 7</label><label><input type="radio" name="nps" value="8" data-expect="rating"> 8</label><label><input type="radio" name="nps" value="9" data-expect="rating"> 9</label><label><input type="radio" name="nps" value="10" data-expect="rating"> 10</label>
+    </div>
+    <label for="nl">Subscribe to newsletter?</label>
+    <select id="nl" name="newsletter" data-expect="skip:consent"><option value="">-- Choose --</option><option value="yes">Yes</option><option value="no">No</option></select>
+    <button type="submit">Send</button>
+  </form>
+  <form action="/apply" method="post" data-form-type="other">
+    <p>Are you legally authorized to work in the country of this position?</p>
+    <div class="choices">
+      <label><input type="radio" name="work_authorization" value="citizen" data-expect="unknown"> Yes, citizen or permanent resident</label>
+      <label><input type="radio" name="work_authorization" value="visa" data-expect="unknown"> Yes, with a current work visa</label>
+      <label><input type="radio" name="work_authorization" value="sponsorship" data-expect="unknown"> No, I will need sponsorship</label>
+    </div>
+    <span>Have you ever been diagnosed with any of the following?</span>
+    <div class="choices">
+      <label><input type="checkbox" name="conditions[]" value="diabetes" data-expect="unknown"> Diabetes</label>
+      <label><input type="checkbox" name="conditions[]" value="asthma" data-expect="unknown"> Asthma</label>
+    </div>
+    <div class="field"><span class="label">Declarations</span><div class="choices">
+      <label><input type="checkbox" name="decl_anti_bribery" value="yes" data-expect="skip:consent"> Anti-bribery policy in place</label>
+      <label><input type="checkbox" name="decl_sanctions" value="yes" data-expect="skip:consent"> Not on any sanctions list</label>
+    </div></div>
+    <button type="submit">Apply</button>
+  </form>
+</main>
+</body>
+</html>
