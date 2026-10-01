@@ -62,6 +62,20 @@ every engine, including main; permission wording ("allow", "grant access") now c
 fixed after the sealed measurement. Pages 76–90 are now retired: the next round needs a new sealed
 set before any tuning.
 
+Real-world sealed set, same day: 200 forms from 200 websites of the UCI web form crawl
+(Cui et al., PoPETs 2025), 2,317 fields labelled blind with this guide, kept outside the repository
+under the dataset's licence (`scripts/uci-sealed/`, `npm run model:evaluate`).
+
+| Engine (e69aa23) | Precision | Recall | F1 | Consent fields filled |
+| --- | --- | --- | --- | --- |
+| Rules | 87.1% | 79.5% | 83.1% | 21 |
+| Rules + model v1 | 85.3% | 82.3% | 83.8% | 21 |
+
+The model's wrong answers were mostly guesses on fields that should stay unknown (captcha responses,
+"last 4 of SSN", school names), which synthetic pages never taught it. Consent fixes found on these
+forms then brought the rules to 83.7% F1 and 8 filled consent fields (all mailing-list or
+declaration choices whose page uses no consent wording). This set is now retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
@@ -74,6 +88,10 @@ move a type's precision. Such a change is accepted only when every field it chan
 reviewed below, overall precision drops by at most 0.5 point, and leaks, submissions and form types
 stay where they were. Most fixtures are in the model's training data, so the benchmark guards
 against harm; the sealed Form Lab set measures the gain.
+
+Since 1 October 2026 the model is off by default (the "Learned guesses" setting): on 200 hand-labelled
+real forms it added only 0.7 F1 and cost 1.8 points of precision, so the baseline is the rules alone
+again. The reviews below apply when it is switched on.
 
 Reviewed model changes (model v1, 1 October 2026; rules alone 41 mistakes, with the model 21):
 

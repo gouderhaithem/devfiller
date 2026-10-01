@@ -50,7 +50,7 @@ describe('model guesses on a page', () => {
   function classified(html: string, extra: Partial<FillRequest> = {}) {
     document.body.innerHTML = `<form>${html}</form>`;
     const controls = Array.from(document.querySelectorAll<HTMLInputElement>('input, select, textarea'));
-    const result = fillPage({ ...request, ...extra, mode: 'classify' });
+    const result = fillPage({ ...request, modelGuesses: true, ...extra, mode: 'classify' });
     return new Map((result.classified ?? []).map(found => [controls[found.index].id, found]));
   }
   it('stays below medium confidence', () => {
@@ -61,6 +61,10 @@ describe('model guesses on a page', () => {
   it('never touches a sensitive field', () => {
     const found = classified('<label for="c">Card number</label><input id="c"><label for="i">IBAN</label><input id="i"><label for="o">Verification code</label><input id="o">');
     expect([...found.values()].map(f => f.type)).toEqual(['skip:card', 'skip:iban', 'skip:otp']);
+  });
+  it('is off unless asked for', () => {
+    document.body.innerHTML = '<form><label for="a">Leaving on</label><input id="a" type="date"></form>';
+    expect(fillPage({ ...request, mode: 'classify' }).classified?.[0]).toEqual(fillPage({ ...request, modelGuesses: false, mode: 'classify' }).classified?.[0]);
   });
   it('can be switched off', () => {
     const on = classified('<label for="a">Leaving on</label><input id="a" type="date">');

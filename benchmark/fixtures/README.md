@@ -88,6 +88,8 @@ and any training data agree:
 | Expiry or "valid until" with no matching start | `date` | Nothing to come after |
 | Income, household or monthly income, revenu | `amount` | Only salary, wage or pay expectations are `salary` |
 | Bank name, school or university name | `unknown` | No generator; they aren't the person's `company` |
+| The department, office or service a message is sent to | `unknown` | Not the person's own department; their own department or job function is `department` |
+| A phone number's country-code picker ("+33", "FR (+33)") | `country` | The choice is a country |
 | A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |
 | Years driving, years in the role, licence held for | `experience` | A number of years of doing something |
 | Personal or legal IDs (national ID, NIN, SIRET, tax ID, plate, employee number); record IDs (order, VIN, serial, customer number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |

@@ -309,7 +309,7 @@ export function fillPage(request: FillRequest): FillResult {
   if (request.suggestions) result.used = {};
   const controls = listControls();
   const visible = new Map(controls.map(el => [el, isVisible(el)]));
-  const analysis = analyzePage(controls, visible, request.typeRules ?? [], request.modelGuesses !== false);
+  const analysis = analyzePage(controls, visible, request.typeRules ?? [], request.modelGuesses === true);
   result.forms = analysis.forms;
   if (request.mode === 'classify') {
     result.classified = controls.flatMap((el, index) => { const found = analysis.fields.get(el); return found ? [{ index, type: found.type, confidence: found.confidence }] : []; });

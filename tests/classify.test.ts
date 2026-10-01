@@ -127,6 +127,28 @@ describe('settled labels', () => {
   });
 });
 
+// Consent questions from real forms (UCI sample, 1 October 2026): the box's words sit outside its label.
+describe('consent text beside the box', () => {
+  it.each([
+    ['an empty label with the text a few wrappers away', '<p><span><span><span><label><input type="checkbox" name="checkbox-9[]"><span></span></label></span></span></span><span>I have read and accept the Privacy Notice</span></p>'],
+    ['the next table cell', '<table><tr><td><input type="checkbox" name="approve"></td><td>I grant permission for changes to the text I have provided.</td></tr></table>'],
+    ['a one-word aria-label', '<div><span><input type="checkbox" aria-label="controlled"></span><p>I agree to receive follow-up calls from company representatives</p></div>'],
+    ['Gift Aid', '<label><input type="checkbox"> Yes, add Gift Aid to my donation</label>'],
+    ['saving a payment method', '<label><input type="checkbox"> Save payment information to my account for future purchases</label>'],
+  ])('treats %s as consent', (_, html) => {
+    expect(typeOf(html)).toBe('skip:consent');
+  });
+  it('reads the question over a list, past a required mark', () => {
+    expect(typeOf('<div><strong>Which newsletters would you like to receive?</strong> <span>*</span><ul><li><input type="checkbox" id="a"><label for="a">Student news</label></li><li><input type="checkbox" id="b"><label for="b">Staff news</label></li></ul></div>')).toBe('skip:consent');
+  });
+  it('reads the question past a "See more" link', () => {
+    expect(typeOf('<div><div>Data sharing with our partners</div><div><a>See more</a></div><div><label>Yes <input type="radio" name="tp" value="y"></label><label>No <input type="radio" name="tp" value="n"></label></div></div>')).toBe('skip:consent');
+  });
+  it('leaves an ordinary choice in a table alone', () => {
+    expect(typeOf('<table><tr><td><input type="checkbox" name="veg"></td><td>Vegetarian</td></tr></table>')).toBe('unknown');
+  });
+});
+
 describe('sensitive fields', () => {
   it.each([
     ['<input autocomplete="cc-number">', 'skip:card'],

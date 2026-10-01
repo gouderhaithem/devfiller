@@ -74,7 +74,7 @@ function App() {
         {options&&<section className="options"><h2>Fill settings</h2>{([
           ['overwrite','Replace existing values','Overwrite fields that already have a value.'],
           ['fillUnknown','Fill unknown fields','Fill every editable field, even if its value is invalid.'],
-          ['modelGuesses','Learned guesses','When the rules aren’t sure, a small offline model suggests a type. Its guesses are marked in the field list and filled only with Fill unknown fields.'],
+          ['modelGuesses','Learned guesses','Experimental. When the rules aren’t sure, a small offline model suggests a type. Its guesses are marked in the field list and filled only with Fill unknown fields.'],
           ['passwords','Generate test passwords','Fill password and confirmation fields.'],
         ] as const).map(([key,label,description])=><label className="toggle-row" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={settings[key]} disabled={!ready||busy} onChange={e=>update({...settings,[key]:e.target.checked})}/></label>)}
           <label className="toggle-row setting-row"><span><strong>Test cards</strong><small>Card fields get a sandbox test card, never a real one, with a future expiry and any CVC. Pick the payment result to test.</small></span><select disabled={!ready||busy} value={settings.cards} onChange={e=>update({...settings,cards:e.target.value as Settings['cards']})}>{cardSettings.map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
