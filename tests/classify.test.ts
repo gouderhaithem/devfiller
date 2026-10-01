@@ -110,6 +110,45 @@ describe('scoring', () => {
   });
 });
 
+// Labels settled in benchmark/fixtures/README.md ("Settled cases").
+describe('settled labels', () => {
+  it.each([
+    ['<label for="x">Account holder</label><input id="x">', 'fullName'],
+    ['<label for="x">Account holder name</label><input id="x">', 'fullName'],
+    ['<input name="bank_account_holder" aria-label="Holder">', 'fullName'],
+    ['<label for="x">Titulaire du compte</label><input id="x">', 'fullName'],
+    ['<fieldset><legend>Bank details</legend><label for="x">Account holder name</label><input id="x"></fieldset>', 'fullName'],
+    ['<label for="x">Place of birth</label><input id="x">', 'city'],
+    ['<label for="x">Lieu de naissance</label><input id="x">', 'city'],
+    ['<input name="lieu_naissance">', 'city'],
+    ['<label for="x">مكان الميلاد</label><input id="x">', 'city'],
+  ])('recognizes %s as %s', (html, expected) => {
+    expect(typeOf(html)).toBe(expected);
+  });
+});
+
+// Consent questions from real forms (UCI sample, 1 October 2026): the box's words sit outside its label.
+describe('consent text beside the box', () => {
+  it.each([
+    ['an empty label with the text a few wrappers away', '<p><span><span><span><label><input type="checkbox" name="checkbox-9[]"><span></span></label></span></span></span><span>I have read and accept the Privacy Notice</span></p>'],
+    ['the next table cell', '<table><tr><td><input type="checkbox" name="approve"></td><td>I grant permission for changes to the text I have provided.</td></tr></table>'],
+    ['a one-word aria-label', '<div><span><input type="checkbox" aria-label="controlled"></span><p>I agree to receive follow-up calls from company representatives</p></div>'],
+    ['Gift Aid', '<label><input type="checkbox"> Yes, add Gift Aid to my donation</label>'],
+    ['saving a payment method', '<label><input type="checkbox"> Save payment information to my account for future purchases</label>'],
+  ])('treats %s as consent', (_, html) => {
+    expect(typeOf(html)).toBe('skip:consent');
+  });
+  it('reads the question over a list, past a required mark', () => {
+    expect(typeOf('<div><strong>Which newsletters would you like to receive?</strong> <span>*</span><ul><li><input type="checkbox" id="a"><label for="a">Student news</label></li><li><input type="checkbox" id="b"><label for="b">Staff news</label></li></ul></div>')).toBe('skip:consent');
+  });
+  it('reads the question past a "See more" link', () => {
+    expect(typeOf('<div><div>Data sharing with our partners</div><div><a>See more</a></div><div><label>Yes <input type="radio" name="tp" value="y"></label><label>No <input type="radio" name="tp" value="n"></label></div></div>')).toBe('skip:consent');
+  });
+  it('leaves an ordinary choice in a table alone', () => {
+    expect(typeOf('<table><tr><td><input type="checkbox" name="veg"></td><td>Vegetarian</td></tr></table>')).toBe('unknown');
+  });
+});
+
 describe('sensitive fields', () => {
   it.each([
     ['<input autocomplete="cc-number">', 'skip:card'],
@@ -118,7 +157,13 @@ describe('sensitive fields', () => {
     ['<input placeholder="MM / YY">', 'skip:card'],
     ['<label for="x">IBAN</label><input id="x">', 'skip:iban'],
     ['<input name="sepa_bic">', 'skip:iban'],
-    ['<label for="x">Account holder</label><input id="x">', 'skip:iban'],
+    ['<label for="x">RIB du titulaire</label><input id="x">', 'skip:iban'],
+    ['<fieldset><legend>Bank details</legend><label for="x">Account number</label><input id="x"></fieldset>', 'skip:iban'],
+    ['<input aria-label="Beneficiary bank account">', 'skip:iban'],
+    ['<input aria-label="Compte bancaire du bénéficiaire">', 'skip:iban'],
+    ['<input aria-label="Bank account # of holder">', 'skip:iban'],
+    ['<input aria-label="Compte bancaire" name="nom_titulaire">', 'skip:iban'],
+    ['<input aria-label="Titulaire" name="compte_bancaire">', 'skip:iban'],
     ['<label for="x">Code de vérification</label><input id="x">', 'skip:otp'],
     ['<input autocomplete="one-time-code">', 'skip:otp'],
     ['<fieldset><legend>Card details</legend><input name="number"></fieldset>', 'skip:card'],
@@ -130,6 +175,9 @@ describe('sensitive fields', () => {
     'I would like to receive marketing emails',
     'Share my details with event sponsors',
     "J'accepte les conditions générales",
+    'Allow support staff to sign in to my account for 7 days',
+    'Grant access to my account while you investigate',
+    'Je permets au support d’accéder à mon compte',
     'أوافق على الشروط',
   ])('treats "%s" as consent', label => {
     expect(typeOf(`<label><input type="checkbox"> ${label}</label>`)).toBe('skip:consent');

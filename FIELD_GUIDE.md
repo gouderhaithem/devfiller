@@ -5,7 +5,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Field | Typical native control | Recognized label examples |
 | --- | --- | --- |
 | Username | text | username, user name, login, login name, user id, pseudo, handle, identifiant, nom utilisateur, nom d'utilisateur, اسم المستخدم, اسم الدخول |
-| Full name | text | full name, name, your name, guest name, contact name, attendee name, customer name, client name, passenger name, applicant name, candidate name, recipient name, nom complet, nom et prénom, prénom et nom, nom prénom, nom du client, الاسم الكامل, الاسم واللقب, اسم الزبون |
+| Full name | text | full name, name, first and last name, first last name, first name and last name, name and surname, account holder, account holder name, titulaire du compte, beneficiary name, your name, guest name, contact name, attendee name, customer name, client name, passenger name, applicant name, candidate name, recipient name, nom complet, nom et prénom, prénom et nom, nom prénom, nom du client, الاسم الكامل, الاسم واللقب, اسم الزبون |
 | First name | text | first name, firstname, fname, given name, forename, prénom, الاسم الأول, الاسم الشخصي, الاسم |
 | Middle name | text | middle name, second prénom, الاسم الأوسط |
 | Last name | text | last name, lastname, lname, surname, family name, nom, nom de famille, اللقب, اسم العائلة |
@@ -25,7 +25,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Employee count | number / range | employee count, number of employees, company size, headcount, effectif, taille de l'entreprise, nombre de salariés, عدد الموظفين |
 | Street address | text | address, street address, address line 1, street, street and number, street name, addr, billing address, shipping address, delivery address, home address, adresse, adresse postale, rue, adresse de livraison, adresse de facturation, العنوان, عنوان الشارع, الشارع |
 | Apartment / suite | text | address line 2, address 2, apartment, suite, floor, building, complément adresse, complément d'adresse, appartement, bâtiment, étage, الشقة |
-| City / commune | text | city, town, locality, municipality, ville, commune, municipalité, المدينة, مدينة, البلدية, بلدية |
+| City / commune | text | city, town, place of birth, birth place, birthplace, lieu de naissance, lieu naissance, ville de naissance, commune de naissance, مكان الميلاد, locality, municipality, ville, commune, municipalité, المدينة, مدينة, البلدية, بلدية |
 | District / daira | text | district, daira, daïra, borough, arrondissement, الدائرة, دائرة |
 | State / wilaya | select / text | state, province, region, county, wilaya, الولاية, ولاية, المحافظة |
 | Postal code | text | postal code, postcode, zip, zip code, cp, code postal, الرمز البريدي |

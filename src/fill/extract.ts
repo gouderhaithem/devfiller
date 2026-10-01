@@ -1,7 +1,7 @@
 import type { Control } from './types';
 import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP } from './dictionary';
 import { normalize } from './normalize';
-import { placeholderShape } from './placeholder';
+import { EXAMPLE_PREFIX, placeholderShape } from './placeholder';
 
 // Input types the engine never touches or reports.
 export const OMITTED_TYPES: readonly string[] = ['hidden','submit','button','reset','image'];
@@ -89,7 +89,7 @@ export function displayLabel(el: Control): string {
   return (labelText(el) || el.getAttribute('aria-label') || labelledByText(el).trim() || el.getAttribute('placeholder') || el.name || el.id || el.type || 'Unnamed field').trim().slice(0, 160);
 }
 
-export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule' | 'format';
+export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule' | 'format' | 'model';
 export interface Signal { source: SignalSource; raw: string; text: string }
 
 const CONTROLS = 'input, select, textarea, button';
@@ -107,11 +107,13 @@ function ownText(root: Element): string {
 
 const holdsControl = (node: Node) => node instanceof Element && (node.matches(CONTROLS) || !!node.querySelector(CONTROLS));
 
+// Text that names nothing: a required mark ("*") or a link that expands the text ("See more").
+const NOT_A_NAME = /^(?:[^\p{L}\p{N}]*|(?:see|read|show|learn|voir|lire) (?:more|less|plus|moins)\W*)$/iu;
 function siblingText(start: Node, forward: boolean): string {
   for (let node = forward ? start.nextSibling : start.previousSibling; node; node = forward ? node.nextSibling : node.previousSibling) {
     if (holdsControl(node)) return '';
     const text = clip(node.textContent || '');
-    if (text) return text;
+    if (text && !NOT_A_NAME.test(text)) return text;
   }
   return '';
 }
@@ -121,12 +123,15 @@ function siblingText(start: Node, forward: boolean): string {
 // this control.
 export function nearbyText(el: Control): string {
   let anchor: Element = el;
-  for (let depth = 0; depth < 3 && anchor.parentElement; depth++) {
+  // A checkbox's words often sit a few wrappers out (an empty label inside framework spans).
+  const levels = isChoice(el) ? 5 : 3;
+  for (let depth = 0; depth < levels && anchor.parentElement; depth++) {
     const text = (isChoice(el) && siblingText(anchor, true)) || siblingText(anchor, false);
     if (text) return text;
     const parent: Element = anchor.parentElement;
     if (parent.matches('td, th')) {
-      const cell = parent.previousElementSibling;
+      // A checkbox's words are in the next cell; a text field's in the previous one.
+      const cell = (isChoice(el) && parent.nextElementSibling) || parent.previousElementSibling;
       return cell && !holdsControl(cell) ? clip(cell.textContent || '') : '';
     }
     if (parent.querySelectorAll(CONTROLS).length > 1 || parent.matches('form, fieldset, body')) return '';
@@ -182,7 +187,7 @@ const MAX_CAPTIONED = 30;
 function choiceCaption(el: HTMLInputElement): string {
   const sameGroup = (other: Element) => other instanceof HTMLInputElement && other.type === el.type && (el.type === 'checkbox' || other.name === el.name);
   let node: Element = el;
-  for (let depth = 0; depth < 3 && node.parentElement; depth++) {
+  for (let depth = 0; depth < 4 && node.parentElement; depth++) {
     const parent: Element = node.parentElement;
     const inside = parent.querySelectorAll(CONTROLS);
     // A caption sits over a handful of choices; a container of dozens is a layout, not a group.
@@ -217,6 +222,7 @@ export function isTrap(el: Control): boolean {
   return box.width > 0 && (box.right + scrollX <= 0 || box.bottom + scrollY <= 0);
 }
 
+const FRAMEWORK_NAMES = ['formcontrolname', 'ng-model', 'v-model', 'data-field-name'];
 const FILLER = new Set(['field', 'fld', 'input', 'inp', 'text', 'txt', 'ctl', 'ctrl', 'mat', 'form', 'el', 'elem', 'control', 'widget', 'item']);
 // Generated names carry no meaning: field1, input_7, mat-input-3, ":r5:", UUIDs.
 export function isMeaningless(raw: string): boolean {
@@ -240,13 +246,21 @@ export function describeSignals(el: Control): Signal[] {
     add('aria-label', el.getAttribute('aria-label'));
     add('aria-labelledby', labelledByText(el));
   }
-  add('placeholder', el.getAttribute('placeholder'));
+  // "e.g. State Farm" shows a sample answer, not what the field is; its format still counts.
+  const placeholder = el.getAttribute('placeholder');
+  if (!EXAMPLE_PREFIX.test((placeholder || '').trim())) add('placeholder', placeholder);
   // A select's empty first option ("Select country") works as its placeholder.
   if (el instanceof HTMLSelectElement && el.options[0] && !el.options[0].value) add('placeholder', el.options[0].textContent);
   add('title', el.getAttribute('title'));
-  if (!signals.some(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby')) add('nearby', radio ? '' : nearbyText(el));
+  // A checkbox named by one word ("controlled", a library's default) still reads the words beside it.
+  const naming = signals.filter(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby');
+  const thin = choice && !radio && naming.every(signal => !signal.text.includes(' '));
+  if (!naming.length || thin) add('nearby', radio ? '' : nearbyText(el));
   if (!isMeaningless(el.name)) add('name', el.name);
   if (!isMeaningless(el.id)) add('id', el.id);
+  // Angular, Vue and form builders name the field in their own attribute when name and id are generated.
+  const bound = FRAMEWORK_NAMES.map(name => el.getAttribute(name)).find(value => value && !isMeaningless(value));
+  if (bound && isMeaningless(el.name) && isMeaningless(el.id)) add('name', bound);
   // A radio group's question, else the heading just above it. A checkbox reads its fieldset's legend
   // and the heading just above its own group, which may sit inside that larger fieldset.
   add('legend', radio ? groupText(el) || choiceCaption(el) : el.closest('fieldset')?.querySelector('legend')?.textContent);

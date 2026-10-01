@@ -36,13 +36,13 @@ export function skipReason(ctx: FillContext, el: Control): string {
 }
 
 const TYPE_LABELS: Readonly<Record<string, string>> = { ...Object.fromEntries(fields), unknown: 'Unknown', 'skip:card': 'Card details', 'skip:otp': 'One-time code', 'skip:iban': 'Bank details', 'skip:consent': 'Consent', 'skip:session': 'Session choice' };
-const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form', unit: 'unit', rule: 'your type rule', format: 'format' };
+const SOURCE_LABELS: Readonly<Record<Evidence['source'], string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'inputmode', label: 'label', 'aria-label': 'aria-label', 'aria-labelledby': 'accessible name', placeholder: 'placeholder', title: 'title', nearby: 'text beside it', name: 'name', id: 'id', legend: 'section', options: 'options', form: 'form', unit: 'unit', rule: 'your type rule', format: 'format', model: 'model guess' };
 const typeLabel = (type: FieldType | string) => TYPE_LABELS[type] ?? type;
 
 // "autocomplete=tel", "label “Téléphone”", "against: type=email".
 function describeEvidence(item: Evidence): string {
   const source = SOURCE_LABELS[item.source];
-  const text = ['autocomplete', 'type', 'inputmode'].includes(item.source) ? `${source}=${item.signal}` : item.source === 'form' || item.source === 'options' ? item.signal : `${source} “${item.signal.slice(0, 60)}”`;
+  const text = ['autocomplete', 'type', 'inputmode'].includes(item.source) ? `${source}=${item.signal}` : item.source === 'form' || item.source === 'options' || item.source === 'model' ? item.signal : `${source} “${item.signal.slice(0, 60)}”`;
   return item.weight < 0 ? `against: ${text}` : text;
 }
 

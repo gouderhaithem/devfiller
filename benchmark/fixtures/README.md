@@ -73,6 +73,27 @@ Two more kinds of answer:
   - `skip:consent`: terms, privacy, newsletter, marketing or permission checkboxes, and declarations ("I certify…")
   - `skip:session`: "Remember me", "Keep me signed in" and similar session choices (skipped, but not counted as a leak)
 
+## Settled cases
+
+Labels that were given different answers on different pages. One answer each, so the benchmark
+and any training data agree:
+
+| Field | Answer | Why |
+| --- | --- | --- |
+| Place of birth, lieu de naissance, ville/commune de naissance, مكان الميلاد | `city` | Forms expect a town or commune name |
+| Account holder (name) next to bank fields | `fullName` | It's a person's name; only the account number, IBAN, BIC and RIB are `skip:iban` |
+| Cardholder name, name on card | `skip:card` | Part of the card block, which gets test cards as a whole |
+| Allergies, dietary restrictions, medical conditions | `notes` | Free-text remarks about the person |
+| A start with no matching end ("Available from", "Earliest start date") | `startDate` | The label names a start; a plain event date or move-in date is `date` |
+| Expiry or "valid until" with no matching start | `date` | Nothing to come after |
+| Income, household or monthly income, revenu | `amount` | Only salary, wage or pay expectations are `salary` |
+| Bank name, school or university name | `unknown` | No generator; they aren't the person's `company` |
+| The department, office or service a message is sent to | `unknown` | Not the person's own department; their own department or job function is `department` |
+| A phone number's country-code picker ("+33", "FR (+33)") | `country` | The choice is a country |
+| A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |
+| Years driving, years in the role, licence held for | `experience` | A number of years of doing something |
+| Personal or legal IDs (national ID, NIN, SIRET, tax ID, plate, employee number); record IDs (order, VIN, serial, customer number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |
+
 ## Relationships
 
 These are checked after a fill with passwords on:

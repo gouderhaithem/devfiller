@@ -1,12 +1,12 @@
 {
   "summary": {
     "fields": 865,
-    "precision": 0.9915730337078652,
-    "recall": 0.9805555555555555,
-    "f1": 0.9860335195530725,
-    "accuracy": 0.9791907514450867,
-    "unknownRate": 0.176878612716763,
-    "falsePositiveRate": 0.027586206896551724,
+    "precision": 0.9915966386554622,
+    "recall": 0.9819694868238558,
+    "f1": 0.9867595818815331,
+    "accuracy": 0.9803468208092485,
+    "unknownRate": 0.1745664739884393,
+    "falsePositiveRate": 0.027777777777777776,
     "wrongRate": 0.006936416184971098
   },
   "types": {
@@ -59,12 +59,12 @@
       "f1": 1
     },
     "city": {
-      "support": 27,
-      "predicted": 26,
-      "correct": 26,
+      "support": 28,
+      "predicted": 28,
+      "correct": 28,
       "precision": 1,
-      "recall": 0.9629629629629629,
-      "f1": 0.9811320754716981
+      "recall": 1,
+      "f1": 1
     },
     "color": {
       "support": 2,
@@ -163,9 +163,9 @@
       "f1": 1
     },
     "fullName": {
-      "support": 29,
-      "predicted": 29,
-      "correct": 29,
+      "support": 30,
+      "predicted": 30,
+      "correct": 30,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -339,9 +339,9 @@
       "f1": 0.9848484848484849
     },
     "skip:iban": {
-      "support": 9,
-      "predicted": 9,
-      "correct": 9,
+      "support": 8,
+      "predicted": 8,
+      "correct": 8,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -434,8 +434,8 @@
   },
   "relations": {
     "accepted by the page": {
-      "correct": 566,
-      "total": 566
+      "correct": 567,
+      "total": 567
     },
     "seeded repeat": {
       "correct": 62,

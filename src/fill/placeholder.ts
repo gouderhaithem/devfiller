@@ -7,7 +7,7 @@ import type { Control } from './types';
 
 // "e.g. 5", "Ex : Paris", "Example: 12", "par ex. 3", "مثال: 2020" → the example itself.
 // The prefix must end the word: "Explain your role" and "Expiry date" aren't examples.
-const EXAMPLE_PREFIX = /^(?:e\.\s?g\.?|eg(?=[\s:])|ex(?:ample)?\.?(?=[\s:：])|ex\.|for example|such as|par ex(?:emple)?\.?|exemple|مثال|مثلا|مثلاً)(?:\s*[:：,-]\s*|\s+)/iu;
+export const EXAMPLE_PREFIX = /^(?:e\.\s?g\.?|eg(?=[\s:])|ex(?:ample)?\.?(?=[\s:：])|ex\.|for example|such as|par ex(?:emple)?\.?|exemple|مثال|مثلا|مثلاً)(?:\s*[:：,-]\s*|\s+)/iu;
 const DATE_FORMAT = /^(?:(?:dd|jj|يوم)\s*([/.-])\s*(?:mm|شهر)\s*\1\s*(?:yyyy|aaaa|yy|سنة)|(?:mm)\s*([/.-])\s*(?:dd)\s*\2\s*(?:yyyy|yy)|(?:yyyy|aaaa)\s*([/.-])\s*(?:mm)\s*\3\s*(?:dd|jj))$/iu;
 const TIME_FORMAT = /^(?:hh|hh24)\s*:\s*mm(?:\s*:\s*ss)?(?:\s*(?:am|pm|a))?$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
