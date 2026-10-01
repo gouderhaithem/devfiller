@@ -1,7 +1,7 @@
 import type { Control } from './types';
 import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP } from './dictionary';
 import { normalize } from './normalize';
-import { placeholderShape } from './placeholder';
+import { EXAMPLE_PREFIX, placeholderShape } from './placeholder';
 
 // Input types the engine never touches or reports.
 export const OMITTED_TYPES: readonly string[] = ['hidden','submit','button','reset','image'];
@@ -89,7 +89,7 @@ export function displayLabel(el: Control): string {
   return (labelText(el) || el.getAttribute('aria-label') || labelledByText(el).trim() || el.getAttribute('placeholder') || el.name || el.id || el.type || 'Unnamed field').trim().slice(0, 160);
 }
 
-export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule' | 'format';
+export type SignalSource = 'autocomplete' | 'type' | 'inputmode' | 'label' | 'aria-label' | 'aria-labelledby' | 'placeholder' | 'title' | 'nearby' | 'name' | 'id' | 'legend' | 'options' | 'form' | 'unit' | 'rule' | 'format' | 'model';
 export interface Signal { source: SignalSource; raw: string; text: string }
 
 const CONTROLS = 'input, select, textarea, button';
@@ -217,6 +217,7 @@ export function isTrap(el: Control): boolean {
   return box.width > 0 && (box.right + scrollX <= 0 || box.bottom + scrollY <= 0);
 }
 
+const FRAMEWORK_NAMES = ['formcontrolname', 'ng-model', 'v-model', 'data-field-name'];
 const FILLER = new Set(['field', 'fld', 'input', 'inp', 'text', 'txt', 'ctl', 'ctrl', 'mat', 'form', 'el', 'elem', 'control', 'widget', 'item']);
 // Generated names carry no meaning: field1, input_7, mat-input-3, ":r5:", UUIDs.
 export function isMeaningless(raw: string): boolean {
@@ -240,13 +241,18 @@ export function describeSignals(el: Control): Signal[] {
     add('aria-label', el.getAttribute('aria-label'));
     add('aria-labelledby', labelledByText(el));
   }
-  add('placeholder', el.getAttribute('placeholder'));
+  // "e.g. State Farm" shows a sample answer, not what the field is; its format still counts.
+  const placeholder = el.getAttribute('placeholder');
+  if (!EXAMPLE_PREFIX.test((placeholder || '').trim())) add('placeholder', placeholder);
   // A select's empty first option ("Select country") works as its placeholder.
   if (el instanceof HTMLSelectElement && el.options[0] && !el.options[0].value) add('placeholder', el.options[0].textContent);
   add('title', el.getAttribute('title'));
   if (!signals.some(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby')) add('nearby', radio ? '' : nearbyText(el));
   if (!isMeaningless(el.name)) add('name', el.name);
   if (!isMeaningless(el.id)) add('id', el.id);
+  // Angular, Vue and form builders name the field in their own attribute when name and id are generated.
+  const bound = FRAMEWORK_NAMES.map(name => el.getAttribute(name)).find(value => value && !isMeaningless(value));
+  if (bound && isMeaningless(el.name) && isMeaningless(el.id)) add('name', bound);
   // A radio group's question, else the heading just above it. A checkbox reads its fieldset's legend
   // and the heading just above its own group, which may sit inside that larger fieldset.
   add('legend', radio ? groupText(el) || choiceCaption(el) : el.closest('fieldset')?.querySelector('legend')?.textContent);

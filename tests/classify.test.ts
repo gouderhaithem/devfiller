@@ -110,6 +110,23 @@ describe('scoring', () => {
   });
 });
 
+// Labels settled in benchmark/fixtures/README.md ("Settled cases").
+describe('settled labels', () => {
+  it.each([
+    ['<label for="x">Account holder</label><input id="x">', 'fullName'],
+    ['<label for="x">Account holder name</label><input id="x">', 'fullName'],
+    ['<input name="bank_account_holder" aria-label="Holder">', 'fullName'],
+    ['<label for="x">Titulaire du compte</label><input id="x">', 'fullName'],
+    ['<fieldset><legend>Bank details</legend><label for="x">Account holder name</label><input id="x"></fieldset>', 'fullName'],
+    ['<label for="x">Place of birth</label><input id="x">', 'city'],
+    ['<label for="x">Lieu de naissance</label><input id="x">', 'city'],
+    ['<input name="lieu_naissance">', 'city'],
+    ['<label for="x">مكان الميلاد</label><input id="x">', 'city'],
+  ])('recognizes %s as %s', (html, expected) => {
+    expect(typeOf(html)).toBe(expected);
+  });
+});
+
 describe('sensitive fields', () => {
   it.each([
     ['<input autocomplete="cc-number">', 'skip:card'],
@@ -118,7 +135,13 @@ describe('sensitive fields', () => {
     ['<input placeholder="MM / YY">', 'skip:card'],
     ['<label for="x">IBAN</label><input id="x">', 'skip:iban'],
     ['<input name="sepa_bic">', 'skip:iban'],
-    ['<label for="x">Account holder</label><input id="x">', 'skip:iban'],
+    ['<label for="x">RIB du titulaire</label><input id="x">', 'skip:iban'],
+    ['<fieldset><legend>Bank details</legend><label for="x">Account number</label><input id="x"></fieldset>', 'skip:iban'],
+    ['<input aria-label="Beneficiary bank account">', 'skip:iban'],
+    ['<input aria-label="Compte bancaire du bénéficiaire">', 'skip:iban'],
+    ['<input aria-label="Bank account # of holder">', 'skip:iban'],
+    ['<input aria-label="Compte bancaire" name="nom_titulaire">', 'skip:iban'],
+    ['<input aria-label="Titulaire" name="compte_bancaire">', 'skip:iban'],
     ['<label for="x">Code de vérification</label><input id="x">', 'skip:otp'],
     ['<input autocomplete="one-time-code">', 'skip:otp'],
     ['<fieldset><legend>Card details</legend><input name="number"></fieldset>', 'skip:card'],
@@ -130,6 +153,9 @@ describe('sensitive fields', () => {
     'I would like to receive marketing emails',
     'Share my details with event sponsors',
     "J'accepte les conditions générales",
+    'Allow support staff to sign in to my account for 7 days',
+    'Grant access to my account while you investigate',
+    'Je permets au support d’accéder à mon compte',
     'أوافق على الشروط',
   ])('treats "%s" as consent', label => {
     expect(typeOf(`<label><input type="checkbox"> ${label}</label>`)).toBe('skip:consent');

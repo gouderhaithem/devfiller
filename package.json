@@ -12,7 +12,10 @@
     "store-assets": "node scripts/store-assets.mjs",
     "store-listing": "node scripts/store-listing-page.mjs",
     "package": "npm run build && rm -rf release && mkdir -p release && cd dist && zip -qr ../release/devfiller-$npm_package_version.zip . -x demo.html 'assets/demo-*'",
-    "benchmark": "playwright test -c benchmark/playwright.config.ts"
+    "benchmark": "playwright test -c benchmark/playwright.config.ts",
+    "model:dataset": "node scripts/model/run.mjs dataset",
+    "train": "node scripts/model/run.mjs train",
+    "model:evaluate": "node scripts/model/run.mjs evaluate"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

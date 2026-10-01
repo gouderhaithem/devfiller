@@ -12,7 +12,7 @@ import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
 import { normalize } from './normalize';
 
 export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
-export type MatchKind = 'autocomplete' | 'type' | 'exact' | 'plural' | 'phrase' | 'joined' | 'word' | 'compound' | 'fuzzy' | 'generic' | 'sensitive' | 'against' | 'options' | 'context';
+export type MatchKind = 'autocomplete' | 'type' | 'exact' | 'plural' | 'phrase' | 'joined' | 'word' | 'compound' | 'fuzzy' | 'generic' | 'sensitive' | 'against' | 'options' | 'context' | 'model';
 export type FieldRole = 'confirm' | 'current' | 'new' | 'start' | 'end' | 'cardholder';
 export interface Evidence { source: SignalSource; signal: string; weight: number; match: MatchKind }
 export interface Candidate { type: FieldKey; score: number; evidence: Evidence[] }
@@ -23,6 +23,7 @@ export interface Classification {
   after?: Control;         // the start date an end date must follow
   signals?: Signal[];      // what the field said, kept for the form-level pass
   fixed?: boolean;         // set by your type rule: nothing refines it
+  model?: boolean;         // the learned second opinion named a type the rules didn't give
   unconfirmed?: Classification; // a card guess from a word other documents share: what the field is if the form has no card
   confidence: number;      // 0..1, after the margin adjustment
   candidates: Candidate[]; // top alternatives, best first
@@ -36,13 +37,22 @@ const MARGIN = 0.15;
 
 // How much each source is worth on its own. Sources in one group repeat each other (a label and a
 // placeholder usually say the same thing), so only the strongest in a group counts.
-const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1, rule: 1, format: 1 };
-export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit', rule: 'rule', format: 'format' };
+const SOURCE_WEIGHT: Readonly<Record<SignalSource, number>> = { autocomplete: 0.98, type: 1, inputmode: 1, label: 0.9, 'aria-label': 0.9, 'aria-labelledby': 0.88, placeholder: 0.75, title: 0.6, nearby: 0.65, name: 0.8, id: 0.75, legend: 0.4, options: 1, form: 1, unit: 1, rule: 1, format: 1, model: 1 };
+export const SOURCE_GROUP: Readonly<Record<SignalSource, string>> = { autocomplete: 'autocomplete', type: 'type', inputmode: 'type', label: 'visible', 'aria-label': 'visible', 'aria-labelledby': 'visible', placeholder: 'visible', title: 'visible', nearby: 'visible', name: 'attribute', id: 'attribute', legend: 'context', options: 'options', form: 'form', unit: 'unit', rule: 'rule', format: 'format', model: 'model' };
 // A radio group's question is its label.
 const RADIO_LEGEND_WEIGHT = 0.85;
 // How well a signal matches an alias: the whole signal beats a phrase inside it, which beats a word.
 const MATCH_STRENGTH: Readonly<Partial<Record<MatchKind, number>>> = { exact: 1, plural: 0.95, phrase: 0.9, joined: 0.9, word: 0.75, compound: 0.7, fuzzy: 0.6, generic: 0.35 };
 const TEXT_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'title', 'nearby', 'name', 'id', 'legend']);
+const OWN_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'title', 'name', 'id']);
+const HOLDER_WORDS = /(?:^| )(?:holder|titulaire|beneficiary|beneficiaire|name|nom|اسم|صاحب)(?= |$)/;
+// The holder's own phrase is removed first, so only the rest of the words can name bank data.
+const HOLDER_PHRASES = / ?(?:bank account holder|account holder|titulaire du compte|صاحب الحساب) ?/g;
+const BANK_WORDS = /(?:^| )(?:iban|bic|swift|rib|number|numero|no|num|code|routing|ccp|sort|account|compte|bank|banque|bancaire|حساب|رقم)(?= |$)/;
+// "Reference 1", "Personal references", "Character reference": people, not record numbers.
+const PERSONAL_REFERENCE = /(?:^| )(?:reference \d|references|personal reference|character reference|professional reference)(?= |$)/;
+const PERSON_DETAIL = /(?:^| )(?:name|relationship|relation|phone|telephone|email|nom|lien)(?= |$)/;
+const RECORD_NUMBER = /(?:^| )(?:number|no|num|numero|id|code)(?= |$)/;
 // Sources that name a field on their own; without them, a title does.
 const NAMING_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder']);
 // Matches of a single word, which a long question may mention in passing.
@@ -125,13 +135,14 @@ export function matchText(text: string): Match[] {
   const tokens = text.split(' ');
   const covered = tokens.map(() => false);
   const found: Match[] = [];
-  tokens.forEach((token, i) => {
-    if (covered[i]) return;
-    const phrase = (PHRASES.get(token) ?? []).find(entry => entry.tokens.every((word, j) => tokens[i + j] === word && !covered[i + j]));
-    if (!phrase) return;
-    found.push([phrase, 'phrase']);
-    phrase.tokens.forEach((_, j) => { covered[i + j] = true; });
-  });
+  // Longer phrases first: "billing address line 2" is the second line, not a billing address.
+  const phrases = tokens.flatMap((token, i) => (PHRASES.get(token) ?? []).filter(entry => entry.tokens.every((word, j) => tokens[i + j] === word)).map(entry => ({ entry, i })));
+  phrases.sort((a, b) => b.entry.tokens.length - a.entry.tokens.length || a.i - b.i);
+  for (const { entry, i } of phrases) {
+    if (entry.tokens.some((_, j) => covered[i + j])) continue;
+    found.push([entry, 'phrase']);
+    entry.tokens.forEach((_, j) => { covered[i + j] = true; });
+  }
   tokens.forEach((token, i) => {
     if (covered[i]) return;
     const words = WORDS.get(token) ?? WORDS.get(singular(token));
@@ -152,7 +163,11 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
   }
   // A checkbox or radio can't hold a card number or a code: "Pay by card" is a choice, not card data.
   if (isChoice(el)) return undefined;
-  const kinds: SensitiveKind[] = ['card', 'otp', 'iban'];
+  // The account holder's name sits in the bank block but is a person's name, not bank data: the
+  // field's own words name a holder or a name and nothing that identifies the account.
+  const own = signals.filter(signal => OWN_SOURCES.has(signal.source));
+  const holder = own.some(signal => HOLDER_WORDS.test(signal.text)) && !own.some(signal => BANK_WORDS.test(` ${signal.text} `.replace(HOLDER_PHRASES, ' ').trim()));
+  const kinds: SensitiveKind[] = holder ? ['card', 'otp'] : ['card', 'otp', 'iban'];
   let weak: { kind: SensitiveKind; evidence: Evidence; weak: true } | undefined;
   for (const signal of signals) {
     if (!TEXT_SOURCES.has(signal.source)) continue;
@@ -202,6 +217,9 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   const picker = !hinted && isDatePicker(el) ? ['date', 0.8] as const : undefined;
   const [type, weight] = hinted ?? picker ?? [];
   if (!type || !weight) return;
+  // Phone shapes are only digits and dashes, which an order or reference number shares: when the
+  // field's words clearly name another type, the digits are that type's example.
+  if (type === 'phone' && [...byType].some(([key, items]) => key !== 'phone' && items.some(item => TEXT_SOURCES.has(item.source) && item.weight >= THRESHOLDS.medium))) return;
   const evidence: Evidence = { source: 'format', signal: picker ? 'date picker' : placeholder, weight, match: 'type' };
   const named = type === 'date' ? [...byType.keys()].filter(key => DATE_FIELD_TYPES.has(key)) : [];
   for (const key of named.length ? named : [type]) add(key, evidence);
@@ -247,6 +265,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   if (idNumber) push(idNumber.source, idNumber.raw, 0.6);
   const slug = type === 'website' && texts.find(signal => SLUG_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (slug) push(slug.source, slug.raw, 0.9);
+  // "Reference 1 name", "Reference relationship": a person given as a reference, not a record number.
+  const personalReference = signals.some(signal => PERSONAL_REFERENCE.test(signal.text));
+  if (type === 'reference' && personalReference && texts.some(signal => PERSON_DETAIL.test(signal.text)) && !texts.some(signal => RECORD_NUMBER.test(signal.text))) push('label', 'a person given as a reference', 0.7);
   // "Mr / Mrs / Dr" is a civility, not the title of a thing.
   if (type === 'title' && (options.length ? options : optionTexts(el)).filter(text => CIVILITY.test(normalize(text))).length >= 2) push('options', 'civility titles', 0.9);
   return found;

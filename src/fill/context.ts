@@ -4,6 +4,7 @@ import { classifyField, datePart, isSensitive, SOURCE_GROUP, THRESHOLDS, type Cl
 import { AUTOCOMPLETE, CONFIRMABLE_TYPES, DATE_FIELD_TYPES, PAIR_PHRASES } from './dictionary';
 import { autocompleteToken, describeSignals, displayLabel, indexRadios, isChoice, isVisible, OMITTED_TYPES, optionTexts, type Signal } from './extract';
 import { normalize } from './normalize';
+import { secondOpinion } from './model';
 
 // The second pass: after each field is classified on its own, read each form as a whole.
 
@@ -15,6 +16,7 @@ const CURRENT_WORDS = words(['current', 'old', 'existing', 'actuel', 'actuelle',
 const NEW_WORDS = words(['new', 'nouveau', 'nouvelle', 'الجديدة', 'الجديد']);
 const FROM_WORDS = words(['from', 'du', 'de', 'start', 'begin', 'depuis', 'من']);
 const TO_WORDS = words(['to', 'au', 'until', 'end', 'jusqu au', 'الى', 'حتى']);
+const START_WORDS = words(['start', 'starts', 'started', 'starting', 'commencing', 'commence', 'commences', 'begin', 'begins', 'beginning', 'rentree', 'debut', 'بداية', 'البدء']);
 const DEPARTURE_WORDS = words(['departure', 'depart', 'départ', 'leaving', 'المغادرة']);
 const SPECIFY_WORDS = words(['specify', 'please specify', 'other', 'précisez', 'préciser', 'autre', 'autres', 'حدد', 'أخرى']);
 const NAME_TYPES: ReadonlySet<string> = new Set(['fullName', 'firstName', 'lastName']);
@@ -106,12 +108,21 @@ function ownDate(start: readonly Signal[], signals: readonly Signal[]): boolean 
   const subject = new Set(labelWords(start));
   return !own.some(word => subject.has(word));
 }
+// What the field itself says: its label, accessible name, placeholder, name and id, not a hint or title.
+const OWN = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'name', 'id']);
+const ownWords = (signals: readonly Signal[]) => signals.filter(signal => OWN.has(signal.source)).map(signal => signal.text);
 const isDateInput = (el: Control) => el instanceof HTMLInputElement && (el.type === 'date' || el.type === 'datetime-local');
 
 // Start and end dates: "Arrival" then "Departure", "From"/"To", "Du"/"Au", "من"/"إلى", or an
 // unlabelled date just after a start date.
 function dateRoles(pass: Pass) {
   const dates = pass.members.filter(el => !(el instanceof HTMLSelectElement) && !isSensitive(get(pass, el).type) && (isDateInput(el) || DATE_FIELD_TYPES.has(get(pass, el).type as FieldKey)) && get(pass, el).type !== 'birthDate');
+  // "Date you'd like to start", "started_on", "Week commencing": a plain date whose
+  // own words name a beginning is a start date, alone or before its end.
+  for (const el of dates) {
+    const found = get(pass, el);
+    if ((found.type === 'date' || (found.type === 'unknown' && isDateInput(el))) && ownWords(pass.signals(el)).some(text => START_WORDS.some(word => contains(text, word)))) retype(pass, el, 'startDate', 'start', evidence('a date that starts something', 0.75));
+  }
   for (let k = 0; k + 1 < dates.length; k++) {
     const a = dates[k], b = dates[k + 1];
     const first = get(pass, a), second = get(pass, b);
@@ -195,6 +206,18 @@ function fieldOrder(pass: Pass) {
   });
 }
 
+// "Company" then "Title": beside the person's employer, a bare title is their job title, not the
+// title of a thing. Only a title whose words say nothing more ("Title", "Titre").
+const WORK_TYPES: ReadonlySet<string> = new Set(['company', 'department', 'industry']);
+function jobTitles(pass: Pass) {
+  pass.members.forEach((el, i) => {
+    const found = get(pass, el);
+    if (found.type !== 'title' || visibleText(pass.signals(el)).split(' ').length > 1) return;
+    const neighbour = [pass.members[i - 1], pass.members[i + 1]].find(other => other && WORK_TYPES.has(get(pass, other).type));
+    if (neighbour) retype(pass, el, 'jobTitle', undefined, evidence(`beside ${quote(neighbour)}`, Math.max(found.confidence, 0.7)));
+  });
+}
+
 // What kind of form this is, from its fields and the words on its action, id and submit button.
 export function formType(form: HTMLFormElement, types: readonly string[], roles: readonly (FieldRole | undefined)[]): { type: FormType; confidence: number } {
   const count = (type: string) => types.filter(found => found === type).length;
@@ -229,7 +252,8 @@ function ruleFor(el: Control, rules: readonly TypeRule[]): TypeRule | undefined 
   return rules.find(rule => (!rule.site || rule.site === host) && (() => { try { return el.matches(rule.selector); } catch { return false; } })());
 }
 
-export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<Control, boolean>, rules: readonly TypeRule[] = []): PageAnalysis {
+// Each field on its own, before the form is read as a whole.
+export function firstPass(controls: readonly Control[], rules: readonly TypeRule[] = []): Map<Control, Classification> {
   const fields = new Map<Control, Classification>();
   indexRadios(controls);
   try {
@@ -241,6 +265,13 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     const rule = ruleFor(el, rules);
     if (rule && !isSensitive(found.type)) fields.set(el, { ...found, type: rule.type, confidence: rule.type === 'unknown' ? 0 : 1, candidates: [], evidence: [{ source: 'rule', signal: 'set for this site', weight: 1, match: 'context' }], fixed: true });
   }
+  return fields;
+}
+
+export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<Control, boolean>, rules: readonly TypeRule[] = [], model = true): PageAnalysis {
+  const fields = firstPass(controls, rules);
+  // The model reads each field as the first pass saw it, as in training.
+  const first = new Map(fields);
   const signals = (el: Control) => fields.get(el)?.signals ?? describeSignals(el);
   const groups = new Map<HTMLFormElement | null, Control[]>();
   for (const el of fields.keys()) { const members = groups.get(el.form) ?? []; members.push(el); groups.set(el.form, members); }
@@ -253,6 +284,7 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     dateRoles(pass);
     cardSection(pass, members);
     specifyCompanions(pass);
+    jobTitles(pass);
     fieldOrder(pass);
     if (!form) continue;
     // A form is judged by what the user can see: hidden fields and hidden forms don't count.
@@ -261,5 +293,8 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     const types = shown.filter(el => !isChoice(el)).map(el => fields.get(el)!.type);
     forms.push({ index: Array.from(document.forms).indexOf(form), fields: shown.length, ...formType(form, types, shown.map(el => fields.get(el)!.role)) });
   }
+  // Last, so confirmations, dates, neighbours and card sections speak first, and form types come
+  // from the rules alone: the model only names fields they still leave unknown or unsure.
+  if (model) secondOpinion(controls, fields, first);
   return { fields, forms };
 }

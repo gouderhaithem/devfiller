@@ -1,22 +1,22 @@
 {
   "summary": {
     "fields": 865,
-    "precision": 0.9915730337078652,
-    "recall": 0.9805555555555555,
-    "f1": 0.9860335195530725,
-    "accuracy": 0.9791907514450867,
-    "unknownRate": 0.176878612716763,
-    "falsePositiveRate": 0.027586206896551724,
-    "wrongRate": 0.006936416184971098
+    "precision": 0.9903448275862069,
+    "recall": 0.9958391123439667,
+    "f1": 0.9930843706777316,
+    "accuracy": 0.9895953757225433,
+    "unknownRate": 0.16184971098265896,
+    "falsePositiveRate": 0.041666666666666664,
+    "wrongRate": 0.008092485549132947
   },
   "types": {
     "address": {
       "support": 22,
-      "predicted": 21,
-      "correct": 21,
-      "precision": 1,
-      "recall": 0.9545454545454546,
-      "f1": 0.9767441860465117
+      "predicted": 23,
+      "correct": 22,
+      "precision": 0.9565217391304348,
+      "recall": 1,
+      "f1": 0.9777777777777777
     },
     "address2": {
       "support": 5,
@@ -59,12 +59,12 @@
       "f1": 1
     },
     "city": {
-      "support": 27,
-      "predicted": 26,
-      "correct": 26,
-      "precision": 1,
-      "recall": 0.9629629629629629,
-      "f1": 0.9811320754716981
+      "support": 28,
+      "predicted": 29,
+      "correct": 28,
+      "precision": 0.9655172413793104,
+      "recall": 1,
+      "f1": 0.9824561403508771
     },
     "color": {
       "support": 2,
@@ -76,11 +76,11 @@
     },
     "company": {
       "support": 15,
-      "predicted": 13,
-      "correct": 13,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
-      "recall": 0.8666666666666667,
-      "f1": 0.9285714285714286
+      "recall": 1,
+      "f1": 1
     },
     "country": {
       "support": 21,
@@ -93,10 +93,10 @@
     "date": {
       "support": 14,
       "predicted": 15,
-      "correct": 13,
-      "precision": 0.8666666666666667,
-      "recall": 0.9285714285714286,
-      "f1": 0.896551724137931
+      "correct": 14,
+      "precision": 0.9333333333333333,
+      "recall": 1,
+      "f1": 0.9655172413793104
     },
     "department": {
       "support": 1,
@@ -108,11 +108,11 @@
     },
     "description": {
       "support": 4,
-      "predicted": 3,
-      "correct": 3,
+      "predicted": 4,
+      "correct": 4,
       "precision": 1,
-      "recall": 0.75,
-      "f1": 0.8571428571428571
+      "recall": 1,
+      "f1": 1
     },
     "district": {
       "support": 2,
@@ -124,11 +124,11 @@
     },
     "email": {
       "support": 50,
-      "predicted": 50,
-      "correct": 50,
+      "predicted": 49,
+      "correct": 49,
       "precision": 1,
-      "recall": 1,
-      "f1": 1
+      "recall": 0.98,
+      "f1": 0.98989898989899
     },
     "employeeCount": {
       "support": 2,
@@ -163,9 +163,9 @@
       "f1": 1
     },
     "fullName": {
-      "support": 29,
-      "predicted": 29,
-      "correct": 29,
+      "support": 30,
+      "predicted": 30,
+      "correct": 30,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -196,11 +196,11 @@
     },
     "lastName": {
       "support": 22,
-      "predicted": 21,
-      "correct": 21,
-      "precision": 1,
-      "recall": 0.9545454545454546,
-      "f1": 0.9767441860465117
+      "predicted": 23,
+      "correct": 22,
+      "precision": 0.9565217391304348,
+      "recall": 1,
+      "f1": 0.9777777777777777
     },
     "material": {
       "support": 3,
@@ -236,11 +236,11 @@
     },
     "notes": {
       "support": 10,
-      "predicted": 8,
-      "correct": 8,
+      "predicted": 10,
+      "correct": 10,
       "precision": 1,
-      "recall": 0.8,
-      "f1": 0.888888888888889
+      "recall": 1,
+      "f1": 1
     },
     "password": {
       "support": 25,
@@ -268,19 +268,19 @@
     },
     "postalCode": {
       "support": 18,
-      "predicted": 17,
-      "correct": 17,
+      "predicted": 18,
+      "correct": 18,
       "precision": 1,
-      "recall": 0.9444444444444444,
-      "f1": 0.9714285714285714
+      "recall": 1,
+      "f1": 1
     },
     "price": {
       "support": 4,
-      "predicted": 3,
-      "correct": 3,
+      "predicted": 4,
+      "correct": 4,
       "precision": 1,
-      "recall": 0.75,
-      "f1": 0.8571428571428571
+      "recall": 1,
+      "f1": 1
     },
     "quantity": {
       "support": 22,
@@ -316,11 +316,11 @@
     },
     "search": {
       "support": 6,
-      "predicted": 7,
+      "predicted": 6,
       "correct": 6,
-      "precision": 0.8571428571428571,
+      "precision": 1,
       "recall": 1,
-      "f1": 0.923076923076923
+      "f1": 1
     },
     "skip:card": {
       "support": 21,
@@ -339,9 +339,9 @@
       "f1": 0.9848484848484849
     },
     "skip:iban": {
-      "support": 9,
-      "predicted": 9,
-      "correct": 9,
+      "support": 8,
+      "predicted": 8,
+      "correct": 8,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -364,11 +364,11 @@
     },
     "startDate": {
       "support": 19,
-      "predicted": 18,
-      "correct": 18,
+      "predicted": 19,
+      "correct": 19,
       "precision": 1,
-      "recall": 0.9473684210526315,
-      "f1": 0.972972972972973
+      "recall": 1,
+      "f1": 1
     },
     "state": {
       "support": 15,
@@ -434,8 +434,8 @@
   },
   "relations": {
     "accepted by the page": {
-      "correct": 566,
-      "total": 566
+      "correct": 567,
+      "total": 567
     },
     "seeded repeat": {
       "correct": 62,

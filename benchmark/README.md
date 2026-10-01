@@ -45,12 +45,43 @@ change on 30 new pages. So:
   engine on the sealed set; a regression there is a bug in the fix, fixed and disclosed.
 - **Label blind.** Whoever labels a form never sees the engine's answers.
 
+## Sealed results
+
+Round of 1 October 2026: sealed Form Lab pages 76–90 (15 pages, 458 labelled fields), written blind
+before any tuning, opened once with the finished engine.
+
+| Engine | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| main at 03e7772 (start of the round) | 90.3% | 78.0% | 83.7% |
+| Rules after the round's fixes | 91.0% | 78.8% | 84.5% |
+| Rules + second-opinion model v1 | 91.2% | 87.5% | **89.3%** |
+
+The model fixed 30 fields and broke 2 (a licence number read as a reference, an ethnicity dropdown
+read as a city). One consent checkbox ("Allow support staff to sign in to my account") was filled by
+every engine, including main; permission wording ("allow", "grant access") now counts as consent,
+fixed after the sealed measurement. Pages 76–90 are now retired: the next round needs a new sealed
+set before any tuning.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
 or, compared with `baseline.json`, overall precision or recall drops, any type's precision or
 recall drops, or fewer spelling variants are right. Update the baseline only for a change you
 mean to accept, and say why in the commit.
+
+The second-opinion model ([MODEL.md](MODEL.md)) answers more fields, so a few of its answers can
+move a type's precision. Such a change is accepted only when every field it changed is listed and
+reviewed below, overall precision drops by at most 0.5 point, and leaks, submissions and form types
+stay where they were. Most fixtures are in the model's training data, so the benchmark guards
+against harm; the sealed Form Lab set measures the gain.
+
+Reviewed model changes (model v1, 1 October 2026; rules alone 41 mistakes, with the model 21):
+
+| Fixture | Label | Model | Why it's accepted |
+| --- | --- | --- | --- |
+| `06-flight-booking` `dest` | unknown | city | "City or airport": the rules abstain on either-fields; a city is a valid answer |
+| `37-fr-commande-charpente` `reperes[0][nom]` | unknown | lastName | The name of a marked part read as a person's; harmless sample text in a free field |
+| `h06-declaration-fiscale` `f_20` | email | address | Unlabelled field the rules reached only from its neighbour, at 0.69; a known weakness to fix with more data |
 
 ## Adding a fixture
 
