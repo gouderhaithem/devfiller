@@ -103,6 +103,29 @@ Forms honeypots (`autocomplete="new-password"`, labelled "Name" or "Email", hidd
 builder's stylesheet), now treated as traps from their markup, and an identity number the model
 read as a phone: the model no longer guesses on fields whose own words name an ID number.
 
+### Second real-world round: 1,200 more forms
+
+1,200 more forms from 1,200 other websites of the same crawl (`scripts/uci-sealed/sample-round.mjs`),
+labelled blind with this guide and `scripts/uci-sealed/label.mjs`, then checked against the settled
+cases (`scripts/uci-sealed/consistency.mjs`): 998 forms (13,767 fields) became training data with
+the first real-world set, and 202 forms (2,291 fields, no website shared with training) were sealed
+and opened once. The real-form rows stay outside the repository, in `~/datasets/uci-webform/model/`.
+
+| On the 202 sealed real forms | Precision | Recall | F1 | Better / worse than rules |
+| --- | --- | --- | --- | --- |
+| Rules alone | 88.0% | 82.2% | 85.0% | |
+| Rules + model v1 (no real forms in training) | 86.8% | 85.2% | 86.0% | 49 / 15 |
+| **Rules + model v2 (real forms in training, 150 KB)** | **88.7%** | 84.9% | **86.8%** | 43 / 5 |
+
+The model now beats the rules on precision on real forms as well as on recall. A 287 KB model scored
+87.2% (precision 88.9%, 54 better and 3 worse) but would break the 150 KB budget; the size was chosen
+on validation pages, never on the sealed set. Learned guesses stay off by default: the +1.8 points
+are short of the +3 the plan set for switching them on.
+
+18 sensitive fields are filled on these forms by every engine: Stripe's hidden one-character helper
+inputs, consent radios and checkboxes worded unusually ("show my name", "keep my gift anonymous",
+supporter questions) and an email verification code. That is rule work for the next round.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
