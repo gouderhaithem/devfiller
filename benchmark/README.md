@@ -76,6 +76,33 @@ The model's wrong answers were mostly guesses on fields that should stay unknown
 forms then brought the rules to 83.7% F1 and 8 filled consent fields (all mailing-list or
 declaration choices whose page uses no consent wording). This set is now retired.
 
+## Real-world comparison
+
+1 October 2026: 30,956 English forms from the 11,500 sites of the UCI web form crawl, compared field
+by field with their PI type classifier (`scripts/uci`, see its README). Their labels are a model's,
+so disagreements were reviewed by hand. Three were engine bugs, fixed with
+`fixtures/regressions/r09-real-world-uci-crawl.html`:
+
+| Bug | Fields before | After |
+| --- | --- | --- |
+| A postal code on `type="tel"` read as a phone | 133 | 6 |
+| `autocomplete="new-password"` on a text field (a form builder turning autofill off) read as a password | 149 | 18 |
+| The second opinion naming a thing's name ("Facility Name", "OS Name") a person's full name | 246 | 169 |
+
+Agreement on comparable fields went from 91.4% to 91.7%. Most of the remaining 169 are person names
+their classifier missed. Training the model on their labels didn't help: every variant scored below
+the current model on the validation pages (88.3–88.8% F1 against 89.0%), since 93% of the rows are
+fields the rules already get right and their data has no "unknown" examples.
+
+On the retired real-world set above, against main at 6872a90: rules 83.7% → 83.8% F1, rules + model
+84.4% → 84.6% (precision 85.4% → 85.6%; the model's harmful changes 24 → 21). Seven fields fixed
+(four postal codes on `type="tel"`, a group name and a school name no longer read as people, a
+"last 4 of SSN" no longer read as a last name); two got worse, both select2 dropdown search boxes now
+read as search, which the default "skip search fields" leaves empty. The same set showed Gravity
+Forms honeypots (`autocomplete="new-password"`, labelled "Name" or "Email", hidden by the form
+builder's stylesheet), now treated as traps from their markup, and an identity number the model
+read as a phone: the model no longer guesses on fields whose own words name an ID number.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,

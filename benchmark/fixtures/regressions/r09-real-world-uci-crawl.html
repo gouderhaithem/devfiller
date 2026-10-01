@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" data-no-training>
+<head><meta charset="utf-8"><title>Regression: real-world fields from the UCI web form crawl</title></head>
+<body>
+<main>
+  <!-- Found by comparing the engine with the UCI web form dataset (scripts/uci) on 1 October 2026:
+       fields copied from live sites. A postal code on type="tel" read as a phone, a "Name" field
+       with autocomplete="new-password" (a form builder turning autofill off) read as a password,
+       and the second opinion named "Facility Name" or "Test Name" a person's full name. Kept out of
+       the model's training data (data-no-training): it checks the rules and the model's veto. -->
+  <form action="/register" method="post" data-form-type="other">
+    <label for="zip">ZIP Code</label><input type="tel" id="zip" name="/atg/userprofiling/ProfileFormHandler.value.registrationPostalCode" data-expect="postalCode">
+    <input type="tel" name="PostalCode" title="Postal Code (required)" autocomplete="postal-code" pattern="^\d{5}([\-]\d{4})?$" data-expect="postalCode">
+    <label for="pc">Postcode:</label><input type="tel" id="pc" name="bboxdonation$billing$billingAddress$txtAUPostCode" placeholder="postcode" data-expect="postalCode">
+    <label for="tel">Phone</label><input type="tel" id="tel" name="input_5" data-expect="phone">
+  </form>
+  <form action="/join" method="post" data-form-type="signup">
+    <label for="input_1_80">Name</label><input type="text" id="input_1_80" name="input_80" autocomplete="new-password" data-expect="fullName">
+    <label for="input_1_3">Email</label><input type="text" id="input_1_3" name="input_3" autocomplete="new-password" data-expect="email">
+    <label for="input_1_9">Password</label><input type="password" id="input_1_9" name="input_9" autocomplete="new-password" data-expect="password">
+  </form>
+  <form action="/facility" method="post" data-form-type="other">
+    <label for="facility_name">Facility Name</label><input type="text" id="facility_name" name="facilityName" data-expect="unknown">
+    <label for="agency">What is the Agency's Name?</label><input type="text" id="agency" name="fFBrokerAgencyName" data-expect="unknown">
+    <label for="input_5_31">Test Name</label><input type="text" id="input_5_31" name="input_31" data-expect="unknown">
+    <label for="contact_name">Contact Name *</label><input type="text" id="contact_name" name="item_meta[6]" data-expect="fullName">
+  </form>
+</main>
+</body>
+</html>

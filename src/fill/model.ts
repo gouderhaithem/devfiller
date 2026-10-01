@@ -6,9 +6,10 @@ import { isChoice } from './extract';
 import packed from './model.json';
 
 // The learned second opinion: a small softmax regression trained offline (npm run train) that
-// speaks only when the rules have no confident answer. Four safety rules: it never decides a
+// speaks only when the rules have no confident answer. Five safety rules: it never decides a
 // sensitive field and never names one (its classes have no skip:*), it never overrides a confident
-// rule, its confidence stays below medium, and it abstains when its top two types are close.
+// rule, its confidence stays below medium, it abstains when its top two types are close, and it
+// never names a type the rules ruled out.
 
 export interface PackedModel {
   version: number;
@@ -86,12 +87,13 @@ const confidenceOf = (model: PackedModel, probability: number) =>
 // pass (`first`), exactly as the dataset records them.
 export function secondOpinion(controls: readonly Control[], fields: Map<Control, Classification>, first: ReadonlyMap<Control, Classification> = fields, model: PackedModel = MODEL) {
   if (!model.classes.length) return;
-  for (const { el, info } of modelInputs(controls, first)) {
+  for (const { el, found: seen, info } of modelInputs(controls, first)) {
     const found = fields.get(el);
     if (!found || !askable(el, found)) continue;
     const opinion = predict(model, featuresOf(info));
     const type = answer(model, opinion, found.confidence >= THRESHOLDS.low ? found.type : 'unknown');
-    if (!type || !opinion) continue;
+    // Nor does it name a type the rules ruled out: "Facility name" is no person's name.
+    if (!type || !opinion || (found.ruledOut ?? seen.ruledOut)?.includes(type)) continue;
     // A weak rule guess the model agrees with keeps the rule's evidence and gains the model's.
     const agrees = found.type === type;
     const confidence = Math.min(MODEL_CONFIDENCE_CAP, Math.max(agrees ? found.confidence : 0, confidenceOf(model, opinion.probability)));

@@ -30,7 +30,7 @@ export function skipReason(ctx: FillContext, el: Control): string {
   if (type === 'skip:iban') return 'Protected bank account field';
   if (type === 'skip:consent') return 'Consent field stays untouched';
   if (type === 'skip:session') return 'Session choice stays untouched';
-  if (!request.passwords && (el.type === 'password' || type === 'password' || ac.includes('password') || fieldSignals(el).some(signal => PASSWORD.test(signal)))) return 'Password filling disabled';
+  if (!request.passwords && (el.type === 'password' || type === 'password' || (ac.includes('password') && type === 'unknown') || fieldSignals(el).some(signal => PASSWORD.test(signal)))) return 'Password filling disabled';
   if (isChoice(el) && !request.fillUnknown) return 'Unknown-field filling disabled';
   return '';
 }

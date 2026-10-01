@@ -267,3 +267,70 @@ describe('explainability', () => {
     expect(document.documentElement.childElementCount).toBe(before);
   });
 });
+
+// Real fields from the UCI web form crawl (scripts/uci), where the engine and their classifier
+// disagreed and the engine was wrong.
+describe('real-world fields', () => {
+  it('reads a postal code on a type="tel" input, which some sites use for the number pad', () => {
+    expect(typeOf('<label for="z">ZIP Code</label><input type="tel" id="z" name="/atg/userprofiling/ProfileFormHandler.value.registrationPostalCode">')).toBe('postalCode');
+    expect(typeOf('<input type="tel" name="PostalCode" title="Postal Code (required)" autocomplete="postal-code" pattern="^\\d{5}([\\-]\\d{4})?$">')).toBe('postalCode');
+    expect(typeOf('<label for="p">Postcode:</label><input type="tel" id="p" name="bboxdonation$billing$billingAddress$txtAUPostCode" placeholder="postcode">')).toBe('postalCode');
+  });
+
+  it('still reads a type="tel" input as a phone when its words say little', () => {
+    expect(typeOf('<input type="tel" name="field_7">')).toBe('phone');
+    expect(typeOf('<label for="c">Contact</label><input type="tel" id="c">')).toBe('phone');
+  });
+
+  it('ignores autocomplete="new-password" on a text field, a common way to turn browser autofill off', () => {
+    expect(typeOf('<label for="n">Name</label><input type="text" id="n" name="input_80" autocomplete="new-password">')).toBe('fullName');
+    expect(typeOf('<label for="e">Email</label><input type="text" id="e" name="input_3" autocomplete="new-password">')).toBe('email');
+  });
+
+  it('fills such a field even with password filling off, and still leaves real passwords alone', () => {
+    document.body.innerHTML = '<form><label for="n">Name</label><input type="text" id="n" name="input_80" autocomplete="new-password"><label for="p">Password</label><input type="text" id="p" name="input_81" autocomplete="new-password"><input type="text" id="f82" name="input_82" autocomplete="new-password"></form>';
+    fillPage({ ...request, passwords: false, exclusions: { skipSearch: false, skipHeader: false, rules: [] } });
+    expect(input('n').value).not.toBe('');
+    expect(input('p').value).toBe('');
+    expect(input('f82').value).toBe('');
+  });
+
+  it('still reads a password field by its type or its words', () => {
+    expect(typeOf('<input type="password" name="input_9" autocomplete="new-password">')).toBe('password');
+    expect(typeOf('<label for="p">Password</label><input type="text" id="p" autocomplete="current-password">')).toBe('password');
+  });
+
+  it("doesn't take the name of a thing for a person's name", () => {
+    for (const html of [
+      '<label for="f">Facility Name</label><input type="text" id="f" name="facilityName">',
+      '<label for="a">What is the Agency\'s Name?</label><input type="text" id="a" name="fFBrokerAgencyName">',
+      '<label for="t">Test Name</label><input type="text" id="t" name="input_31">',
+      '<label for="e">Name of the event</label><input type="text" id="e">',
+      '<label for="p">Nom du projet</label><input type="text" id="p">',
+      '<label for="o">OS Name</label><input type="text" id="o" name="item_os_name_impacted1">',
+    ]) expect(typeOf(html), html).not.toBe('fullName');
+  });
+
+  it("rules out every person-name type for a thing's name, not only the full name", () => {
+    expect(classify('<label for="f">Facility Name</label><input type="text" id="f">').ruledOut).toEqual(expect.arrayContaining(['fullName', 'firstName', 'middleName', 'lastName']));
+  });
+
+  it('reads the people named after a thing: "Name of the project manager"', () => {
+    for (const label of ['Name of the project manager', 'Name of your team lead', 'Name of the school principal', 'Name of the pet owner']) {
+      const found = classify(`<label for="n">${label}</label><input type="text" id="n">`);
+      expect(found.ruledOut ?? [], label).not.toContain('fullName');
+    }
+    expect(typeOf('<label for="n">Name of the project manager</label><input type="text" id="n">')).toBe('fullName');
+  });
+
+  it("goes by the visible label when only the field's name says it's a thing", () => {
+    expect(typeOf('<label for="g">Full name</label><input type="text" id="g" name="group_name">')).toBe('fullName');
+    expect(typeOf('<label for="c">Your name</label><input type="text" id="c" name="clinic_name">')).toBe('fullName');
+  });
+
+  it("still reads a person's name", () => {
+    expect(typeOf('<label for="n">Name</label><input type="text" id="n">')).not.toBe('unknown');
+    expect(typeOf('<label for="c">Contact Name *</label><input type="text" id="c">')).toBe('fullName');
+    expect(typeOf('<label for="h">Account holder name</label><input type="text" id="h">')).toBe('fullName');
+  });
+});

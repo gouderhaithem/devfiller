@@ -212,3 +212,16 @@ describe('Phase D review regressions', () => {
     expect([el('y').checked, el('a').checked, el('b').checked]).toEqual([true, false, false]);
   });
 });
+
+describe('second opinion', () => {
+  it('never guesses an identity number field (UCI real-world set: last 4 of an SSN read as a phone)', () => {
+    expect(typeOf('<form><label id="l">Last 4 digits of Social Security Number</label><input id="f" aria-label="Last 4 digits of Social Security Number" maxlength="4" name="ssnUnmasked" type="tel"></form>', 'f')).toBe('unknown');
+    expect(analyze('<form><input id="f" aria-label="Last 4 digits of Social Security Number" maxlength="4" name="ssnUnmasked" type="tel"></form>').fields.get(el('f'))?.ruledOut).toEqual(expect.arrayContaining(['phone', 'reference']));
+  });
+
+  it('never names a type the rules ruled out (UCI crawl: "Facility Name" was filled as a person)', () => {
+    for (const html of ['<label for="f">Facility Name</label><input type="text" id="f" name="facilityName">', '<label for="f">Test Name</label><input type="text" id="f" name="input_31">', '<label for="f">Wiki page name</label><input type="text" id="f" name="ctl00$PlaceHolderMain$wikiPageNameEditTextBox">']) {
+      expect(typeOf(`<form>${html}</form>`, 'f'), html).not.toBe('fullName');
+    }
+  });
+});

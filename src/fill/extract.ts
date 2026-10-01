@@ -216,6 +216,8 @@ export function isScale(answers: readonly string[]): 'words' | 'numbers' | undef
 // A modal library hides the rest of the page with aria-hidden too, so that only counts with tabindex="-1".
 export function isTrap(el: Control): boolean {
   if (el.getAttribute('tabindex') === '-1' && el.closest('[aria-hidden="true"]')) return true;
+  // Gravity Forms' honeypot, hidden by its stylesheet, which a page may load late or not at all.
+  if (el.closest('.gform_validation_container, .gfield--type-honeypot')) return true;
   const hints = [el.getAttribute('placeholder'), labelText(el), el.getAttribute('aria-label'), el.getAttribute('title')];
   if (hints.some(hint => TRAP.test(normalize(hint || '')))) return true;
   const box = el.getBoundingClientRect();
