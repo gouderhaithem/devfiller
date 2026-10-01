@@ -173,6 +173,21 @@ describe('honeypots', () => {
   });
 });
 
+describe('Gravity Forms honeypots', () => {
+  it("leaves them empty even when the form builder's stylesheet that hides them is missing", () => {
+    // From the UCI real-world set (scripts/uci): Gravity Forms marks its honeypot with
+    // autocomplete="new-password" and a "Name" or "Email" label, and hides it with its own CSS.
+    document.body.innerHTML = `<form><div class="gfield gfield--type-honeypot gform_validation_container"><label class="gfield_label" for="input_2_21">Name</label>
+      <div class="ginput_container"><input name="input_21" id="input_2_21" type="text" value="" autocomplete="new-password"></div>
+      <div class="gfield_description">This field is for validation purposes and should be left unchanged.</div></div>
+      <label for="real">Name</label><input id="real" name="input_1">
+    </form>`;
+    fillPage({ ...request, passwords: true });
+    expect(field('input_2_21').value).toBe('');
+    expect(field('real').value).not.toBe('');
+  });
+});
+
 describe('real fields that mention leaving something empty', () => {
   it('fills them, and fields behind an open dialog', () => {
     document.body.innerHTML = `<form>

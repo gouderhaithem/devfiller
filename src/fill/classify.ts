@@ -1,5 +1,6 @@
 import type { FieldKey } from '../data';
 import type { Control } from './types';
+import { fields } from '../fields';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
   CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
@@ -213,6 +214,10 @@ const PERSON_NAME_TYPES: ReadonlySet<FieldType> = new Set(['fullName', 'firstNam
 // alone doesn't count against its label ("Full name" on name="group_name").
 const escape = (phrase: string) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const NAMED_THING = new RegExp(`(?:^| )(?:${NAMED_THING_PHRASES.map(escape).join('|')})(?: |$)|(?:^| )(?:${NAMED_THING_ENDINGS.map(escape).join('|')})$`, 'u');
+// "Passport number", "Last 4 of SSN", "Promo code": an identity or code number the rules leave
+// unknown, so the learned second opinion mustn't guess one either.
+const idNumberText = (signals: readonly Signal[]) => signals.find(signal => TEXT_SOURCES.has(signal.source) && signal.source !== 'legend' && ID_NUMBER_PHRASES.some(phrase => contains(signal.text, phrase)));
+const ALL_TYPES: readonly FieldKey[] = fields.map(([key]) => key);
 const namedThing = (signals: readonly Signal[]) => signals.find(signal => SOURCE_GROUP[signal.source] === 'visible' && NAMED_THING.test(signal.text));
 
 // A date or time format in the placeholder ("MM/DD/YYYY") outranks type="tel", which some date
@@ -272,7 +277,7 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   if (search) push(search.source, search.raw, 0.5);
   const confirm = !CONFIRMABLE_TYPES.has(type) && texts.find(signal => CONFIRM_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (confirm) push(confirm.source, confirm.raw, 0.4);
-  const idNumber = texts.find(signal => ID_NUMBER_PHRASES.some(phrase => contains(signal.text, phrase)));
+  const idNumber = idNumberText(signals);
   if (idNumber) push(idNumber.source, idNumber.raw, 0.6);
   const slug = type === 'website' && texts.find(signal => SLUG_PHRASES.some(phrase => contains(signal.text, phrase)));
   if (slug) push(slug.source, slug.raw, 0.9);
@@ -447,6 +452,7 @@ function rank(el: Control, signals: Signal[], answers?: readonly string[], group
   const excluded = new Set(scored.filter(candidate => candidate.evidence.some(item => item.match === 'against' && -item.weight >= RULED_OUT)).map(candidate => candidate.type));
   // A thing's name rules out every person-name type, whether or not the rules suggested one.
   if (namedThing(signals)) for (const type of PERSON_NAME_TYPES) excluded.add(type as FieldKey);
+  if (idNumberText(signals)) for (const type of ALL_TYPES) excluded.add(type);
   const ruledOut = excluded.size ? { ruledOut: [...excluded] } : {};
   const candidates = scored.slice(0, 3);
   const [top] = candidates;
