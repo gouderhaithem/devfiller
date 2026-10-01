@@ -1,4 +1,5 @@
 import type { Control, FillContext } from './types';
+import { fieldSignals } from './extract';
 import { classificationOf, usableKey } from './classify';
 import { COUNTRY_SPELLINGS } from './dictionary';
 import { fitValue, matchChoice } from './generate';
@@ -9,7 +10,8 @@ const COUNTRY_REGION: Readonly<Record<string, Region>> = { 'United States': 'us'
 const DIAL_CODE: Readonly<Record<Region, string>> = { dz: '+213', fr: '+33', us: '+1' };
 // Dial codes in a field's hints. National numbers (05…, 06…) exist in more than one of these
 // countries, so they only decide the format, not the country.
-const DIAL_HINTS: ReadonlyArray<readonly [RegExp, Region]> = [[/(?:\+|00)\s?213/, 'dz'], [/(?:\+|00)\s?33/, 'fr'], [/\+\s?1/, 'us']];
+// "(555) 555-0123" is the US way of writing a number, with or without its +1.
+const DIAL_HINTS: ReadonlyArray<readonly [RegExp, Region]> = [[/(?:\+|00)\s?213/, 'dz'], [/(?:\+|00)\s?33/, 'fr'], [/\+\s?1/, 'us'], [/^\(\d{3}\)\s?\d{3}[-.\s]\d{4}$/, 'us']];
 
 const hints = (el: Control) => ['placeholder', 'pattern', 'title'].map(name => (el.getAttribute(name) || '').trim()).filter(Boolean);
 const regionOfValue = (value: string) => (Object.entries(DIAL_CODE) as [Region, string][]).find(([, code]) => value.startsWith(`${code} `))?.[0];
@@ -43,8 +45,13 @@ function languageRegion(el: Control): Region | undefined {
 // A form that asks for a US state, and has no country field, is American. A sample of states is
 // enough: a US state select lists all fifty, so five of these is a clear sign.
 const US_STATES = new Set(['alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'florida', 'georgia', 'illinois', 'new york', 'ohio', 'texas', 'washington', 'virginia', 'michigan', 'pennsylvania', 'massachusetts', 'oregon', 'nevada']);
+// A ZIP code is American too: "ZIP", "Zip code", "Zip/Postal".
+const ZIP = /(?:^| )zip(?: ?code)?(?= |$)|^zip/;
 function stateRegion(ctx: FillContext, form: HTMLFormElement | null): Region | undefined {
-  const states = ctx.controls.find((el): el is HTMLSelectElement => el instanceof HTMLSelectElement && el.form === form && usableKey(classificationOf(ctx.classifications, el), true) === 'state');
+  const members = ctx.controls.filter(el => el.form === form);
+  const zip = members.some(el => usableKey(classificationOf(ctx.classifications, el), true) === 'postalCode' && fieldSignals(el).some(text => ZIP.test(text)));
+  if (zip) return 'us';
+  const states = members.find((el): el is HTMLSelectElement => el instanceof HTMLSelectElement && usableKey(classificationOf(ctx.classifications, el), true) === 'state');
   if (!states) return undefined;
   return Array.from(states.options).filter(option => US_STATES.has((option.textContent || '').trim().toLowerCase())).length >= 5 ? 'us' : undefined;
 }

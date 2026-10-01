@@ -47,6 +47,33 @@ function besideText(el: Element, forward: boolean): string {
   return '';
 }
 
+// The heading over a group of toggles that isn't a fieldset: "Notifications & privacy" above a
+// stack of switches. Climbs past rows of other toggles and stops at native fields, which mean the
+// container is a whole form section rather than the group.
+const NATIVE = 'input:not([type="hidden"]), select, textarea';
+const TOGGLES = '[role="switch"], [role="checkbox"]';
+const onlyToggles = (node: Element) => !node.matches(NATIVE) && !node.querySelector(NATIVE) && (node.matches(TOGGLES) || !!node.querySelector(TOGGLES)) && !node.querySelector('[role]:not([role="switch"]):not([role="checkbox"])');
+const referencedIds = () => new Set(Array.from(document.querySelectorAll('[aria-labelledby], [aria-describedby]'), node => `${node.getAttribute('aria-labelledby') || ''} ${node.getAttribute('aria-describedby') || ''}`.split(/\s+/)).flat().filter(Boolean));
+function headingAbove(el: Element): string {
+  const referenced = referencedIds();
+  const isLabelOfSomething = (node: Element) => node.matches('label') || (!!node.id && referenced.has(node.id));
+  let node: Element = el;
+  for (let depth = 0; depth < 8; depth++) {
+    for (let sibling = node.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+      // Another toggle, or another field's label ("Share usage data" beside its switch), isn't a heading.
+      if (onlyToggles(sibling) || isLabelOfSomething(sibling)) continue;
+      if (sibling.matches(NATIVE) || sibling.querySelector(`${NATIVE}, [role]`)) return '';
+      const text = clip(sibling.textContent);
+      if (text) return text.length <= 80 ? text : '';
+    }
+    // The form, a fieldset or the page is as far as a group's heading can be.
+    const parent = node.parentElement;
+    if (!parent || parent.matches('form, fieldset, body') || parent.querySelector(NATIVE)) return '';
+    node = parent;
+  }
+  return '';
+}
+
 function widgetSignals(el: HTMLElement, kind: WidgetKind): Signal[] {
   const label = el.id ? document.querySelector(`label[for="${el.id.replace(/"/g, '\\"')}"]`)?.textContent : '';
   const signals = [
@@ -59,7 +86,7 @@ function widgetSignals(el: HTMLElement, kind: WidgetKind): Signal[] {
   if (!signals.length && kind !== 'radio') signals.push(...signal('nearby', besideText(el, kind === 'checkbox') || besideText(el, kind !== 'checkbox')));
   if (kind === 'checkbox' && !signals.length) signals.push(...signal('label', el.textContent));
   if (el.id && !isMeaningless(el.id)) signals.push(...signal('id', el.id));
-  signals.push(...signal('legend', kind === 'radio' ? groupLabel(groupOf(el)) : el.closest('fieldset')?.querySelector('legend')?.textContent));
+  signals.push(...signal('legend', kind === 'radio' ? groupLabel(groupOf(el)) : el.closest('fieldset')?.querySelector('legend')?.textContent || (kind === 'checkbox' ? headingAbove(el) : '')));
   return signals;
 }
 
