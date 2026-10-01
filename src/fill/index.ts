@@ -269,7 +269,9 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   const { type } = classificationOf(ctx.classifications, el);
   // Card, one-time-code, bank and consent fields are recognized so they are never filled.
   if (isSensitive(type)) return NONE;
-  if (!request.passwords && (type === 'password' || sig.ac.includes('password') || sig.signals.some(s => PASSWORD.test(s)))) return NONE;
+  // autocomplete="new-password" alone is often a way to turn autofill off: it only keeps a field
+  // empty when nothing else says what the field is.
+  if (!request.passwords && (type === 'password' || (sig.ac.includes('password') && type === 'unknown') || sig.signals.some(s => PASSWORD.test(s)))) return NONE;
   if (isChoice(el)) return fillChoice(ctx, el, sig.signals);
   return fillValue(ctx, el, index, sig);
 }

@@ -207,6 +207,17 @@ export const DOCUMENT_PHRASES: readonly string[] = DOCUMENTS.map(normalize);
 export const SLUG_PHRASES: readonly string[] = SLUG_WORDS.map(normalize);
 export const ID_NUMBER_PHRASES: readonly string[] = ID_NUMBER_WORDS.map(normalize);
 export const PERSON_ROLE_PHRASES: readonly string[] = PERSON_ROLES.map(normalize);
+// Things with a name of their own: "Facility name", "Name of the event" and "Agency's name" aren't
+// the person's name.
+const NAMED_THINGS = ['facility', 'agency', 'event', 'product', 'project', 'team', 'store', 'shop', 'school', 'university', 'college', 'group', 'brand', 'venue', 'property', 'domain', 'file', 'course', 'program', 'programme', 'campaign', 'pet', 'hotel', 'restaurant', 'club', 'league', 'plan', 'device', 'app', 'application', 'list', 'test', 'site', 'website', 'workspace', 'channel', 'server', 'network', 'practice', 'clinic', 'hospital', 'church', 'charity', 'fund', 'vessel', 'vehicle', 'package', 'template', 'report', 'document', 'folder', 'category', 'playlist', 'game', 'book', 'song', 'album', 'show', 'os', 'page', 'wiki page', 'entity', 'software', 'system'];
+export const NAMED_THING_PHRASES: readonly string[] = [...new Set([
+  ...NAMED_THINGS.flatMap(thing => [`${thing} name`, `${thing} s name`]),
+  'nom du projet', "nom de l'evenement", "nom de l'etablissement", 'nom du produit', "nom de l'ecole", 'nom du fichier', "nom de l'equipe", 'nom du magasin', 'nom du site', 'nom du groupe',
+  'اسم المشروع', 'اسم المنتج', 'اسم الملف', 'اسم الفريق', 'اسم المتجر', 'اسم الموقع',
+].map(normalize))];
+// "Name of the event" names a thing only when the thing ends the label: "Name of the project
+// manager" is a person.
+export const NAMED_THING_ENDINGS: readonly string[] = NAMED_THINGS.flatMap(thing => [`name of ${thing}`, `name of the ${thing}`, `name of your ${thing}`]).map(normalize);
 export const SENSITIVE_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_TERMS.card.map(normalize), otp: SENSITIVE_TERMS.otp.map(normalize), iban: SENSITIVE_TERMS.iban.map(normalize),
 };

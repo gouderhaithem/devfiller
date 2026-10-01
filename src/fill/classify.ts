@@ -2,7 +2,7 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -25,6 +25,7 @@ export interface Classification {
   fixed?: boolean;         // set by your type rule: nothing refines it
   model?: boolean;         // the learned second opinion named a type the rules didn't give
   unconfirmed?: Classification; // a card guess from a word other documents share: what the field is if the form has no card
+  ruledOut?: FieldKey[];   // types the field's own words or kind exclude: the learned second opinion never names them
   confidence: number;      // 0..1, after the margin adjustment
   candidates: Candidate[]; // top alternatives, best first
   evidence: Evidence[];    // why the winning type won (or why the field is sensitive)
@@ -204,6 +205,16 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
 
+const PASSWORD_TOKENS: ReadonlySet<string> = new Set(['new-password', 'current-password']);
+// A penalty this strong rules the type out: "Facility name" is not a person's name.
+const RULED_OUT = 0.9;
+const PERSON_NAME_TYPES: ReadonlySet<FieldType> = new Set(['fullName', 'firstName', 'middleName', 'lastName']);
+// What the person reads names a thing: "Facility name", "Name of the event". A field's name or id
+// alone doesn't count against its label ("Full name" on name="group_name").
+const escape = (phrase: string) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const NAMED_THING = new RegExp(`(?:^| )(?:${NAMED_THING_PHRASES.map(escape).join('|')})(?: |$)|(?:^| )(?:${NAMED_THING_ENDINGS.map(escape).join('|')})$`, 'u');
+const namedThing = (signals: readonly Signal[]) => signals.find(signal => SOURCE_GROUP[signal.source] === 'visible' && NAMED_THING.test(signal.text));
+
 // A date or time format in the placeholder ("MM/DD/YYYY") outranks type="tel", which some date
 // fields use to get a numeric keyboard.
 const showsDateOrTime = (el: Control) => ['date', 'time'].includes(placeholderShape(placeholderOf(el))?.kind ?? '');
@@ -232,10 +243,10 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   const found: Evidence[] = [];
   const push = (source: SignalSource, signal: string, factor: number) => found.push({ source, signal, weight: -factor, match: 'against' });
   if (isInput(el)) {
-    const ac = (el.getAttribute('autocomplete') || '').toLowerCase();
-    if ((el.type === 'password' || ac.includes('password')) && type !== 'password') push('type', 'password', 0.9);
+    if (el.type === 'password' && type !== 'password') push('type', 'password', 0.9);
     else if (el.type === 'email' && type !== 'email') push('type', 'email', 0.6);
-    else if (el.type === 'tel' && type !== 'phone' && !showsDateOrTime(el)) push('type', 'tel', 0.6);
+    // type="tel" brings up the number pad, which some postal code fields use too.
+    else if (el.type === 'tel' && type !== 'phone' && type !== 'postalCode' && !showsDateOrTime(el)) push('type', 'tel', 0.6);
     else if (el.type === 'url' && type !== 'website') push('type', 'url', 0.6);
     else if ((el.type === 'number' || el.type === 'range') && !NUMERIC_TYPES.has(type)) push('type', el.type, 0.6);
     else if (['date', 'datetime-local', 'month', 'week'].includes(el.type) && !DATE_FIELD_TYPES.has(type)) push('type', el.type, 0.7);
@@ -268,6 +279,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   // "Reference 1 name", "Reference relationship": a person given as a reference, not a record number.
   const personalReference = signals.some(signal => PERSONAL_REFERENCE.test(signal.text));
   if (type === 'reference' && personalReference && texts.some(signal => PERSON_DETAIL.test(signal.text)) && !texts.some(signal => RECORD_NUMBER.test(signal.text))) push('label', 'a person given as a reference', 0.7);
+  // "Facility name", "Name of the event": a thing's name, not the person's.
+  const thing = PERSON_NAME_TYPES.has(type) && namedThing(signals);
+  if (thing) push(thing.source, thing.raw, RULED_OUT);
   // "Mr / Mrs / Dr" is a civility, not the title of a thing.
   if (type === 'title' && (options.length ? options : optionTexts(el)).filter(text => CIVILITY.test(normalize(text))).length >= 2) push('options', 'civility titles', 0.9);
   return found;
@@ -340,6 +354,9 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   for (const signal of signals) {
     if (signal.source === 'autocomplete') {
       const token = autocompleteToken(el).toLowerCase();
+      // autocomplete="new-password" on a text field is a common way to turn browser autofill
+      // off, not a password: only a password input is believed.
+      if (PASSWORD_TOKENS.has(token) && isInput(el) && el.type !== 'password') continue;
       if (Object.hasOwn(AUTOCOMPLETE, token)) add(AUTOCOMPLETE[token], { source: 'autocomplete', signal: token, weight: SOURCE_WEIGHT.autocomplete, match: 'autocomplete' });
     } else if (signal.source === 'type' || signal.source === 'inputmode') {
       const hints = signal.source === 'type' ? INPUT_TYPE_HINTS : INPUT_MODE_HINTS;
@@ -426,13 +443,18 @@ const GENERAL_TYPE: Readonly<Partial<Record<FieldKey, FieldKey>>> = { birthDate:
 
 // Scores every candidate type and applies the margin rule.
 function rank(el: Control, signals: Signal[], answers?: readonly string[], grouped = false): Classification {
-  const candidates = [...collectEvidence(el, signals, answers, grouped)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score).slice(0, 3);
+  const scored = [...collectEvidence(el, signals, answers, grouped)].map(([type, evidence]) => scoreType(el, type, evidence, signals)).sort((a, b) => b.score - a.score);
+  const excluded = new Set(scored.filter(candidate => candidate.evidence.some(item => item.match === 'against' && -item.weight >= RULED_OUT)).map(candidate => candidate.type));
+  // A thing's name rules out every person-name type, whether or not the rules suggested one.
+  if (namedThing(signals)) for (const type of PERSON_NAME_TYPES) excluded.add(type as FieldKey);
+  const ruledOut = excluded.size ? { ruledOut: [...excluded] } : {};
+  const candidates = scored.slice(0, 3);
   const [top] = candidates;
-  if (!top) return { type: 'unknown', confidence: 0, candidates, evidence: [] };
+  if (!top) return { type: 'unknown', confidence: 0, candidates, evidence: [], ...ruledOut };
   // "Date" is the general form of a birth, start or end date: it agrees with them, it isn't a rival.
   const runnerUp = candidates.slice(1).find(candidate => GENERAL_TYPE[top.type] !== candidate.type);
   const confidence = Math.max(0, Math.min(1, top.score - Math.max(0, MARGIN - (top.score - (runnerUp?.score ?? 0))) * 2));
-  return { type: confidence >= THRESHOLDS.low ? top.type : 'unknown', confidence, candidates, evidence: top.evidence };
+  return { type: confidence >= THRESHOLDS.low ? top.type : 'unknown', confidence, candidates, evidence: top.evidence, ...ruledOut };
 }
 
 // Custom widgets (ARIA radio groups, comboboxes, rich-text editors) have no native control, so they

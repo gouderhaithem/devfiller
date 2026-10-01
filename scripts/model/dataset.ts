@@ -38,6 +38,9 @@ for (const { page, url, source } of sources) {
   const wait = WAIT[page.replace(/^lab\//, '').replace(/\.html$/, '')];
   if (wait) await tab.waitForTimeout(wait);
   await tab.addScriptTag({ content: entry });
+  // A page marked data-no-training tests the engine's own rules, not what the model learns: the
+  // model is small enough that a few such rows move its answers elsewhere.
+  if (await tab.evaluate(() => document.documentElement.hasAttribute('data-no-training'))) continue;
   const lang = await tab.evaluate(() => document.documentElement.lang?.slice(0, 2) || (document.documentElement.dir === 'rtl' ? 'ar' : 'en'));
   const rows = await tab.evaluate(() => (globalThis as any).__devfillerDataset()) as Array<{ index: number; expect: string; info: unknown }>;
   // Sensitive labels are left out: the model never learns card, code, bank or consent fields.

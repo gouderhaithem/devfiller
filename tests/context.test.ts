@@ -212,3 +212,11 @@ describe('Phase D review regressions', () => {
     expect([el('y').checked, el('a').checked, el('b').checked]).toEqual([true, false, false]);
   });
 });
+
+describe('second opinion', () => {
+  it('never names a type the rules ruled out (UCI crawl: "Facility Name" was filled as a person)', () => {
+    for (const html of ['<label for="f">Facility Name</label><input type="text" id="f" name="facilityName">', '<label for="f">Test Name</label><input type="text" id="f" name="input_31">', '<label for="f">Wiki page name</label><input type="text" id="f" name="ctl00$PlaceHolderMain$wikiPageNameEditTextBox">']) {
+      expect(typeOf(`<form>${html}</form>`, 'f'), html).not.toBe('fullName');
+    }
+  });
+});

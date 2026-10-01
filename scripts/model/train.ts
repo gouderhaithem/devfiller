@@ -6,7 +6,7 @@
 // the validation pages pick the stopping point, the temperature and the abstain threshold. The
 // sealed Form Lab pages are not in the dataset at all.
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { featuresOf, hashFeature, type FieldInfo } from '../../src/fill/features';
 import { MODEL_CONFIDENCE_CAP, type PackedModel } from '../../src/fill/model';
@@ -30,14 +30,23 @@ const raw = readFileSync(DATASET, 'utf8');
 const rows: Row[] = raw.trim().split('\n').map(line => JSON.parse(line));
 const datasetHash = createHash('sha256').update(raw).digest('hex').slice(0, 16);
 
-// Pages: about a fifth go to validation, drawn within each language and source.
+// Pages: about a fifth go to validation, drawn within each language and source. A page keeps the
+// side it was given (benchmark/model/split.json), so adding pages never moves the others: a new
+// page is placed by a hash of its name, and a group with no validation page yet gets its first.
 const random = rng(SEED);
 const pages = [...new Set(rows.map(row => row.page))];
 const stratum = (page: string) => { const row = rows.find(r => r.page === page)!; return `${row.lang}:${row.source.startsWith('benchmark') ? 'b' : 'l'}`; };
+const SPLIT = resolve('benchmark/model/split.json');
+const previous = existsSync(SPLIT) ? JSON.parse(readFileSync(SPLIT, 'utf8')) as { validation: string[]; training?: string[] } : undefined;
+// A split written before training pages were listed trained on every page it didn't validate on.
+const placed = previous && new Set([...previous.validation, ...(previous.training ?? pages)]);
+const pageDraw = (page: string) => parseInt(createHash('sha256').update(`${SEED}:${page}`).digest('hex').slice(0, 8), 16) / 2 ** 32;
+const validPages = new Set(pages.filter(page => placed?.has(page) ? previous!.validation.includes(page) : pageDraw(page) < 0.2));
 const strata = new Map<string, string[]>();
 for (const page of pages) strata.set(stratum(page), [...(strata.get(stratum(page)) ?? []), page]);
-const validPages = new Set<string>();
-for (const list of strata.values()) { random.shuffle(list); list.slice(0, Math.max(1, Math.round(list.length * 0.2))).forEach(page => validPages.add(page)); }
+for (const list of strata.values()) if (!list.some(page => validPages.has(page))) validPages.add(list.reduce((a, b) => pageDraw(a) <= pageDraw(b) ? a : b));
+// The draws the earlier shuffled split took, so the cross-validation folds below stay the same.
+for (const list of strata.values()) random.shuffle([...list]);
 // FRACTION < 1 trains on a seeded share of the training pages, for a learning curve (with DRY=1).
 const FRACTION = Number(process.env.FRACTION || 1);
 const kept = new Set(rng(SEED + 1).shuffle([...new Set(rows.filter(row => !validPages.has(row.page)).map(row => row.page))]).filter((_, i, all) => i < Math.max(1, Math.round(all.length * FRACTION))));
@@ -47,6 +56,17 @@ const validRows = rows.filter(row => validPages.has(row.page));
 const classes = [...new Set(rows.map(row => row.expect))].sort((a, b) => a === 'unknown' ? -1 : b === 'unknown' ? 1 : a.localeCompare(b));
 const classIndex = new Map(classes.map((name, i) => [name, i]));
 const K = classes.length;
+
+// EXTRA: more training rows from elsewhere (the UCI fields of scripts/uci), with silver labels.
+// They join every training set but are never held out or validated on, are not reworded, and each
+// weighs EXTRA_WEIGHT of a field; class weights come from the hand-labelled rows alone.
+const EXTRA = process.env.EXTRA ? resolve(process.env.EXTRA) : '';
+const EXTRA_WEIGHT = Number(process.env.EXTRA_WEIGHT || 0.3);
+const extraRaw = EXTRA ? readFileSync(EXTRA, 'utf8') : '';
+const extraRows: Row[] = extraRaw.trim() ? extraRaw.trim().split('\n').map(line => JSON.parse(line)).filter((row: Row) => classIndex.has(row.expect)) : [];
+const extraSet = new Set(extraRows);
+const extraHash = extraRaw ? createHash('sha256').update(extraRaw).digest('hex').slice(0, 16) : '';
+const withExtra = (set: readonly Row[]) => [...set, ...extraRows];
 
 // Fields the model is asked about at run time: the rules said unknown, or weren't sure.
 const askable = (row: Row) => !row.info.verdict[0].startsWith('skip:') && (row.info.verdict[0] === 'unknown' || row.info.verdict[1] < THRESHOLDS.medium);
@@ -58,7 +78,7 @@ function featureSet(info: FieldInfo, exclude: readonly string[]): number[] {
 interface Prepared { examples: Example[]; columns: Map<number, number> }
 function prepare(trainSet: readonly Row[], exclude: readonly string[], seed: number): Prepared {
   const r = rng(seed);
-  const expanded = trainSet.flatMap(row => [{ row, info: row.info }, ...augment(row.info, row.expect, r, VARIANTS).map(info => ({ row, info }))]);
+  const expanded = trainSet.flatMap(row => [{ row, info: row.info }, ...(extraSet.has(row) ? [] : augment(row.info, row.expect, r, VARIANTS).map(info => ({ row, info })))]);
   const hashed = expanded.map(({ row, info }) => ({ row, buckets: featureSet(info, exclude) }));
   const counts = new Map<number, number>();
   for (const { buckets } of hashed) for (const b of new Set(buckets)) counts.set(b, (counts.get(b) ?? 0) + 1);
@@ -66,11 +86,12 @@ function prepare(trainSet: readonly Row[], exclude: readonly string[], seed: num
   for (const [b, c] of counts) if (c >= MIN_COUNT) columns.set(b, columns.size);
   // Inverse-frequency class weights, capped, so rare types count and common ones don't dominate.
   const freq = new Map<string, number>();
-  for (const row of trainSet) freq.set(row.expect, (freq.get(row.expect) ?? 0) + 1);
-  const mean = trainSet.length / freq.size;
+  const labelled = trainSet.filter(row => !extraSet.has(row));
+  for (const row of labelled) freq.set(row.expect, (freq.get(row.expect) ?? 0) + 1);
+  const mean = labelled.length / freq.size;
   const classWeight = (name: string) => Math.min(CLASS_WEIGHT_CAP, Math.max(1 / CLASS_WEIGHT_CAP, mean / (freq.get(name) ?? mean)));
   // An original field and its variants weigh as much together as two fields.
-  const examples = hashed.map(({ row, buckets }, i) => ({ cols: toCols(buckets, columns), y: classIndex.get(row.expect)!, weight: classWeight(row.expect) * (expanded[i].info === row.info ? 1 : 1 / VARIANTS) }));
+  const examples = hashed.map(({ row, buckets }, i) => ({ cols: toCols(buckets, columns), y: classIndex.get(row.expect)!, weight: classWeight(row.expect) * (extraSet.has(row) ? EXTRA_WEIGHT : expanded[i].info === row.info ? 1 : 1 / VARIANTS) }));
   return { examples, columns };
 }
 const toCols = (buckets: readonly number[], columns: Map<number, number>) => Int32Array.from(new Set(buckets.flatMap(b => columns.has(b) ? [columns.get(b)!] : [])));
@@ -86,7 +107,7 @@ function cvLoss({ settings, exclude }: (typeof GRID)[number]): number {
   let total = 0;
   for (const fold of folds) {
     const inner = trainRows.filter(row => !fold.has(row.page)), held = trainRows.filter(row => fold.has(row.page));
-    const { examples, columns } = prepare(inner, exclude, SEED);
+    const { examples, columns } = prepare(withExtra(inner), exclude, SEED);
     const heldOut = examplesFor(held, columns, exclude);
     total += train(examples, columns.size, K, settings, heldOut).validLoss;
   }
@@ -101,7 +122,7 @@ const chosen = grid[0];
 console.log('cross-validation:', grid.map(g => `l1=${g.settings.l1} α=${g.settings.alpha}${g.exclude.length ? ' no-rule' : ''}: ${g.loss.toFixed(3)}`).join(' | '));
 
 // --- Final fit on the training pages, stopped on the validation pages ---
-const { examples, columns } = prepare(trainRows, chosen.exclude, SEED);
+const { examples, columns } = prepare(withExtra(trainRows), chosen.exclude, SEED);
 const valid = examplesFor(validRows, columns, chosen.exclude);
 const fitted = train(examples, columns.size, K, { ...chosen.settings, epochs: 30 }, valid);
 
@@ -179,11 +200,11 @@ const pct = (x: number) => `${(100 * x).toFixed(1)}%`;
 const answers = answered(threshold, margin);
 
 const top1 = opinions.filter(o => o.type === o.row.expect).length / opinions.length;
-console.log(`l1 ${chosen.settings.l1}, size ${(json.length / 1024).toFixed(0)} KB, cutoff ${cutoff}, packed agreement ${pct(agree / validRows.length)}; pages ${new Set(trainRows.map(r => r.page)).size}, fields ${trainRows.length}: validation log-loss ${logLoss(fitted.weights, valid, K, temperature).toFixed(3)}, top-1 ${pct(top1)}, asked top-1 ${pct(asked.filter(o => o.type === o.row.expect).length / asked.length)}, F1 rules ${pct(rulesScore.F)} → model ${pct(modelScore.F)}`);
+console.log(`l1 ${chosen.settings.l1}, size ${(json.length / 1024).toFixed(0)} KB, cutoff ${cutoff}, packed agreement ${pct(agree / validRows.length)}; pages ${new Set(trainRows.map(r => r.page)).size}, fields ${trainRows.length}${extraRows.length ? ` + ${extraRows.length} extra ×${EXTRA_WEIGHT}` : ''}: validation log-loss ${logLoss(fitted.weights, valid, K, temperature).toFixed(3)}, top-1 ${pct(top1)}, asked top-1 ${pct(asked.filter(o => o.type === o.row.expect).length / asked.length)}, F1 rules ${pct(rulesScore.F)} → model ${pct(modelScore.F)}`);
 if (process.env.DRY) process.exit(0);
 writeFileSync(resolve('src/fill/model.json'), json + '\n');
 // Which pages were held out, so the whole-engine evaluation can score the same pages.
-writeFileSync(resolve('benchmark/model/split.json'), JSON.stringify({ seed: SEED, validation: [...validPages].sort() }, null, 1) + '\n');
+writeFileSync(SPLIT, JSON.stringify({ seed: SEED, validation: [...validPages].sort(), training: pages.filter(page => !validPages.has(page)).sort() }, null, 1) + '\n');
 const card = `# Second-opinion model
 
 Generated by \`npm run train\` on ${new Date().toISOString().slice(0, 10)}. Don't edit by hand.
@@ -194,7 +215,7 @@ Generated by \`npm run train\` on ${new Date().toISOString().slice(0, 10)}. Don'
 | Dataset | \`benchmark/model/dataset.jsonl\`, ${rows.length} fields from ${pages.length} pages (hash \`${datasetHash}\`) |
 | Sources | ${Object.entries(rows.reduce((acc, r) => ({ ...acc, [r.source]: (acc[r.source] ?? 0) + 1 }), {} as Record<string, number>)).map(([s, n]) => `${s} ${n}`).join(', ')} |
 | Languages | ${Object.entries(rows.reduce((acc, r) => ({ ...acc, [r.lang]: (acc[r.lang] ?? 0) + 1 }), {} as Record<string, number>)).map(([s, n]) => `${s} ${n}`).join(', ')} |
-| Split | ${pages.length - validPages.size} training pages (${trainRows.length} fields, ×${VARIANTS} rewordings), ${validPages.size} validation pages (${validRows.length} fields), by page, stratified by language and source |
+${extraRows.length ? `| Extra training rows | ${extraRows.length} from \`${EXTRA.replace(process.env.HOME || '~', '~')}\` (hash \`${extraHash}\`), ${Object.entries(extraRows.reduce((acc, r) => ({ ...acc, [r.source]: (acc[r.source] ?? 0) + 1 }), {} as Record<string, number>)).map(([s, n]) => `${s} ${n}`).join(', ')}; each weighs ${EXTRA_WEIGHT} of a field, not reworded, never validated on |\n` : ''}| Split | ${pages.length - validPages.size} training pages (${trainRows.length} fields, ×${VARIANTS} rewordings), ${validPages.size} validation pages (${validRows.length} fields), by page, stratified by language and source |
 | Classes | ${K} (${classes.length - 1} types and unknown; sensitive labels are not in the data) |
 | Model | softmax regression, FTRL-Proximal, l1 ${chosen.settings.l1}, l2 ${chosen.settings.l2}, α ${chosen.settings.alpha}, ${fitted.epochs} epochs, seed ${SEED}${chosen.exclude.length ? `, without ${chosen.exclude.join(', ')} features` : ''} |
 | Calibration | temperature ${temperature}; answers when p ≥ ${threshold} and leads by ≥ ${margin}, replaces a weak rule answer only when p ≥ ${override === 1 ? 'never' : override} (gain ${bestOverride} on validation); confidence capped at ${MODEL_CONFIDENCE_CAP} |
