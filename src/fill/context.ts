@@ -160,6 +160,19 @@ function confirmCards(fields: Map<Control, Classification>) {
 
 // In the same section as card fields, a name is the cardholder's, a month, year or date is the
 // card's expiry, and anything unrecognized is most likely card data too: none of them is filled.
+// Four or more one-character boxes in a row are one code typed digit by digit: a one-time code,
+// never test data. (A card number in four boxes takes four characters per box.)
+const isCodeBox = (el: Control) => el instanceof HTMLInputElement && ['text', 'tel', 'number', 'password', ''].includes(el.type) && el.maxLength === 1;
+function codeBoxes(pass: Pass) {
+  const run: Control[] = [];
+  const close = () => {
+    if (run.length >= 4) for (const el of run) pass.fields.set(el, { ...get(pass, el), type: 'skip:otp', confidence: 1, candidates: [], evidence: [{ source: 'form', signal: `${run.length} one-character boxes in a row`, weight: 1, match: 'sensitive' }] });
+    run.length = 0;
+  };
+  for (const el of pass.members) { if (isCodeBox(el) && !isSensitive(get(pass, el).type)) run.push(el); else close(); }
+  close();
+}
+
 function cardSection(pass: Pass, all: readonly Control[]) {
   const cards = all.filter(el => get(pass, el).type === 'skip:card');
   if (!cards.length) return;
@@ -174,7 +187,8 @@ function cardSection(pass: Pass, all: readonly Control[]) {
     const name = NAME_TYPES.has(found.type) && !/shipping|billing/.test((el.getAttribute('autocomplete') || '').toLowerCase());
     if (declared(el) && !name) continue;
     // A plain or unrecognized date is the card's expiry; a birthday or a named start date is not.
-    const expiry = isDateLike(el, found.type) && (found.type === 'date' || found.type === 'unknown' || found.confidence < THRESHOLDS.medium);
+    // A year beside the card ("YYYY") is its expiry year too.
+    const expiry = (isDateLike(el, found.type) && (found.type === 'date' || found.type === 'unknown' || found.confidence < THRESHOLDS.medium)) || found.type === 'year';
     if (!name && !expiry && !(found.type === 'unknown' && couldHoldCard(el))) continue;
     for (let node = el.parentElement, depth = 0; node && depth < 4 && node !== el.form && node !== document.body; node = node.parentElement, depth++) {
       if (!sections.has(node)) continue;
@@ -288,6 +302,7 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     linkConfirmations(pass);
     passwordRoles(pass);
     dateRoles(pass);
+    codeBoxes(pass);
     cardSection(pass, members);
     specifyCompanions(pass);
     jobTitles(pass);
