@@ -3,7 +3,7 @@ import type { Control } from './types';
 import { fields } from '../fields';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  CHECKBOX_CONSENT, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -202,7 +202,9 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   const radio = isChoice(el) && el.type === 'radio';
   const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source)).map(signal => radio ? { ...signal, text: signal.text.replace(DESCRIBING, ' ') } : signal);
   const answers = own.map(signal => ({ ...signal, text: signal.text.replace(DESCRIBING_ANSWER, ' ') }));
-  const found = [...texts, ...answers].find(signal => CONSENT.test(signal.text)) ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && DECLARATION.test(signal.text));
+  const checkbox = isChoice(el) && el.type === 'checkbox';
+  const found = [...texts, ...answers].find(signal => CONSENT.test(signal.text))
+    ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && (DECLARATION.test(signal.text) || (checkbox && CHECKBOX_CONSENT.test(signal.text))));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
 
@@ -423,7 +425,7 @@ function classifySignals(el: Control, signals: Signal[]): Classification {
     if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
   }
   if (isChoice(el) && el.type === 'checkbox') {
-    const consent = consentEvidence(el, signals);
+    const consent = consentEvidence(el, signals) ?? subscriptionEvidence(el);
     if (consent) return { type: 'skip:consent', confidence: 1, candidates: [], evidence: [consent] };
     const session = sessionEvidence(signals);
     return session ? { type: 'skip:session', confidence: 1, candidates: [], evidence: [session] } : { type: 'unknown', confidence: 0, candidates: [], evidence: [] };
@@ -438,10 +440,31 @@ function classifySignals(el: Control, signals: Signal[]): Classification {
   return rank(el, signals);
 }
 
-// A select that only answers yes or no, besides its "Choose…" placeholder.
+// A select that only answers yes or no, or opts in or out ("Send me updates" / "Unsubscribe me"),
+// besides its "Choose…" placeholder.
+const OPT_ANSWER = /(?:^| )(?:(?:un)?subscribe|opt (?:in|out)|send me|no thanks)(?= |$)/;
 function isYesNo(el: HTMLSelectElement): boolean {
   const answers = optionTexts(el).map(normalize).filter(text => text && !PLACEHOLDER_OPTION.test(text));
-  return answers.length >= 1 && answers.length <= 3 && answers.every(text => YES_NO.test(text));
+  return answers.length >= 1 && answers.length <= 4 && answers.every(text => YES_NO.test(text) || OPT_ANSWER.test(text));
+}
+
+// A checkbox in a sign-up form's list of newsletters: its name says it is a list (Mailchimp's
+// group[…], lists[…], "newsletter", "email alerts"), a container is a mailing list, or the form's
+// button says Subscribe. A paid "subscription" (a product, a magazine) is not a mailing list.
+const LIST_NAME = /newsletter|mailing.?list|email.?alerts|signup.?alerts|opt.?in|^lists\[|^group\[\d+\]/i;
+const LIST_PLACE = /newsletter|mailing.?list|opt.?in\b|[-_]emails\b|mc-embedded|email.?alerts|subscription.?list|subscribe.?form|marketing.?(list|subscription|pref)/i;
+const SUBSCRIBE_BUTTON = /^\s*(subscribe|sign me up|sign up for (our |the )?(newsletter|emails?|updates))\b/i;
+function subscriptionEvidence(el: HTMLInputElement): Evidence | undefined {
+  const own = [el.name, el.id, el.className].find(text => text && LIST_NAME.test(text));
+  let place: string | undefined;
+  for (let node = el.parentElement, depth = 0; node && depth < 5 && node.tagName !== 'BODY' && !place; node = node.parentElement, depth++) {
+    place = [node.id, typeof node.className === 'string' ? node.className : '', node.getAttribute('data-editorblocktype') || ''].find(text => text && LIST_PLACE.test(text));
+    if (node.tagName === 'FORM') break;
+  }
+  const button = el.form?.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
+  const pressed = [button?.textContent || '', button?.getAttribute('value') || ''].find(text => SUBSCRIBE_BUTTON.test(text));
+  const found = own ?? place ?? pressed;
+  return found ? { source: 'form', signal: `a sign-up list (${found.trim().slice(0, 40)})`, weight: 1, match: 'sensitive' } : undefined;
 }
 
 const GENERAL_TYPE: Readonly<Partial<Record<FieldKey, FieldKey>>> = { birthDate: 'date', startDate: 'date', endDate: 'date' };
