@@ -92,8 +92,10 @@ and any training data agree:
 | A phone number's country-code picker ("+33", "FR (+33)") | `country` | The choice is a country |
 | A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |
 | Years driving, years in the role, licence held for | `experience` | A number of years of doing something |
-| Personal or legal IDs (national ID, NIN, SIRET, tax ID, plate, employee number); record IDs (order, VIN, serial, customer number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |
+| Personal or legal IDs (national ID, NIN, SIRET, PAN, tax ID, plate, employee number); record IDs (order, VIN, serial, customer, client or membership number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |
 | Saving the person's details for later ("Save this information for next time", "Save this address to my account", "Save this card"); opting out ("Email opt-out", "Unsubscribe") | `skip:consent` | Each gives or withdraws permission to keep or use personal data; "Remember me" stays `skip:session` |
+| Automatic renewal ("Renew my membership automatically", "Enroll me in auto renewal") | `skip:consent` | Permission to charge again later |
+| Each part of a split date (day, month and year selects or boxes) | the date's type on every part (`birthDate`, `date`, `startDate`…) | One date written in pieces; a year asked on its own is `year` |
 
 ## Relationships
 
