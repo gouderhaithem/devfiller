@@ -269,6 +269,39 @@ Fixed, each by mechanism rather than by page, with fixtures `r07` and `r08`:
   coupon and offer codes have no type.
 - **Phones:** a French-language form gets a French number and a form with a US state select a US one.
 
+## Form Lab, sealed pages 151–195
+
+Pages 151–180 (631 fields: everyday forms, French and Arabic forms from seven countries, and the
+markup of ten form builders) were written blind and opened once on 1 October 2026:
+
+| F1 | `main` before | Rules only (default) | Rules + learned guesses |
+| --- | --- | --- | --- |
+| Pages 151–180 | 86.3% | 88.0% | 91.0% |
+| Everyday forms (151–160) | 82.4% | 84.7% | 90.4% |
+| French and Arabic (161–170) | 92.4% | 93.8% | 96.6% |
+| Form-builder markup (171–180) | 84.3% | 85.6% | 86.3% |
+
+They found two consent boxes that were ticked in every version (an "Email Opt Out" box and "Save
+this address to my account for next time"), notification switches read without the heading above
+them, a "…back by" deadline that came out equal to its start date, and US forms without a country
+field whose phones followed the generated region instead of the form. All five are fixed, with
+tests in `tests/form-lab-4.test.ts`. The guide now settles "save my details" and opt-out boxes as
+`skip:consent`, and `04-checkout`'s "Save this information for next time" is relabelled to match.
+
+Pages 181–195 (327 fields, checkouts, preference toggles, US and French/Arabic forms) were written
+while these fixes were made and opened once afterwards:
+
+| Pages 181–195 | F1 | Precision | Recall | Sensitive fields filled |
+| --- | --- | --- | --- | --- |
+| `main` | 79.3% | 85.6% | 73.9% | 3 |
+| These fixes (default) | 79.6% | 85.6% | 74.3% | 2 |
+| These fixes + learned guesses | 83.3% | 86.2% | 80.5% | 2 |
+
+Field by field against `main`, one answer got better and none got worse. These pages lean on
+consent toggles and preference checkboxes, and that is where most remaining mistakes are: 10
+consent fields read as unknown (two of them were ticked, both email-preference checkboxes), and 5
+fields beside a card read as card data. That is the next round's work. Both sets are now retired.
+
 ## Confidence calibration
 
 Typed answers on the main fixtures, by confidence band. Sensitive skips and unknowns are left out.

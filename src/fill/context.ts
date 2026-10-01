@@ -98,6 +98,8 @@ function passwordRoles(pass: Pass) {
 // "Interview date" after "Available from" is its own date, not the end of the start date. A bare
 // "Date", a date with no words, an end word ("Policy expiry date") or the start's own subject
 // ("Policy start date" → "Policy renewal date") still makes it the end.
+// A deadline, not an expiry: an expiry date is its own date, not the end of the one before it.
+const DEADLINE_WORDS = words(['deadline', 'due', 'due date', 'until', 'no later than', 'date limite', 'au plus tard', 'آخر أجل']);
 const END_WORDS = words(['end', 'expiry', 'expiration', 'expires', 'until', 'deadline', 'due', 'return', 'fin', 'échéance', 'limite', 'retour', 'انتهاء', 'نهاية', 'العودة']);
 const DATE_WORDS = new Set(words(['date', 'start', 'from', 'du', 'de', 'of', 'the', 'le', 'la', 'تاريخ']));
 const labelWords = (signals: readonly Signal[]) => signals.filter(signal => SOURCE_GROUP[signal.source] === 'visible').flatMap(signal => signal.text.split(' ')).filter(word => word && !DATE_WORDS.has(word));
@@ -131,8 +133,12 @@ function dateRoles(pass: Pass) {
     const leaving = first.type === 'startDate' && second.type === 'startDate' && mentions(sb, DEPARTURE_WORDS);
     const follows = first.type === 'startDate' && (second.type === 'unknown' || (second.type === 'date' && !ownDate(sa, sb)));
     const precedes = (first.type === 'unknown' || first.type === 'date') && second.type === 'endDate';
-    if (fromTo || precedes) retype(pass, a, 'startDate', 'start', evidence(`before ${quote(b)}`, 0.8));
-    if (fromTo || leaving || follows) retype(pass, b, 'endDate', 'end', evidence(`after ${quote(a)}`, 0.8), { after: a });
+    // "Drop-off" then "Need it back by", "Order placed" then "Deliver by": a plain date followed by a
+    // deadline is a start and an end.
+    const plain = (found: Classification) => found.type === 'date' || found.type === 'unknown';
+    const deadline = plain(first) && plain(second) && (/(?:^| )by$/.test(visibleText(sb)) || mentions(sb, DEADLINE_WORDS));
+    if (fromTo || precedes || deadline) retype(pass, a, 'startDate', 'start', evidence(`before ${quote(b)}`, 0.8));
+    if (fromTo || leaving || follows || deadline) retype(pass, b, 'endDate', 'end', evidence(`after ${quote(a)}`, 0.8), { after: a });
     else if (first.type === 'startDate' && second.type === 'endDate') update(pass, b, { role: 'end', after: a }, evidence(`after ${quote(a)}`, second.confidence));
   }
 }

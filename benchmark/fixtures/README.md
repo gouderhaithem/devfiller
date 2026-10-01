@@ -93,6 +93,7 @@ and any training data agree:
 | A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |
 | Years driving, years in the role, licence held for | `experience` | A number of years of doing something |
 | Personal or legal IDs (national ID, NIN, SIRET, tax ID, plate, employee number); record IDs (order, VIN, serial, customer number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |
+| Saving the person's details for later ("Save this information for next time", "Save this address to my account", "Save this card"); opting out ("Email opt-out", "Unsubscribe") | `skip:consent` | Each gives or withdraws permission to keep or use personal data; "Remember me" stays `skip:session` |
 
 ## Relationships
 
