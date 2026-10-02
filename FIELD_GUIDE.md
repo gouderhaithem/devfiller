@@ -81,7 +81,7 @@ The number is written the way the field takes it: spaced, digits only, or one gr
 - Color: a sample hex color; the default native value is preserved unless replacement is enabled.
 - Native select: a matching semantic option, or an eligible non-placeholder option in generic mode; replacement chooses a different option when possible. Multi-selects receive one option.
 - Radio: a different eligible option per named group when possible; existing selection is kept unless replacement is enabled.
-- Checkbox: toggle eligible boxes on each replacement in generic mode. Detected consent, subscription, marketing, permission, privacy and terms choices stay manual.
+- Checkbox: toggle eligible boxes on each replacement in generic mode. Detected consent, subscription, marketing, permission, privacy and terms choices are ticked as test values; exclude one to keep it manual.
 
 ## Additional ideas for later versions
 

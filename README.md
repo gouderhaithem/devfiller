@@ -31,7 +31,7 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 | **Undo last fill** | Restore the previous values while preserving fields you edited afterward. |
 | **One-click filling** | Fill the active page directly from the toolbar and see the filled-field count on the icon. |
 | **46 field categories** | Generate fictional identities, contact details, work information, addresses, numbers, dates, and text. |
-| **Measured recognition** | Every field scored from all its clues, the form read as a whole, and a confidence and the evidence shown in the side panel. Card fields get sandbox test cards (4242 4242 4242 4242 and the declined, insufficient-funds, expired and incorrect-CVC cards), never real ones; bank, one-time-code and consent fields are never filled. |
+| **Measured recognition** | Every field scored from all its clues, the form read as a whole, and a confidence and the evidence shown in the side panel. Card fields get sandbox test cards (4242 4242 4242 4242 and the declined, insufficient-funds, expired and incorrect-CVC cards), never real ones. Other sensitive fields get values that read as tests: a one-time code of 4s (`444444`), a bank account of 4s (a valid IBAN `DE47444444444444444444`, BIC `TESTDE44`, US routing `110000000`), consent and "Remember me" boxes ticked with "Yes" on permission questions. Exclude any field you want left alone. |
 | **Fits the site's validation** | Values follow each field's rules, and a value the site rejects is written another way. |
 | **Custom widgets** | ARIA switches, checkboxes, radio groups, dropdowns and rich-text editors are filled too. |
 | **Repeatable and regional data** | A seed gives the same data every run; addresses and phones come from the United States, France or Algeria (69 wilayas, real communes). |
@@ -127,7 +127,7 @@ New to DevFiller? **[docs/getting-started.html](docs/getting-started.html)** is 
 - Gemini is optional. Its prompt contains field metadata, including labels and placeholders, plus the selected language. Entered form values, page URLs, and whole-page HTML are excluded. Labels can still contain website-specific information.
 - Your Gemini key stays in local extension storage, which is **not encrypted**, and is sent to Google for API authentication. No shared key is bundled.
 - DevFiller fills the **top-level document**. Frames, shadow DOM, rich-text editors, and custom widgets need additional adapters.
-- File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Filling never submits forms automatically.
+- File uploads and hidden/disabled/read-only controls are skipped. Detected one-time-code, bank and consent fields get test values; exclude a field to leave it alone. Filling never submits forms automatically.
 - Generated data is fictional. Finite sample pools can repeat, and website-specific validation may reject values. Choose the region for addresses and phones in the options; French and Algerian phone numbers follow the real format and may be in use.
 
 The extension uses `activeTab`, `scripting`, `storage`, and `alarms`, plus `sidePanel` and `contextMenus` for the page companion. Automatic Gemini preparation requests optional HTTP/HTTPS website access. [Privacy policy](PRIVACY.md) · [Full privacy and permissions details →](docs/USER_GUIDE.md#privacy--permissions)

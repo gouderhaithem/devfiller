@@ -147,7 +147,7 @@ Generated fields use readable words and phrases, with no appended random identif
 
 Data is fictional and intended for testing. Emails and websites use `example.com`; phone samples use the fictional US 202-555-01xx range. Address and phone regions are not necessarily tied to the selected language. Website-specific validation may still reject generated data.
 
-DevFiller works in the active page’s **top-level document**. Frames, shadow DOM, rich-text editors, and custom JavaScript controls need separate adapters. File uploads, hidden/disabled/read-only controls, and detected consent, payment, and one-time-code fields are skipped. Some frameworks require trusted user input that a script cannot reproduce.
+DevFiller works in the active page’s **top-level document**. Frames, shadow DOM, rich-text editors, and custom JavaScript controls need separate adapters. File uploads and hidden/disabled/read-only controls are skipped; detected consent, payment, bank and one-time-code fields get test values. Some frameworks require trusted user input that a script cannot reproduce.
 
 ## Privacy & permissions
 

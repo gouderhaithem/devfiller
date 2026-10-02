@@ -13,7 +13,7 @@ npm install --save-dev devfiller
 ## What it would do
 
 - **Generate data**: the same coherent identities, addresses, numbers and dates as the extension, in English, French or Arabic, with no network access.
-- **Fill a form**: the same field detection, so one call fills a whole form in a Playwright or Cypress test, with the same skip rules for passwords, payments and consent.
+- **Fill a form**: the same field detection, so one call fills a whole form in a Playwright or Cypress test, with the same rules: passwords skipped, payment, bank, one-time-code and consent fields given test values.
 - **Repeat a run**: an optional seed, so a failing test produces the same data every time you rerun it.
 - **Report what happened**: which fields were filled or skipped, and why, for your assertions.
 
