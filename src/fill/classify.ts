@@ -279,6 +279,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   // A select of the person's own addresses may be an email; other selects can't hold one.
   const emails = type === 'email' && options.some(text => /@/.test(text));
   if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type) && !emails) push('type', 'select', 0.6);
+  // "Currency", "Donation frequency", "Payment type", "Hide my amount": about a sum, not the sum.
+  const aboutSum = type === 'amount' && (isChoice(el) || el instanceof HTMLSelectElement) && signals.find(signal => (signal.source === 'name' || signal.source === 'id' || signal.source === 'label' || signal.source === 'aria-label') && ABOUT_A_SUM.test(signal.text));
+  if (aboutSum) push(aboutSum.source, aboutSum.raw, RULED_OUT);
   // A radio group's answers are choices too: "About you" over Yes / No isn't a bio.
   if (isChoice(el) && el.type === 'radio' && !SELECT_TYPES.has(type)) push('type', 'radio', 0.6);
   // "7 days, 30 days, No expiration" are durations: a date select lists dates or their parts.
@@ -326,6 +329,17 @@ export function datePart(texts: readonly string[]): DatePart | undefined {
 
 // What the answers say: mostly country names means a country, mostly wilayas a state or wilaya.
 // Answers alone stay below medium confidence: a list can share words with another kind of list.
+// "$25", "50,00 €", "$1,000 – $5,000", "25.00": sums of money, besides an "Other" answer. Returns how
+// many, when at least two and most answers are.
+const MONEY = /^(?:[$€£¥₹]\s?\d[\d,.\s]*|\d[\d,.\s]*\s?(?:[$€£¥₹]|usd|eur|gbp|chf|cad|aud)|\d+[.,]\d{2})(?:\s*(?:-|–|to|à)\s*[$€£¥₹]?\s?\d[\d,.\s]*[$€£¥₹]?)?(?:\s*(?:\/|per|a|each)\s*\w+)?$/i;
+const MONEY_RANGE = /^(?:less than|under|up to|more than|over|above)\s+[$€£¥₹]\s?\d/i;
+const ABOUT_A_SUM = /(?:^| )(?:currency|currencies|frequency|type|hide|devise)(?= |$)/u;
+export function moneyShare(texts: readonly string[]): number {
+  const answers = texts.map(text => text.trim()).filter(text => text && !/^(?:other|autre|custom|another amount|other amount)\b/i.test(text));
+  const sums = answers.filter(text => MONEY.test(text) || MONEY_RANGE.test(text)).length;
+  return sums >= 2 && sums / answers.length >= 0.6 ? sums : 0;
+}
+
 function optionEvidence(texts: readonly string[], signals: readonly Signal[]): Array<[FieldKey, Evidence]> {
   if (texts.length < 2) return [];
   const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
@@ -347,6 +361,8 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
   if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);
+  const money = moneyShare(texts);
+  if (money) found.push(['amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' }]);
   return found;
 }
 
@@ -356,6 +372,11 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   const add = (type: FieldKey, evidence: Evidence) => byType.set(type, [...(byType.get(type) ?? []), evidence]);
   const options = answers ?? optionTexts(el);
   for (const [type, evidence] of optionEvidence(options, signals)) add(type, evidence);
+  // Unlabelled radios ("25.00", "50.00") say what they are by their values.
+  if (!options.length && isChoice(el) && el.type === 'radio') {
+    const money = moneyShare(radioGroup(el).map(radio => radio.value));
+    if (money && radioGroup(el).every(radio => /^[$€£]?\d+(?:[.,]\d{2})?$|^(?:other|custom)$/i.test(radio.value.trim()))) add('amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' });
+  }
   const unit = unitOf(signals);
   if (unit) {
     // Money is an amount unless the label says price; a rate ("$/h", "€/m²") is a price.

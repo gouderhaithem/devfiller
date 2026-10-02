@@ -35,7 +35,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   website: ['website', 'web site', 'url', 'homepage', 'home page', 'portfolio', 'linkedin', 'linked in', 'profile url', 'site', 'blog', 'site web', 'site internet', 'الموقع الإلكتروني', 'الموقع'],
   bio: ['bio', 'biography', 'about', 'about me', 'about you', 'about yourself', 'biographie', 'à propos', 'présentation', 'نبذة'],
   description: ['steps to reproduce', 'expected result', 'actual result', 'symptoms', 'symptômes', 'reason', 'purpose', 'description', 'details', 'product description', 'الوصف', 'التفاصيل'],
-  message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
+  message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'feedback', 'your query', 'your enquiry', 'your inquiry', 'your question', 'how can we help', 'how we can help', 'tell us how we can help', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
   subject: ['subject', 'topic', 'sujet', 'objet', 'الموضوع', 'موضوع'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
   measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
@@ -47,7 +47,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
     'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
   quantity: ['bedrooms', 'bathrooms', 'years', 'number of years', 'number of hours', 'hours per month', 'hours per week', 'number of days', 'quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
-  amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
+  amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'amt', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
     'montant', 'somme', 'revenu', 'revenus', 'dépenses', 'apport', 'acompte', "chiffre d'affaires", 'المبلغ', 'الدخل', 'المصاريف', 'الميزانية'],
   salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
@@ -84,7 +84,7 @@ export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['year', 'experience', 'measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
-export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
+export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'amount', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
 export const CONFIRMABLE_TYPES: ReadonlySet<FieldKey> = new Set(['email', 'password', 'phone', 'username']);
 export const CONFIRM_WORDS = ['confirm', 'confirmation', 'repeat', 're enter', 'retype', 'verify', 'again', 'confirmer', 'تاكيد', 'اعادة'];
 export const SEARCH_WORDS = ['search', 'recherche', 'rechercher', 'بحث', 'البحث'];
@@ -134,8 +134,9 @@ export const CHECKBOX_CONSENT = new RegExp(`(?:^| )(?:${CHECKBOX_CONSENT_WORDS.j
 // A checkbox that states something about the user ("I have read…", "I am over 18",
 // "Je certifie…", "J'ai lu…") is a declaration, never test data.
 // A first-person statement that declares or vouches: "I confirm…", "I have read…", "I am over 18",
-// "Je certifie…". "I want to choose a dealership" or "I have a vehicle" are answers, not declarations.
-export const DECLARATION = /^(?:i|im|i m|je|j)(?: (?:hereby|also|fully|do|have|am|m|ai|suis))* (?:confirm|certify|declare|agree|accept|consent|acknowledge|understand|attest|affirm|swear|promise|undertake|authori[sz]e|authori[sz]ed|give|grant|read|wish|will|would like|at least|over|aged|\d+ years|of legal|confirme|certifie|declare|accepte|reconnais|atteste|lu|majeur)(?= |$)/u;
+// "Je certifie…", and promises to pay or give ("I choose to pay the fees", "I want to contribute
+// this amount every month"). "I want to choose a dealership" or "I have a vehicle" are answers.
+export const DECLARATION = /^(?:i|im|i m|je|j)(?: (?:hereby|also|fully|do|not|d|have|am|m|ai|suis|ne))* (?:(?:want|choose|agree|wish|would like|d like|like) to (?:pay|cover|contribute|donate|give)|pay|cover|contribute|donate|confirm|certify|declare|agree|accept|consent|acknowledge|understand|attest|affirm|swear|promise|undertake|authori[sz]e|authori[sz]ed|give|grant|read|wish|will|would like|at least|over|aged|\d+ years|of legal|confirme|certifie|declare|accepte|reconnais|atteste|lu|majeur)(?= |$)/u;
 // A bare topic ("Analytics", "Marketing", "Product news") names what an option is about. Among
 // several options it is a choice; it asks permission only as the box's own lone question.
 export const TOPIC_ONLY = /^(?:[a-z]+ )?(?:analytics|communications?|comms|marketing|news|updates|deals|digest|notifications?|alerts|offers|promotions?|partners|sponsors?|newsletters?)(?: [a-z]+)?$/u;

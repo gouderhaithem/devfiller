@@ -229,6 +229,17 @@ function fieldOrder(pass: Pass) {
 // "Company" then "Title": beside the person's employer, a bare title is their job title, not the
 // title of a thing. Only a title whose words say nothing more ("Title", "Titre").
 const WORK_TYPES: ReadonlySet<string> = new Set(['company', 'department', 'industry']);
+// A form that asks for an email and has one text area with no clue of its own ("input_10"): the
+// message, as a weak answer that any clue or the model still overrides. Captcha and spam-trap
+// boxes don't count.
+const NOT_WRITTEN = /captcha|hp_textarea|honeypot/i;
+function soleMessage(pass: Pass, visible?: ReadonlyMap<Control, boolean>) {
+  const areas = pass.members.filter(el => el instanceof HTMLTextAreaElement && !NOT_WRITTEN.test(`${el.name} ${el.id}`) && (visible?.get(el) ?? isVisible(el)));
+  if (areas.length !== 1 || !pass.members.some(el => get(pass, el).type === 'email')) return;
+  const [area] = areas;
+  if (get(pass, area).type === 'unknown') retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', THRESHOLDS.low));
+}
+
 function jobTitles(pass: Pass) {
   pass.members.forEach((el, i) => {
     const found = get(pass, el);
@@ -312,7 +323,10 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     const shown = members.filter(el => (visible?.get(el) ?? isVisible(el)));
     if (!shown.length) continue;
     const types = shown.filter(el => !isChoice(el)).map(el => fields.get(el)!.type);
-    forms.push({ index: Array.from(document.forms).indexOf(form), fields: shown.length, ...formType(form, types, shown.map(el => fields.get(el)!.role)) });
+    const kind = formType(form, types, shown.map(el => fields.get(el)!.role));
+    // An order's or a booking's text area holds notes ("delivery instructions"), not a message.
+    if (kind.type !== 'checkout' && kind.type !== 'booking') soleMessage(pass, visible);
+    forms.push({ index: Array.from(document.forms).indexOf(form), fields: shown.length, ...kind });
   }
   // Last, so confirmations, dates, neighbours and card sections speak first, and form types come
   // from the rules alone: the model only names fields they still leave unknown or unsure.
