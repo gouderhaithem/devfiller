@@ -41,3 +41,14 @@ describe('a lead form\'s title', () => {
     expect(typeOf('#t')).toBe('title');
   });
 });
+
+describe('a second address line named as one', () => {
+  it.each(['address2', 'gb_street2', 'myaddr2', 'address_3', 'additional-address'])('reads "%s" under an "Address" label as the second line', name => {
+    document.body.innerHTML = `<form><label for="a">Address</label><input id="a" name="address1"><input id="b" name="${name}"><label for="c">City</label><input id="c" name="city"></form>`;
+    expect([typeOf('#a'), typeOf('#b')]).toEqual(['address', 'address2']);
+  });
+  it('reads autocomplete="address-line3" as another line', () => {
+    document.body.innerHTML = `<form><label for="b">Address</label><input id="b" autocomplete="address-line3"></form>`;
+    expect(typeOf('#b')).toBe('address2');
+  });
+});

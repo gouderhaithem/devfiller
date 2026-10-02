@@ -65,3 +65,16 @@ describe('a topic picked from a list', () => {
     expect(typeOf('#t')).toBe('message');
   });
 });
+
+// A support form's one text area named "Description" or "Details" (round 4, 2 October 2026): what the
+// person asks, so the message. A listing's description describes a thing and stays a description.
+describe('a support form\'s description', () => {
+  it.each(['Description', 'Details:', 'Request description'])('reads the one text area labelled "%s" of a form asking for an email as the message', label => {
+    document.body.innerHTML = `<form>${contact()}<label for="t">${label}</label><textarea id="t" name="request[description]"></textarea></form>`;
+    expect(typeOf('#t')).toBe('message');
+  });
+  it('keeps the description of a listing with a title and a price', () => {
+    document.body.innerHTML = `<form>${contact()}<label for="ti">Title</label><input id="ti" name="title"><label for="p">Price</label><input id="p" name="price" type="number"><label for="t">Description</label><textarea id="t" name="description"></textarea></form>`;
+    expect(typeOf('#t')).toBe('description');
+  });
+});
