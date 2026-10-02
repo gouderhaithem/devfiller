@@ -3,7 +3,7 @@ import type { Control } from './types';
 import { fields } from '../fields';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CHECKBOX_CONSENT, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  CHECKBOX_CONSENT, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -191,6 +191,14 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
 }
 
 // Checkboxes, radios and yes/no selects about terms, privacy, newsletters or marketing are never touched.
+const OWN_TEXT: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'nearby', 'title']);
+// The checkboxes answering one question: same name stem (input_20.1, skills[], lists[3]) in the form.
+function listSize(el: HTMLInputElement): number {
+  const stem = (name: string) => name.replace(/(?:\[[^\]]*\]|[._-]\d+)$/, '');
+  if (!el.name) return el.closest('fieldset')?.querySelectorAll('input[type="checkbox"]').length ?? 1;
+  const scope = el.form ?? el.ownerDocument;
+  return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')).filter(other => other.name && stem(other.name) === stem(el.name)).length;
+}
 function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | undefined {
   // A scale ("Strongly disagree … Strongly agree") is an opinion, whatever its question says.
   if (isChoice(el) && el.type === 'radio' && isScale(optionTexts(el))) return undefined;
@@ -203,7 +211,10 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source)).map(signal => radio ? { ...signal, text: signal.text.replace(DESCRIBING, ' ') } : signal);
   const answers = own.map(signal => ({ ...signal, text: signal.text.replace(DESCRIBING_ANSWER, ' ') }));
   const checkbox = isChoice(el) && el.type === 'checkbox';
-  const found = [...texts, ...answers].find(signal => CONSENT.test(signal.text))
+  // An option among several ("Analytics", "Communications") is a choice, whatever its topic; a list
+  // of newsletters is still found by subscriptionEvidence.
+  const option = (signal: Signal) => OWN_TEXT.has(signal.source) && TOPIC_ONLY.test(signal.text) && (radio || (checkbox && listSize(el as HTMLInputElement) >= 3));
+  const found = [...texts.filter(signal => !option(signal)), ...answers.filter(signal => !TOPIC_ONLY.test(signal.text))].find(signal => CONSENT.test(signal.text))
     ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && (DECLARATION.test(signal.text) || (checkbox && CHECKBOX_CONSENT.test(signal.text))));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
