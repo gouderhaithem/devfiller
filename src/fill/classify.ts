@@ -3,7 +3,7 @@ import type { Control } from './types';
 import { fields } from '../fields';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CHECKBOX_CONSENT, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -171,6 +171,7 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
   const holder = own.some(signal => HOLDER_WORDS.test(signal.text)) && !own.some(signal => BANK_WORDS.test(` ${signal.text} `.replace(HOLDER_PHRASES, ' ').trim()));
   const kinds: SensitiveKind[] = holder ? ['card', 'otp'] : ['card', 'otp', 'iban'];
   let weak: { kind: SensitiveKind; evidence: Evidence; weak: true } | undefined;
+  const otherCode = signals.some(signal => OTHER_CODES.test(signal.text));
   for (const signal of signals) {
     if (!TEXT_SOURCES.has(signal.source)) continue;
     const phrases = signal.source === 'legend' ? SENSITIVE_SECTION_PHRASES : SENSITIVE_PHRASES;
@@ -181,7 +182,8 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
       const words = phrases[k].filter(phrase => contains(signal.text, phrase) && !(k === 'card' && otherCard && PLAIN_CARD_PHRASES.has(phrase)));
       return words.length > 0 || glued.some(token => SENSITIVE_GLUED[k].test(token));
     };
-    const kind = kinds.find(matches);
+    const bare = !otherCode && signal.source !== 'legend' && BARE_CODE_PHRASES.some(phrase => contains(signal.text, phrase));
+    const kind = kinds.find(matches) ?? (bare ? 'otp' : undefined);
     if (kind) return { kind, evidence: { source: signal.source, signal: signal.raw, weight: 1, match: 'sensitive' } };
     // "Passport expiry", "Certificate expiration": a document's date, not a card's.
     const document = otherCard || DOCUMENT_PHRASES.some(phrase => contains(signal.text, phrase));
@@ -256,6 +258,16 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
 
 // An option that is a date: "2026-05-01", "01/05/2026", or a year on its own ("2000 sq ft" isn't).
 const DATE_TEXT = /\d{4}-\d{2}|\d{1,2}[/.]\d{1,2}[/.]\d{2,4}|^\s*(?:19|20)\d{2}\s*$/;
+const NAME_PARTS: Readonly<Record<string, FieldKey>> = { first: 'firstName', last: 'lastName', middle: 'middleName', 3: 'firstName', 6: 'lastName', 4: 'middleName' };
+function namePart(el: Control, signals: readonly Signal[]): FieldKey | undefined {
+  const name = el.getAttribute('name') ?? '';
+  const builder = name.match(/\[(first|last|middle)\]$/);
+  if (builder) return NAME_PARTS[builder[1]];
+  const gravity = name.match(/^input_\d+\.([346])$/);
+  const named = signals.some(signal => (signal.source === 'label' || signal.source === 'legend' || signal.source === 'nearby') && contains(signal.text, 'name'));
+  return gravity && named ? NAME_PARTS[gravity[1]] : undefined;
+}
+
 // Negative evidence: the kind of control pushes down types it can't hold.
 function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evidence[] {
   const found: Evidence[] = [];
@@ -272,6 +284,8 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
     else if (el.type === 'color' && type !== 'color') push('type', 'color', 0.7);
   }
   if (el instanceof HTMLTextAreaElement && !MULTILINE_TYPES.has(type)) push('type', 'textarea', 0.5);
+  // "Name" over WPForms' [first] box is the group's label: the box holds one part, not the whole name.
+  if (type === 'fullName' && namePart(el, signals)) push('name', el.getAttribute('name') ?? '', 0.6);
   // A unit means a number: "Longueur (mm)" isn't a name or a city.
   const unit = unitOf(signals);
   if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
@@ -418,6 +432,13 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
     }
   }
   if (isInput(el) || el instanceof HTMLTextAreaElement) formatEvidence(el, byType, add);
+  // Form builders name a name's parts: WPForms' [first] / [last], and Gravity Forms' .3 / .6 / .4
+  // (first, last, middle) under a "Name" label. Its address parts use the same numbers.
+  const part = namePart(el, signals);
+  if (part) add(part, { source: 'name', signal: el.getAttribute('name') ?? '', weight: 0.9, match: 'phrase' });
+  // Picked from a list, a message's question ("How can we help?", "Nature of comments") asks for
+  // its topic: the subject.
+  if (el instanceof HTMLSelectElement || radio) for (const item of byType.get('message') ?? []) add('subject', item);
   return byType;
 }
 

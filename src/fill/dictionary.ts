@@ -36,7 +36,10 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   bio: ['bio', 'biography', 'about', 'about me', 'about you', 'about yourself', 'biographie', 'à propos', 'présentation', 'نبذة'],
   description: ['steps to reproduce', 'expected result', 'actual result', 'symptoms', 'symptômes', 'reason', 'purpose', 'description', 'details', 'product description', 'الوصف', 'التفاصيل'],
   message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'feedback', 'your query', 'your enquiry', 'your inquiry', 'your question', 'how can we help', 'how we can help', 'tell us how we can help', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
-  subject: ['subject', 'topic', 'sujet', 'objet', 'الموضوع', 'موضوع'],
+  subject: ['subject', 'topic', 'sujet', 'objet', 'inquiry type', 'enquiry type', 'type of inquiry', 'type of enquiry', 'request type', 'type of request', 'issue type', 'type of issue',
+    'reason for contact', 'reason for contacting', 'reason for contacting us', 'contact reason', 'purpose of contact', 'nature of your inquiry', 'nature of your enquiry', 'nature of your query',
+    'type of question', 'type of feedback', 'feedback type', 'i am writing about', 'inquiry topic', 'enquiry topic', 'help topic', 'objet de votre demande', 'type de demande', 'motif de contact', 'nature de la demande',
+    'الموضوع', 'موضوع', 'نوع الطلب'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
   measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
     'longueur', 'largeur', 'hauteur', 'profondeur', 'épaisseur', 'diamètre', 'rayon', 'poids', 'poids unitaire', 'poids net', 'poids brut', 'masse', 'superficie', 'surface habitable', 'الطول', 'العرض', 'الارتفاع', 'العمق', 'السمك', 'القطر', 'الوزن', 'المساحة', 'الحجم'],
@@ -93,9 +96,13 @@ export type SensitiveKind = 'card' | 'otp' | 'iban';
 // Sensitive fields are recognized so they can be skipped, never filled. Phrases match whole words.
 export const SENSITIVE_TERMS: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: ['card', 'credit card', 'debit card', 'card number', 'cardnumber', 'creditcard', 'cc number', 'cc num', 'ccnumber', 'card no', 'name on card', 'cardholder', 'card holder', 'card expiry', 'card expiration', 'cc exp', 'mm yy', 'mm aa', 'card pin', 'date d expiration de la carte', 'cvv', 'cvv2', 'cvc', 'cvc2', 'ccv', 'csc', 'security code', 'card verification', 'card security code', 'numéro de carte', 'numéro carte', 'carte bancaire', 'carte de crédit', 'titulaire de la carte', 'nom sur la carte', 'cryptogramme', 'cb numero', 'رقم البطاقة', 'البطاقة البنكية', 'بطاقة الائتمان', 'رمز الأمان'],
-  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
+  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'validation code', 'verify code', 'temporary code', 'reset code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
   iban: ['iban', 'bic', 'swift', 'swift code', 'rib', 'account no', 'acct no', 'acct number', 'account num', 'routing', 'aba', 'bank code', "relevé d'identité bancaire", 'bank account', 'bank account number', 'account number', 'routing number', 'sort code', 'numéro de compte', 'compte bancaire', 'code banque', 'code guichet', 'numéro ccp', 'compte ccp', 'رقم الحساب', 'الحساب البنكي', 'الحساب المصرفي'],
 };
+// "Enter code" alone names no kind of code: a one-time code unless another clue of the field names
+// one ("Promo code", "Postal code").
+export const BARE_CODE_TERMS: readonly string[] = ['enter code', 'enter the code'];
+export const OTHER_CODES = /\b(promo|promotion(al)?|coupon|discount|voucher|gift|referral|invite|invitation|postal|post|zip|country|area|dial(ling)?|tracking|product|access|offer|campaign|code postal)\b/;
 // Words a card field uses that other documents use too: "Passport expiry", "Choose a PIN". They only
 // mean card data when the form also has a card field.
 export const WEAK_CARD_TERMS: readonly string[] = ['expiry', 'expiry date', 'expiration', 'expiration date', 'expiration month', 'expiration year', 'exp month', 'exp year', 'exp date', 'pin', 'pin code', 'security pin', 'date d expiration', 'carte'];
@@ -110,7 +117,7 @@ export const DOCUMENTS: readonly string[] = ['passport', 'passeport', 'identity'
 // Glued names: ccnum, cardcvc, cardNumber written as one word, sepaiban.
 export const SENSITIVE_GLUED: Readonly<Record<SensitiveKind, RegExp>> = {
   card: /^(?:cc|card|credit|carte|cb)(?:num|number|no|cvc|cvv|csc|exp|expiry|holder|name|pin|code)|cvv|cvc|ccexp|ccnum/,
-  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|auth)code$/,
+  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|verify|vali|valid|validation|auth|reset|temp|temporary)code$/,
   iban: /iban|^(?:bic|swift)(?:code)?$|^(?:acct|account)(?:no|num|number)$/,
 };
 export const SENSITIVE_SECTIONS: Readonly<Record<SensitiveKind, readonly string[]>> = {
@@ -231,6 +238,7 @@ export const NAMED_THING_ENDINGS: readonly string[] = NAMED_THINGS.flatMap(thing
 export const SENSITIVE_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_TERMS.card.map(normalize), otp: SENSITIVE_TERMS.otp.map(normalize), iban: SENSITIVE_TERMS.iban.map(normalize),
 };
+export const BARE_CODE_PHRASES: readonly string[] = BARE_CODE_TERMS.map(normalize);
 export const SENSITIVE_SECTION_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_SECTIONS.card.map(normalize), otp: [], iban: SENSITIVE_SECTIONS.iban.map(normalize),
 };

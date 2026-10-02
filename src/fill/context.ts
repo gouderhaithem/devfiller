@@ -161,15 +161,35 @@ function confirmCards(fields: Map<Control, Classification>) {
 // In the same section as card fields, a name is the cardholder's, a month, year or date is the
 // card's expiry, and anything unrecognized is most likely card data too: none of them is filled.
 // Four or more one-character boxes in a row are one code typed digit by digit: a one-time code,
-// never test data. (A card number in four boxes takes four characters per box.)
-const isCodeBox = (el: Control) => el instanceof HTMLInputElement && ['text', 'tel', 'number', 'password', ''].includes(el.type) && el.maxLength === 1;
+// never test data. One box of the row may take two characters. (A card number in four boxes takes
+// four characters per box.) A box read as something else, a ZIP code typed digit by digit, breaks
+// the row.
+const codeBoxSize = (el: Control) => el instanceof HTMLInputElement && ['text', 'tel', 'number', 'password', ''].includes(el.type) && el.maxLength >= 1 && el.maxLength <= 2 ? el.maxLength : 0;
 function codeBoxes(pass: Pass) {
   const run: Control[] = [];
   const close = () => {
-    if (run.length >= 4) for (const el of run) pass.fields.set(el, { ...get(pass, el), type: 'skip:otp', confidence: 1, candidates: [], evidence: [{ source: 'form', signal: `${run.length} one-character boxes in a row`, weight: 1, match: 'sensitive' }] });
+    const single = run.filter(el => codeBoxSize(el) === 1).length;
+    if (run.length >= 4 && single >= run.length - 1) for (const el of run) pass.fields.set(el, { ...get(pass, el), type: 'skip:otp', confidence: 1, candidates: [], evidence: [{ source: 'form', signal: `${run.length} one-character boxes in a row`, weight: 1, match: 'sensitive' }] });
     run.length = 0;
   };
-  for (const el of pass.members) { if (isCodeBox(el) && !isSensitive(get(pass, el).type)) run.push(el); else close(); }
+  for (const el of pass.members) { if (codeBoxSize(el) && get(pass, el).type === 'unknown') run.push(el); else close(); }
+  close();
+}
+
+// A date split into day, month and year is a birth date when any part, or the words just before the
+// first, say "birth": "Date of Birth" over three selects, dayofbirth / monthofbirth / yearOfBirth.
+// Only selects of days, months or years are parts: a whole date beside a birth date ("Start date")
+// is a date of its own, and a year typed into a text box can't hold a whole date.
+const BIRTH = /birth|\bdob\b|dob[_-]|naissance|\bborn\b|ميلاد/i;
+const isDatePart = (_pass: Pass, el: Control) => el instanceof HTMLSelectElement && !!datePart(optionTexts(el));
+function birthDateParts(pass: Pass) {
+  const run: Control[] = [];
+  const close = () => {
+    const birth = run.length >= 2 && run.some(el => pass.signals(el).some(signal => BIRTH.test(signal.raw)));
+    if (birth) for (const el of run) if (get(pass, el).type !== 'birthDate') retype(pass, el, 'birthDate', undefined, evidence('a part of a split birth date', 0.85));
+    run.length = 0;
+  };
+  for (const el of pass.members) { if (isDatePart(pass, el)) run.push(el); else close(); }
   close();
 }
 
@@ -240,11 +260,15 @@ function soleMessage(pass: Pass, visible?: ReadonlyMap<Control, boolean>) {
   if (get(pass, area).type === 'unknown') retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', THRESHOLDS.low));
 }
 
+// A lead form's "Title" is a job title: when its own words say "Job title", or when a work field
+// (company, department…) is among the three fields on either side.
 function jobTitles(pass: Pass) {
   pass.members.forEach((el, i) => {
     const found = get(pass, el);
-    if (found.type !== 'title' || visibleText(pass.signals(el)).split(' ').length > 1) return;
-    const neighbour = [pass.members[i - 1], pass.members[i + 1]].find(other => other && WORK_TYPES.has(get(pass, other).type));
+    if (found.type !== 'title') return;
+    if (mentions(pass.signals(el), ['job title', 'job'])) return retype(pass, el, 'jobTitle', undefined, evidence('says “job title”', Math.max(found.confidence, 0.8)));
+    if (visibleText(pass.signals(el)).split(' ').length > 1) return;
+    const neighbour = pass.members.slice(Math.max(0, i - 3), i + 4).find(other => other !== el && WORK_TYPES.has(get(pass, other).type));
     if (neighbour) retype(pass, el, 'jobTitle', undefined, evidence(`beside ${quote(neighbour)}`, Math.max(found.confidence, 0.7)));
   });
 }
@@ -314,6 +338,8 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     passwordRoles(pass);
     dateRoles(pass);
     codeBoxes(pass);
+    // Split day/month/year selects take part here: they are the parts.
+    birthDateParts({ ...pass, members });
     cardSection(pass, members);
     specifyCompanions(pass);
     jobTitles(pass);
