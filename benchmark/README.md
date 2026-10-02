@@ -169,9 +169,22 @@ are unchanged. On the third round's sealed forms, relabelled, with the model ret
 | Rules + model, + round 4 | 90.9% | 88.8% | 89.9% | 132 | 142 |
 | **Rules + model, + round 5 (kept)** | **90.8%** | **90.9%** | **90.9%** | 101 | 147 |
 
-More contact and sign-up forms made the model hold back; the forms with rare types helped, so round 4
-stays labelled but out of the training data. This set was already retired and the mix was chosen on
-it, so +0.5 F1 is an estimate, not a sealed result: the next sealed set measures it.
+Round 4 made the model hold back, so it stays labelled but out of the training data. The third
+round's set was already retired and the mix was chosen on it, so round 4 was then used as the clean
+measurement: same draw as the third round's sealed forms, labelled blind, never trained on, never used
+to choose anything.
+
+| On round 4's 1,000 forms (10,071 fields) | Precision | Recall | F1 | Missed | Wrong |
+| --- | --- | --- | --- | --- | --- |
+| Rules alone | 91.2% | 86.9% | 89.0% | 701 | 626 |
+| Rules + model, rounds 1–2 (before) | 91.6% | 89.8% | 90.7% | 522 | 617 |
+| Rules + model, + round 5 (kept) | 91.3% | 90.1% | 90.7% | 495 | 638 |
+
+The +0.5 did not hold: on clean forms the two models tie. The new one fills 27 more fields and gets 21
+more wrong (62 fields newly right, mostly topic lists read as `subject`; 56 newly wrong, mostly other
+lists read as `subject` and birth dates read as plain dates). Twice the real-form rows bought no F1, so
+the model is near what its features allow: the next gains are rule work (495 fields missed, 13
+sensitive fields filled) or new features, not more forms of the same crawl. Round 4 is now retired.
 
 ## The gate
 
