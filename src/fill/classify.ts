@@ -268,6 +268,11 @@ function namePart(el: Control, signals: readonly Signal[]): FieldKey | undefined
   return gravity && named ? NAME_PARTS[gravity[1]] : undefined;
 }
 
+// address2, gb_street2, myaddr2, address_3, additional-address: a later line of the address, whose
+// visible label ("Address") belongs to the whole block.
+const LATER_LINE = /(?:address|addr|street|adresse|rue)[\s_.-]*(?:line)?[\s_.-]*[23]$|additional[\s_.-]*address|address[\s_.-]*(?:complement|supplement)/i;
+const isLaterAddressLine = (el: Control) => LATER_LINE.test(el.getAttribute('name') ?? '') || LATER_LINE.test(el.id);
+
 // Negative evidence: the kind of control pushes down types it can't hold.
 function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evidence[] {
   const found: Evidence[] = [];
@@ -286,6 +291,7 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   if (el instanceof HTMLTextAreaElement && !MULTILINE_TYPES.has(type)) push('type', 'textarea', 0.5);
   // "Name" over WPForms' [first] box is the group's label: the box holds one part, not the whole name.
   if (type === 'fullName' && namePart(el, signals)) push('name', el.getAttribute('name') ?? '', 0.6);
+  if (type === 'address' && isLaterAddressLine(el)) push('name', el.getAttribute('name') || el.id, 0.6);
   // A unit means a number: "Longueur (mm)" isn't a name or a city.
   const unit = unitOf(signals);
   if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
@@ -434,8 +440,8 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   if (isInput(el) || el instanceof HTMLTextAreaElement) formatEvidence(el, byType, add);
   // Form builders name a name's parts: WPForms' [first] / [last], and Gravity Forms' .3 / .6 / .4
   // (first, last, middle) under a "Name" label. Its address parts use the same numbers.
-  const part = namePart(el, signals);
-  if (part) add(part, { source: 'name', signal: el.getAttribute('name') ?? '', weight: 0.9, match: 'phrase' });
+  const part = namePart(el, signals) ?? (isLaterAddressLine(el) ? 'address2' : undefined);
+  if (part) add(part, { source: 'name', signal: el.getAttribute('name') || el.id, weight: 0.9, match: 'phrase' });
   // Picked from a list, a message's question ("How can we help?", "Nature of comments") asks for
   // its topic: the subject.
   if (el instanceof HTMLSelectElement || radio) for (const item of byType.get('message') ?? []) add('subject', item);

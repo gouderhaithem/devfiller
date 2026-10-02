@@ -89,6 +89,7 @@ and any training data agree:
 | Income, household or monthly income, revenu | `amount` | Only salary, wage or pay expectations are `salary` |
 | Bank name, school or university name | `unknown` | No generator; they aren't the person's `company` |
 | What a message is about, picked from a list ("Topic", "Type of enquiry", "Reason for contacting us", "How can we help?" as a select or radios) | `subject` | Picking a topic fills it like a subject line; who the person is ("I am a…", "My question is regarding a student") and interest lists stay `unknown` |
+| The one text area of a contact or support form, whatever it's called ("Description", "Details", "Question") | `message` | What the person asks; a `description` describes a thing (a listing with a title and a price, a product, a project) |
 | The department, office or service a message is sent to | `unknown` | Not the person's own department; their own department or job function is `department` |
 | A phone number's country-code picker ("+33", "FR (+33)") | `country` | The choice is a country |
 | A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |

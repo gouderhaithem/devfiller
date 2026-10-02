@@ -258,7 +258,12 @@ function soleMessage(pass: Pass, visible?: ReadonlyMap<Control, boolean>) {
   if (areas.length !== 1 || !pass.members.some(el => get(pass, el).type === 'email')) return;
   const [area] = areas;
   if (get(pass, area).type === 'unknown') retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', THRESHOLDS.low));
+  // "Description", "Details" there is what the person asks: the message. A form about a thing (a
+  // listing with a title and a price) keeps its description.
+  const thing = pass.members.some(el => THING_TYPES.has(get(pass, el).type));
+  if (get(pass, area).type === 'description' && !thing) retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', get(pass, area).confidence));
 }
+const THING_TYPES: ReadonlySet<string> = new Set(['title', 'price', 'amount', 'quantity', 'measurement', 'material', 'color']);
 
 // A lead form's "Title" is a job title: when its own words say "Job title", or when a work field
 // (company, department…) is among the three fields on either side.
