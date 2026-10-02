@@ -62,17 +62,17 @@ After each field is scored on its own, DevFiller looks at the form around it:
 - **"Please specify".** A text field that completes the choice before it ("Grade — précisez") holds the same kind of value.
 - **The form's type.** Sign-in, sign-up, checkout, booking, contact or search, shown in the side panel.
 
-## 5. Never fill what must stay yours
+## 5. Fill sensitive fields with values that read as tests
 
-Some fields are recognized so they can be skipped, whatever your settings:
+Some fields are recognized as sensitive, and get values anyone can tell are tests:
 
-- card numbers, expiry dates, CVV and cardholder names
-- one-time, SMS and two-factor codes
-- IBAN, BIC, RIB and bank account fields
-- consent: terms, privacy, newsletters, marketing, permissions, data sharing and declarations such as "I certify that…", in English, French and Arabic
-- session choices such as "Remember me" or "Keep me signed in"
+- card numbers, expiry dates, CVV and cardholder names: a sandbox test card (4242 4242 4242 4242 and the declined, expired and incorrect-CVC cards), or nothing when card fields are turned off
+- one-time, SMS and two-factor codes: `444444`, sized to the box (one `4` per box in a row of boxes)
+- IBAN, BIC, RIB and bank account fields: a bank account of 4s, with a valid IBAN `DE47444444444444444444`, BIC `TESTDE44`, US routing number `110000000` (Stripe's test number, since no run of 4s passes the routing checksum)
+- consent: terms, privacy, newsletters, marketing, permissions, data sharing and declarations such as "I certify that…", in English, French and Arabic: ticked, or the agreeing answer of a Yes/No question
+- session choices such as "Remember me" or "Keep me signed in": ticked
 
-The same rules apply to custom switches and checkboxes built by component libraries. DevFiller never submits a form.
+The side panel marks each one "Filled with test value". To leave a field alone, exclude it. The same rules apply to custom switches and checkboxes built by component libraries. DevFiller never submits a form.
 
 ## 6. Write a value that fits
 

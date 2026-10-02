@@ -119,11 +119,11 @@ describe('form context', () => {
   it('recognizes a search form from its role', () => {
     expect(analyze('<form role="search"><input name="q"></form>').forms[0].type).toBe('search');
   });
-  it('leaves "remember me" as the user set it', () => {
+  it('ticks "remember me" as a test value', () => {
     document.body.innerHTML = '<form><label><input type="checkbox" id="r"> Remember me</label></form>';
     const result = fillPage(request);
-    expect(el('r').checked).toBe(false);
-    expect(result.fields![0].reason).toBe('Session choice stays untouched');
+    expect(el('r').checked).toBe(true);
+    expect(result.fields![0].reason).toBe('Filled with test value (stay signed in)');
   });
   it('raises a weak guess that fits the field before it', () => {
     const plain = analyze('<form><input id="x" placeholder="Surname please"></form>').fields.get(el('x'))!;
@@ -206,10 +206,10 @@ describe('Phase D review regressions', () => {
     fillPage(request);
     expect(el('c').checked).toBe(true);
   });
-  it('leaves session and consent radio groups alone', () => {
+  it('answers yes to session and consent radio groups', () => {
     document.body.innerHTML = '<form><fieldset><legend>Stay signed in?</legend><label><input type="radio" name="s" id="y" checked> Yes</label><label><input type="radio" name="s" id="n"> No</label></fieldset><label><input type="radio" name="c" id="a"> Yes, I agree</label><label><input type="radio" name="c" id="b"> No thanks</label></form>';
     fillPage(request);
-    expect([el('y').checked, el('a').checked, el('b').checked]).toEqual([true, false, false]);
+    expect([el('y').checked, el('a').checked, el('b').checked]).toEqual([true, true, false]);
   });
 });
 

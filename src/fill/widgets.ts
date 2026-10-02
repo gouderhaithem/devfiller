@@ -3,6 +3,7 @@ import type { FillRequest } from './types';
 import type { Signal } from './extract';
 import { isSensitive, rankElement, usableKey, type Classification } from './classify';
 import { CONSENT, SENSITIVE_PHRASES, SESSION, PLACEHOLDER_OPTION } from './dictionary';
+import { agreeingOption } from './sensitive';
 import { isMeaningless } from './extract';
 import { matchChoice, spellingsFor } from './generate';
 import { normalize } from './normalize';
@@ -244,6 +245,20 @@ function excluded(el: Element, request: FillRequest): boolean {
   return exclusions.rules.some(rule => rule.match === 'selector' && (() => { try { return !!el.closest(rule.value); } catch { return false; } })());
 }
 
+async function agree(el: HTMLElement, kind: 'checkbox' | 'radio', done: Set<Element>): Promise<boolean> {
+  if (kind === 'checkbox') {
+    if (checked(el)) return true;
+    press(el);
+    return waitFor(() => checked(el), 150).then(Boolean);
+  }
+  const members = groupMembers(el).filter(member => member.getAttribute('aria-disabled') !== 'true');
+  members.forEach(member => done.add(member));
+  const target = agreeingOption(members, ownText);
+  if (!target) return false;
+  if (!checked(target)) { press(target); await waitFor(() => checked(target), 150); }
+  return true;
+}
+
 export async function fillWidgets(request: FillRequest): Promise<{ filled: number; skipped: number }> {
   const seed = request.seed?.trim();
   const streams = new Map<Element, Random>();
@@ -261,6 +276,11 @@ export async function fillWidgets(request: FillRequest): Promise<{ filled: numbe
     if (done.has(el) || !el.isConnected || !isShown(el) || el.closest('[inert], [aria-disabled="true"]') || excluded(el, request)) continue;
     const found = classifyWidget(el);
     const kind = kindOf(el);
+    // Consent and "stay signed in" toggles are ticked as test values, like their native boxes.
+    if ((found.type === 'skip:consent' || found.type === 'skip:session') && (kind === 'checkbox' || kind === 'radio')) {
+      try { if (await agree(el, kind, done)) filled++; } catch { skipped++; }
+      continue;
+    }
     if (isSensitive(found.type)) { skipped++; if (kind === 'radio') groupMembers(el).forEach(member => done.add(member)); continue; }
     try {
       const ok = kind === 'checkbox' ? await fillCheckbox(run, el)

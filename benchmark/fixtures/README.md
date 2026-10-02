@@ -88,6 +88,8 @@ and any training data agree:
 | Expiry or "valid until" with no matching start | `date` | Nothing to come after |
 | Income, household or monthly income, revenu | `amount` | Only salary, wage or pay expectations are `salary` |
 | Bank name, school or university name | `unknown` | No generator; they aren't the person's `company` |
+| What a message is about, picked from a list ("Topic", "Type of enquiry", "Reason for contacting us", "How can we help?" as a select or radios) | `subject` | Picking a topic fills it like a subject line; who the person is ("I am a…", "My question is regarding a student") and interest lists stay `unknown` |
+| The one text area of a contact or support form, whatever it's called ("Description", "Details", "Question") | `message` | What the person asks; a `description` describes a thing (a listing with a title and a price, a product, a project) |
 | The department, office or service a message is sent to | `unknown` | Not the person's own department; their own department or job function is `department` |
 | A phone number's country-code picker ("+33", "FR (+33)") | `country` | The choice is a country |
 | A freelancer's hourly or day rate | `price` | What a service costs; only an employee's pay is `salary` |
@@ -95,6 +97,7 @@ and any training data agree:
 | Personal or legal IDs (national ID, NIN, SIRET, PAN, tax ID, plate, employee number); record IDs (order, VIN, serial, customer, client or membership number) | `unknown`; `reference` | A record has a reference, a person or company has an identity |
 | Saving the person's details for later ("Save this information for next time", "Save this address to my account", "Save this card"); opting out ("Email opt-out", "Unsubscribe") | `skip:consent` | Each gives or withdraws permission to keep or use personal data; "Remember me" stays `skip:session` |
 | Automatic renewal ("Renew my membership automatically", "Enroll me in auto renewal") | `skip:consent` | Permission to charge again later |
+| A checkbox that adds to a payment: covering the processing fee ("I'd like to cover the transaction fee", "Add 3% so 100% of my gift goes…") or making a gift recurring ("Make this a monthly gift", "Repeat this gift every month") | `skip:consent` | A promise to pay more; a one-time / monthly radio group is a choice, not a promise, and stays `unknown` |
 | Each part of a split date (day, month and year selects or boxes) | the date's type on every part (`birthDate`, `date`, `startDate`…) | One date written in pieces; a year asked on its own is `year` |
 
 ## Relationships

@@ -16,7 +16,7 @@ test('one click fills a multilingual form and settings persist',async({page})=>{
   await expect(form.locator('#last')).not.toHaveValue('');
   await expect(form.locator('#email')).toHaveValue(/@example\.com$/);
   await expect(form.locator('#country')).not.toHaveValue('');
-  await expect(form.locator('#terms')).not.toBeChecked();
+  await expect(form.locator('#terms')).toBeChecked();
   await expect(form.locator('#pwd')).toHaveValue('');
   await expect(page.getByRole('status')).toContainText('fields filled');
   await form.locator('#first').fill('Keep this');
@@ -36,7 +36,7 @@ test('one click fills a multilingual form and settings persist',async({page})=>{
   await expect(form.locator('#project-code')).toHaveValue('PRJ-001');
   await expect(form.locator('#appointment')).not.toHaveValue('');
   await expect(form.locator('input[name=contact]:checked')).toHaveCount(1);
-  await expect(form.locator('#terms')).not.toBeChecked();
+  await expect(form.locator('#terms')).toBeChecked();
   await page.reload();
   await page.getByRole('button',{name:'Toggle settings'}).click();
   await expect(page.getByLabel('Fill unknown fields')).toBeChecked();
@@ -91,7 +91,7 @@ test('toolbar action fills the target website directly and options persist',asyn
     await expect(website.locator('#email')).toHaveValue(/@example\.com$/);
     await expect(website.locator('#country')).not.toHaveValue('');
     await expect(website.locator('#project-code')).toHaveValue(/^[A-Za-z]+$/);
-    await expect(website.locator('#terms')).not.toBeChecked();
+    await expect(website.locator('#terms')).toBeChecked();
     expect(context.pages()).toHaveLength(pageCount);
     const tabId=await worker.evaluate(async()=>{
       const tabs=await chrome.tabs.query({});

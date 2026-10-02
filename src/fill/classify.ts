@@ -3,7 +3,7 @@ import type { Control } from './types';
 import { fields } from '../fields';
 import {
   AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  CHECKBOX_CONSENT, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
@@ -171,6 +171,7 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
   const holder = own.some(signal => HOLDER_WORDS.test(signal.text)) && !own.some(signal => BANK_WORDS.test(` ${signal.text} `.replace(HOLDER_PHRASES, ' ').trim()));
   const kinds: SensitiveKind[] = holder ? ['card', 'otp'] : ['card', 'otp', 'iban'];
   let weak: { kind: SensitiveKind; evidence: Evidence; weak: true } | undefined;
+  const otherCode = signals.some(signal => OTHER_CODES.test(signal.text));
   for (const signal of signals) {
     if (!TEXT_SOURCES.has(signal.source)) continue;
     const phrases = signal.source === 'legend' ? SENSITIVE_SECTION_PHRASES : SENSITIVE_PHRASES;
@@ -181,7 +182,8 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
       const words = phrases[k].filter(phrase => contains(signal.text, phrase) && !(k === 'card' && otherCard && PLAIN_CARD_PHRASES.has(phrase)));
       return words.length > 0 || glued.some(token => SENSITIVE_GLUED[k].test(token));
     };
-    const kind = kinds.find(matches);
+    const bare = !otherCode && signal.source !== 'legend' && BARE_CODE_PHRASES.some(phrase => contains(signal.text, phrase));
+    const kind = kinds.find(matches) ?? (bare ? 'otp' : undefined);
     if (kind) return { kind, evidence: { source: signal.source, signal: signal.raw, weight: 1, match: 'sensitive' } };
     // "Passport expiry", "Certificate expiration": a document's date, not a card's.
     const document = otherCard || DOCUMENT_PHRASES.some(phrase => contains(signal.text, phrase));
@@ -191,6 +193,14 @@ export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: 
 }
 
 // Checkboxes, radios and yes/no selects about terms, privacy, newsletters or marketing are never touched.
+const OWN_TEXT: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'nearby', 'title']);
+// The checkboxes answering one question: same name stem (input_20.1, skills[], lists[3]) in the form.
+function listSize(el: HTMLInputElement): number {
+  const stem = (name: string) => name.replace(/(?:\[[^\]]*\]|[._-]\d+)$/, '');
+  if (!el.name) return el.closest('fieldset')?.querySelectorAll('input[type="checkbox"]').length ?? 1;
+  const scope = el.form ?? el.ownerDocument;
+  return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')).filter(other => other.name && stem(other.name) === stem(el.name)).length;
+}
 function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | undefined {
   // A scale ("Strongly disagree … Strongly agree") is an opinion, whatever its question says.
   if (isChoice(el) && el.type === 'radio' && isScale(optionTexts(el))) return undefined;
@@ -203,7 +213,10 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   const texts = signals.filter(signal => TEXT_SOURCES.has(signal.source)).map(signal => radio ? { ...signal, text: signal.text.replace(DESCRIBING, ' ') } : signal);
   const answers = own.map(signal => ({ ...signal, text: signal.text.replace(DESCRIBING_ANSWER, ' ') }));
   const checkbox = isChoice(el) && el.type === 'checkbox';
-  const found = [...texts, ...answers].find(signal => CONSENT.test(signal.text))
+  // An option among several ("Analytics", "Communications") is a choice, whatever its topic; a list
+  // of newsletters is still found by subscriptionEvidence.
+  const option = (signal: Signal) => OWN_TEXT.has(signal.source) && TOPIC_ONLY.test(signal.text) && (radio || (checkbox && listSize(el as HTMLInputElement) >= 3));
+  const found = [...texts.filter(signal => !option(signal)), ...answers.filter(signal => !TOPIC_ONLY.test(signal.text))].find(signal => CONSENT.test(signal.text))
     ?? texts.find(signal => (signal.source === 'label' || signal.source === 'nearby') && (DECLARATION.test(signal.text) || (checkbox && CHECKBOX_CONSENT.test(signal.text))));
   return found && { source: found.source, signal: found.raw, weight: 1, match: 'sensitive' };
 }
@@ -245,6 +258,21 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
 
 // An option that is a date: "2026-05-01", "01/05/2026", or a year on its own ("2000 sq ft" isn't).
 const DATE_TEXT = /\d{4}-\d{2}|\d{1,2}[/.]\d{1,2}[/.]\d{2,4}|^\s*(?:19|20)\d{2}\s*$/;
+const NAME_PARTS: Readonly<Record<string, FieldKey>> = { first: 'firstName', last: 'lastName', middle: 'middleName', 3: 'firstName', 6: 'lastName', 4: 'middleName' };
+function namePart(el: Control, signals: readonly Signal[]): FieldKey | undefined {
+  const name = el.getAttribute('name') ?? '';
+  const builder = name.match(/\[(first|last|middle)\]$/);
+  if (builder) return NAME_PARTS[builder[1]];
+  const gravity = name.match(/^input_\d+\.([346])$/);
+  const named = signals.some(signal => (signal.source === 'label' || signal.source === 'legend' || signal.source === 'nearby') && contains(signal.text, 'name'));
+  return gravity && named ? NAME_PARTS[gravity[1]] : undefined;
+}
+
+// address2, gb_street2, myaddr2, address_3, additional-address: a later line of the address, whose
+// visible label ("Address") belongs to the whole block.
+const LATER_LINE = /(?:address|addr|street|adresse|rue)[\s_.-]*(?:line)?[\s_.-]*[23]$|additional[\s_.-]*address|address[\s_.-]*(?:complement|supplement)/i;
+const isLaterAddressLine = (el: Control) => LATER_LINE.test(el.getAttribute('name') ?? '') || LATER_LINE.test(el.id);
+
 // Negative evidence: the kind of control pushes down types it can't hold.
 function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evidence[] {
   const found: Evidence[] = [];
@@ -261,6 +289,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
     else if (el.type === 'color' && type !== 'color') push('type', 'color', 0.7);
   }
   if (el instanceof HTMLTextAreaElement && !MULTILINE_TYPES.has(type)) push('type', 'textarea', 0.5);
+  // "Name" over WPForms' [first] box is the group's label: the box holds one part, not the whole name.
+  if (type === 'fullName' && namePart(el, signals)) push('name', el.getAttribute('name') ?? '', 0.6);
+  if (type === 'address' && isLaterAddressLine(el)) push('name', el.getAttribute('name') || el.id, 0.6);
   // A unit means a number: "Longueur (mm)" isn't a name or a city.
   const unit = unitOf(signals);
   if (unit && !NUMERIC_TYPES.has(type) && type !== 'date') push('unit', unit.symbol, 0.5);
@@ -268,6 +299,9 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   // A select of the person's own addresses may be an email; other selects can't hold one.
   const emails = type === 'email' && options.some(text => /@/.test(text));
   if (el instanceof HTMLSelectElement && !SELECT_TYPES.has(type) && !emails) push('type', 'select', 0.6);
+  // "Currency", "Donation frequency", "Payment type", "Hide my amount": about a sum, not the sum.
+  const aboutSum = type === 'amount' && (isChoice(el) || el instanceof HTMLSelectElement) && signals.find(signal => (signal.source === 'name' || signal.source === 'id' || signal.source === 'label' || signal.source === 'aria-label') && ABOUT_A_SUM.test(signal.text));
+  if (aboutSum) push(aboutSum.source, aboutSum.raw, RULED_OUT);
   // A radio group's answers are choices too: "About you" over Yes / No isn't a bio.
   if (isChoice(el) && el.type === 'radio' && !SELECT_TYPES.has(type)) push('type', 'radio', 0.6);
   // "7 days, 30 days, No expiration" are durations: a date select lists dates or their parts.
@@ -315,6 +349,17 @@ export function datePart(texts: readonly string[]): DatePart | undefined {
 
 // What the answers say: mostly country names means a country, mostly wilayas a state or wilaya.
 // Answers alone stay below medium confidence: a list can share words with another kind of list.
+// "$25", "50,00 €", "$1,000 – $5,000", "25.00": sums of money, besides an "Other" answer. Returns how
+// many, when at least two and most answers are.
+const MONEY = /^(?:[$€£¥₹]\s?\d[\d,.\s]*|\d[\d,.\s]*\s?(?:[$€£¥₹]|usd|eur|gbp|chf|cad|aud)|\d+[.,]\d{2})(?:\s*(?:-|–|to|à)\s*[$€£¥₹]?\s?\d[\d,.\s]*[$€£¥₹]?)?(?:\s*(?:\/|per|a|each)\s*\w+)?$/i;
+const MONEY_RANGE = /^(?:less than|under|up to|more than|over|above)\s+[$€£¥₹]\s?\d/i;
+const ABOUT_A_SUM = /(?:^| )(?:currency|currencies|frequency|type|hide|devise)(?= |$)/u;
+export function moneyShare(texts: readonly string[]): number {
+  const answers = texts.map(text => text.trim()).filter(text => text && !/^(?:other|autre|custom|another amount|other amount)\b/i.test(text));
+  const sums = answers.filter(text => MONEY.test(text) || MONEY_RANGE.test(text)).length;
+  return sums >= 2 && sums / answers.length >= 0.6 ? sums : 0;
+}
+
 function optionEvidence(texts: readonly string[], signals: readonly Signal[]): Array<[FieldKey, Evidence]> {
   if (texts.length < 2) return [];
   const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
@@ -336,6 +381,8 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
   if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);
+  const money = moneyShare(texts);
+  if (money) found.push(['amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' }]);
   return found;
 }
 
@@ -345,6 +392,11 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   const add = (type: FieldKey, evidence: Evidence) => byType.set(type, [...(byType.get(type) ?? []), evidence]);
   const options = answers ?? optionTexts(el);
   for (const [type, evidence] of optionEvidence(options, signals)) add(type, evidence);
+  // Unlabelled radios ("25.00", "50.00") say what they are by their values.
+  if (!options.length && isChoice(el) && el.type === 'radio') {
+    const money = moneyShare(radioGroup(el).map(radio => radio.value));
+    if (money && radioGroup(el).every(radio => /^[$€£]?\d+(?:[.,]\d{2})?$|^(?:other|custom)$/i.test(radio.value.trim()))) add('amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' });
+  }
   const unit = unitOf(signals);
   if (unit) {
     // Money is an amount unless the label says price; a rate ("$/h", "€/m²") is a price.
@@ -386,6 +438,13 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
     }
   }
   if (isInput(el) || el instanceof HTMLTextAreaElement) formatEvidence(el, byType, add);
+  // Form builders name a name's parts: WPForms' [first] / [last], and Gravity Forms' .3 / .6 / .4
+  // (first, last, middle) under a "Name" label. Its address parts use the same numbers.
+  const part = namePart(el, signals) ?? (isLaterAddressLine(el) ? 'address2' : undefined);
+  if (part) add(part, { source: 'name', signal: el.getAttribute('name') || el.id, weight: 0.9, match: 'phrase' });
+  // Picked from a list, a message's question ("How can we help?", "Nature of comments") asks for
+  // its topic: the subject.
+  if (el instanceof HTMLSelectElement || radio) for (const item of byType.get('message') ?? []) add('subject', item);
   return byType;
 }
 

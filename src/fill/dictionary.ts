@@ -5,8 +5,8 @@ import { normalize } from './normalize';
 // so accents, case, separators and camelCase don't matter here.
 export const ALIASES: Record<FieldKey, readonly string[]> = {
   username: ['username', 'user name', 'login', 'login name', 'user id', 'pseudo', 'handle', 'identifiant', 'nom utilisateur', "nom d'utilisateur", 'اسم المستخدم', 'اسم الدخول'],
-  fullName: ['full name', 'name', 'first and last name', 'first last name', 'first name and last name', 'name and surname', 'account holder', 'account holder name', 'titulaire du compte', 'beneficiary name', 'your name', 'guest name', 'contact name', 'attendee name', 'customer name', 'client name', 'passenger name', 'applicant name', 'candidate name', 'recipient name', 'nom complet', 'nom et prénom', 'prénom et nom', 'nom prénom', 'nom du client', 'الاسم الكامل', 'الاسم واللقب', 'اسم الزبون'],
-  firstName: ['first name', 'firstname', 'fname', 'given name', 'forename', 'prénom', 'الاسم الأول', 'الاسم الشخصي', 'الاسم'],
+  fullName: ['full name', 'name', 'first and last name', 'first last name', 'first name and last name', 'name and surname', 'account holder', 'account holder name', 'titulaire du compte', 'beneficiary name', 'your name', 'guest name', 'contact name', 'attendee name', 'customer name', 'client name', 'passenger name', 'applicant name', 'candidate name', 'recipient name', 'nom complet', 'nom et prénom', 'prénom et nom', 'nom prénom', 'nom du client', 'الاسم الكامل', 'الاسم واللقب', 'اسم الزبون', 'الاسم'],
+  firstName: ['first name', 'firstname', 'fname', 'given name', 'forename', 'prénom', 'الاسم الأول', 'الاسم الشخصي'],
   middleName: ['middle name', 'second prénom', 'الاسم الأوسط'],
   lastName: ['last name', 'lastname', 'lname', 'surname', 'family name', 'nom', 'nom de famille', 'اللقب', 'اسم العائلة'],
   email: ['email', 'e-mail', 'mail', 'email address', 'e-mail address', 'courriel', 'adresse électronique', 'adresse mail', 'adresse e-mail', 'البريد الإلكتروني', 'البريد'],
@@ -19,7 +19,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   year: ['year', 'graduation year', 'year of graduation', 'year graduated', 'graduated in', 'class of', 'completion year', 'year of completion', 'year obtained', 'passing year', 'year of passing', 'birth year', 'year of birth', 'model year', 'year of manufacture', 'construction year', 'year built',
     'année', "année d'obtention", "année d'obtention du diplôme", 'année du diplôme', 'année de diplôme', 'année de naissance', 'année de fabrication', 'année de construction', 'السنة', 'سنة التخرج', 'سنة الحصول', 'سنة الميلاد', 'سنة الصنع'],
   experience: ['years of experience', 'year of experience', 'years experience', 'experience years', 'experience in years', 'years of work experience', 'years of professional experience', 'work experience years', 'total experience', 'total years of experience', 'yoe', 'experience',
-    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة'],
+    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة', 'الخبرة', 'خبرتك', 'خبرة'],
   company: ['company', 'company name', 'organization', 'organisation', 'organization name', 'org', 'employer', 'business name', 'entreprise', 'société', "nom de l'entreprise", 'raison sociale', 'الشركة', 'اسم الشركة', 'المؤسسة'],
   jobTitle: ['job title', 'profession', 'position', 'occupation', 'fonction', 'poste', 'titre du poste', 'المهنة', 'المسمى الوظيفي', 'الوظيفة'],
   department: ['department', 'dept', 'division', 'département', 'service', 'القسم'],
@@ -27,7 +27,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   employeeCount: ['employee count', 'number of employees', 'company size', 'headcount', 'effectif', "taille de l'entreprise", 'nombre de salariés', 'عدد الموظفين'],
   address: ['address', 'street address', 'address line 1', 'street', 'street and number', 'street name', 'addr', 'billing address', 'shipping address', 'delivery address', 'home address', 'adresse', 'adresse postale', 'rue', 'adresse de livraison', 'adresse de facturation', 'العنوان', 'عنوان الشارع', 'الشارع'],
   address2: ['address line 2', 'address 2', 'apartment', 'suite', 'floor', 'building', 'complément adresse', "complément d'adresse", 'appartement', 'bâtiment', 'étage', 'الشقة'],
-  city: ['city', 'town', 'place of birth', 'birth place', 'birthplace', 'lieu de naissance', 'lieu naissance', 'ville de naissance', 'commune de naissance', 'مكان الميلاد', 'locality', 'municipality', 'ville', 'commune', 'municipalité', 'المدينة', 'مدينة', 'البلدية', 'بلدية'],
+  city: ['city', 'town', 'place of birth', 'birth place', 'birthplace', 'lieu de naissance', 'lieu naissance', 'ville de naissance', 'commune de naissance', 'مكان الميلاد', 'locality', 'municipality', 'ville', 'commune', 'municipalité', 'المدينة', 'مدينة', 'البلدية', 'بلدية', 'gare de départ', "gare d'arrivée", 'ville de départ', "ville d'arrivée"],
   district: ['district', 'daira', 'daïra', 'borough', 'arrondissement', 'الدائرة', 'دائرة'],
   state: ['state', 'province', 'region', 'county', 'wilaya', 'الولاية', 'ولاية', 'المحافظة'],
   postalCode: ['postal code', 'postcode', 'zip', 'zip code', 'cp', 'code postal', 'الرمز البريدي'],
@@ -35,8 +35,11 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   website: ['website', 'web site', 'url', 'homepage', 'home page', 'portfolio', 'linkedin', 'linked in', 'profile url', 'site', 'blog', 'site web', 'site internet', 'الموقع الإلكتروني', 'الموقع'],
   bio: ['bio', 'biography', 'about', 'about me', 'about you', 'about yourself', 'biographie', 'à propos', 'présentation', 'نبذة'],
   description: ['steps to reproduce', 'expected result', 'actual result', 'symptoms', 'symptômes', 'reason', 'purpose', 'description', 'details', 'product description', 'الوصف', 'التفاصيل'],
-  message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق'],
-  subject: ['subject', 'topic', 'sujet', 'objet', 'الموضوع', 'موضوع'],
+  message: ['message', 'comment', 'your message', 'cover letter', 'msg', 'feedback', 'your query', 'your enquiry', 'your inquiry', 'your question', 'how can we help', 'how we can help', 'tell us how we can help', 'commentaire', 'votre message', 'lettre de motivation', 'motivation', 'الرسالة', 'رسالة', 'تعليق', 'questions or comments', 'comments or questions', 'questions and comments', 'comments and questions', 'questions comments'],
+  subject: ['subject', 'topic', 'sujet', 'objet', 'inquiry type', 'enquiry type', 'type of inquiry', 'type of enquiry', 'request type', 'type of request', 'issue type', 'type of issue',
+    'reason for contact', 'reason for contacting', 'reason for contacting us', 'contact reason', 'purpose of contact', 'nature of your inquiry', 'nature of your enquiry', 'nature of your query',
+    'type of question', 'type of feedback', 'feedback type', 'i am writing about', 'inquiry topic', 'enquiry topic', 'help topic', 'objet de votre demande', 'type de demande', 'motif de contact', 'nature de la demande',
+    'الموضوع', 'موضوع', 'نوع الطلب'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
   measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
     'longueur', 'largeur', 'hauteur', 'profondeur', 'épaisseur', 'diamètre', 'rayon', 'poids', 'poids unitaire', 'poids net', 'poids brut', 'masse', 'superficie', 'surface habitable', 'الطول', 'العرض', 'الارتفاع', 'العمق', 'السمك', 'القطر', 'الوزن', 'المساحة', 'الحجم'],
@@ -47,9 +50,9 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
     'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
   quantity: ['bedrooms', 'bathrooms', 'years', 'number of years', 'number of hours', 'hours per month', 'hours per week', 'number of days', 'quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
-  amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
+  amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'amt', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
     'montant', 'somme', 'revenu', 'revenus', 'dépenses', 'apport', 'acompte', "chiffre d'affaires", 'المبلغ', 'الدخل', 'المصاريف', 'الميزانية'],
-  salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
+  salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر', 'راتبك', 'الراتب المتوقع', 'راتبك المتوقع'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
   rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'how likely', 'likely to recommend', 'net promoter score', 'nps', 'stars', 'évaluation', 'التقييم'],
   date: ['date', 'event date', 'deadline', 'due date', 'travel date', 'select date', 'select a date', 'choose date', 'choose a date', 'pick a date', 'graduation date', 'joining date', 'date of joining', 'hire date', 'date of hire', 'choisir une date', 'اختر التاريخ', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
@@ -57,7 +60,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   endDate: ['end date', 'check out', 'check-out date', 'return date', 'to date', 'date to', 'date de fin', 'date de retour', 'retour', 'تاريخ النهاية', 'تاريخ الانتهاء', 'تاريخ المغادرة', 'تاريخ العودة'],
   time: ['time', 'arrival time', 'session time', 'time slot', 'preferred time', 'heure', "heure d'arrivée", 'الوقت', 'الساعة'],
   color: ['color', 'colour', 'couleur', 'اللون'],
-  search: ['search', 'q', 'query', 'keywords', 'keyword', 'recherche', 'rechercher', 'بحث', 'البحث'],
+  search: ['search', 'q', 'query', 'keywords', 'keyword', 'recherche', 'rechercher', 'بحث', 'البحث', 'mots clés', 'mots-clés', 'mot clé', 'mot-clé'],
   title: ['summary', 'headline', 'listing title', 'title', 'product title', 'ticket title', 'post title', 'article title', 'titre', 'العنوان المختصر'],
 };
 
@@ -74,7 +77,7 @@ export const GLUE_WORDS: ReadonlySet<string> = new Set(['order', 'numero', 'num'
 export const QUALIFIERS: readonly string[] = ['billing', 'shipping', 'delivery', 'home', 'work', 'business', 'contact', 'user', 'customer', 'primary', 'secondary', 'current', 'new', 'main', 'personal', 'your', 'my'];
 
 // Autocomplete tokens (the last token of the attribute) and the type they declare.
-export const AUTOCOMPLETE: Readonly<Record<string, FieldKey>> = { username: 'username', name: 'fullName', 'given-name': 'firstName', 'family-name': 'lastName', email: 'email', tel: 'phone', 'tel-national': 'phone', organization: 'company', 'organization-title': 'jobTitle', 'street-address': 'address', 'address-line1': 'address', 'address-level2': 'city', 'address-level1': 'state', 'postal-code': 'postalCode', country: 'country', 'country-name': 'country', url: 'website', 'additional-name': 'middleName', bday: 'birthDate', sex: 'gender', 'address-line2': 'address2', 'new-password': 'password', 'current-password': 'password' };
+export const AUTOCOMPLETE: Readonly<Record<string, FieldKey>> = { username: 'username', name: 'fullName', 'given-name': 'firstName', 'family-name': 'lastName', email: 'email', tel: 'phone', 'tel-national': 'phone', organization: 'company', 'organization-title': 'jobTitle', 'street-address': 'address', 'address-line1': 'address', 'address-level2': 'city', 'address-level1': 'state', 'postal-code': 'postalCode', country: 'country', 'country-name': 'country', url: 'website', 'additional-name': 'middleName', bday: 'birthDate', sex: 'gender', 'address-line2': 'address2', 'address-line3': 'address2', 'new-password': 'password', 'current-password': 'password' };
 
 // What an input type or inputmode says about the field, and how strongly.
 export const INPUT_TYPE_HINTS: Readonly<Record<string, readonly [FieldKey, number]>> = { email: ['email', 0.9], tel: ['phone', 0.85], url: ['website', 0.8], password: ['password', 0.95], color: ['color', 0.9], time: ['time', 0.7], date: ['date', 0.55], search: ['search', 0.9] };
@@ -84,7 +87,7 @@ export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['year', 'experience', 'measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
-export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
+export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'amount', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject', 'experience', 'salary']);
 export const CONFIRMABLE_TYPES: ReadonlySet<FieldKey> = new Set(['email', 'password', 'phone', 'username']);
 export const CONFIRM_WORDS = ['confirm', 'confirmation', 'repeat', 're enter', 'retype', 'verify', 'again', 'confirmer', 'تاكيد', 'اعادة'];
 export const SEARCH_WORDS = ['search', 'recherche', 'rechercher', 'بحث', 'البحث'];
@@ -93,9 +96,13 @@ export type SensitiveKind = 'card' | 'otp' | 'iban';
 // Sensitive fields are recognized so they can be skipped, never filled. Phrases match whole words.
 export const SENSITIVE_TERMS: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: ['card', 'credit card', 'debit card', 'card number', 'cardnumber', 'creditcard', 'cc number', 'cc num', 'ccnumber', 'card no', 'name on card', 'cardholder', 'card holder', 'card expiry', 'card expiration', 'cc exp', 'mm yy', 'mm aa', 'card pin', 'date d expiration de la carte', 'cvv', 'cvv2', 'cvc', 'cvc2', 'ccv', 'csc', 'security code', 'card verification', 'card security code', 'numéro de carte', 'numéro carte', 'carte bancaire', 'carte de crédit', 'titulaire de la carte', 'nom sur la carte', 'cryptogramme', 'cb numero', 'رقم البطاقة', 'البطاقة البنكية', 'بطاقة الائتمان', 'رمز الأمان'],
-  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
+  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'validation code', 'verify code', 'temporary code', 'reset code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
   iban: ['iban', 'bic', 'swift', 'swift code', 'rib', 'account no', 'acct no', 'acct number', 'account num', 'routing', 'aba', 'bank code', "relevé d'identité bancaire", 'bank account', 'bank account number', 'account number', 'routing number', 'sort code', 'numéro de compte', 'compte bancaire', 'code banque', 'code guichet', 'numéro ccp', 'compte ccp', 'رقم الحساب', 'الحساب البنكي', 'الحساب المصرفي'],
 };
+// "Enter code" alone names no kind of code: a one-time code unless another clue of the field names
+// one ("Promo code", "Postal code").
+export const BARE_CODE_TERMS: readonly string[] = ['enter code', 'enter the code'];
+export const OTHER_CODES = /\b(promo|promotion(al)?|coupon|discount|voucher|gift|referral|invite|invitation|postal|post|zip|country|area|dial(ling)?|tracking|product|access|offer|campaign|code postal)\b/;
 // Words a card field uses that other documents use too: "Passport expiry", "Choose a PIN". They only
 // mean card data when the form also has a card field.
 export const WEAK_CARD_TERMS: readonly string[] = ['expiry', 'expiry date', 'expiration', 'expiration date', 'expiration month', 'expiration year', 'exp month', 'exp year', 'exp date', 'pin', 'pin code', 'security pin', 'date d expiration', 'carte'];
@@ -110,7 +117,7 @@ export const DOCUMENTS: readonly string[] = ['passport', 'passeport', 'identity'
 // Glued names: ccnum, cardcvc, cardNumber written as one word, sepaiban.
 export const SENSITIVE_GLUED: Readonly<Record<SensitiveKind, RegExp>> = {
   card: /^(?:cc|card|credit|carte|cb)(?:num|number|no|cvc|cvv|csc|exp|expiry|holder|name|pin|code)|cvv|cvc|ccexp|ccnum/,
-  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|auth)code$/,
+  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|verify|vali|valid|validation|auth|reset|temp|temporary)code$/,
   iban: /iban|^(?:bic|swift)(?:code)?$|^(?:acct|account)(?:no|num|number)$/,
 };
 export const SENSITIVE_SECTIONS: Readonly<Record<SensitiveKind, readonly string[]>> = {
@@ -121,11 +128,11 @@ export const SENSITIVE_SECTIONS: Readonly<Record<SensitiveKind, readonly string[
 // Consent checkboxes: terms, privacy, newsletters and marketing. Latin stems match a word's start.
 // Three kinds: agreeing to terms, permission (j'autorise, I give permission), and asking for
 // messages (email me, keep me updated, recevoir les actualités).
-const CONSENT_STEMS = ['consent', 'agre', 'subscri', 'newsletter', 'accept', 'marketing', 'offer', 'promot', 'partner', 'optin', 'receive', 'recevoir', 'confidentialite', 'abonn', 'offre', 'partenaire', 'autoris', 'permission', 'actualite'];
+const CONSENT_STEMS = ['consent', 'agre', 'subscri', 'newsletter', 'accept', 'marketing', 'offer', 'promot', 'optin', 'receive', 'recevoir', 'confidentialite', 'abonn', 'offre', 'partenaire', 'autoris', 'permission', 'actualite'];
 // Whole words only: "sponsors" but not "sponsorship", "I authorize" but not "authorized to work",
 // "terms and conditions" but not medical conditions.
 // Sharing data counts too: usage data, analytics, telemetry, crash reports.
-const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'sponsor', 'sponsors', 'gift aid', 'data sharing', 'text messages', 'email preferences', 'sign me up', 'email list', 'mailing list', 'reveal my name', 'name may be revealed', 'automatically renew', 'renew automatically', 'auto renew', 'auto renewal', 'save card', 'acepto', 'autorizo', 'consiento', 'accetto', 'acconsento', 'aceito', 'concordo', 'akzeptiere', 'einverstanden', 'datenschutz', 'prihvatam', 'slazem', 'согласие', 'соглашаюсь', 'подписаться', 'save payment', 'save my card', 'save this card', 'save this address', 'save my address', 'to my account', 'for next time', 'future purchases', 'opt out', 'optout', 'unsubscribe', 'allow', 'allows', 'allowing', 'grant access', 'give access', 'access to my account', 'permets', 'permettre', 'authorize', 'authorise', 'authorizes', 'authorises', 'authorizing', 'authorising', 'declaration', 'declarations', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'terms and conditions', 'the conditions', 'les conditions', 'general conditions', 'conditions of use', 'conditions of sale', 'conditions generales', 'conditions d utilisation', 'conditions de vente', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'notification', 'notifications', 'alerts', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
+const CONSENT_WORDS = ['usage data', 'share anonymous', 'share data', 'share usage', 'crash reports', 'diagnostics', 'telemetry', 'analytics', 'donnees d utilisation', 'statistiques anonymes', 'opt me in', 'communications', 'comms', 'policy', 'policies', 'cookie', 'cookies', 'sponsor', 'sponsors', 'gift aid', 'data sharing', 'partners', 'partner offers', 'our partner', 'text messages', 'email preferences', 'sign me up', 'email list', 'mailing list', 'reveal my name', 'name may be revealed', 'automatically renew', 'renew automatically', 'auto renew', 'auto renewal', 'save card', 'acepto', 'autorizo', 'consiento', 'accetto', 'acconsento', 'aceito', 'concordo', 'akzeptiere', 'einverstanden', 'datenschutz', 'prihvatam', 'slazem', 'согласие', 'соглашаюсь', 'подписаться', 'save payment', 'save my card', 'save this card', 'save this address', 'save my address', 'to my account', 'for next time', 'future purchases', 'opt out', 'optout', 'unsubscribe', 'allow', 'allows', 'allowing', 'grant access', 'give access', 'access to my account', 'permets', 'permettre', 'authorize', 'authorise', 'authorizes', 'authorises', 'authorizing', 'authorising', 'declaration', 'declarations', 'certify', 'declare', 'acknowledge', 'understand', 'attest', 'over 18', 'of age', 'certifie', 'declare', 'atteste', 'reconnais', 'terms', 'privacy', 'terms and conditions', 'the conditions', 'les conditions', 'general conditions', 'conditions of use', 'conditions of sale', 'conditions generales', 'conditions d utilisation', 'conditions de vente', 'gdpr', 'rgpd', 'cgu', 'cgv', 'opt in', 'share my', 'contact me', 'email me', 'text me', 'notify me', 'alert me', 'notification', 'notifications', 'alerts', 'keep me informed', 'keep me updated', 'keep me posted', 'hear about', 'hear from', 'send me the', 'updates', 'news', 'deals', 'digest', 'etre informe', 'tenir informe', 'lettre d information'];
 export const CONSENT = new RegExp(`(?:^| )(?:(?:${CONSENT_STEMS.join('|')})|(?:${CONSENT_WORDS.join('|')})(?= |$))|وافق|شروط|خصوصية|اشتراك|النشرة|العروض|التسويق|تلقي|اخبار|اشعارات|اسمح|اقر|اشهد|اتعهد|اصرح|اصادق|اؤكد`, 'u');
 // Words that ask permission only as a checkbox's own label: "Keep my gift anonymous", "Can we
 // contact you?", "Emailed twice a month". As a question for radios or a select they often aren't.
@@ -133,7 +140,13 @@ const CHECKBOX_CONSENT_WORDS = ['contact you', 'text you', 'call you', 'email yo
 export const CHECKBOX_CONSENT = new RegExp(`(?:^| )(?:${CHECKBOX_CONSENT_WORDS.join('|')})(?= |$)`, 'u');
 // A checkbox that states something about the user ("I have read…", "I am over 18",
 // "Je certifie…", "J'ai lu…") is a declaration, never test data.
-export const DECLARATION = /^(?:i|im|i m|je|j)(?= )/u;
+// A first-person statement that declares or vouches: "I confirm…", "I have read…", "I am over 18",
+// "Je certifie…", and promises to pay or give ("I choose to pay the fees", "I want to contribute
+// this amount every month"). "I want to choose a dealership" or "I have a vehicle" are answers.
+export const DECLARATION = /^(?:i|im|i m|je|j)(?: (?:hereby|also|fully|do|not|d|have|am|m|ai|suis|ne))* (?:(?:want|choose|agree|wish|would like|d like|like) to (?:pay|cover|contribute|donate|give)|pay|cover|contribute|donate|confirm|certify|declare|agree|accept|consent|acknowledge|understand|attest|affirm|swear|promise|undertake|authori[sz]e|authori[sz]ed|give|grant|read|wish|will|would like|at least|over|aged|\d+ years|of legal|confirme|certifie|declare|accepte|reconnais|atteste|lu|majeur)(?= |$)/u;
+// A bare topic ("Analytics", "Marketing", "Product news") names what an option is about. Among
+// several options it is a choice; it asks permission only as the box's own lone question.
+export const TOPIC_ONLY = /^(?:[a-z]+ )?(?:analytics|communications?|comms|marketing|news|updates|deals|digest|notifications?|alerts|offers|promotions?|partners|sponsors?|newsletters?)(?: [a-z]+)?$/u;
 // Words that describe rather than ask, in a radio group: "Joyfully accepts", "Returns accepted?",
 // "Oui, notification reçue". Removed before the group's question and answers are read for consent.
 export const DESCRIBING = /(?:^| )(?:accepts|accepted)(?= |$)/gu;
@@ -225,6 +238,7 @@ export const NAMED_THING_ENDINGS: readonly string[] = NAMED_THINGS.flatMap(thing
 export const SENSITIVE_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_TERMS.card.map(normalize), otp: SENSITIVE_TERMS.otp.map(normalize), iban: SENSITIVE_TERMS.iban.map(normalize),
 };
+export const BARE_CODE_PHRASES: readonly string[] = BARE_CODE_TERMS.map(normalize);
 export const SENSITIVE_SECTION_PHRASES: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: SENSITIVE_SECTIONS.card.map(normalize), otp: [], iban: SENSITIVE_SECTIONS.iban.map(normalize),
 };

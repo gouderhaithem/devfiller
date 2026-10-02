@@ -4,7 +4,7 @@ The side panel sits beside the website and follows the tab you're on. Open it wi
 
 The panel lists every form field on the page as **filled**, **skipped** or **incompatible**, with the reason. Filter the list by **Filled** or **Skipped**. Select a field to highlight it on the page with **Show on page**.
 
-Under each field's name, the panel shows what DevFiller recognized it as and how sure it is, for example **Phone · 96%**. Protected fields (card, bank, one-time code and consent) say so, and fields it couldn't recognize say **Type not recognized**. Select a field to see the evidence behind it, such as `autocomplete=tel` or `label “Téléphone”`, and any close alternatives. Fields under 70% are only filled when **Fill unknown fields** is on.
+Under each field's name, the panel shows what DevFiller recognized it as and how sure it is, for example **Phone · 96%**. Sensitive fields (card, bank, one-time code and consent) say **test value**, and once filled **Filled with test value**, and fields it couldn't recognize say **Type not recognized**. Select a field to see the evidence behind it, such as `autocomplete=tel` or `label “Téléphone”`, and any close alternatives. Fields under 70% are only filled when **Fill unknown fields** is on.
 
 Above the list, the panel names the kind of form it found, such as **Checkout form** or **Sign-up form**.
 

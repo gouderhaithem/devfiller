@@ -9,7 +9,7 @@ These are on the [roadmap](/#roadmap).
 
 ## Skipped on purpose
 
-File uploads, hidden, disabled and read-only fields, card and bank details, one-time codes, consent, terms, newsletter and data-sharing checkboxes, and "Remember me" choices are always left for you. Passwords are skipped unless you turn on **Generate test passwords**.
+File uploads and hidden, disabled and read-only fields are always left for you. Card and bank details, one-time codes, consent, terms, newsletter and data-sharing checkboxes and "Remember me" choices get values that read as tests ([how it works](/docs/how-it-works/)); exclude any of them to leave it alone. Passwords are skipped unless you turn on **Generate test passwords**.
 
 ## Troubleshooting
 

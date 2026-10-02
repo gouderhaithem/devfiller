@@ -17,9 +17,9 @@ describe('form filling',()=>{
     expect(field('a').value).toBe(values.firstName);expect(field('b').value).toBe(values.lastName);
     expect(field('c').value).toBe(`${values.firstName} ${values.lastName}`);expect(field('d').value).toBe(values.email);expect(field('e').value).toBe(values.username);
   });
-  it('preserves existing values and excludes passwords, hidden, payment, readonly and consent',()=>{
+  it('preserves existing values and excludes passwords, hidden, readonly and cards when test cards are off; ticks consent',()=>{
     document.body.innerHTML='<input id="firstName" value="My name"><input id="password" type="password"><input id="secret" type="hidden"><input id="card" autocomplete="cc-number"><input id="email" readonly><label for="terms">I agree to terms</label><input id="terms" type="checkbox">';
-    const result=fillPage({...request,fillUnknown:true});expect(result.filled).toBe(0);expect(result.preserved).toBe(1);expect(field('firstName').value).toBe('My name');expect(field('terms').checked).toBe(false);expect(field('card').value).toBe('');
+    const result=fillPage({...request,fillUnknown:true});expect(result.filled).toBe(1);expect(result.preserved).toBe(1);expect(field('firstName').value).toBe('My name');expect(field('terms').checked).toBe(true);expect(field('card').value).toBe('');
   });
   it('overwrites only when requested and dispatches form events',()=>{
     document.body.innerHTML='<input id="firstName" value="Before">';const input=vi.fn(),change=vi.fn();field('firstName').addEventListener('input',input);field('firstName').addEventListener('change',change);

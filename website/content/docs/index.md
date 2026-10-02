@@ -5,7 +5,7 @@ DevFiller is a browser extension for developers and testers. Open a page with a 
 1. DevFiller reads the form on the page you're looking at. It only runs when you click, and only on that tab.
 2. It works out what each field is from every clue the page gives, such as the label, name, placeholder, autocomplete attribute, units and the answers a list offers, in English, French or Arabic. Each field gets one of [46 field types](/docs/field-types/) and a confidence, or stays unknown when the clues aren't strong enough. [How recognition works](/docs/how-it-works/) explains the details.
 3. A matching value is generated locally. The username and email follow the generated name, places and phone numbers come from one country, numbers and dates fit the field's limits, and confirmation fields repeat what they confirm.
-4. Fields that must stay yours are skipped: passwords (unless you turn them on), card and bank details, one-time codes, consent boxes and file uploads.
+4. Sensitive fields get values that read as tests: test cards, a one-time code of 4s, a bank account of 4s, consent boxes ticked. Passwords (unless you turn them on) and file uploads are skipped, and any field you exclude is left alone.
 5. If the site rejects a value, DevFiller tries another way of writing it. The toolbar icon shows how many fields were filled; open the [side panel](/docs/side-panel/) to see every field and why.
 
 Click again to get a different identity and new values.

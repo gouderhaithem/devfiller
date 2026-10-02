@@ -235,6 +235,8 @@ export function isMeaningless(raw: string): boolean {
   return !tokens.length || tokens.every(token => /^\d+$/.test(token) || /^[a-z]{1,2}\d+$/.test(token) || FILLER.has(token.replace(/\d+$/, '')));
 }
 
+const PROMPT = /^[\s\-–—.*]*(?:(?:please |veuillez |merci de )?(?:select|choose|pick|choisir|choisissez|sélectionner|sélectionnez|selectionner|selectionnez)(?: (?:a|an|your|the|un|une|le|la|les|l'|votre|vos|du|de|des))?|اختر|اختار|اختاري|اختري|حدد|حددي)\s+/iu;
+
 // Every signal classification can read, with its source. Values are never read.
 export function describeSignals(el: Control): Signal[] {
   const signals: Signal[] = [];
@@ -253,8 +255,9 @@ export function describeSignals(el: Control): Signal[] {
   // "e.g. State Farm" shows a sample answer, not what the field is; its format still counts.
   const placeholder = el.getAttribute('placeholder');
   if (!EXAMPLE_PREFIX.test((placeholder || '').trim())) add('placeholder', placeholder);
-  // A select's empty first option ("Select country") works as its placeholder.
-  if (el instanceof HTMLSelectElement && el.options[0] && !el.options[0].value) add('placeholder', el.options[0].textContent);
+  // A select's empty first option ("Select country") works as its placeholder, read without its
+  // "choose" word: "Choisir fonction", "اختر الخبرة" name a job title and an experience.
+  if (el instanceof HTMLSelectElement && el.options[0] && !el.options[0].value) add('placeholder', (el.options[0].textContent || '').replace(PROMPT, ''));
   add('title', el.getAttribute('title'));
   // A checkbox named by one word ("controlled", a library's default) still reads the words beside it.
   const naming = signals.filter(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby');

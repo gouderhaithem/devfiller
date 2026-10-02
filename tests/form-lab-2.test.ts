@@ -98,13 +98,13 @@ describe('radio groups', () => {
     expect(found.bourse).not.toBe('skip:consent');
     expect(found.pp).toBe('skip:consent');
   });
-  it('still protects an opt-in asked only by its answers', () => {
+  it('reads an opt-in asked only by its answers as consent, and answers yes', () => {
     document.body.innerHTML = `<form><fieldset><legend>Preferences</legend>
       <label><input type="radio" id="y" name="offers" value="y"> Yes, please send me offers</label><label><input type="radio" id="n" name="offers" value="n"> No thanks</label></fieldset>
       <fieldset><legend>Follow-up</legend><label><input type="radio" id="c" name="call" value="y"> Yes, contact me</label><label><input type="radio" name="call" value="n"> No</label></fieldset>
       <label><input type="checkbox" id="acc"> Accepted</label></form>`;
     fillPage(request);
-    expect(document.querySelectorAll('input:checked')).toHaveLength(0);
+    expect(Array.from(document.querySelectorAll<HTMLInputElement>('input:checked'), el => el.id)).toEqual(['y', 'c', 'acc']);
   });
   it('gives another person a different number wherever the digits end', async () => {
     const { otherNumber } = await import('../src/fill/phones');

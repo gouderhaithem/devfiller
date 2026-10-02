@@ -126,6 +126,134 @@ are short of the +3 the plan set for switching them on.
 inputs, consent radios and checkboxes worded unusually ("show my name", "keep my gift anonymous",
 supporter questions) and an email verification code. That is rule work for the next round.
 
+### Third real-world round: 200 fresh sealed forms
+
+Rule work tuned on the 998 training forms only: sign-up lists and consent wording, interest options
+and plain first-person answers no longer read as consent, donation and price choices read as an
+amount, a contact form's one unlabelled text area read as its message. The model was then retrained
+on the same data. 200 forms from 200 websites no earlier round used (2,389 fields; same tools, same
+guide) were labelled blind and opened once, against `main` before this work:
+
+| On the 200 sealed real forms | Precision | Recall | F1 | Sensitive fields filled |
+| --- | --- | --- | --- | --- |
+| `main`, rules alone | 89.6% | 84.2% | 86.8% | 20 |
+| `main`, rules + model | 89.5% | 86.5% | 88.0% | 20 |
+| **This round, rules alone** | **90.8%** | 87.4% | **89.1%** | 23 |
+| **This round, rules + model** | 90.4% | 89.9% | **90.1%** | 23 |
+
+The 3 extra sensitive fields were a regression of the narrower declaration rule: promises to pay or
+give ("I choose to pay the fees", "I want to contribute this amount every month", "I do not wish to
+be publicly recognized"). Fixed after the measurement and disclosed: 20 again (89.2% / 90.2% F1).
+The 20 left, on `main` too, are mostly contact-channel checkboxes ("by email", "by SMS"), investor
+alert lists and two verification-code boxes: rule work for the next round. The model adds +1.0 F1
+over the rules here, short of the +3 for switching learned guesses on by default. This set is now
+retired.
+
+### Fourth and fifth real-world rounds: more training forms
+
+Two training rounds from websites no earlier round used, labelled blind with the same guide and
+checked against the settled cases (`consistency.mjs`): round 4, 1,000 forms (10,071 fields) drawn
+like round 2, mostly contact and sign-up forms; round 5, 1,257 forms (20,900 fields) drawn by
+`scripts/uci-sealed/sample-rare.mjs`, the forms that ask for the types with the fewest rows
+(ratings, colours, gender, industry, company size, start and end dates, middle names…). Two settled
+cases were added to the guide and applied to every round, both sealed sets included: a checkbox that
+adds to a payment (cover the fee, make it monthly) is `skip:consent`, and a topic picked from a list
+is `subject` (183 labels changed, 7 of them on the third round's sealed forms). The engine's rules
+are unchanged. On the third round's sealed forms, relabelled, with the model retrained on each mix:
+
+| On the 200 third-round forms | Precision | Recall | F1 | Missed | Wrong |
+| --- | --- | --- | --- | --- | --- |
+| Rules alone | 90.9% | 87.3% | 89.1% | 156 | 140 |
+| Rules + model, rounds 1–2 (before) | 90.8% | 90.0% | 90.4% | 112 | 147 |
+| Rules + model, + rounds 4 and 5 | 90.3% | 90.5% | 90.4% | 102 | 156 |
+| Rules + model, + round 4 | 90.9% | 88.8% | 89.9% | 132 | 142 |
+| **Rules + model, + round 5 (kept)** | **90.8%** | **90.9%** | **90.9%** | 101 | 147 |
+
+Round 4 made the model hold back, so it stays labelled but out of the training data. The third
+round's set was already retired and the mix was chosen on it, so round 4 was then used as the clean
+measurement: same draw as the third round's sealed forms, labelled blind, never trained on, never used
+to choose anything.
+
+| On round 4's 1,000 forms (10,071 fields) | Precision | Recall | F1 | Missed | Wrong |
+| --- | --- | --- | --- | --- | --- |
+| Rules alone | 91.2% | 86.9% | 89.0% | 701 | 626 |
+| Rules + model, rounds 1–2 (before) | 91.6% | 89.8% | 90.7% | 522 | 617 |
+| Rules + model, + round 5 (kept) | 91.3% | 90.1% | 90.7% | 495 | 638 |
+
+The +0.5 did not hold: on clean forms the two models tie. The new one fills 27 more fields and gets 21
+more wrong (62 fields newly right, mostly topic lists read as `subject`; 56 newly wrong, mostly other
+lists read as `subject` and birth dates read as plain dates). Twice the real-form rows bought no F1, so
+the model is near what its features allow: the next gains are rule work (495 fields missed, 13
+sensitive fields filled) or new features, not more forms of the same crawl. Round 4 is now retired.
+
+### Sixth real-world round: rule work on round 4, measured on 200 sealed forms
+
+200 forms from websites no earlier round used were drawn and labelled blind before any fix (round 6;
+the crawl's rich forms are used up, so these are mostly contact and sign-up forms). The rules were
+then fixed against round 4's mistakes only: one-time codes worded "Validation code", "Temporary
+code", "Reset code" or a bare "Enter code", and a row of code boxes with one two-character box; a
+message's question on a select or radios ("How can we help?") and topic wording read as `subject`;
+day/month/year selects of a birth date; WPForms and Gravity Forms name parts; a lead form's "Title"
+as a job title. The evaluator counted every untouched sensitive select as filled (`undefined`
+against `false`): fixed, and both sides below are scored with the fixed evaluator.
+
+| | Precision | Recall | F1 | Sensitive fields filled |
+| --- | --- | --- | --- | --- |
+| Round 4 (tuned on), rules, before | 91.2% | 86.9% | 89.0% | 13 |
+| Round 4 (tuned on), rules, after | 91.2% | 88.5% | 89.9% | 0 |
+| **Round 6 (sealed), rules, before** | 94.9% | 88.9% | 91.8% | 1 |
+| **Round 6 (sealed), rules, after** | **95.0%** | **90.4%** | **92.7%** | 1 |
+| Round 6 (sealed), rules + model, before | 94.9% | 91.4% | 93.1% | 1 |
+| Round 6 (sealed), rules + model, after | 95.0% | 92.5% | 93.8% | 1 |
+
+The gain held on the sealed forms: +0.9 F1 for the rules, +0.7 with the model, precision unchanged.
+The one sensitive field filled is a Chinese "验证码" (verification code): the engine reads English,
+French and Arabic only. Round 6 is now retired.
+
+### Seventh real-world round: two more fixes, and a second sealed check
+
+200 more forms (round 7, mostly short contact, sign-up and log-in forms) were labelled blind before
+two more fixes tuned on round 4: a support form's one text area called "Description" or "Details" is
+its message (settled in the guide), and fields named as a later address line (address2, street2,
+address_3, autocomplete="address-line3") are address line 2. Round 4, rules alone: F1 89.9% → 90.0%.
+
+| On round 7's 200 sealed forms (1,379 fields) | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| Rules, before the sixth round | 94.2% | 89.7% | 91.9% |
+| Rules, after the sixth round | 94.3% | 90.4% | 92.3% |
+| **Rules, after this round** | 94.3% | 90.4% | **92.3%** |
+| Rules + model, before the sixth round | 94.0% | 92.0% | 93.0% |
+| **Rules + model, after this round** | 94.1% | 92.2% | **93.2%** |
+
+The sixth round's fixes hold on a second sealed set (+0.4 F1); this round's two fixes change nothing
+here, since these forms have no such fields. Round 7 is now retired.
+
+### French and Arabic forms from the web
+
+The UCI crawl has almost no French or Arabic forms (12 unused French websites), so 255 forms were
+collected from 188 public French, Belgian, Swiss, Québécois, Algerian, Moroccan, Tunisian, Egyptian
+and Gulf websites (`scripts/uci-sealed/crawl-forms.mjs`: home, contact, sign-up and job pages,
+nothing typed or submitted, websites that turn automated browsers away skipped), labelled blind with
+the same guide plus French and Arabic notes, and split by website: 157 training forms (117 French, 40
+Arabic) and 98 sealed (69 French, 29 Arabic). Rule fixes were tuned on the training forms only: a
+select named only by its prompt ("Choisir fonction", "اختر الخبرة"), experience and salary selects,
+"mots clés", "gare de départ", "خبرتك", "راتبك المتوقع", and "الاسم" / "Name" as the whole name alone
+but the first name beside a surname. The model was retrained with the training forms (920 rows).
+
+| | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| French and Arabic training forms, rules, before | 89.4% | 77.2% | 82.8% |
+| French and Arabic training forms, rules, after | 90.1% | 80.5% | 85.0% |
+| **98 sealed French and Arabic forms, rules, before** | 86.5% | 80.2% | 83.2% |
+| **98 sealed French and Arabic forms, rules, after** | 86.9% | 80.5% | **83.6%** |
+| 98 sealed French and Arabic forms, rules + model, before | 86.5% | 81.3% | 83.8% |
+| 98 sealed French and Arabic forms, rules + model, after | 87.2% | 82.2% | **84.6%** |
+
+French and Arabic stay about 8 points below English (92–93% on the sealed English rounds): many of
+these forms are search widgets, price sliders and custom pickers, and 98 forms make a noisy measure.
+In English, round 4 moved from 91.4% to 91.2% with the retrained model (rules unchanged at 90.1%);
+the benchmark gate shows no regressions. The sealed French and Arabic forms are now retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,

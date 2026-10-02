@@ -11,6 +11,7 @@ import { formatReport, type FixtureScore, type PerfResult, type RunExtras } from
 import { variantCases } from './variants';
 import { WIDGET_SELECTOR } from '../src/fill/widgets';
 import { TEST_CARDS } from '../src/fill/cards';
+import { isTestValue, TEST_TEXT, testKind } from '../src/fill/sensitive';
 
 // The benchmark injects the same bundle the extension ships, built straight from source.
 // BENCHMARK_ENTRY swaps in another engine entry, to compare engines on the same fixtures.
@@ -32,13 +33,24 @@ interface ControlState { value: string; checked: boolean }
 
 const values = generateValues('en');
 const base: FillRequest = { values, identities: generateIdentities('en'), samples: generateSamples('en'), phones: generatePhones(), localized: localizedValues('en'), custom: [], overwrite: true, fillUnknown: true, passwords: false, exclusions: defaultExclusions };
-// Card fields off, then every optional filler switched on, test cards included. Neither may touch
-// a one-time code, bank or consent field; with test cards on, a card field may only get test data.
+// Card fields off, then every optional filler switched on, test cards included. A one-time code or
+// bank field may only get its test value (sensitive.ts), a consent field only a tick, its agreeing
+// answer or "Test"; with test cards on, a card field may only get test data.
 const FILL_SETTINGS: FillRequest[] = [{ ...base, cards: 'off' }, { ...base, passwords: true, cards: 'success', exclusions: { skipSearch: false, skipHeader: false, rules: [] } }];
 const TEST_NUMBERS = Object.values(TEST_CARDS).map(card => card.number.replace(/\D/g, ''));
 // Test data for a card field: a test card number, a group of four, an expiry, the CVC, a name or "visa".
 const TEST_CARD_SHAPES = [/^\d{1,4}$/, /^\d{2}\s?[/-]?\s?\d{2}(?:\d{2})?$/, /^\d{4}-\d{2}$/, /^visa$/i, /^[\p{L} .'-]+$/u];
 const isTestCardData = (value: string) => !value || TEST_NUMBERS.includes(value.replace(/[\s-]/g, '')) || TEST_CARD_SHAPES.some(shape => shape.test(value.trim()));
+
+// A sensitive field holding its test value: 4s in a code, the test account in a bank field; a
+// consent text box may only say "Test" (ticks and chosen answers are its test value).
+const TEXT_LIKE = /^<(?:textarea|input(?![^>]*type="(?:checkbox|radio)"))/i;
+function isTestFill(control: ControlInfo, before: ControlState, after: ControlState): boolean {
+  const kind = testKind(control.expect ?? '');
+  if (!kind) return false;
+  if (kind === 'consent' || kind === 'session') return !TEXT_LIKE.test(control.html) || after.value === before.value || after.value === TEST_TEXT;
+  return isTestValue(kind, after.value);
+}
 
 let engineScript = '';
 
@@ -113,7 +125,7 @@ async function findLeaks(page: Page, url: string, name: string, controls: Contro
     sensitive.forEach((control, i) => {
       const changed = before[i].value !== after[i].value || before[i].checked !== after[i].checked;
       const testCard = control.expect === 'skip:card' && settings.cards !== 'off' && isTestCardData(after[i].value);
-      if (changed && !testCard && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
+      if (changed && !testCard && !isTestFill(control, before[i], after[i]) && !leaks.some(leak => leak.control === control.html)) leaks.push({ fixture: name, expected: control.expect!, control: control.html });
     });
     // A card number never lands outside a card field.
     const others = controls.filter(control => !control.omitted && control.expect !== 'skip:card');

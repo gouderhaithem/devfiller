@@ -5,6 +5,7 @@ import { ALIAS_ENTRIES } from '../src/fill/dictionary';
 import { isMeaningless, nearbyText } from '../src/fill/extract';
 import { normalize } from '../src/fill/normalize';
 import { fillPage, panelPageAction, type FillRequest } from '../src/fill';
+import { TEST_IBAN } from '../src/fill/sensitive';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 
@@ -187,13 +188,13 @@ describe('sensitive fields', () => {
     expect(typeOf('<label><input type="checkbox"> Same as billing address</label>')).toBe('unknown');
     expect(typeOf('<fieldset><legend>Preferred contact method</legend><label><input type="radio" name="via"> Email</label></fieldset>')).toBe('unknown');
   });
-  it('never fills bank fields or marketing opt-ins, even with every filler switched on', () => {
+  it('fills bank fields and marketing opt-ins with test values, marked as such', () => {
     document.body.innerHTML = '<label for="iban">IBAN</label><input id="iban"><label><input type="checkbox" id="offers"> Send me special offers</label><input id="email" type="email">';
     const result = fillPage({ ...request, passwords: true, exclusions: { skipSearch: false, skipHeader: false, rules: [] } });
-    expect(input('iban').value).toBe('');
-    expect(input('offers').checked).toBe(false);
+    expect(input('iban').value).toBe(TEST_IBAN);
+    expect(input('offers').checked).toBe(true);
     expect(input('email').value).toBe(values.email);
-    expect(result.fields?.find(f => f.label === 'IBAN')).toMatchObject({ status: 'skipped', reason: 'Protected bank account field' });
+    expect(result.fields?.find(f => f.label === 'IBAN')).toMatchObject({ status: 'filled', reason: 'Filled with test value (bank details)' });
   });
 });
 

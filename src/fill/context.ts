@@ -161,15 +161,35 @@ function confirmCards(fields: Map<Control, Classification>) {
 // In the same section as card fields, a name is the cardholder's, a month, year or date is the
 // card's expiry, and anything unrecognized is most likely card data too: none of them is filled.
 // Four or more one-character boxes in a row are one code typed digit by digit: a one-time code,
-// never test data. (A card number in four boxes takes four characters per box.)
-const isCodeBox = (el: Control) => el instanceof HTMLInputElement && ['text', 'tel', 'number', 'password', ''].includes(el.type) && el.maxLength === 1;
+// never test data. One box of the row may take two characters. (A card number in four boxes takes
+// four characters per box.) A box read as something else, a ZIP code typed digit by digit, breaks
+// the row.
+const codeBoxSize = (el: Control) => el instanceof HTMLInputElement && ['text', 'tel', 'number', 'password', ''].includes(el.type) && el.maxLength >= 1 && el.maxLength <= 2 ? el.maxLength : 0;
 function codeBoxes(pass: Pass) {
   const run: Control[] = [];
   const close = () => {
-    if (run.length >= 4) for (const el of run) pass.fields.set(el, { ...get(pass, el), type: 'skip:otp', confidence: 1, candidates: [], evidence: [{ source: 'form', signal: `${run.length} one-character boxes in a row`, weight: 1, match: 'sensitive' }] });
+    const single = run.filter(el => codeBoxSize(el) === 1).length;
+    if (run.length >= 4 && single >= run.length - 1) for (const el of run) pass.fields.set(el, { ...get(pass, el), type: 'skip:otp', confidence: 1, candidates: [], evidence: [{ source: 'form', signal: `${run.length} one-character boxes in a row`, weight: 1, match: 'sensitive' }] });
     run.length = 0;
   };
-  for (const el of pass.members) { if (isCodeBox(el) && !isSensitive(get(pass, el).type)) run.push(el); else close(); }
+  for (const el of pass.members) { if (codeBoxSize(el) && get(pass, el).type === 'unknown') run.push(el); else close(); }
+  close();
+}
+
+// A date split into day, month and year is a birth date when any part, or the words just before the
+// first, say "birth": "Date of Birth" over three selects, dayofbirth / monthofbirth / yearOfBirth.
+// Only selects of days, months or years are parts: a whole date beside a birth date ("Start date")
+// is a date of its own, and a year typed into a text box can't hold a whole date.
+const BIRTH = /birth|\bdob\b|dob[_-]|naissance|\bborn\b|ميلاد/i;
+const isDatePart = (_pass: Pass, el: Control) => el instanceof HTMLSelectElement && !!datePart(optionTexts(el));
+function birthDateParts(pass: Pass) {
+  const run: Control[] = [];
+  const close = () => {
+    const birth = run.length >= 2 && run.some(el => pass.signals(el).some(signal => BIRTH.test(signal.raw)));
+    if (birth) for (const el of run) if (get(pass, el).type !== 'birthDate') retype(pass, el, 'birthDate', undefined, evidence('a part of a split birth date', 0.85));
+    run.length = 0;
+  };
+  for (const el of pass.members) { if (isDatePart(pass, el)) run.push(el); else close(); }
   close();
 }
 
@@ -229,11 +249,43 @@ function fieldOrder(pass: Pass) {
 // "Company" then "Title": beside the person's employer, a bare title is their job title, not the
 // title of a thing. Only a title whose words say nothing more ("Title", "Titre").
 const WORK_TYPES: ReadonlySet<string> = new Set(['company', 'department', 'industry']);
+// A form that asks for an email and has one text area with no clue of its own ("input_10"): the
+// message, as a weak answer that any clue or the model still overrides. Captcha and spam-trap
+// boxes don't count.
+const NOT_WRITTEN = /captcha|hp_textarea|honeypot/i;
+function soleMessage(pass: Pass, visible?: ReadonlyMap<Control, boolean>) {
+  const areas = pass.members.filter(el => el instanceof HTMLTextAreaElement && !NOT_WRITTEN.test(`${el.name} ${el.id}`) && (visible?.get(el) ?? isVisible(el)));
+  if (areas.length !== 1 || !pass.members.some(el => get(pass, el).type === 'email')) return;
+  const [area] = areas;
+  if (get(pass, area).type === 'unknown') retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', THRESHOLDS.low));
+  // "Description", "Details" there is what the person asks: the message. A form about a thing (a
+  // listing with a title and a price) keeps its description.
+  const thing = pass.members.some(el => THING_TYPES.has(get(pass, el).type));
+  if (get(pass, area).type === 'description' && !thing) retype(pass, area, 'message', undefined, evidence('the one text area of a form asking for an email', get(pass, area).confidence));
+}
+const THING_TYPES: ReadonlySet<string> = new Set(['title', 'price', 'amount', 'quantity', 'measurement', 'material', 'color']);
+
+// "Name" or "الاسم" on its own is the whole name, unless a surname field sits beside it: then it is
+// the first name ("الاسم" next to "اللقب"). "Full name" stays whole.
+const BARE_NAMES: ReadonlySet<string> = new Set(['name', 'your name', 'الاسم', 'اسم', 'الإسم']);
+function namesBesideSurname(pass: Pass) {
+  if (pass.members.some(el => get(pass, el).type === 'firstName')) return;
+  pass.members.forEach((el, i) => {
+    if (get(pass, el).type !== 'fullName' || !BARE_NAMES.has(visibleText(pass.signals(el)).replace(/[*:]/g, '').trim())) return;
+    const surname = pass.members.slice(Math.max(0, i - 2), i + 3).find(other => other !== el && get(pass, other).type === 'lastName');
+    if (surname) retype(pass, el, 'firstName', undefined, evidence(`beside ${quote(surname)}`, get(pass, el).confidence));
+  });
+}
+
+// A lead form's "Title" is a job title: when its own words say "Job title", or when a work field
+// (company, department…) is among the three fields on either side.
 function jobTitles(pass: Pass) {
   pass.members.forEach((el, i) => {
     const found = get(pass, el);
-    if (found.type !== 'title' || visibleText(pass.signals(el)).split(' ').length > 1) return;
-    const neighbour = [pass.members[i - 1], pass.members[i + 1]].find(other => other && WORK_TYPES.has(get(pass, other).type));
+    if (found.type !== 'title') return;
+    if (mentions(pass.signals(el), ['job title', 'job'])) return retype(pass, el, 'jobTitle', undefined, evidence('says “job title”', Math.max(found.confidence, 0.8)));
+    if (visibleText(pass.signals(el)).split(' ').length > 1) return;
+    const neighbour = pass.members.slice(Math.max(0, i - 3), i + 4).find(other => other !== el && WORK_TYPES.has(get(pass, other).type));
     if (neighbour) retype(pass, el, 'jobTitle', undefined, evidence(`beside ${quote(neighbour)}`, Math.max(found.confidence, 0.7)));
   });
 }
@@ -303,16 +355,22 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     passwordRoles(pass);
     dateRoles(pass);
     codeBoxes(pass);
+    // Split day/month/year selects take part here: they are the parts.
+    birthDateParts({ ...pass, members });
     cardSection(pass, members);
     specifyCompanions(pass);
     jobTitles(pass);
+    namesBesideSurname(pass);
     fieldOrder(pass);
     if (!form) continue;
     // A form is judged by what the user can see: hidden fields and hidden forms don't count.
     const shown = members.filter(el => (visible?.get(el) ?? isVisible(el)));
     if (!shown.length) continue;
     const types = shown.filter(el => !isChoice(el)).map(el => fields.get(el)!.type);
-    forms.push({ index: Array.from(document.forms).indexOf(form), fields: shown.length, ...formType(form, types, shown.map(el => fields.get(el)!.role)) });
+    const kind = formType(form, types, shown.map(el => fields.get(el)!.role));
+    // An order's or a booking's text area holds notes ("delivery instructions"), not a message.
+    if (kind.type !== 'checkout' && kind.type !== 'booking') soleMessage(pass, visible);
+    forms.push({ index: Array.from(document.forms).indexOf(form), fields: shown.length, ...kind });
   }
   // Last, so confirmations, dates, neighbours and card sections speak first, and form types come
   // from the rules alone: the model only names fields they still leave unknown or unsure.

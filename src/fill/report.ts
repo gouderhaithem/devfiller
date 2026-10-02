@@ -26,10 +26,7 @@ export function skipReason(ctx: FillContext, el: Control): string {
   const ac = el.autocomplete || '';
   const { type } = classificationOf(ctx.classifications, el);
   if (type === 'skip:card') return testCardRole(ctx, el) ? '' : PROTECTED_CARD;
-  if (type === 'skip:otp') return 'Protected payment or verification field';
-  if (type === 'skip:iban') return 'Protected bank account field';
-  if (type === 'skip:consent') return 'Consent field stays untouched';
-  if (type === 'skip:session') return 'Session choice stays untouched';
+  // One-time codes, bank details, consent and session choices get test values (sensitive.ts).
   if (!request.passwords && (el.type === 'password' || type === 'password' || (ac.includes('password') && type === 'unknown') || fieldSignals(el).some(signal => PASSWORD.test(signal)))) return 'Password filling disabled';
   if (isChoice(el) && !request.fillUnknown) return 'Unknown-field filling disabled';
   return '';

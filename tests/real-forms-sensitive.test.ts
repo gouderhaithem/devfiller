@@ -3,6 +3,10 @@
 // 2026): 165 in all, mostly mailing lists. Each block is one mechanism, as generic markup.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fillPage, type FillRequest } from '../src/fill';
+import { classifyField } from '../src/fill/classify';
+import { analyzePage } from '../src/fill/context';
+import { listControls } from '../src/fill/extract';
+import { isTestValue, testKind } from '../src/fill/sensitive';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 
@@ -12,8 +16,12 @@ beforeEach(() => {
   document.body.replaceChildren();
   vi.spyOn(Element.prototype, 'getClientRects').mockReturnValue([{}] as unknown as DOMRectList);
 });
-const checked = () => Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox], input[type=radio]')).filter(el => el.checked).map(el => el.id || el.name);
-const values_ = () => Array.from(document.querySelectorAll<HTMLInputElement>('input:not([type=checkbox]):not([type=radio]), select')).filter(el => el.value).map(el => el.id || el.name);
+// Sensitive fields are filled with test values (sensitive.ts); what matters here is that they are
+// recognized. checked(): ticked boxes the rules didn't recognize as sensitive. values_(): fields
+// holding anything but a test value.
+const typeOf = () => analyzePage(listControls()).fields;
+const checked = () => { const types = typeOf(); return Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox], input[type=radio]')).filter(el => el.checked && !types.get(el)?.type.startsWith('skip:')).map(el => el.id || el.name); };
+const values_ = () => { const types = typeOf(); return Array.from(document.querySelectorAll<HTMLInputElement>('input:not([type=checkbox]):not([type=radio]), select')).filter(el => { const kind = testKind(types.get(el)?.type ?? ''); return el.value && !(kind && isTestValue(kind, el.value)); }).map(el => el.id || el.name); };
 
 describe('mailing lists', () => {
   it('never ticks the lists of a Mailchimp-style sign-up form', () => {
@@ -75,9 +83,54 @@ describe('codes and hidden helpers', () => {
     fillPage(request);
     expect(values_()).toEqual([]);
   });
+  it('reads a row of short code boxes as one code when one box takes two characters', () => {
+    document.body.innerHTML = `<form><p>Please enter the code we sent to your email.</p>${[1, 1, 2, 1, 1, 1].map((n, i) => `<input type="text" id="c${i}" class="otp-input" maxlength="${n}">`).join('')}</form>`;
+    fillPage(request);
+    expect(values_()).toEqual([]);
+  });
+  it.each([
+    ['a validation code', '<label for="f">Validation Code</label><input id="f" name="ev_verifyCode">'],
+    ['a glued validation code name', '<input id="f" name="valicode">'],
+    ['a temporary code', '<label for="f">* / Temporary Code:</label><input id="f" name="form:temporaryCode">'],
+    ['a password reset code', '<p>Password Reset Code</p><input id="f" name="ctl00$_bodyContent$_resetCode">'],
+    ['a bare "Enter code" box', '<input id="f" type="text" autocomplete="new-password" placeholder="Enter code">'],
+  ])('reads %s as a one-time code', (_, field) => {
+    document.body.innerHTML = `<form><label for="e">Email</label><input id="e" type="email">${field}</form>`;
+    expect(typeOf().get(document.getElementById('f') as HTMLInputElement)?.type).toBe('skip:otp');
+  });
+  it.each(['Promo code', 'Enter promo code', 'Postal code', 'Coupon code', 'Referral code', 'Country code'])('keeps "%s" out of one-time codes', label => {
+    document.body.innerHTML = `<form><label for="f">${label}</label><input id="f" type="text"></form>`;
+    expect(typeOf().get(document.getElementById('f') as HTMLInputElement)?.type).not.toBe('skip:otp');
+  });
+  it('keeps five one-character ZIP boxes out of one-time codes when they are named as a ZIP', () => {
+    document.body.innerHTML = `<form><label for="z0">ZIP code</label>${[0, 1, 2, 3, 4].map(i => `<input type="text" id="z${i}" name="zip${i}" maxlength="1">`).join('')}</form>`;
+    expect(typeOf().get(document.getElementById('z0') as HTMLInputElement)?.type).not.toBe('skip:otp');
+  });
   it('reads a year beside card fields as the card\'s expiry', () => {
     document.body.innerHTML = `<form><div class="card"><label for="num">Card number</label><input id="num"><label for="mm">MM</label><input id="mm" placeholder="MM" maxlength="2"><input id="yy" placeholder="YYYY" maxlength="4"></div></form>`;
     fillPage({ ...request, cards: 'off' });
     expect(values_()).toEqual([]);
+  });
+});
+
+// The other side: options and statements that only look like consent, found on the same real forms.
+describe('not consent', () => {
+  const types = () => Array.from(document.querySelectorAll<HTMLInputElement>('input')).map(el => classifyField(el).type);
+  it('reads topic words in a list of options as options', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Which areas interest you?</legend>${['Analytics', 'Marketing', 'Sales', 'I don\u2019t know yet'].map((t, i) => `<label><input type="checkbox" name="input_20.${i + 1}"> ${t}</label>`).join('')}</fieldset>
+      <fieldset><legend>Department</legend>${['Communications', 'Engineering', 'Finance'].map(t => `<label><input type="radio" name="department_id" value="${t}"> ${t}</label>`).join('')}</fieldset></form>`;
+    expect(types().filter(t => t === 'skip:consent')).toEqual([]);
+  });
+  it('reads first-person requests and facts as questions, not declarations', () => {
+    const labels = ['I want to choose a dealership', 'I have a vehicle to trade-in', "I'd like to make this contribution in honor or in memory of someone", 'I request expedited processing of my request', 'I am a current student'];
+    document.body.innerHTML = `<form>${labels.map(l => `<label><input type="checkbox"> ${l}</label>`).join('')}
+      <fieldset><legend>Is this a joint gift with your partner?</legend><label><input type="radio" name="joint" value="y"> Yes</label><label><input type="radio" name="joint" value="n"> No</label></fieldset></form>`;
+    expect(types().filter(t => t === 'skip:consent')).toEqual([]);
+  });
+  it('still reads declarations, sign-up lists and partner offers as consent', () => {
+    const labels = ['I confirm I am the account holder', 'I am over 18', 'I certify that the above is accurate', 'I choose to pay the fees to process my donation', 'I do not wish to be publicly recognized for this gift', 'I want to contribute this amount every month', "I'd like to cover the transaction fee", "Je certifie l'exactitude des informations", 'Share my details with our partners', 'Newsletter'];
+    document.body.innerHTML = `<form>${labels.map(l => `<label><input type="checkbox"> ${l}</label>`).join('')}
+      <ul>${['Marketing', 'Product news', 'Events'].map((t, i) => `<li><label><input type="checkbox" name="lists[${i}]"> ${t}</label></li>`).join('')}</ul></form>`;
+    expect(types()).toEqual(Array(13).fill('skip:consent'));
   });
 });

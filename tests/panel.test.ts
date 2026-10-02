@@ -17,7 +17,7 @@ it('reports fill and skip reasons without exposing preserved, password, or hidde
   expect(result.fields?.find(f=>f.label==='pwd')).toMatchObject({reason:'Password filling disabled'});
   expect(result.fields?.find(f=>f.label==='q')).toMatchObject({reason:'Excluded by your settings'});
   expect(result.fields?.find(f=>f.label==='fixed')).toMatchObject({reason:'Disabled field'});
-  expect(result.fields?.find(f=>f.label==='I agree to terms')).toMatchObject({reason:'Consent field stays untouched'});
+  expect(result.fields?.find(f=>f.label==='I agree to terms')).toMatchObject({status:'filled',reason:'Filled with test value (consent)'});
   expect(JSON.stringify(result.fields)).not.toMatch(/Personal name|private|secret|hidden/);
 });
 it('inspect and Gemini scans do not fill the form or replace its undo snapshot',()=>{

@@ -52,7 +52,7 @@ DATA THAT MAKES SENSE
 YOU STAY IN CONTROL
 • Custom values: map a label such as "Project code" to an exact value such as "PRJ-001".
 • Exclusions: leave search bars, navigation and any field you choose untouched, on every site or just one.
-• Card fields get sandbox test cards, never real ones: pick a successful, declined, insufficient-funds, expired-card or incorrect-CVC card in the settings, or leave card fields empty. File uploads, bank fields (IBAN), one-time codes, consent and data-sharing checkboxes and "Remember me" choices are skipped. Password fields stay empty unless you turn on test passwords.
+• Card fields get sandbox test cards, never real ones: pick a successful, declined, insufficient-funds, expired-card or incorrect-CVC card in the settings, or leave card fields empty. One-time codes, bank fields and consent boxes get values that read as tests (444444, a bank account of 4s, boxes ticked); exclude any field you want left alone. File uploads are skipped. Password fields stay empty unless you turn on test passwords.
 
 OPTIONAL AI FOR UNUSUAL FIELDS
 Fields the local generator doesn't recognize can get relevant suggestions from Groq or Google Gemini, using your own API key. This is off by default. Only field descriptions (labels, names, placeholders and limits) are sent, never the values you type, the page address or the page content. Without a key, everything runs locally.
