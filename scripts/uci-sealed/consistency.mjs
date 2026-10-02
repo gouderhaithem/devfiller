@@ -15,12 +15,17 @@ const text = (document, el) => {
     .filter(Boolean).join(' | ').replace(/\s+/g, ' ').toLowerCase();
 };
 
-// Each rule: which labels it corrects, what the field's text says, and the guide's answer.
+// Each rule: which labels it corrects, what the field's text says, and the guide's answer. `checkbox`
+// and `choice` (a select or a radio) limit a rule to those controls.
 const RULES = [
   { name: 'customer number is a record reference', from: ['unknown'], unless: /permanent account|pan card|tax|ssn|social security/, when: /customer\s*(number|no\.?|id|#)|(?<!ga ?|google |analytics |\w)client (number|no\.?|id)(?!\w)|account\s*number(?!.*(bank|iban|routing))|\bmember(ship)? (number|no\.?)(?!\w)/, to: 'reference' },
   { name: 'address line 2', from: ['unknown'], when: /address\s*(line)?\s*[23]\b|address2|\bapt\b|apartment|\bsuite\s*(number|no|#)?\s*($|\|)/, to: 'address2' },
   { name: "another person's name", from: ['unknown'], when: /(\breferr?(er|ed|al)?|\brefer you|emergency|manager|supervisor|guardian|parent|spouse|recipient|next of kin|beneficiary)[^|]{0,40}name|name of (your|the) (referrer|manager|supervisor)/, unless: /username/, to: 'fullName' },
   { name: 'automatic renewal is a permission', from: ['unknown'], checkbox: true, when: /auto(matic(ally)?)?[- ]?renew|renew[^|]{0,30}automatically/, to: 'skip:consent' },
+  { name: 'a promise to pay more', from: ['unknown'], checkbox: true, when: /(cover|pay|add)[^|]{0,40}(processing|transaction|admin\w*|card|credit card)?\s*(fee|cost)s?\b|processing[- _]?fee|fee[- _]?cover|cover[- _]?fees|(make|making) (this|it|my \w+) (a )?(monthly|recurring|weekly|annual)|(monthly|recurring) (gift|donation|contribution|pledge)|repeat (this|my) (gift|donation)|every month|\bisrecurring\b|donor_recurring|auto_?repeat/, to: 'skip:consent' },
+  { name: 'a topic picked from a list', from: ['unknown'], choice: true,
+    when: /\btopics?\b|reason (for|of)|(type|kind|nature|category) of (your )?(enquiry|inquiry|request|query|question|message|feedback|issue|concern)|(enquiry|inquiry|request|query|question|feedback|issue) (type|category|topic)|how can we help|how may we help|what can we help|what (is|are) (your|this) [^|]{0,20}(about|regarding)|\bregarding\b(?! an?\b)|\bsubject\b|^\s*i('m| am) (contacting|writing)|main concern|choose your issue|contact.?reason|inquiry.?reason|enquiry.?reason/,
+    unless: /department|\bteam\b|\boffice\b|send (it |this |your message )?to|recipient|branch|\bstore\b|location|who (would|do|should) you|which (person|contact)|interest(s|ed)?\b|subject areas?|newsletter|opt.?out|unsubscrib|cancel|leaving|delet|this.?subject|interview/, to: 'subject' },
   { name: '"Remember me" is a session choice', from: ['skip:consent'], checkbox: true, when: /^\s*remember me|\|\s*remember me/, to: 'skip:session' },
   { name: 'permission to be contacted', from: ['unknown'], checkbox: true, when: /(contact|call|text|sms) me\b|okay to (text|call|contact)|may (we|i) contact|consent to be contacted/, to: 'skip:consent' },
 ];
@@ -41,8 +46,11 @@ for (const dir of process.argv.slice(2)) {
     for (const el of controls) {
       const label = el.getAttribute('data-expect');
       const said = text(document, el);
+      // A radio's question is its group's legend and name; its own label is one answer.
+      const legend = (el.closest('fieldset')?.querySelector('legend')?.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+      const asked = el.getAttribute('type') === 'radio' ? `${legend} | ${el.getAttribute('name') || ''}`.toLowerCase() : `${said} | ${legend}`;
       for (const rule of RULES) {
-        if (!rule.from.includes(label) || (rule.checkbox && el.getAttribute('type') !== 'checkbox') || !rule.when.test(said) || rule.unless?.test(said)) continue;
+        if (!rule.from.includes(label) || (rule.checkbox && el.getAttribute('type') !== 'checkbox') || (rule.choice && el.tagName !== 'SELECT' && el.getAttribute('type') !== 'radio') || !rule.when.test(rule.choice ? asked : said) || rule.unless?.test(rule.choice ? asked : said)) continue;
         changes.push([el, rule.to, rule.name, said]);
         break;
       }
