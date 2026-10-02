@@ -210,6 +210,24 @@ The gain held on the sealed forms: +0.9 F1 for the rules, +0.7 with the model, p
 The one sensitive field filled is a Chinese "验证码" (verification code): the engine reads English,
 French and Arabic only. Round 6 is now retired.
 
+### Seventh real-world round: two more fixes, and a second sealed check
+
+200 more forms (round 7, mostly short contact, sign-up and log-in forms) were labelled blind before
+two more fixes tuned on round 4: a support form's one text area called "Description" or "Details" is
+its message (settled in the guide), and fields named as a later address line (address2, street2,
+address_3, autocomplete="address-line3") are address line 2. Round 4, rules alone: F1 89.9% → 90.0%.
+
+| On round 7's 200 sealed forms (1,379 fields) | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| Rules, before the sixth round | 94.2% | 89.7% | 91.9% |
+| Rules, after the sixth round | 94.3% | 90.4% | 92.3% |
+| **Rules, after this round** | 94.3% | 90.4% | **92.3%** |
+| Rules + model, before the sixth round | 94.0% | 92.0% | 93.0% |
+| **Rules + model, after this round** | 94.1% | 92.2% | **93.2%** |
+
+The sixth round's fixes hold on a second sealed set (+0.4 F1); this round's two fixes change nothing
+here, since these forms have no such fields. Round 7 is now retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
