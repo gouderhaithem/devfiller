@@ -98,9 +98,9 @@ describe('not consent', () => {
     expect(types().filter(t => t === 'skip:consent')).toEqual([]);
   });
   it('still reads declarations, sign-up lists and partner offers as consent', () => {
-    const labels = ['I confirm I am the account holder', 'I am over 18', 'I certify that the above is accurate', "Je certifie l'exactitude des informations", 'Share my details with our partners', 'Newsletter'];
+    const labels = ['I confirm I am the account holder', 'I am over 18', 'I certify that the above is accurate', 'I choose to pay the fees to process my donation', 'I do not wish to be publicly recognized for this gift', 'I want to contribute this amount every month', "I'd like to cover the transaction fee", "Je certifie l'exactitude des informations", 'Share my details with our partners', 'Newsletter'];
     document.body.innerHTML = `<form>${labels.map(l => `<label><input type="checkbox"> ${l}</label>`).join('')}
       <ul>${['Marketing', 'Product news', 'Events'].map((t, i) => `<li><label><input type="checkbox" name="lists[${i}]"> ${t}</label></li>`).join('')}</ul></form>`;
-    expect(types()).toEqual(Array(9).fill('skip:consent'));
+    expect(types()).toEqual(Array(13).fill('skip:consent'));
   });
 });
