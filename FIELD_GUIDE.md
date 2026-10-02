@@ -5,8 +5,8 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Field | Typical native control | Recognized label examples |
 | --- | --- | --- |
 | Username | text | username, user name, login, login name, user id, pseudo, handle, identifiant, nom utilisateur, nom d'utilisateur, اسم المستخدم, اسم الدخول |
-| Full name | text | full name, name, first and last name, first last name, first name and last name, name and surname, account holder, account holder name, titulaire du compte, beneficiary name, your name, guest name, contact name, attendee name, customer name, client name, passenger name, applicant name, candidate name, recipient name, nom complet, nom et prénom, prénom et nom, nom prénom, nom du client, الاسم الكامل, الاسم واللقب, اسم الزبون |
-| First name | text | first name, firstname, fname, given name, forename, prénom, الاسم الأول, الاسم الشخصي, الاسم |
+| Full name | text | full name, name, first and last name, first last name, first name and last name, name and surname, account holder, account holder name, titulaire du compte, beneficiary name, your name, guest name, contact name, attendee name, customer name, client name, passenger name, applicant name, candidate name, recipient name, nom complet, nom et prénom, prénom et nom, nom prénom, nom du client, الاسم الكامل, الاسم واللقب, اسم الزبون, الاسم |
+| First name | text | first name, firstname, fname, given name, forename, prénom, الاسم الأول, الاسم الشخصي |
 | Middle name | text | middle name, second prénom, الاسم الأوسط |
 | Last name | text | last name, lastname, lname, surname, family name, nom, nom de famille, اللقب, اسم العائلة |
 | Email | email / text | email, e-mail, mail, email address, e-mail address, courriel, adresse électronique, adresse mail, adresse e-mail, البريد الإلكتروني, البريد |
@@ -17,7 +17,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Gender | select / text | gender, sex, genre, sexe, الجنس |
 | Nationality | text | nationality, citizenship, nationalité, الجنسية |
 | Year | text / number | year, graduation year, year of graduation, year graduated, graduated in, class of, completion year, year of completion, year obtained, passing year, year of passing, birth year, year of birth, model year, year of manufacture, construction year, year built, année, année d'obtention, année d'obtention du diplôme, année du diplôme, année de diplôme, année de naissance, année de fabrication, année de construction, السنة, سنة التخرج, سنة الحصول, سنة الميلاد, سنة الصنع |
-| Years of experience | text / number | years of experience, year of experience, years experience, experience years, experience in years, years of work experience, years of professional experience, work experience years, total experience, total years of experience, yoe, experience, années d'expérience, nombre d'années d'expérience, années d'expérience professionnelle, expérience années, expérience en années, expérience, سنوات الخبرة, عدد سنوات الخبرة, سنوات الخبرة المهنية, الخبرة |
+| Years of experience | text / number | years of experience, year of experience, years experience, experience years, experience in years, years of work experience, years of professional experience, work experience years, total experience, total years of experience, yoe, experience, années d'expérience, nombre d'années d'expérience, années d'expérience professionnelle, expérience années, expérience en années, expérience, سنوات الخبرة, عدد سنوات الخبرة, سنوات الخبرة المهنية, الخبرة, الخبرة, خبرتك, خبرة |
 | Company | text | company, company name, organization, organisation, organization name, org, employer, business name, entreprise, société, nom de l'entreprise, raison sociale, الشركة, اسم الشركة, المؤسسة |
 | Job title | text | job title, profession, position, occupation, fonction, poste, titre du poste, المهنة, المسمى الوظيفي, الوظيفة |
 | Department | text | department, dept, division, département, service, القسم |
@@ -25,7 +25,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Employee count | number / range | employee count, number of employees, company size, headcount, effectif, taille de l'entreprise, nombre de salariés, عدد الموظفين |
 | Street address | text | address, street address, address line 1, street, street and number, street name, addr, billing address, shipping address, delivery address, home address, adresse, adresse postale, rue, adresse de livraison, adresse de facturation, العنوان, عنوان الشارع, الشارع |
 | Apartment / suite | text | address line 2, address 2, apartment, suite, floor, building, complément adresse, complément d'adresse, appartement, bâtiment, étage, الشقة |
-| City / commune | text | city, town, place of birth, birth place, birthplace, lieu de naissance, lieu naissance, ville de naissance, commune de naissance, مكان الميلاد, locality, municipality, ville, commune, municipalité, المدينة, مدينة, البلدية, بلدية |
+| City / commune | text | city, town, place of birth, birth place, birthplace, lieu de naissance, lieu naissance, ville de naissance, commune de naissance, مكان الميلاد, locality, municipality, ville, commune, municipalité, المدينة, مدينة, البلدية, بلدية, gare de départ, gare d'arrivée, ville de départ, ville d'arrivée |
 | District / daira | text | district, daira, daïra, borough, arrondissement, الدائرة, دائرة |
 | State / wilaya | select / text | state, province, region, county, wilaya, الولاية, ولاية, المحافظة |
 | Postal code | text | postal code, postcode, zip, zip code, cp, code postal, الرمز البريدي |
@@ -42,7 +42,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | Quantity | number / range | bedrooms, bathrooms, years, number of years, number of hours, hours per month, hours per week, number of days, quantity, qty, number of, nombre de, pieces, pcs, units, pièces, unités, number of guests, guests, passengers, attendees, number of attendees, number of people, travellers, travelers, pax, adults, children, kids, infants, rooms, number of rooms, tickets, number of tickets, seats, nights, number of nights, low stock threshold, reorder level, quantité, nombre de personnes, nombre d'exemplaires, exemplaires, nombre de participants, الكمية, عدد الأشخاص, عدد المسافرين, عدد البالغين, عدد الأطفال, عدد الغرف, عدد التذاكر |
 | Price | number / range | price, unit price, cost, prix, prix unitaire, tarif, coût, السعر, الثمن |
 | Amount | number / range | subtotal, sub total, line total, declared value, advance, advance received, amount, amt, total, total amount, income, monthly income, annual income, expenses, monthly expenses, down payment, deposit, budget, balance, revenue, annual revenue, turnover, montant, somme, revenu, revenus, dépenses, apport, acompte, chiffre d'affaires, المبلغ, الدخل, المصاريف, الميزانية |
-| Salary | number / range | salary, expected salary, salary expectations, annual salary, wage, salaire, rémunération, prétentions salariales, prétentions, الراتب, الأجر |
+| Salary | number / range | salary, expected salary, salary expectations, annual salary, wage, salaire, rémunération, prétentions salariales, prétentions, الراتب, الأجر, راتبك, الراتب المتوقع, راتبك المتوقع |
 | Percentage | number / range | percentage, percent, discount, discount percentage, pct, pourcentage, remise, النسبة |
 | Rating | number / range | rating, score, satisfaction, satisfied, how satisfied, how likely, likely to recommend, net promoter score, nps, stars, évaluation, التقييم |
 | Date | date | date, event date, deadline, due date, travel date, select date, select a date, choose date, choose a date, pick a date, graduation date, joining date, date of joining, hire date, date of hire, choisir une date, اختر التاريخ, delivery date, appointment date, release date, publication date, expiry, expiry date, expiration, expiration date, valid until, issue date, date d'expiration, date de validité, date de délivrance, date de livraison, date du rendez-vous, التاريخ, تاريخ الموعد |
@@ -50,7 +50,7 @@ DevFiller recognizes these 46 field types. The examples are its built-in aliases
 | End date | date | end date, check out, check-out date, return date, to date, date to, date de fin, date de retour, retour, تاريخ النهاية, تاريخ الانتهاء, تاريخ المغادرة, تاريخ العودة |
 | Time | time | time, arrival time, session time, time slot, preferred time, heure, heure d'arrivée, الوقت, الساعة |
 | Color | color | color, colour, couleur, اللون |
-| Search | search / text | search, q, query, keywords, keyword, recherche, rechercher, بحث, البحث |
+| Search | search / text | search, q, query, keywords, keyword, recherche, rechercher, بحث, البحث, mots clés, mots-clés, mot clé, mot-clé |
 | Title | text | summary, headline, listing title, title, product title, ticket title, post title, article title, titre, العنوان المختصر |
 
 ## How recognition works

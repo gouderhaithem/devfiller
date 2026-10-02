@@ -265,6 +265,18 @@ function soleMessage(pass: Pass, visible?: ReadonlyMap<Control, boolean>) {
 }
 const THING_TYPES: ReadonlySet<string> = new Set(['title', 'price', 'amount', 'quantity', 'measurement', 'material', 'color']);
 
+// "Name" or "الاسم" on its own is the whole name, unless a surname field sits beside it: then it is
+// the first name ("الاسم" next to "اللقب"). "Full name" stays whole.
+const BARE_NAMES: ReadonlySet<string> = new Set(['name', 'your name', 'الاسم', 'اسم', 'الإسم']);
+function namesBesideSurname(pass: Pass) {
+  if (pass.members.some(el => get(pass, el).type === 'firstName')) return;
+  pass.members.forEach((el, i) => {
+    if (get(pass, el).type !== 'fullName' || !BARE_NAMES.has(visibleText(pass.signals(el)).replace(/[*:]/g, '').trim())) return;
+    const surname = pass.members.slice(Math.max(0, i - 2), i + 3).find(other => other !== el && get(pass, other).type === 'lastName');
+    if (surname) retype(pass, el, 'firstName', undefined, evidence(`beside ${quote(surname)}`, get(pass, el).confidence));
+  });
+}
+
 // A lead form's "Title" is a job title: when its own words say "Job title", or when a work field
 // (company, department…) is among the three fields on either side.
 function jobTitles(pass: Pass) {
@@ -348,6 +360,7 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
     cardSection(pass, members);
     specifyCompanions(pass);
     jobTitles(pass);
+    namesBesideSurname(pass);
     fieldOrder(pass);
     if (!form) continue;
     // A form is judged by what the user can see: hidden fields and hidden forms don't count.

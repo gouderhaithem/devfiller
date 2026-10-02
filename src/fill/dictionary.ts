@@ -5,8 +5,8 @@ import { normalize } from './normalize';
 // so accents, case, separators and camelCase don't matter here.
 export const ALIASES: Record<FieldKey, readonly string[]> = {
   username: ['username', 'user name', 'login', 'login name', 'user id', 'pseudo', 'handle', 'identifiant', 'nom utilisateur', "nom d'utilisateur", 'اسم المستخدم', 'اسم الدخول'],
-  fullName: ['full name', 'name', 'first and last name', 'first last name', 'first name and last name', 'name and surname', 'account holder', 'account holder name', 'titulaire du compte', 'beneficiary name', 'your name', 'guest name', 'contact name', 'attendee name', 'customer name', 'client name', 'passenger name', 'applicant name', 'candidate name', 'recipient name', 'nom complet', 'nom et prénom', 'prénom et nom', 'nom prénom', 'nom du client', 'الاسم الكامل', 'الاسم واللقب', 'اسم الزبون'],
-  firstName: ['first name', 'firstname', 'fname', 'given name', 'forename', 'prénom', 'الاسم الأول', 'الاسم الشخصي', 'الاسم'],
+  fullName: ['full name', 'name', 'first and last name', 'first last name', 'first name and last name', 'name and surname', 'account holder', 'account holder name', 'titulaire du compte', 'beneficiary name', 'your name', 'guest name', 'contact name', 'attendee name', 'customer name', 'client name', 'passenger name', 'applicant name', 'candidate name', 'recipient name', 'nom complet', 'nom et prénom', 'prénom et nom', 'nom prénom', 'nom du client', 'الاسم الكامل', 'الاسم واللقب', 'اسم الزبون', 'الاسم'],
+  firstName: ['first name', 'firstname', 'fname', 'given name', 'forename', 'prénom', 'الاسم الأول', 'الاسم الشخصي'],
   middleName: ['middle name', 'second prénom', 'الاسم الأوسط'],
   lastName: ['last name', 'lastname', 'lname', 'surname', 'family name', 'nom', 'nom de famille', 'اللقب', 'اسم العائلة'],
   email: ['email', 'e-mail', 'mail', 'email address', 'e-mail address', 'courriel', 'adresse électronique', 'adresse mail', 'adresse e-mail', 'البريد الإلكتروني', 'البريد'],
@@ -19,7 +19,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   year: ['year', 'graduation year', 'year of graduation', 'year graduated', 'graduated in', 'class of', 'completion year', 'year of completion', 'year obtained', 'passing year', 'year of passing', 'birth year', 'year of birth', 'model year', 'year of manufacture', 'construction year', 'year built',
     'année', "année d'obtention", "année d'obtention du diplôme", 'année du diplôme', 'année de diplôme', 'année de naissance', 'année de fabrication', 'année de construction', 'السنة', 'سنة التخرج', 'سنة الحصول', 'سنة الميلاد', 'سنة الصنع'],
   experience: ['years of experience', 'year of experience', 'years experience', 'experience years', 'experience in years', 'years of work experience', 'years of professional experience', 'work experience years', 'total experience', 'total years of experience', 'yoe', 'experience',
-    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة'],
+    "années d'expérience", "nombre d'années d'expérience", "années d'expérience professionnelle", 'expérience années', 'expérience en années', 'expérience', 'سنوات الخبرة', 'عدد سنوات الخبرة', 'سنوات الخبرة المهنية', 'الخبرة', 'الخبرة', 'خبرتك', 'خبرة'],
   company: ['company', 'company name', 'organization', 'organisation', 'organization name', 'org', 'employer', 'business name', 'entreprise', 'société', "nom de l'entreprise", 'raison sociale', 'الشركة', 'اسم الشركة', 'المؤسسة'],
   jobTitle: ['job title', 'profession', 'position', 'occupation', 'fonction', 'poste', 'titre du poste', 'المهنة', 'المسمى الوظيفي', 'الوظيفة'],
   department: ['department', 'dept', 'division', 'département', 'service', 'القسم'],
@@ -27,7 +27,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   employeeCount: ['employee count', 'number of employees', 'company size', 'headcount', 'effectif', "taille de l'entreprise", 'nombre de salariés', 'عدد الموظفين'],
   address: ['address', 'street address', 'address line 1', 'street', 'street and number', 'street name', 'addr', 'billing address', 'shipping address', 'delivery address', 'home address', 'adresse', 'adresse postale', 'rue', 'adresse de livraison', 'adresse de facturation', 'العنوان', 'عنوان الشارع', 'الشارع'],
   address2: ['address line 2', 'address 2', 'apartment', 'suite', 'floor', 'building', 'complément adresse', "complément d'adresse", 'appartement', 'bâtiment', 'étage', 'الشقة'],
-  city: ['city', 'town', 'place of birth', 'birth place', 'birthplace', 'lieu de naissance', 'lieu naissance', 'ville de naissance', 'commune de naissance', 'مكان الميلاد', 'locality', 'municipality', 'ville', 'commune', 'municipalité', 'المدينة', 'مدينة', 'البلدية', 'بلدية'],
+  city: ['city', 'town', 'place of birth', 'birth place', 'birthplace', 'lieu de naissance', 'lieu naissance', 'ville de naissance', 'commune de naissance', 'مكان الميلاد', 'locality', 'municipality', 'ville', 'commune', 'municipalité', 'المدينة', 'مدينة', 'البلدية', 'بلدية', 'gare de départ', "gare d'arrivée", 'ville de départ', "ville d'arrivée"],
   district: ['district', 'daira', 'daïra', 'borough', 'arrondissement', 'الدائرة', 'دائرة'],
   state: ['state', 'province', 'region', 'county', 'wilaya', 'الولاية', 'ولاية', 'المحافظة'],
   postalCode: ['postal code', 'postcode', 'zip', 'zip code', 'cp', 'code postal', 'الرمز البريدي'],
@@ -52,7 +52,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
   amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'amt', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
     'montant', 'somme', 'revenu', 'revenus', 'dépenses', 'apport', 'acompte', "chiffre d'affaires", 'المبلغ', 'الدخل', 'المصاريف', 'الميزانية'],
-  salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر'],
+  salary: ['salary', 'expected salary', 'salary expectations', 'annual salary', 'wage', 'salaire', 'rémunération', 'prétentions salariales', 'prétentions', 'الراتب', 'الأجر', 'راتبك', 'الراتب المتوقع', 'راتبك المتوقع'],
   percentage: ['percentage', 'percent', 'discount', 'discount percentage', 'pct', 'pourcentage', 'remise', 'النسبة'],
   rating: ['rating', 'score', 'satisfaction', 'satisfied', 'how satisfied', 'how likely', 'likely to recommend', 'net promoter score', 'nps', 'stars', 'évaluation', 'التقييم'],
   date: ['date', 'event date', 'deadline', 'due date', 'travel date', 'select date', 'select a date', 'choose date', 'choose a date', 'pick a date', 'graduation date', 'joining date', 'date of joining', 'hire date', 'date of hire', 'choisir une date', 'اختر التاريخ', 'delivery date', 'appointment date', 'release date', 'publication date', 'expiry', 'expiry date', 'expiration', 'expiration date', 'valid until', 'issue date', "date d'expiration", 'date de validité', 'date de délivrance', 'date de livraison', 'date du rendez-vous', 'التاريخ', 'تاريخ الموعد'],
@@ -60,7 +60,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   endDate: ['end date', 'check out', 'check-out date', 'return date', 'to date', 'date to', 'date de fin', 'date de retour', 'retour', 'تاريخ النهاية', 'تاريخ الانتهاء', 'تاريخ المغادرة', 'تاريخ العودة'],
   time: ['time', 'arrival time', 'session time', 'time slot', 'preferred time', 'heure', "heure d'arrivée", 'الوقت', 'الساعة'],
   color: ['color', 'colour', 'couleur', 'اللون'],
-  search: ['search', 'q', 'query', 'keywords', 'keyword', 'recherche', 'rechercher', 'بحث', 'البحث'],
+  search: ['search', 'q', 'query', 'keywords', 'keyword', 'recherche', 'rechercher', 'بحث', 'البحث', 'mots clés', 'mots-clés', 'mot clé', 'mot-clé'],
   title: ['summary', 'headline', 'listing title', 'title', 'product title', 'ticket title', 'post title', 'article title', 'titre', 'العنوان المختصر'],
 };
 
@@ -87,7 +87,7 @@ export const INPUT_MODE_HINTS: Readonly<Record<string, readonly [FieldKey, numbe
 export const NUMERIC_TYPES: ReadonlySet<FieldKey> = new Set(['year', 'experience', 'measurement', 'reference', 'age', 'employeeCount', 'quantity', 'price', 'amount', 'salary', 'percentage', 'rating', 'postalCode', 'phone']);
 export const DATE_FIELD_TYPES: ReadonlySet<FieldKey> = new Set(['birthDate', 'date', 'startDate', 'endDate']);
 export const MULTILINE_TYPES: ReadonlySet<FieldKey> = new Set(['address', 'bio', 'description', 'message', 'notes', 'subject']);
-export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'amount', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject']);
+export const SELECT_TYPES: ReadonlySet<FieldKey> = new Set(['material', 'country', 'state', 'city', 'gender', 'nationality', 'industry', 'department', 'jobTitle', 'employeeCount', 'age', 'amount', 'quantity', 'rating', 'percentage', 'date', 'startDate', 'endDate', 'birthDate', 'time', 'color', 'title', 'subject', 'experience', 'salary']);
 export const CONFIRMABLE_TYPES: ReadonlySet<FieldKey> = new Set(['email', 'password', 'phone', 'username']);
 export const CONFIRM_WORDS = ['confirm', 'confirmation', 'repeat', 're enter', 'retype', 'verify', 'again', 'confirmer', 'تاكيد', 'اعادة'];
 export const SEARCH_WORDS = ['search', 'recherche', 'rechercher', 'بحث', 'البحث'];
