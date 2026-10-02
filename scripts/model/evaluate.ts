@@ -42,7 +42,8 @@ async function score(page: Page, name: string, engine: string, modelGuesses: boo
   const unlabelled = controls.filter(c => !c.omit && !c.expect).length;
   // A real fill: did anything sensitive change?
   await open(page, url, engine);
-  const before = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, textarea, select'), el => `${el.value}|${el.checked}`));
+  // `!!checked` on both sides: a select has no `checked`, and undefined against false would read as a change.
+  const before = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, textarea, select'), el => `${el.value}|${!!el.checked}`));
   await page.evaluate(r => (globalThis as any).__devfiller.fillPage(r), { ...base, modelGuesses });
   // Sensitive fields get test values; a leak is one that got anything else (or a card field, which
   // this run fills with no test card).
