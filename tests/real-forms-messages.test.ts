@@ -44,3 +44,24 @@ describe('orders and bookings', () => {
     expect(typeOf('#t')).not.toBe('message');
   });
 });
+
+// Topics picked from a list (round 4 of the real forms, 2 October 2026): the guide's `subject`.
+describe('a topic picked from a list', () => {
+  const select = (label: string) => `<label for="s">${label}</label><select id="s" name="input_7"><option value="">Select…</option><option>Sales</option><option>Support</option><option>Billing</option><option>Other</option></select>`;
+  it.each(['How can we help?', 'Type of enquiry', 'Reason for contacting us', 'What is your inquiry about?', 'Request type', 'Select a topic', "Objet de votre demande"])('reads a select labelled "%s" as the subject', label => {
+    document.body.innerHTML = `<form>${contact(select(label))}<textarea id="t" name="msg"></textarea></form>`;
+    expect(typeOf('#s')).toBe('subject');
+  });
+  it('reads a radio group asking for the nature of the query as the subject', () => {
+    document.body.innerHTML = `<form>${contact()}<fieldset><legend>What is the nature of your query?</legend>${['Press', 'Partnerships', 'Careers'].map((t, i) => `<label><input type="radio" id="r${i}" name="nature" value="${t}"> ${t}</label>`).join('')}</fieldset></form>`;
+    expect(typeOf('#r0')).toBe('subject');
+  });
+  it.each([['Department', 'department'], ['Area of interest', 'unknown'], ['Reason for cancellation', 'unknown']])('leaves a select labelled "%s" to its own type', (label, type) => {
+    document.body.innerHTML = `<form>${contact(select(label))}</form>`;
+    expect(typeOf('#s')).toBe(type);
+  });
+  it('keeps "How can we help?" over a text area as the message', () => {
+    document.body.innerHTML = `<form>${contact()}<label for="t">How can we help?</label><textarea id="t"></textarea></form>`;
+    expect(typeOf('#t')).toBe('message');
+  });
+});

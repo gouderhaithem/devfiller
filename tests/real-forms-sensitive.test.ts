@@ -83,6 +83,29 @@ describe('codes and hidden helpers', () => {
     fillPage(request);
     expect(values_()).toEqual([]);
   });
+  it('reads a row of short code boxes as one code when one box takes two characters', () => {
+    document.body.innerHTML = `<form><p>Please enter the code we sent to your email.</p>${[1, 1, 2, 1, 1, 1].map((n, i) => `<input type="text" id="c${i}" class="otp-input" maxlength="${n}">`).join('')}</form>`;
+    fillPage(request);
+    expect(values_()).toEqual([]);
+  });
+  it.each([
+    ['a validation code', '<label for="f">Validation Code</label><input id="f" name="ev_verifyCode">'],
+    ['a glued validation code name', '<input id="f" name="valicode">'],
+    ['a temporary code', '<label for="f">* / Temporary Code:</label><input id="f" name="form:temporaryCode">'],
+    ['a password reset code', '<p>Password Reset Code</p><input id="f" name="ctl00$_bodyContent$_resetCode">'],
+    ['a bare "Enter code" box', '<input id="f" type="text" autocomplete="new-password" placeholder="Enter code">'],
+  ])('reads %s as a one-time code', (_, field) => {
+    document.body.innerHTML = `<form><label for="e">Email</label><input id="e" type="email">${field}</form>`;
+    expect(typeOf().get(document.getElementById('f') as HTMLInputElement)?.type).toBe('skip:otp');
+  });
+  it.each(['Promo code', 'Enter promo code', 'Postal code', 'Coupon code', 'Referral code', 'Country code'])('keeps "%s" out of one-time codes', label => {
+    document.body.innerHTML = `<form><label for="f">${label}</label><input id="f" type="text"></form>`;
+    expect(typeOf().get(document.getElementById('f') as HTMLInputElement)?.type).not.toBe('skip:otp');
+  });
+  it('keeps five one-character ZIP boxes out of one-time codes when they are named as a ZIP', () => {
+    document.body.innerHTML = `<form><label for="z0">ZIP code</label>${[0, 1, 2, 3, 4].map(i => `<input type="text" id="z${i}" name="zip${i}" maxlength="1">`).join('')}</form>`;
+    expect(typeOf().get(document.getElementById('z0') as HTMLInputElement)?.type).not.toBe('skip:otp');
+  });
   it('reads a year beside card fields as the card\'s expiry', () => {
     document.body.innerHTML = `<form><div class="card"><label for="num">Card number</label><input id="num"><label for="mm">MM</label><input id="mm" placeholder="MM" maxlength="2"><input id="yy" placeholder="YYYY" maxlength="4"></div></form>`;
     fillPage({ ...request, cards: 'off' });
