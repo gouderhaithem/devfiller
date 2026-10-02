@@ -149,6 +149,30 @@ alert lists and two verification-code boxes: rule work for the next round. The m
 over the rules here, short of the +3 for switching learned guesses on by default. This set is now
 retired.
 
+### Fourth and fifth real-world rounds: more training forms
+
+Two training rounds from websites no earlier round used, labelled blind with the same guide and
+checked against the settled cases (`consistency.mjs`): round 4, 1,000 forms (10,071 fields) drawn
+like round 2, mostly contact and sign-up forms; round 5, 1,257 forms (20,900 fields) drawn by
+`scripts/uci-sealed/sample-rare.mjs`, the forms that ask for the types with the fewest rows
+(ratings, colours, gender, industry, company size, start and end dates, middle names…). Two settled
+cases were added to the guide and applied to every round, both sealed sets included: a checkbox that
+adds to a payment (cover the fee, make it monthly) is `skip:consent`, and a topic picked from a list
+is `subject` (183 labels changed, 7 of them on the third round's sealed forms). The engine's rules
+are unchanged. On the third round's sealed forms, relabelled, with the model retrained on each mix:
+
+| On the 200 third-round forms | Precision | Recall | F1 | Missed | Wrong |
+| --- | --- | --- | --- | --- | --- |
+| Rules alone | 90.9% | 87.3% | 89.1% | 156 | 140 |
+| Rules + model, rounds 1–2 (before) | 90.8% | 90.0% | 90.4% | 112 | 147 |
+| Rules + model, + rounds 4 and 5 | 90.3% | 90.5% | 90.4% | 102 | 156 |
+| Rules + model, + round 4 | 90.9% | 88.8% | 89.9% | 132 | 142 |
+| **Rules + model, + round 5 (kept)** | **90.8%** | **90.9%** | **90.9%** | 101 | 147 |
+
+More contact and sign-up forms made the model hold back; the forms with rare types helped, so round 4
+stays labelled but out of the training data. This set was already retired and the mix was chosen on
+it, so +0.5 F1 is an estimate, not a sealed result: the next sealed set measures it.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
