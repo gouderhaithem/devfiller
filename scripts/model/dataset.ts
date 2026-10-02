@@ -30,7 +30,9 @@ const UCI = resolve(process.env.HOME || '', 'datasets/uci-webform');
 export const REAL_DATASET = process.env.REAL_DATASET || resolve(UCI, 'model/dataset-real.jsonl');
 // round4/train is labelled but left out: more contact and sign-up forms cost recall on the sealed set
 // (F1 89.9% with it alone, 90.4% with it beside round 5, 90.9% without it).
-const REAL_DIRS = (process.env.REAL_DIRS ?? [resolve(UCI, 'sealed'), resolve(UCI, 'round2/train'), resolve(UCI, 'round5/train')].join(':')).split(':').filter(dir => dir && existsSync(dir));
+// French and Arabic forms from public websites (scripts/uci-sealed/crawl-forms.mjs): their training part.
+const FR_AR = resolve(process.env.HOME || '', 'datasets/web-forms-fr-ar');
+const REAL_DIRS = (process.env.REAL_DIRS ?? [resolve(UCI, 'sealed'), resolve(UCI, 'round2/train'), resolve(UCI, 'round5/train'), resolve(FR_AR, 'train')].join(':')).split(':').filter(dir => dir && existsSync(dir));
 if (REAL_DIRS.some(dir => /sealed$/.test(dir) && !dir.endsWith('uci-webform/sealed'))) throw new Error('A round\'s sealed folder is never training data');
 const sources = [
   ...html(FIXTURES).map(name => ({ page: `bench/${name}`, url: pathToFileURL(resolve(FIXTURES, name)).href, source: 'benchmark' })),

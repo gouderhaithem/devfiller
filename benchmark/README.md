@@ -228,6 +228,32 @@ address_3, autocomplete="address-line3") are address line 2. Round 4, rules alon
 The sixth round's fixes hold on a second sealed set (+0.4 F1); this round's two fixes change nothing
 here, since these forms have no such fields. Round 7 is now retired.
 
+### French and Arabic forms from the web
+
+The UCI crawl has almost no French or Arabic forms (12 unused French websites), so 255 forms were
+collected from 188 public French, Belgian, Swiss, Québécois, Algerian, Moroccan, Tunisian, Egyptian
+and Gulf websites (`scripts/uci-sealed/crawl-forms.mjs`: home, contact, sign-up and job pages,
+nothing typed or submitted, websites that turn automated browsers away skipped), labelled blind with
+the same guide plus French and Arabic notes, and split by website: 157 training forms (117 French, 40
+Arabic) and 98 sealed (69 French, 29 Arabic). Rule fixes were tuned on the training forms only: a
+select named only by its prompt ("Choisir fonction", "اختر الخبرة"), experience and salary selects,
+"mots clés", "gare de départ", "خبرتك", "راتبك المتوقع", and "الاسم" / "Name" as the whole name alone
+but the first name beside a surname. The model was retrained with the training forms (920 rows).
+
+| | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| French and Arabic training forms, rules, before | 89.4% | 77.2% | 82.8% |
+| French and Arabic training forms, rules, after | 90.1% | 80.5% | 85.0% |
+| **98 sealed French and Arabic forms, rules, before** | 86.5% | 80.2% | 83.2% |
+| **98 sealed French and Arabic forms, rules, after** | 86.9% | 80.5% | **83.6%** |
+| 98 sealed French and Arabic forms, rules + model, before | 86.5% | 81.3% | 83.8% |
+| 98 sealed French and Arabic forms, rules + model, after | 87.2% | 82.2% | **84.6%** |
+
+French and Arabic stay about 8 points below English (92–93% on the sealed English rounds): many of
+these forms are search widgets, price sliders and custom pickers, and 98 forms make a noisy measure.
+In English, round 4 moved from 91.4% to 91.2% with the retrained model (rules unchanged at 90.1%);
+the benchmark gate shows no regressions. The sealed French and Arabic forms are now retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
