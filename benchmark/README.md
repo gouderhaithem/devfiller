@@ -126,6 +126,29 @@ are short of the +3 the plan set for switching them on.
 inputs, consent radios and checkboxes worded unusually ("show my name", "keep my gift anonymous",
 supporter questions) and an email verification code. That is rule work for the next round.
 
+### Third real-world round: 200 fresh sealed forms
+
+Rule work tuned on the 998 training forms only: sign-up lists and consent wording, interest options
+and plain first-person answers no longer read as consent, donation and price choices read as an
+amount, a contact form's one unlabelled text area read as its message. The model was then retrained
+on the same data. 200 forms from 200 websites no earlier round used (2,389 fields; same tools, same
+guide) were labelled blind and opened once, against `main` before this work:
+
+| On the 200 sealed real forms | Precision | Recall | F1 | Sensitive fields filled |
+| --- | --- | --- | --- | --- |
+| `main`, rules alone | 89.6% | 84.2% | 86.8% | 20 |
+| `main`, rules + model | 89.5% | 86.5% | 88.0% | 20 |
+| **This round, rules alone** | **90.8%** | 87.4% | **89.1%** | 23 |
+| **This round, rules + model** | 90.4% | 89.9% | **90.1%** | 23 |
+
+The 3 extra sensitive fields were a regression of the narrower declaration rule: promises to pay or
+give ("I choose to pay the fees", "I want to contribute this amount every month", "I do not wish to
+be publicly recognized"). Fixed after the measurement and disclosed: 20 again (89.2% / 90.2% F1).
+The 20 left, on `main` too, are mostly contact-channel checkboxes ("by email", "by SMS"), investor
+alert lists and two verification-code boxes: rule work for the next round. The model adds +1.0 F1
+over the rules here, short of the +3 for switching learned guesses on by default. This set is now
+retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
