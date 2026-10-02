@@ -65,9 +65,12 @@ if (command === 'list') {
   const ok = allowed();
   let pages = 0, fields = 0, bad = 0;
   for (const name of readdirSync(target).filter(n => n.endsWith('.html')).sort()) {
-    const { document } = new JSDOM(readFileSync(resolve(target, name), 'utf8')).window;
-    const list = controls(document);
+    const { window } = new JSDOM(readFileSync(resolve(target, name), 'utf8'));
+    const list = controls(window.document);
     const wrong = list.filter(el => !ok.has(el.getAttribute('data-expect') || ''));
+    // A big round doesn't fit in memory unless each page's window is closed and freed before the next.
+    window.close();
+    await new Promise(setImmediate);
     pages++; fields += list.length;
     if (wrong.length) { bad++; console.log(`${name}: ${wrong.length} of ${list.length} unlabelled or not allowed`); }
   }

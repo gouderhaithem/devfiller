@@ -67,6 +67,9 @@ for (const dir of process.argv.slice(2)) {
       if (fix) el.setAttribute('data-expect', to);
     }
     if (fix && changes.length) writeFileSync(path, `<!doctype html>\n${document.documentElement.outerHTML}\n`);
+    // A big round doesn't fit in memory unless each page's window is closed and freed before the next.
+    dom.window.close();
+    await new Promise(setImmediate);
   }
 }
 console.log(JSON.stringify(counts), fix ? '(written)' : '(dry run)');
