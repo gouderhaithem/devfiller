@@ -3,6 +3,7 @@
 // 2026): 165 in all, mostly mailing lists. Each block is one mechanism, as generic markup.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fillPage, type FillRequest } from '../src/fill';
+import { classifyField } from '../src/fill/classify';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 
@@ -79,5 +80,27 @@ describe('codes and hidden helpers', () => {
     document.body.innerHTML = `<form><div class="card"><label for="num">Card number</label><input id="num"><label for="mm">MM</label><input id="mm" placeholder="MM" maxlength="2"><input id="yy" placeholder="YYYY" maxlength="4"></div></form>`;
     fillPage({ ...request, cards: 'off' });
     expect(values_()).toEqual([]);
+  });
+});
+
+// The other side: options and statements that only look like consent, found on the same real forms.
+describe('not consent', () => {
+  const types = () => Array.from(document.querySelectorAll<HTMLInputElement>('input')).map(el => classifyField(el).type);
+  it('reads topic words in a list of options as options', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Which areas interest you?</legend>${['Analytics', 'Marketing', 'Sales', 'I don\u2019t know yet'].map((t, i) => `<label><input type="checkbox" name="input_20.${i + 1}"> ${t}</label>`).join('')}</fieldset>
+      <fieldset><legend>Department</legend>${['Communications', 'Engineering', 'Finance'].map(t => `<label><input type="radio" name="department_id" value="${t}"> ${t}</label>`).join('')}</fieldset></form>`;
+    expect(types().filter(t => t === 'skip:consent')).toEqual([]);
+  });
+  it('reads first-person requests and facts as questions, not declarations', () => {
+    const labels = ['I want to choose a dealership', 'I have a vehicle to trade-in', "I'd like to make this contribution in honor or in memory of someone", 'I request expedited processing of my request', 'I am a current student'];
+    document.body.innerHTML = `<form>${labels.map(l => `<label><input type="checkbox"> ${l}</label>`).join('')}
+      <fieldset><legend>Is this a joint gift with your partner?</legend><label><input type="radio" name="joint" value="y"> Yes</label><label><input type="radio" name="joint" value="n"> No</label></fieldset></form>`;
+    expect(types().filter(t => t === 'skip:consent')).toEqual([]);
+  });
+  it('still reads declarations, sign-up lists and partner offers as consent', () => {
+    const labels = ['I confirm I am the account holder', 'I am over 18', 'I certify that the above is accurate', "Je certifie l'exactitude des informations", 'Share my details with our partners', 'Newsletter'];
+    document.body.innerHTML = `<form>${labels.map(l => `<label><input type="checkbox"> ${l}</label>`).join('')}
+      <ul>${['Marketing', 'Product news', 'Events'].map((t, i) => `<li><label><input type="checkbox" name="lists[${i}]"> ${t}</label></li>`).join('')}</ul></form>`;
+    expect(types()).toEqual(Array(9).fill('skip:consent'));
   });
 });
