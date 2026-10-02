@@ -10,6 +10,7 @@ import { coherentValues, fallbackValue, fitValue, matchChoice, spellingsFor, typ
 import { randomFor, secureRandom, type Random } from '../rng';
 import { alignPhones, otherNumber } from './phones';
 import { fillCard } from './cards';
+import { fillSensitive, looksLikeConsent, testKind } from './sensitive';
 import { classifyWidget, listWidgets, WIDGET_SELECTOR } from './widgets';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
 import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
@@ -65,7 +66,8 @@ function fillChoice(ctx: FillContext, el: HTMLInputElement, signals: readonly st
   if (!request.fillUnknown) return NONE;
   // A scale's question may say "agree" ("How much do you agree…"): an opinion, not consent.
   const scale = el.type === 'radio' && !!isScale(optionTexts(el));
-  if (!scale && (signals.some(s => CONSENT.test(s)) || CONSENT.test(legendText(el)))) return run('none', { reason: 'Consent field stays untouched' });
+  // Permission wording on a box the rules typed otherwise: ticked as consent, like a consent box.
+  if (!scale && el.type === 'checkbox' && looksLikeConsent(signals, legendText(el))) return fillSensitive(ctx, el, 'consent');
   if (el.type === 'radio') return fillRadioGroup(ctx, el);
   if (el.checked && !request.overwrite) return run('preserved');
   ctx.touched.add(el);
@@ -262,13 +264,14 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   if (ctx.traps.has(el)) return run('none', { reason: 'Hidden trap for bots' });
   // When the page keeps its fields in forms, a checkbox outside them is a page setting, not data.
   if (isChoice(el) && !el.form && ctx.inForms) return run('none', { reason: 'Outside the page\'s forms' });
-  // Card fields get test cards, masked CVC boxes included; every other sensitive field stays empty.
-  if (classificationOf(ctx.classifications, el).type === 'skip:card') return fillCard(ctx, el);
+  // Sensitive fields get values that read as tests: test cards (masked CVC boxes included), a
+  // one-time code of 4s, a bank account of 4s, consent and "remember me" ticked.
+  const { type } = classificationOf(ctx.classifications, el);
+  if (type === 'skip:card') return fillCard(ctx, el);
+  const kind = testKind(type);
+  if (kind) return request.mode === 'scan' ? NONE : fillSensitive(ctx, el, kind);
   if (isInput(el) && el.type === 'password' && !request.passwords) return NONE;
   const sig = controlSignals(el);
-  const { type } = classificationOf(ctx.classifications, el);
-  // Card, one-time-code, bank and consent fields are recognized so they are never filled.
-  if (isSensitive(type)) return NONE;
   // autocomplete="new-password" alone is often a way to turn autofill off: it only keeps a field
   // empty when nothing else says what the field is.
   if (!request.passwords && (type === 'password' || (sig.ac.includes('password') && type === 'unknown') || sig.signals.some(s => PASSWORD.test(s)))) return NONE;

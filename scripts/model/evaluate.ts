@@ -3,6 +3,7 @@
 // field F1, the fields that changed, and whether a fill touches a sensitive field. Pages load from
 // disk with every network request blocked. Used for sealed sets kept outside the repository.
 import { chromium, type Page } from 'playwright';
+import { isTestValue, TEST_TEXT, testKind } from '../../src/fill/sensitive';
 import { build } from 'esbuild';
 import { readdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -16,6 +17,7 @@ if (!dirArg) { console.error('usage: npm run model:evaluate -- <folder> [out.jso
 const DIR = resolve(dirArg);
 const OMITTED = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
 const SENSITIVE = /^skip:(card|otp|iban|consent)$/;
+// What a sensitive field may hold after a fill (src/fill/sensitive.ts).
 const U = 'unknown';
 
 const base: FillRequest = {
@@ -42,7 +44,15 @@ async function score(page: Page, name: string, engine: string, modelGuesses: boo
   await open(page, url, engine);
   const before = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, textarea, select'), el => `${el.value}|${el.checked}`));
   await page.evaluate(r => (globalThis as any).__devfiller.fillPage(r), { ...base, modelGuesses });
-  const leaks = await page.evaluate(({ before, pattern }) => Array.from(document.querySelectorAll<HTMLInputElement>('input, textarea, select')).flatMap((el, i) => new RegExp(pattern).test(el.getAttribute('data-expect') || '') && `${el.value}|${el.checked}` !== before[i] ? [el.outerHTML.slice(0, 120)] : []), { before, pattern: SENSITIVE.source });
+  // Sensitive fields get test values; a leak is one that got anything else (or a card field, which
+  // this run fills with no test card).
+  const after = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLInputElement>('input, textarea, select'), el => ({ value: el.value, checked: !!el.checked, expect: el.getAttribute('data-expect') || '', html: el.outerHTML.slice(0, 120), text: el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !['checkbox', 'radio'].includes(el.type)) })));
+  const leaks = after.flatMap((el, i) => {
+    if (!SENSITIVE.test(el.expect) || `${el.value}|${el.checked}` === before[i]) return [];
+    const kind = testKind(el.expect);
+    const ok = kind === 'consent' || kind === 'session' ? !el.text || el.value === TEST_TEXT || el.value === before[i].split('|')[0] : !!kind && isTestValue(kind, el.value);
+    return ok ? [] : [el.html];
+  });
   return { pairs, unlabelled, leaks };
 }
 

@@ -29,10 +29,10 @@ const tier=(d:Detection)=>isProtectedType(d)?'protected':d.type==='unknown'?'unk
 const percent=(d:Detection)=>`${Math.round(d.confidence*100)}%`;
 function detectedText(d:Detection) {
   if(d.type==='unknown')return 'Type not recognized';
-  return isProtectedType(d)?`${d.label} · protected`:`${d.label} · ${percent(d)}`;
+  return isProtectedType(d)?`${d.label} · test value`:`${d.label} · ${percent(d)}`;
 }
 function DetectionDetails({detected}:{detected:Detection}) {
-  const title=detected.type==='unknown'?'Not recognized':isProtectedType(detected)?`Recognized as ${detected.label}, never filled`:`Recognized as ${detected.label}, ${percent(detected)} confident`;
+  const title=detected.type==='unknown'?'Not recognized':isProtectedType(detected)?`Recognized as ${detected.label}, filled with a test value`:`Recognized as ${detected.label}, ${percent(detected)} confident`;
   return <div className="detection"><p className={`detection-title ${tier(detected)}`}>{title}</p>
     {detected.evidence.length>0&&<ul aria-label="Evidence">{detected.evidence.map((item,index)=><li key={`${index}:${item}`}>{item}</li>)}</ul>}
     {detected.alternatives.length>0&&<p className="hint">Also considered: {detected.alternatives.join(', ')}</p>}</div>;
