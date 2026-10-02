@@ -186,6 +186,30 @@ lists read as `subject` and birth dates read as plain dates). Twice the real-for
 the model is near what its features allow: the next gains are rule work (495 fields missed, 13
 sensitive fields filled) or new features, not more forms of the same crawl. Round 4 is now retired.
 
+### Sixth real-world round: rule work on round 4, measured on 200 sealed forms
+
+200 forms from websites no earlier round used were drawn and labelled blind before any fix (round 6;
+the crawl's rich forms are used up, so these are mostly contact and sign-up forms). The rules were
+then fixed against round 4's mistakes only: one-time codes worded "Validation code", "Temporary
+code", "Reset code" or a bare "Enter code", and a row of code boxes with one two-character box; a
+message's question on a select or radios ("How can we help?") and topic wording read as `subject`;
+day/month/year selects of a birth date; WPForms and Gravity Forms name parts; a lead form's "Title"
+as a job title. The evaluator counted every untouched sensitive select as filled (`undefined`
+against `false`): fixed, and both sides below are scored with the fixed evaluator.
+
+| | Precision | Recall | F1 | Sensitive fields filled |
+| --- | --- | --- | --- | --- |
+| Round 4 (tuned on), rules, before | 91.2% | 86.9% | 89.0% | 13 |
+| Round 4 (tuned on), rules, after | 91.2% | 88.5% | 89.9% | 0 |
+| **Round 6 (sealed), rules, before** | 94.9% | 88.9% | 91.8% | 1 |
+| **Round 6 (sealed), rules, after** | **95.0%** | **90.4%** | **92.7%** | 1 |
+| Round 6 (sealed), rules + model, before | 94.9% | 91.4% | 93.1% | 1 |
+| Round 6 (sealed), rules + model, after | 95.0% | 92.5% | 93.8% | 1 |
+
+The gain held on the sealed forms: +0.9 F1 for the rules, +0.7 with the model, precision unchanged.
+The one sensitive field filled is a Chinese "验证码" (verification code): the engine reads English,
+French and Arabic only. Round 6 is now retired.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
