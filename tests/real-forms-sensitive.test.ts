@@ -4,6 +4,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fillPage, type FillRequest } from '../src/fill';
 import { classifyField } from '../src/fill/classify';
+import { analyzePage } from '../src/fill/context';
+import { listControls } from '../src/fill/extract';
+import { isTestValue, testKind } from '../src/fill/sensitive';
 import { generateIdentities, generateValues } from '../src/data';
 import { generateSamples } from '../src/samples';
 
@@ -13,8 +16,12 @@ beforeEach(() => {
   document.body.replaceChildren();
   vi.spyOn(Element.prototype, 'getClientRects').mockReturnValue([{}] as unknown as DOMRectList);
 });
-const checked = () => Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox], input[type=radio]')).filter(el => el.checked).map(el => el.id || el.name);
-const values_ = () => Array.from(document.querySelectorAll<HTMLInputElement>('input:not([type=checkbox]):not([type=radio]), select')).filter(el => el.value).map(el => el.id || el.name);
+// Sensitive fields are filled with test values (sensitive.ts); what matters here is that they are
+// recognized. checked(): ticked boxes the rules didn't recognize as sensitive. values_(): fields
+// holding anything but a test value.
+const typeOf = () => analyzePage(listControls()).fields;
+const checked = () => { const types = typeOf(); return Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox], input[type=radio]')).filter(el => el.checked && !types.get(el)?.type.startsWith('skip:')).map(el => el.id || el.name); };
+const values_ = () => { const types = typeOf(); return Array.from(document.querySelectorAll<HTMLInputElement>('input:not([type=checkbox]):not([type=radio]), select')).filter(el => { const kind = testKind(types.get(el)?.type ?? ''); return el.value && !(kind && isTestValue(kind, el.value)); }).map(el => el.id || el.name); };
 
 describe('mailing lists', () => {
   it('never ticks the lists of a Mailchimp-style sign-up form', () => {

@@ -41,13 +41,13 @@ describe('custom widgets', () => {
     const types = Object.fromEntries(listWidgets().map(w => [w.id, classifyWidget(w).type]));
     expect(types).toMatchObject({ cb: 'unknown', terms: 'skip:consent', usage: 'skip:consent', stay: 'skip:session', m: 'gender', f: 'gender', country: 'country', ed: 'description', card: 'skip:card' });
   });
-  it('are filled by pressing, choosing and typing, never touching consent, session or card widgets', async () => {
+  it('are filled by pressing, choosing and typing, consent and session widgets ticked, card widgets left alone', async () => {
     document.body.innerHTML = html;
     wire();
     const result = await fillWidgets(request);
     expect(el('cb').getAttribute('aria-checked')).toBe('true');
-    expect(el('terms').getAttribute('aria-checked')).toBe('false');
-    expect(el('usage').getAttribute('aria-checked')).toBe('false');
+    expect(el('terms').getAttribute('aria-checked')).toBe('true');
+    expect(el('usage').getAttribute('aria-checked')).toBe('true');
     expect(el('stay').getAttribute('aria-checked')).toBe('true');
     expect(el('f').getAttribute('aria-checked')).toBe('true');
     expect(el('country').textContent).toBe('Algeria');

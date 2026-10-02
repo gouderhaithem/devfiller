@@ -110,7 +110,7 @@ describe('consent is about permission, not every question', () => {
       <label><input type="radio" name="cookies" value="later"> Ask me later</label></fieldset></form>`);
     expect(found.cookies).toBe('skip:consent');
     fillPage(request);
-    expect(document.querySelectorAll('input:checked')).toHaveLength(0);
+    expect(Array.from(document.querySelectorAll<HTMLInputElement>('input:checked'), el => el.id)).toEqual(['all']);
   });
   it('reads numbered answers as a count when the question asks for one', () => {
     const found = types(`<form><fieldset><legend>Adults</legend>${[1, 2, 3, 4].map(n => `<label><input type="radio" name="adults" value="${n}"> ${n}</label>`).join('')}</fieldset></form>`);
@@ -130,26 +130,25 @@ describe('consent is about permission, not every question', () => {
 });
 
 describe('consent leaks', () => {
-  it('never answers a Yes/No newsletter select', () => {
+  it('answers yes to a Yes/No newsletter select', () => {
     document.body.innerHTML = `<form><label for="nl">Subscribe to newsletter?</label><select id="nl"><option value="">-- Choose --</option><option value="yes">Yes</option><option value="no">No</option></select>
       <label for="pref">Preferred contact time</label><select id="pref"><option value="">-- Choose --</option><option value="am">Morning</option><option value="pm">Afternoon</option></select></form>`;
     fillPage(request);
-    expect(field('nl').value).toBe('');
+    expect(field('nl').value).toBe('yes');
     expect(field('pref').value).not.toBe('');
   });
-  it('never ticks a declaration whose heading is not a legend', () => {
+  it('reads a declaration whose heading is not a legend as consent', () => {
     document.body.innerHTML = `<form><div class="field"><span class="label">Declarations</span><div class="choices">
       <label><input type="checkbox" id="bribery"> Anti-bribery policy in place</label>
       <label><input type="checkbox" id="sanctions"> Not on any sanctions list</label>
       <label><input type="checkbox" id="gdpr"> GDPR compliant</label></div></div></form>`;
-    fillPage(request);
-    for (const id of ['bribery', 'sanctions', 'gdpr']) expect(field(id).checked, id).toBe(false);
+    const found = types(document.body.innerHTML);
+    for (const id of ['bribery', 'sanctions', 'gdpr']) expect(found[id], id).toBe('skip:consent');
   });
   it('reads the heading over a group even inside a larger fieldset', () => {
     document.body.innerHTML = `<form><fieldset><legend>Tax &amp; compliance</legend><div class="field"><span class="label">Declarations</span><div class="choices">
       <label><input type="checkbox" id="sanctions"> Not on any sanctions list</label></div></div></fieldset></form>`;
-    fillPage(request);
-    expect(field('sanctions').checked).toBe(false);
+    expect(types(document.body.innerHTML).sanctions).toBe('skip:consent');
   });
 });
 

@@ -2,6 +2,7 @@
 // Card fields are filled with test cards (the numbers payment sandboxes document for testing),
 // never real ones: a number for the chosen scenario, a future expiry, a CVC and the cardholder.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TEST_IBAN } from '../src/fill/sensitive';
 import { fillPage, type FillRequest } from '../src/fill';
 import { TEST_CARDS } from '../src/fill/cards';
 import { defaults, generateIdentities, generateValues, validateSettings } from '../src/data';
@@ -73,7 +74,7 @@ describe('test cards', () => {
     expect(field('mi').value.slice(0, 4) > String(year)).toBe(true);
     expect(Number(field('yy').value)).toBeGreaterThan(year);
   });
-  it('leaves a coupon beside the card, a card PIN, bank and one-time-code fields empty', () => {
+  it('leaves a coupon beside the card and a card PIN empty, and gives bank and one-time-code fields test values', () => {
     document.body.innerHTML = `<form><fieldset><legend>Payment</legend>
       <label for="num">Card number</label><input id="num">
       <label for="promo">Discount code or gift card</label><input id="promo">
@@ -83,7 +84,9 @@ describe('test cards', () => {
     </fieldset></form>`;
     fillPage(request);
     expect(digits(field('num').value)).toBe('4242424242424242');
-    for (const id of ['promo', 'pin', 'iban', 'otp']) expect(field(id).value, id).toBe('');
+    for (const id of ['promo', 'pin']) expect(field(id).value, id).toBe('');
+    expect(field('iban').value).toBe(TEST_IBAN);
+    expect(field('otp').value).toBe('444444');
   });
   it('never writes a card number into a field that is only beside the card', () => {
     document.body.innerHTML = `<form><div class="grid">
