@@ -2,7 +2,7 @@
 
 _Last updated: 3 October 2026_
 
-DevFiller is a Chrome extension that fills website forms with generated, fictional test data. This policy explains what data DevFiller handles, where it goes, and what it never does.
+DevFiller is a browser extension for Chrome, Edge and Firefox that fills website forms with generated, fictional test data. This policy explains what data DevFiller handles, where it goes, and what it never does.
 
 ## Summary
 
@@ -15,18 +15,18 @@ DevFiller is a Chrome extension that fills website forms with generated, fiction
 
 | Data | Where | How long |
 | --- | --- | --- |
-| Generator settings (including your region and seed), custom field values, field types you set, field exclusions | `chrome.storage.local` (this browser only) | Until you change them or uninstall DevFiller |
-| AI provider, model, and API key (if you add one) | `chrome.storage.local`, only readable by the extension's own pages. It is **not encrypted**. | Until you choose **Remove saved key** or uninstall DevFiller |
-| AI suggestions | `chrome.storage.session` (memory, cleared when the browser closes) | Your chosen cache time (1–60 minutes), or until you clear them |
+| Generator settings (including your region and seed), custom field values, field types you set, field exclusions | The browser's local extension storage (this browser only) | Until you change them or uninstall DevFiller |
+| AI provider, model, and API key (if you add one) | The browser's local extension storage, readable only by DevFiller itself, never by websites. It is **not encrypted**. | Until you choose **Remove saved key** or uninstall DevFiller |
+| AI suggestions | The browser's session storage (memory, cleared when the browser closes) | Your chosen cache time (1–60 minutes), or until you clear them |
 | Undo history for the last fill | The page's memory | Until the page is closed or reloaded |
 
 None of this data is sent to the developer.
 
-Working out what each field is happens entirely on your device; no page content is sent anywhere for it. If you click **Export as test fixture** in the side panel, DevFiller saves an HTML file to your computer with the form's structure and labels. It removes the values in the form, hidden fields, scripts, images and the site's address, and it is not sent anywhere unless you share it yourself.
+Working out what each field is happens entirely on your device; no page content is sent anywhere for it. If you click **Export as test fixture** in the side panel (the sidebar in Firefox), DevFiller saves an HTML file to your computer with the form's structure and labels. It removes the values in the form, hidden fields, scripts, images and the site's address, and it is not sent anywhere unless you share it yourself.
 
 ## Data sent to third parties (optional AI only)
 
-The AI feature is **off by default**. When you turn it on and save your own API key, DevFiller sends a request to the provider you chose:
+The AI feature is **off by default**. When you turn it on and save your own API key, DevFiller sends a request to the provider you chose. In Firefox, the browser first asks for your consent to send website content, and you can withdraw it in Firefox's add-on settings, which stops all AI requests:
 
 - **Groq**: `https://api.groq.com` ([Groq privacy policy](https://groq.com/privacy-policy/))
 - **Google Gemini**: `https://generativelanguage.googleapis.com` ([Google privacy policy](https://policies.google.com/privacy))
@@ -47,8 +47,8 @@ Website authors write the field labels and placeholders, so they may mention som
 
 ## Website access
 
-- When you click the toolbar icon, the side panel, or the context menu, DevFiller reads and fills the form fields on the **active tab only** (`activeTab`, `scripting`).
-- If you turn on **automatic preparation** for AI, DevFiller asks for permission to access websites. With that permission, a small script detects forms as they load so suggestions are ready sooner. You can remove this permission at any time in Chrome's extension settings.
+- When you click the toolbar icon, the side panel (the sidebar in Firefox), or the context menu, DevFiller reads and fills the form fields on the **active tab only** (`activeTab`, `scripting`).
+- If you turn on **automatic preparation** for AI, DevFiller asks for permission to access websites. With that permission, a small script detects forms as they load so suggestions are ready sooner. You can remove this permission at any time in your browser's extension settings.
 - DevFiller never submits forms. You always submit them yourself.
 
 ## What DevFiller does not do
