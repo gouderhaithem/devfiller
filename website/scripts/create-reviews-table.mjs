@@ -22,9 +22,11 @@ await sql`
     role TEXT CHECK (role IS NULL OR char_length(role) <= 80),
     rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment TEXT NOT NULL CHECK (char_length(comment) BETWEEN 10 AND 1000),
-    approved BOOLEAN NOT NULL DEFAULT FALSE,
+    approved BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`;
 await sql`CREATE INDEX IF NOT EXISTS reviews_approved_created ON reviews (approved, created_at DESC)`;
+// Reviews are published at once (approved = false hides one); tables made before that kept false.
+await sql`ALTER TABLE reviews ALTER COLUMN approved SET DEFAULT TRUE`;
 const [{ total, shown }] = await sql`SELECT count(*)::int AS total, count(*) FILTER (WHERE approved)::int AS shown FROM reviews`;
 console.log(`reviews table ready: ${total} reviews, ${shown} approved`);

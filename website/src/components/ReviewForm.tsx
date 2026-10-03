@@ -64,7 +64,7 @@ export function ReviewForm() {
     return (
       <div className="rounded-2xl border border-mist bg-mint-pale/60 p-8" role="status">
         <p className="text-xl font-semibold">Thank you for your review.</p>
-        <p className="mt-2 text-ink-soft">It will appear here once it has been checked, usually within a day or two.</p>
+        <p className="mt-2 text-ink-soft">It now appears on this page and on the homepage.</p>
         <button type="button" onClick={() => setStatus({ kind: "idle" })} className="mt-6 rounded-lg px-4 py-2 font-medium text-brand ring-1 ring-mist hover:ring-brand">
           Write another review
         </button>
@@ -136,7 +136,7 @@ export function ReviewForm() {
             {...described("comment")}
           />
           <span className="mt-1 flex justify-between gap-3 text-sm text-ink-soft">
-            {error("comment") ?? <span>Your name, role and review are shown publicly once approved.</span>}
+            {error("comment") ?? <span>Your name, role and review are shown publicly on this website.</span>}
             <span className="shrink-0 tabular-nums">
               {values.comment.length.toLocaleString("en")} / {REVIEW_LIMITS.comment.toLocaleString("en")}
             </span>
@@ -159,7 +159,7 @@ export function ReviewForm() {
           {status.kind === "sending" ? "Sending…" : "Send review"}
         </button>
         <p ref={statusRef} tabIndex={-1} aria-live="polite" className={`text-sm outline-none ${status.kind === "error" ? "text-red-600" : "text-ink-soft"}`}>
-          {status.kind === "error" ? status.message : "Reviews are checked before they appear, to keep spam out."}
+          {status.kind === "error" ? status.message : "Your review appears here as soon as you send it."}
         </p>
       </div>
     </form>

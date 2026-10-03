@@ -68,7 +68,7 @@ The extension never uses this form. If you write in through <https://www.devfill
 
 ## The website's reviews
 
-The extension never uses this either. If you write a review at <https://www.devfiller.com/reviews/>, the name, optional role, star rating and review you type are stored in a database run by [Neon](https://neon.tech), with the date. A review is shown publicly on the website, with your name and role, only after the maintainer approves it. Nothing else is stored with it: no email address, IP address or account. To have your review corrected or removed, use the support form.
+The extension never uses this either. If you write a review at <https://www.devfiller.com/reviews/>, the name, optional role, star rating and review you type are stored in a database run by [Neon](https://neon.tech), with the date. A review is shown publicly on the website, with your name and role, as soon as you send it; the maintainer may remove reviews that are spam or abusive. Nothing else is stored with it: no email address, IP address or account. To have your review corrected or removed, use the support form.
 
 ## Changes and contact
 

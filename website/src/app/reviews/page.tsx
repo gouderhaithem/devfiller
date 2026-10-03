@@ -10,7 +10,7 @@ export const metadata: Metadata = pageMeta({
   path: "/reviews/",
 });
 
-// Approved reviews are read again at most every five minutes.
+// Reviews are read again at most every five minutes, and at once when one is sent.
 export const revalidate = 300;
 
 export default async function ReviewsPage() {
@@ -27,7 +27,7 @@ export default async function ReviewsPage() {
 
       <section id="write" className="mt-16 scroll-mt-24 max-w-3xl">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Write a review</h2>
-        <p className="mt-2 text-ink-soft">Tell other developers and testers how DevFiller works for you. Reviews are checked before they appear.</p>
+        <p className="mt-2 text-ink-soft">Tell other developers and testers how DevFiller works for you.</p>
         <div className="mt-6">
           <ReviewForm />
         </div>

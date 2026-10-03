@@ -46,7 +46,7 @@ The in-code limit counts per server instance. For a firm limit, add a Vercel Fir
 
 ## Reviews
 
-`/reviews/` and the homepage show the reviews the maintainer approved, read from [Neon](https://neon.tech) Postgres at most every five minutes. The review form posts to `/api/reviews`, which applies the support form's protections (same origin only, a hidden field, a minimum fill time, 3 reviews per address every 15 minutes) and stores the review **unapproved**. Nothing but the name, optional role, rating, review and date is stored.
+`/reviews/` and the homepage show the reviews from [Neon](https://neon.tech) Postgres, read at most every five minutes and again as soon as a review is sent. The review form posts to `/api/reviews`, which applies the support form's protections (same origin only, a hidden field, a minimum fill time, 3 reviews per address every 15 minutes) and publishes the review at once. Nothing but the name, optional role, rating, review and date is stored. With no reviews, the pages show an empty state.
 
 | Variable | Required | Value |
 | --- | --- | --- |
@@ -54,11 +54,11 @@ The in-code limit counts per server instance. For a firm limit, add a Vercel Fir
 
 Create the table once (safe to run again): `cd website && node scripts/create-reviews-table.mjs`.
 
-Approve or remove a review in Neon's SQL editor; the site picks it up within five minutes:
+Hide or remove a review in Neon's SQL editor; the site picks it up within five minutes:
 
 ```sql
-SELECT id, name, role, rating, comment, created_at FROM reviews WHERE NOT approved ORDER BY created_at;
-UPDATE reviews SET approved = true WHERE id = 42;
+SELECT id, name, role, rating, comment, approved, created_at FROM reviews ORDER BY created_at DESC;
+UPDATE reviews SET approved = false WHERE id = 42;  -- hide it (true shows it again)
 DELETE FROM reviews WHERE id = 43;
 ```
 
