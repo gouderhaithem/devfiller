@@ -5,6 +5,7 @@ Run `npm run store-listing` and open `docs/store/listing.html` in a browser for 
 ## Package
 
 - Build the upload file with `npm run package`, which creates `release/devfiller-<version>.zip` (the demo page is left out).
+- For Firefox, `npm run package:firefox` creates `release/devfiller-<version>-firefox.zip`; see [FIREFOX.md](FIREFOX.md).
 - Remake the images with `npm run build && npm run store-assets`.
 
 ## Store listing tab
