@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check, Eye, EyeOff, KeyRound, RefreshCw, Trash2 } from 'lucide-react';
 import { PROVIDERS, PROVIDER_SPECS, MIN_CACHE_MINUTES, MAX_CACHE_MINUTES, defaultGemini, validCacheMinutes, type GeminiConfig, type Provider } from './gemini';
 import { isExtension } from './storage';
+import { requestAiAccess } from './browser';
 
 interface CacheStatus { batches:number; suggestions:number; expiresAt:number|null; lastMessage:string }
 const emptyStatus:CacheStatus={batches:0,suggestions:0,expiresAt:null,lastMessage:''};
@@ -44,10 +45,9 @@ export function GeminiPanel() {
       if(config.enabled) {
         if(!config.apiKey.trim()) throw new Error('Enter your API key first.');
         // Only the background watcher needs standing site access. Clicking Fill uses activeTab.
-        if(config.autoPrepare) {
-          const granted=await chrome.permissions.request({origins:['http://*/*','https://*/*']});
-          if(!granted) throw new Error('Website access is needed to prepare data as forms appear. Allow access, or turn off preparing ahead of the click.');
-        }
+        // Firefox also asks for consent to send field descriptions; both in one request.
+        const granted=await requestAiAccess(config.autoPrepare?['http://*/*','https://*/*']:undefined);
+        if(!granted) throw new Error(config.autoPrepare?'Website access is needed to prepare data as forms appear. Allow access, or turn off preparing ahead of the click.':'AI suggestions send field descriptions to the provider, so Firefox needs your permission. Allow it to turn AI on.');
       }
       const reply=await send({type:'gemini:save',config});setConfig(reply.config!);setCache(reply.status!);
       const provider=`${PROVIDER_SPECS[config.provider].label} (${config.model})`;

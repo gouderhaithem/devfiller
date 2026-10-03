@@ -34,7 +34,8 @@ export function installFormPreload(prepare:(tabId:number,tab:chrome.tabs.Tab,doc
   chrome.permissions.onRemoved.addListener(()=>{void sync().catch(()=>{});});
   chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
     if(!message || typeof message!=='object' || (message as {type?:string}).type!=='devfiller:prepare')return;
-    if(sender.id!==chrome.runtime.id || sender.frameId!==0 || sender.tab?.id===undefined || !sender.documentId || !/^https?:/.test(sender.url || ''))return;
+    // Chrome names the document, so preparation targets it; Firefox doesn't, and prepares the tab's page.
+    if(sender.id!==chrome.runtime.id || sender.frameId!==0 || sender.tab?.id===undefined || !/^https?:/.test(sender.url || ''))return;
     const tabId=sender.tab.id;
     void(async()=>{
       const url=new URL(sender.url!);

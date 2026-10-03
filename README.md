@@ -143,7 +143,11 @@ npm run build                 # Type-check and build the unpacked extension
 npm test                      # Unit tests
 npx playwright install chromium
 npm run test:e2e              # Browser and extension tests on port 5188
+npm run package               # release/devfiller-<version>.zip for Chrome and Edge
+npm run package:firefox       # release/devfiller-<version>-firefox.zip for Firefox 140+
 ```
+
+The Firefox build is the same code with a Firefox manifest (the sidebar instead of the side panel). [docs/store/FIREFOX.md](docs/store/FIREFOX.md) explains submitting it to addons.mozilla.org.
 
 Run `npm run build` before the browser tests. CI runs the build and both test suites and uploads an unpacked extension artifact.
 

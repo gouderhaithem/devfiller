@@ -22,3 +22,4 @@ docs/store/listing.html
 
 # Python bytecode (scripts/uci)
 __pycache__/
+.firefox-build/

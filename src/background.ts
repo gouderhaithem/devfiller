@@ -1,4 +1,5 @@
 import {installFormPreload} from './form-preload';
+import { hasAiConsent, openPanel } from './browser';
 import { fields, generateIdentities, generatePhones, generateValues, localizedValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
@@ -24,7 +25,9 @@ async function withCacheWrite<T>(key:string,write:()=>Promise<T>):Promise<T> {
 }
 const prewarming=new Set<number>();
 const queuedPreparations=new Map<number,{tab:chrome.tabs.Tab;documentId?:string}>();
-const protectStorage=chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});
+// Chrome: keep stored settings away from content scripts. Firefox has no access levels (its extension
+// storage is never readable by web pages), and calling this there stopped the background script.
+const protectStorage=chrome.storage.local.setAccessLevel?.({accessLevel:'TRUSTED_CONTEXTS'}) ?? Promise.resolve();
 
 async function pruneCache() {
   const stored=await chrome.storage.session.get(null);
@@ -71,6 +74,8 @@ async function prepareBatch(tabId:number,request:FillRequest,settings:Settings,c
   // surrounding form changes, and only genuinely new or exhausted fields cost a request.
   const missing=fields.filter(field=>!cached?.values[field.signature!]?.length);
   if(!missing.length) return {scan,cacheKey,batch:cached,note:`Used cached ${providerSpec(config.provider).label} suggestions.`};
+  // Firefox: nothing goes to the provider without the person's consent, which they can withdraw.
+  if(!(await hasAiConsent())) throw new Error('Firefox needs your permission to send field descriptions to the AI provider. Turn AI on again in DevFiller\'s settings. Local filling is still available.');
   for(const [key,deadline] of quotaFailures)if(deadline<=Date.now())quotaFailures.delete(key);
   // The cooldown exists so automatic preparation stops hammering a rate-limited key. A fill the user
   // just clicked is different: they are waiting for AI data, so it always gets one real attempt and
@@ -221,7 +226,8 @@ chrome.runtime.onInstalled.addListener(details=>{
     void chrome.runtime.lastError;
     chrome.contextMenus.create({id:'devfiller-panel',title:'Open DevFiller panel',contexts:['action']},()=>void chrome.runtime.lastError);
   });
-  void chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false});
+  // Chrome only: Firefox has a sidebar, and its toolbar click already fills the page.
+  void chrome.sidePanel?.setPanelBehavior({openPanelOnActionClick:false});
   if(details.reason==='install') void chrome.tabs.create({url:chrome.runtime.getURL('welcome.html')}).catch(()=>{});
 });
 
@@ -279,10 +285,10 @@ chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
 
 // Call open synchronously from the browser gesture, before any asynchronous work.
 chrome.contextMenus.onClicked.addListener((info,tab)=>{
-  if(info.menuItemId==='devfiller-panel' && tab?.windowId!==undefined) void chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});
+  if(info.menuItemId==='devfiller-panel' && tab?.windowId!==undefined) openPanel(tab.windowId);
 });
 chrome.commands.onCommand.addListener((command,tab)=>{
-  if(command==='open-panel' && tab?.windowId!==undefined) void chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});
+  if(command==='open-panel' && tab?.windowId!==undefined) openPanel(tab.windowId);
 });
 async function inspectTab(tabId:number) {
   const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
