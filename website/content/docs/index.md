@@ -20,3 +20,7 @@ Click again to get a different identity and new values.
 ## Privacy in one sentence
 
 Everything runs in your browser and nothing is sent anywhere, unless you turn on AI, which sends field descriptions (never the values you type) to the provider you chose. Details are in [Privacy and permissions](/docs/privacy-permissions/).
+
+## Who makes DevFiller
+
+DevFiller is built and maintained by [Haithem Gouder](https://github.com/gouderhaithem). It is free and open source under the MIT license; the [support form](/support/) reaches him directly.
