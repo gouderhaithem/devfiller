@@ -1,6 +1,7 @@
 {
   "name": "devfiller",
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "author": "Haithem Gouder (https://github.com/gouderhaithem)",
   "private": true,
   "type": "module",
   "scripts": {
