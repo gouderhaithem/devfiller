@@ -44,9 +44,9 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 
 ## Install
 
-Install DevFiller from the **Chrome Web Store** (the listing is in review; [www.devfiller.com](https://www.devfiller.com/docs/install/) links to it as soon as it's live). Chrome keeps it up to date.
+Install DevFiller from the **[Chrome Web Store](https://chromewebstore.google.com/detail/devfiller-%E2%80%94-test-data-for/neodjaolegipdhfjgjbdlgfehenmeofj)**. Chrome keeps it up to date.
 
-1. Open DevFiller on the Chrome Web Store and click **Add to Chrome**.
+1. Open [DevFiller on the Chrome Web Store](https://chromewebstore.google.com/detail/devfiller-%E2%80%94-test-data-for/neodjaolegipdhfjgjbdlgfehenmeofj) and click **Add to Chrome**.
 2. Pin DevFiller to your toolbar and follow the welcome guide.
 3. Open a page with a form and click the DevFiller icon.
 
@@ -172,6 +172,10 @@ Google responses are simulated in automated tests. Live Gemini access, the nativ
 - [Chrome Web Store readiness](docs/chrome-web-store-readiness.pdf) ([source](docs/chrome-web-store-readiness.html)): publication audit, blockers, pre-publish checklist, and ready-to-paste permission justifications ([ready-to-paste listing](docs/store/LISTING.md)). Rebuild with `node scripts/html-to-pdf.mjs docs/chrome-web-store-readiness.html docs/chrome-web-store-readiness.pdf`.
 
 For a bug report, include the browser version, reproduction steps, and a minimal form example with fictional data. Before opening a pull request, run the build and both test suites. Useful next areas include custom widget adapters and more regional datasets.
+
+## Author
+
+DevFiller is built and maintained by **Haithem Gouder** ([GitHub](https://github.com/gouderhaithem)). Questions and ideas are welcome through the [support form](https://www.devfiller.com/support/) or the [issues](https://github.com/gouderhaithem/devfiller/issues).
 
 ## License
 

@@ -16,6 +16,7 @@ const groups = [
     links: [
       { href: site.repo, label: "Source code" },
       { href: "/support/", label: "Contact support" },
+      { href: "/reviews/", label: "Reviews" },
       { href: site.issues, label: "Report an issue" },
       { href: "/privacy/", label: "Privacy policy" },
     ],
@@ -30,6 +31,13 @@ export function SiteFooter() {
           <Logo />
           <p className="mt-3 text-[0.95rem] text-ink-soft">
             Fictional test data for the forms you build. Free and open source under the MIT license.
+          </p>
+          <p className="mt-3 text-[0.95rem] text-ink-soft">
+            Made by{" "}
+            <a href={site.author.url} className="font-medium text-ink underline-offset-4 hover:underline">
+              {site.author.name}
+            </a>
+            .
           </p>
         </div>
         {groups.map((group) => (

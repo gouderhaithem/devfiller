@@ -31,7 +31,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   district: ['district', 'daira', 'daïra', 'borough', 'arrondissement', 'الدائرة', 'دائرة'],
   state: ['state', 'province', 'region', 'county', 'wilaya', 'الولاية', 'ولاية', 'المحافظة'],
   postalCode: ['postal code', 'postcode', 'zip', 'zip code', 'cp', 'code postal', 'الرمز البريدي'],
-  country: ['country', 'country name', 'pays', 'البلد', 'الدولة'],
+  country: ['country', 'country name', 'pays', 'البلد', 'الدولة', 'country code', 'dial code', 'dialing code', 'calling code', 'phone code', 'indicatif', 'indicatif pays', 'indicatif téléphonique', 'رمز الاتصال', 'رمز الدولة', 'مفتاح الدولة'],
   website: ['website', 'web site', 'url', 'homepage', 'home page', 'portfolio', 'linkedin', 'linked in', 'profile url', 'site', 'blog', 'site web', 'site internet', 'الموقع الإلكتروني', 'الموقع'],
   bio: ['bio', 'biography', 'about', 'about me', 'about you', 'about yourself', 'biographie', 'à propos', 'présentation', 'نبذة'],
   description: ['steps to reproduce', 'expected result', 'actual result', 'symptoms', 'symptômes', 'reason', 'purpose', 'description', 'details', 'product description', 'الوصف', 'التفاصيل'],
@@ -39,7 +39,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   subject: ['subject', 'topic', 'sujet', 'objet', 'inquiry type', 'enquiry type', 'type of inquiry', 'type of enquiry', 'request type', 'type of request', 'issue type', 'type of issue',
     'reason for contact', 'reason for contacting', 'reason for contacting us', 'contact reason', 'purpose of contact', 'nature of your inquiry', 'nature of your enquiry', 'nature of your query',
     'type of question', 'type of feedback', 'feedback type', 'i am writing about', 'inquiry topic', 'enquiry topic', 'help topic', 'objet de votre demande', 'type de demande', 'motif de contact', 'nature de la demande',
-    'الموضوع', 'موضوع', 'نوع الطلب'],
+    'الموضوع', 'موضوع', 'نوع الطلب', 'thématique', 'thème', 'sur le thème', 'motif de votre réclamation', 'motif de la réclamation', 'motif de votre demande', 'nature de la réclamation', 'nature de votre demande', 'votre demande concerne', 'ma demande concerne', 'votre besoin', 'نوع الاقتراح', 'نوع الإقتراح', 'نوع الرسالة', 'عنوان الرسالة'],
   notes: ['notes', 'note', 'order notes', 'special requests', 'instructions', 'delivery instructions', 'remarks', 'remarques', 'remarque', 'observations', 'ملاحظات'],
   measurement: ['length', 'width', 'height', 'depth', 'thickness', 'diameter', 'radius', 'weight', 'unit weight', 'net weight', 'gross weight', 'mass', 'area', 'surface area', 'volume', 'dimensions',
     'longueur', 'largeur', 'hauteur', 'profondeur', 'épaisseur', 'diamètre', 'rayon', 'poids', 'poids unitaire', 'poids net', 'poids brut', 'masse', 'superficie', 'surface habitable', 'الطول', 'العرض', 'الارتفاع', 'العمق', 'السمك', 'القطر', 'الوزن', 'المساحة', 'الحجم'],
@@ -47,7 +47,7 @@ export const ALIASES: Record<FieldKey, readonly string[]> = {
   reference: ['reference', 'ref', 'reference number', 'ref no', 'order number', 'order no', 'order id', 'order reference', 'work order', 'purchase order', 'po number', 'invoice number', 'invoice no', 'quote number',
     'sku', 'part number', 'part no', 'item code', 'product code', 'article code', 'ticket number', 'case number', 'file number', 'tracking number', 'batch number', 'lot number', 'serial number', 'delivery note',
     'référence', 'réf', 'numéro de commande', 'n° de commande', 'no de commande', 'numéro de facture', 'n° de facture', 'numéro de devis', 'n° de devis', 'bon de commande', 'bon de livraison', 'code article', 'numéro de dossier', 'n° de dossier', 'numéro de lot', 'numéro de série', 'n° de série',
-    'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف'],
+    'رقم الطلب', 'المرجع', 'رقم المرجع', 'رقم الفاتورة', 'رقم الملف', 'numéro de client', 'numéro client', 'numéro de colis', "numéro d'abonné", 'numéro de contrat', 'n° contrat', 'n° de contrat', 'numéro de donateur', 'numéro de réservation', 'customer number', 'client number', 'رقم العميل', 'رقم الاشتراك', 'رقم العقد', 'رقم الحجز'],
   quantity: ['bedrooms', 'bathrooms', 'years', 'number of years', 'number of hours', 'hours per month', 'hours per week', 'number of days', 'quantity', 'qty', 'number of', 'nombre de', 'pieces', 'pcs', 'units', 'pièces', 'unités', 'number of guests', 'guests', 'passengers', 'attendees', 'number of attendees', 'number of people', 'travellers', 'travelers', 'pax', 'adults', 'children', 'kids', 'infants', 'rooms', 'number of rooms', 'tickets', 'number of tickets', 'seats', 'nights', 'number of nights', 'low stock threshold', 'reorder level', 'quantité', 'nombre de personnes', "nombre d'exemplaires", 'exemplaires', 'nombre de participants', 'الكمية', 'عدد الأشخاص', 'عدد المسافرين', 'عدد البالغين', 'عدد الأطفال', 'عدد الغرف', 'عدد التذاكر'],
   price: ['price', 'unit price', 'cost', 'prix', 'prix unitaire', 'tarif', 'coût', 'السعر', 'الثمن'],
   amount: ['subtotal', 'sub total', 'line total', 'declared value', 'advance', 'advance received', 'amount', 'amt', 'total', 'total amount', 'income', 'monthly income', 'annual income', 'expenses', 'monthly expenses', 'down payment', 'deposit', 'budget', 'balance', 'revenue', 'annual revenue', 'turnover',
@@ -96,7 +96,7 @@ export type SensitiveKind = 'card' | 'otp' | 'iban';
 // Sensitive fields are recognized so they can be skipped, never filled. Phrases match whole words.
 export const SENSITIVE_TERMS: Readonly<Record<SensitiveKind, readonly string[]>> = {
   card: ['card', 'credit card', 'debit card', 'card number', 'cardnumber', 'creditcard', 'cc number', 'cc num', 'ccnumber', 'card no', 'name on card', 'cardholder', 'card holder', 'card expiry', 'card expiration', 'cc exp', 'mm yy', 'mm aa', 'card pin', 'date d expiration de la carte', 'cvv', 'cvv2', 'cvc', 'cvc2', 'ccv', 'csc', 'security code', 'card verification', 'card security code', 'numéro de carte', 'numéro carte', 'carte bancaire', 'carte de crédit', 'titulaire de la carte', 'nom sur la carte', 'cryptogramme', 'cb numero', 'رقم البطاقة', 'البطاقة البنكية', 'بطاقة الائتمان', 'رمز الأمان'],
-  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'validation code', 'verify code', 'temporary code', 'reset code', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
+  otp: ['one time', 'one time code', 'code from email', 'email code', 'code sent to', 'code we emailed', 'code received', 'code recu', 'one time password', 'otp', 'verification code', 'code de vérification', 'confirmation code', 'code de confirmation', 'sms code', 'code sms', '2fa', 'two factor', 'authentication code', 'auth code', "code d'authentification", 'totp', 'passcode', 'code we sent', 'digit code', 'validation code', 'verify code', 'temporary code', 'reset code', 'activation code', "code d'activation", 'رمز التفعيل', 'رقم التفعيل', 'رمز التحقق', 'رمز التأكيد', 'كود التحقق'],
   iban: ['iban', 'bic', 'swift', 'swift code', 'rib', 'account no', 'acct no', 'acct number', 'account num', 'routing', 'aba', 'bank code', "relevé d'identité bancaire", 'bank account', 'bank account number', 'account number', 'routing number', 'sort code', 'numéro de compte', 'compte bancaire', 'code banque', 'code guichet', 'numéro ccp', 'compte ccp', 'رقم الحساب', 'الحساب البنكي', 'الحساب المصرفي'],
 };
 // "Enter code" alone names no kind of code: a one-time code unless another clue of the field names
@@ -117,7 +117,7 @@ export const DOCUMENTS: readonly string[] = ['passport', 'passeport', 'identity'
 // Glued names: ccnum, cardcvc, cardNumber written as one word, sepaiban.
 export const SENSITIVE_GLUED: Readonly<Record<SensitiveKind, RegExp>> = {
   card: /^(?:cc|card|credit|carte|cb)(?:num|number|no|cvc|cvv|csc|exp|expiry|holder|name|pin|code)|cvv|cvc|ccexp|ccnum/,
-  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|verify|vali|valid|validation|auth|reset|temp|temporary)code$/,
+  otp: /^(?:otp|totp|2fa|mfa)(?:code)?$|^(?:sms|verification|verif|verify|vali|valid|validation|auth|reset|temp|temporary|activation)code$/,
   iban: /iban|^(?:bic|swift)(?:code)?$|^(?:acct|account)(?:no|num|number)$/,
 };
 export const SENSITIVE_SECTIONS: Readonly<Record<SensitiveKind, readonly string[]>> = {

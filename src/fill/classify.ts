@@ -268,6 +268,10 @@ function namePart(el: Control, signals: readonly Signal[]): FieldKey | undefined
   return gravity && named ? NAME_PARTS[gravity[1]] : undefined;
 }
 
+// "Country code" stays out: in a box of two or three letters it is the ISO code, which a country fills.
+const CALLING_CODE_PHRASES: readonly string[] = ['dial code', 'dialing code', 'calling code', 'phone code', 'indicatif', 'indicatif pays', 'indicatif telephonique', 'رمز الاتصال', 'مفتاح الدولة', 'dialcode', 'phonecode'].map(normalize);
+const SURNAME_PHRASES: readonly string[] = ['last name', 'surname', 'family name', 'nom de famille', 'اللقب', 'اسم العائلة'].map(normalize);
+
 // address2, gb_street2, myaddr2, address_3, additional-address: a later line of the address, whose
 // visible label ("Address") belongs to the whole block.
 const LATER_LINE = /(?:address|addr|street|adresse|rue)[\s_.-]*(?:line)?[\s_.-]*[23]$|additional[\s_.-]*address|address[\s_.-]*(?:complement|supplement)/i;
@@ -291,6 +295,14 @@ function against(el: Control, type: FieldKey, signals: readonly Signal[]): Evide
   if (el instanceof HTMLTextAreaElement && !MULTILINE_TYPES.has(type)) push('type', 'textarea', 0.5);
   // "Name" over WPForms' [first] box is the group's label: the box holds one part, not the whole name.
   if (type === 'fullName' && namePart(el, signals)) push('name', el.getAttribute('name') ?? '', 0.6);
+  // "Indicatif", "Country code" in a text box asks for "+213", not a country's name: only a list of
+  // calling codes is the country.
+  const code = type === 'country' && !(el instanceof HTMLSelectElement) && signals.find(signal => TEXT_SOURCES.has(signal.source) && CALLING_CODE_PHRASES.some(phrase => contains(signal.text, phrase)));
+  if (code) push(code.source, code.raw, 0.6);
+  // A visible "Nom de famille" or "Last name" over name="Name": the field asks for the surname.
+  // The words must start the text: "First and last name" is a full name.
+  const surname = type === 'fullName' && signals.find(signal => SOURCE_GROUP[signal.source] === 'visible' && SURNAME_PHRASES.some(phrase => signal.text === phrase || signal.text.startsWith(`${phrase} `)));
+  if (surname) push(surname.source, surname.raw, 0.6);
   if (type === 'address' && isLaterAddressLine(el)) push('name', el.getAttribute('name') || el.id, 0.6);
   // A unit means a number: "Longueur (mm)" isn't a name or a city.
   const unit = unitOf(signals);
@@ -378,6 +390,8 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   const share = (pattern: RegExp) => texts.filter(text => pattern.test(text.trim())).length / texts.length;
   if (share(/^\d{1,2}[:h]\d{2}(?:\s?[ap]\.?m\.?)?$/i) >= 0.6) found.push(['time', { source: 'options', signal: 'clock times', weight: 0.7, match: 'options' }]);
   if (share(/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i) >= 0.5) found.push(['email', { source: 'options', signal: 'email addresses', weight: 0.7, match: 'options' }]);
+  // "+213", "+33 France", "Algérie (+213)": calling codes pick the country of a phone number.
+  if (share(/^\+\d{1,4}\b|\(\+\d{1,4}\)$/) >= 0.6) found.push(['country', { source: 'options', signal: 'calling codes', weight: 0.7, match: 'options' }]);
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
   if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);

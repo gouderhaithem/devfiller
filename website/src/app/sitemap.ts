@@ -5,6 +5,6 @@ import { site } from "@/lib/site";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = ["/", "/support/", "/privacy/", ...DOC_PAGES.map(docHref)];
+  const paths = ["/", "/reviews/", "/support/", "/privacy/", ...DOC_PAGES.map(docHref)];
   return paths.map((path) => ({ url: `${site.url}${path}` }));
 }

@@ -44,4 +44,22 @@ Redeploy after changing a variable. Replying to a support email answers the pers
 
 The in-code limit counts per server instance. For a firm limit, add a Vercel Firewall rate-limit rule on `/api/support` (for example 10 requests per 10 minutes per IP).
 
+## Reviews
+
+`/reviews/` and the homepage show the reviews the maintainer approved, read from [Neon](https://neon.tech) Postgres at most every five minutes. The review form posts to `/api/reviews`, which applies the support form's protections (same origin only, a hidden field, a minimum fill time, 3 reviews per address every 15 minutes) and stores the review **unapproved**. Nothing but the name, optional role, rating, review and date is stored.
+
+| Variable | Required | Value |
+| --- | --- | --- |
+| `DATABASE_URL` | Yes | The Neon connection string (`postgresql://…?sslmode=require`). Set it in Vercel for Production and Preview, and in `website/.env.local` (git-ignored) to work locally. Without it the pages show the empty state and the form answers that reviews can't be saved. |
+
+Create the table once (safe to run again): `cd website && node scripts/create-reviews-table.mjs`.
+
+Approve or remove a review in Neon's SQL editor; the site picks it up within five minutes:
+
+```sql
+SELECT id, name, role, rating, comment, created_at FROM reviews WHERE NOT approved ORDER BY created_at;
+UPDATE reviews SET approved = true WHERE id = 42;
+DELETE FROM reviews WHERE id = 43;
+```
+
 `vercel.json` skips a deploy when a commit doesn't touch the website or the files it reads.
