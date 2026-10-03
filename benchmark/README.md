@@ -270,7 +270,25 @@ collections' training forms (262 forms); the rules are unchanged.
 
 A small gain (three fewer wrong answers), and English round 4 is unchanged (91.2%). The model's
 lever on French and Arabic is nearly spent: recall there is held back by the rules (78.3%), so the
-next gains come from rule work on the training forms. This sealed set is now retired.
+next gains come from rule work on the training forms.
+
+Rule work followed, tuned on both collections' 262 training forms only: French and Arabic topic
+wording ("Thématique", "Motif de votre réclamation", "Votre demande concerne", "نوع الاقتراح",
+"عنوان الرسالة"), customer, parcel, subscriber, contract and booking numbers, lists of calling codes
+read as the country (a typed "Indicatif" box is left alone, since a country name there would be
+rejected), activation codes as one-time codes, and a visible "Nom de famille" over name="Name". The
+66 sealed forms, opened once for the model, were not looked at; measured again:
+
+| | Rules | Rules + model |
+| --- | --- | --- |
+| French and Arabic training forms, before → after | 85.2% → 86.6% | 87.0% → 87.9% |
+| **66 sealed forms, before → after** | **83.2% → 83.5%** | **84.7% → 84.9%** |
+| English round 4, before → after | 90.1% → 90.2% | 91.2% → 91.2% |
+
+Two of the first wordings broke benchmark fixtures and were taken out before the measurement: a bare
+"Motif" (a medical appointment's reason isn't a message's topic) and "N° client" (which normalises to
+"client", a company). The one sensitive field the training forms still filled, an activation code,
+no longer is. This sealed set is now retired.
 
 ## Against other form fillers
 
