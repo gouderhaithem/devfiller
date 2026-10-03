@@ -254,6 +254,24 @@ these forms are search widgets, price sliders and custom pickers, and 98 forms m
 In English, round 4 moved from 91.4% to 91.2% with the retrained model (rules unchanged at 90.1%);
 the benchmark gate shows no regressions. The sealed French and Arabic forms are now retired.
 
+### A second collection of French and Arabic forms
+
+481 more websites (French regional and professional sites, Senegal, Côte d'Ivoire, Cameroon and other
+francophone African countries, Lebanon, the Maghreb, the Gulf, Egypt, Jordan and Iraq) gave 171
+forms from 119 of them, labelled blind and split by website: 105 training forms (82 French, 23
+Arabic) and 66 sealed (48 French, 18 Arabic, 498 fields). The model was retrained with both
+collections' training forms (262 forms); the rules are unchanged.
+
+| On the 66 sealed forms | Precision | Recall | F1 |
+| --- | --- | --- | --- |
+| Rules | 88.7% | 78.3% | 83.2% |
+| Rules + model, before | 88.5% | 80.6% | 84.4% |
+| **Rules + model, retrained** | **89.3%** | 80.6% | **84.7%** |
+
+A small gain (three fewer wrong answers), and English round 4 is unchanged (91.2%). The model's
+lever on French and Arabic is nearly spent: recall there is held back by the rules (78.3%), so the
+next gains come from rule work on the training forms. This sealed set is now retired.
+
 ## Against other form fillers
 
 `node scripts/model/run.mjs compare <out.json> <folders…>` runs DevFiller's shipped engine and other fillers' Chrome extensions on the same labelled pages,
