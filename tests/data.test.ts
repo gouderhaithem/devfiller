@@ -24,6 +24,11 @@ describe('generation and upgrade defaults',()=>{
       expect(uuid).not.toHaveBeenCalled();
     } finally {uuid.mockRestore();}
   });
+  it('turns learned guesses on, unless they were saved off',()=>{
+    expect(defaults.modelGuesses).toBe(true);
+    expect(validateSettings({version:3,locale:'en',overwrite:true,fillUnknown:true,passwords:false,custom:[]}).modelGuesses).toBe(true);
+    expect(validateSettings({...defaults,modelGuesses:false}).modelGuesses).toBe(false);
+  });
   it('upgrades previously saved settings to refill all editable fields',()=>{
     const upgraded=validateSettings({locale:'fr',overwrite:false,fillUnknown:false,passwords:true,custom:[]});
     expect(upgraded).toMatchObject({version:3,locale:'fr',overwrite:true,fillUnknown:true,passwords:true});

@@ -108,6 +108,7 @@ Open the settings button at the top of Options to control:
 
 - **Replace existing values** — on by default. Turn it off to preserve populated fields.
 - **Fill unknown fields** — on by default. Uses readable fallback values even when the website’s custom validation rejects them.
+- **Learned guesses** — on by default. When the rules aren’t sure what a field is, a small model built into the extension suggests a type. It runs offline, and its guesses are marked in the field list.
 - **Generate test passwords** — off by default. When enabled, password and confirmation fields share a generated value per fill.
 
 ### Custom fields

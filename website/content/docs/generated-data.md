@@ -10,6 +10,7 @@ Open the settings button at the top of the options page:
 | --- | --- | --- |
 | Replace existing values | On | Fills fields that already have a value. Turn it off to keep what's there. |
 | Fill unknown fields | On | Fills fields DevFiller doesn't recognize with readable words or sentences, even if the site's own validation might reject them. |
+| Learned guesses | On | When the rules aren't sure what a field is, a small model built into the extension suggests a type. It runs offline, and the side panel marks its guesses. |
 | Generate test passwords | Off | Fills password fields. The password and its confirmation get the same value. |
 | Addresses and phones | Mixed | Where cities, postal codes, districts, countries and phone numbers come from: **United States**, **France** or **Algeria**, or **Mixed** to pick one of them for each fill. |
 | Repeatable data | Empty | Type a seed, such as `checkout-test`, to get exactly the same values on every fill. Leave it empty for fresh data on every click. |
