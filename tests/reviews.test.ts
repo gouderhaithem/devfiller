@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { REVIEW_LIMITS, summarize, validateReview } from '../website/src/lib/reviews';
+import { REVIEW_LIMITS, avatarTone, displayName, distribution, initials, summarize, validateReview } from '../website/src/lib/reviews';
 import { createReviewHandler, type ReviewDeps } from '../website/src/lib/review-handler';
 
 const valid = { name: 'Amina Test', role: 'QA engineer', rating: 5, comment: 'Filled our whole sign-up form in one click.', leave_empty: '', elapsedMs: 8000 };
@@ -29,6 +29,28 @@ describe('review validation', () => {
   it('removes invisible control and text-direction characters from the name and role', () => {
     const result = validateReview({ ...valid, name: 'Amina‮​ Test', role: 'QA\r\nlead' });
     expect(result.ok && [result.value.name, result.value.role]).toEqual(['Amina Test', 'QA lead']);
+  });
+});
+
+describe('review presentation', () => {
+  it('shows names with capitals, without changing what was typed otherwise', () => {
+    expect(displayName('islam mohamed')).toBe('Islam Mohamed');
+    expect(displayName('Jean-luc O\'neil')).toBe('Jean-luc O\'neil');
+    expect(displayName('محمد أمين')).toBe('محمد أمين');
+  });
+  it('makes initials from the first and last word, in any script', () => {
+    expect(initials('islam mohamed')).toBe('IM');
+    expect(initials('Amina')).toBe('A');
+    expect(initials('Jean Paul de la Tour')).toBe('JT');
+    expect(initials('محمد أمين')).toBe('مأ');
+    expect(initials('  ')).toBe('?');
+  });
+  it('gives the same name the same avatar colour every time', () => {
+    expect(avatarTone('Islam Mohamed')).toBe(avatarTone('islam mohamed'));
+    expect(new Set(['Amina', 'Yacine', 'Lea', 'Omar', 'Sara', 'Karim'].map(avatarTone)).size).toBeGreaterThan(2);
+  });
+  it('counts reviews per star, five first', () => {
+    expect(distribution([{ rating: 5 }, { rating: 5 }, { rating: 3 }])).toEqual([{ stars: 5, count: 2 }, { stars: 4, count: 0 }, { stars: 3, count: 1 }, { stars: 2, count: 0 }, { stars: 1, count: 0 }]);
   });
 });
 
