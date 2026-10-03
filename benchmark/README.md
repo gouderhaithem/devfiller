@@ -254,6 +254,40 @@ these forms are search widgets, price sliders and custom pickers, and 98 forms m
 In English, round 4 moved from 91.4% to 91.2% with the retrained model (rules unchanged at 90.1%);
 the benchmark gate shows no regressions. The sealed French and Arabic forms are now retired.
 
+## Against other form fillers
+
+`node scripts/model/run.mjs compare <out.json> <folders…>` runs DevFiller's shipped engine and other fillers' Chrome extensions on the same labelled pages,
+served over local http with every other request blocked, and scores every tool the same way: by the
+value it leaves in each field. A value that fits the field's label (a valid email, digits for a
+phone, a real option in a select, a date, words of a name, and never lorem ipsum where a name, a
+city, a company or a topic is asked) is right; any other value is wrong; an untouched field is
+missed. Card, code and bank fields filled with anything but a test value are leaks. Each extension
+is triggered the way its "fill the page" shortcut does it; Fake Filler, which works through the
+active-tab permission a click grants, gets that page access from its manifest instead.
+
+3 October 2026, on the 498 sealed pages of rounds 6 and 7 and the French and Arabic set (2,536
+labelled fields; DevFiller was measured on them before, never tuned on them):
+
+| | Right | Wrong | Missed | Sensitive fields leaked |
+| --- | --- | --- | --- | --- |
+| **DevFiller 1.1** (default settings) | **93.5%** | **1.9%** | 4.6% | **1** |
+| DevFiller 1.1 with learned guesses | 93.5% | 1.4% | 5.1% | 1 |
+| Fake Filler 4.1.0 (about 400,000 users) | 87.5% | 9.9% | 2.6% | 15 |
+| Fake Data 4.10 | 68.3% | 11.1% | 20.6% | 14 |
+
+| Right / wrong | Round 6 (English) | Round 7 (English) | French and Arabic |
+| --- | --- | --- | --- |
+| DevFiller | 95.1% / 0.9% | 95.4% / 2.2% | 86.5% / 3.4% |
+| Fake Filler | 90.3% / 7.1% | 89.6% / 8.6% | 77.4% / 18.3% |
+| Fake Data | 70.6% / 8.3% | 68.5% / 9.4% | 63.1% / 20.4% |
+
+Fake Filler fills nearly every field and gets the common ones right; a field it doesn't recognise
+gets lorem ipsum ("Dolor facilis totam" as a first name, "Sapiente porro odit" as a phone). Its
+leaks are random values in card, code and bank fields. DevFiller's one leak is a Chinese
+verification code. The labels follow this guide, which shares DevFiller's types; scoring the values
+rather than the types keeps that from favouring it, but the value checks test a value's shape, not
+its meaning.
+
 ## The gate
 
 A run fails when a sensitive field is filled, a form is submitted, a network request is made,
@@ -270,6 +304,8 @@ against harm; the sealed Form Lab set measures the gain.
 Since 1 October 2026 the model is off by default (the "Learned guesses" setting): on 200 hand-labelled
 real forms it added only 0.7 F1 and cost 1.8 points of precision, so the baseline is the rules alone
 again. The reviews below apply when it is switched on.
+
+Since 3 October 2026 the extension turns learned guesses on by default: on the sealed real forms the rules have caught up enough that the model no longer costs precision (round 6: 95.0% with and without it; French and Arabic: 86.9% → 87.2%), and in the filler comparison below it leaves fewer wrong values (1.9% → 1.4% of fields). The engine's API, and so this benchmark's baseline, still asks for it explicitly.
 
 Reviewed model changes (model v1, 1 October 2026; rules alone 41 mistakes, with the model 21):
 
