@@ -196,7 +196,7 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Reviews</h2>
           <p className="mt-4 max-w-2xl text-ink-soft">What developers and testers say after using DevFiller on their own forms.</p>
-          <ReviewsSection reviews={reviews} limit={3} />
+          <ReviewsSection reviews={reviews} limit={4} />
         </div>
       </section>
 

@@ -49,3 +49,31 @@ export function summarize(reviews: readonly Pick<Review, "rating">[]): { count: 
   const total = reviews.reduce((sum, review) => sum + review.rating, 0);
   return { count: reviews.length, average: Math.round((total / reviews.length) * 10) / 10 };
 }
+
+// Presentation: a name with capitals ("islam mohamed" → "Islam Mohamed"), leaving the rest of each
+// word as typed; scripts without case (Arabic) are unchanged.
+export function displayName(name: string): string {
+  return name.replace(/(^|\s)(\p{Ll})/gu, (_, before: string, letter: string) => before + letter.toLocaleUpperCase());
+}
+
+// The avatar's letters: the first letters of the first and last words.
+export function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  const first = Array.from(words[0])[0];
+  const last = words.length > 1 ? Array.from(words[words.length - 1])[0] : "";
+  return (first + last).toLocaleUpperCase();
+}
+
+// The avatar's colour, always the same for a name: one of the site's tones.
+export const AVATAR_TONES = ["from-tile-light to-tile-deep", "from-emerald-400 to-teal-600", "from-amber-400 to-orange-500", "from-violet-400 to-indigo-600", "from-rose-400 to-pink-600", "from-sky-400 to-blue-600"] as const;
+export function avatarTone(name: string): (typeof AVATAR_TONES)[number] {
+  let hash = 0;
+  for (const char of name.trim().toLowerCase()) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
+  return AVATAR_TONES[hash % AVATAR_TONES.length];
+}
+
+// How many reviews gave each number of stars, five first.
+export function distribution(reviews: readonly Pick<Review, "rating">[]): { stars: number; count: number }[] {
+  return [5, 4, 3, 2, 1].map((stars) => ({ stars, count: reviews.filter((review) => review.rating === stars).length }));
+}
