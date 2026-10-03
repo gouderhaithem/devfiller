@@ -1,6 +1,6 @@
 # DevFiller Privacy Policy
 
-_Last updated: 30 September 2026_
+_Last updated: 3 October 2026_
 
 DevFiller is a Chrome extension that fills website forms with generated, fictional test data. This policy explains what data DevFiller handles, where it goes, and what it never does.
 
@@ -65,6 +65,10 @@ Website authors write the field labels and placeholders, so they may mention som
 ## The website's support form
 
 The extension never uses this form. If you write in through <https://www.devfiller.com/support/>, your name, email address, topic, message and the optional page address are sent by email to the maintainer through [Resend](https://resend.com), an email delivery service, so the maintainer can reply. The website doesn't store the message. The emails are kept only as long as needed to answer you, and you can ask for yours to be deleted.
+
+## The website's reviews
+
+The extension never uses this either. If you write a review at <https://www.devfiller.com/reviews/>, the name, optional role, star rating and review you type are stored in a database run by [Neon](https://neon.tech), with the date. A review is shown publicly on the website, with your name and role, only after the maintainer approves it. Nothing else is stored with it: no email address, IP address or account. To have your review corrected or removed, use the support form.
 
 ## Changes and contact
 

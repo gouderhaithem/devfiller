@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { FillDemo } from "@/components/FillDemo";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { Roadmap } from "@/components/Roadmap";
+import { listApprovedReviews } from "@/lib/reviews-db";
 import { installHref, installLabel } from "@/lib/site";
 
 const FILLS = [
@@ -11,12 +13,12 @@ const FILLS = [
   ["Numbers and dates", "Quantities, prices, ratings, dates and times, within the field's limits; end dates after start dates"],
   ["Measurements and codes", "Lengths, weights and thicknesses sized for their unit, order and invoice numbers that look real"],
   ["Text", "Readable words and short sentences, never random strings"],
+  ["Sensitive fields", "Values anyone can tell are tests: the 4242 test card, codes of 4s, a test IBAN, consent boxes ticked"],
 ];
 
 const LEAVES = [
   "Passwords, unless you turn test passwords on",
-  "Card and bank details, and one-time codes",
-  "Consent, terms, newsletter and data-sharing checkboxes, and \"Remember me\"",
+  "Card, bank and code fields, if you choose to leave them empty",
   "File uploads, hidden, disabled and read-only fields",
   "Search boxes and navigation controls",
   "Any field you exclude, on every site or just one",
@@ -36,7 +38,11 @@ const PANEL_POINTS = [
   ["Undo last fill", "Restore the previous values, keeping anything you edited since."],
 ];
 
-export default function Home() {
+// The latest approved reviews are read again at most every five minutes.
+export const revalidate = 300;
+
+export default async function Home() {
+  const reviews = await listApprovedReviews();
   return (
     <main>
       <section className="bg-tile text-paper">
@@ -158,6 +164,14 @@ export default function Home() {
               Read the privacy policy
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section id="reviews" className="scroll-mt-20 border-t border-mist">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Reviews</h2>
+          <p className="mt-4 max-w-2xl text-ink-soft">What developers and testers say after using DevFiller on their own forms.</p>
+          <ReviewsSection reviews={reviews} limit={3} />
         </div>
       </section>
 

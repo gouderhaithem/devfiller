@@ -1,0 +1,91 @@
+import { describe, expect, it, vi } from 'vitest';
+import { REVIEW_LIMITS, summarize, validateReview } from '../website/src/lib/reviews';
+import { createReviewHandler, type ReviewDeps } from '../website/src/lib/review-handler';
+
+const valid = { name: 'Amina Test', role: 'QA engineer', rating: 5, comment: 'Filled our whole sign-up form in one click.', leave_empty: '', elapsedMs: 8000 };
+
+describe('review validation', () => {
+  it('accepts a complete review and trims it', () => {
+    expect(validateReview({ ...valid, name: '  Amina Test  ', comment: `  ${valid.comment}  ` })).toEqual({ ok: true, value: { name: 'Amina Test', role: 'QA engineer', rating: 5, comment: valid.comment } });
+  });
+  it('keeps the role optional', () => {
+    expect(validateReview({ ...valid, role: '' })).toMatchObject({ ok: true, value: { role: undefined } });
+  });
+  it('names every field that is missing or wrong', () => {
+    const result = validateReview({ name: '', rating: 7, comment: 'ok' });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(Object.keys(result.errors).sort()).toEqual(['comment', 'name', 'rating']);
+  });
+  it.each([0, 6, 3.5, '5', null])('accepts only a whole rating from 1 to 5, not %s', rating => {
+    expect(validateReview({ ...valid, rating }).ok).toBe(false);
+  });
+  it('rejects values over the limits and never trusts a non-object body', () => {
+    const long = validateReview({ ...valid, name: 'n'.repeat(REVIEW_LIMITS.name + 1), role: 'r'.repeat(REVIEW_LIMITS.role + 1), comment: 'c'.repeat(REVIEW_LIMITS.comment + 1) });
+    expect(long.ok).toBe(false);
+    if (!long.ok) expect(Object.keys(long.errors).sort()).toEqual(['comment', 'name', 'role']);
+    expect(validateReview(null).ok).toBe(false);
+    expect(validateReview('text').ok).toBe(false);
+  });
+  it('removes invisible control and text-direction characters from the name and role', () => {
+    const result = validateReview({ ...valid, name: 'Amina‮​ Test', role: 'QA\r\nlead' });
+    expect(result.ok && [result.value.name, result.value.role]).toEqual(['Amina Test', 'QA lead']);
+  });
+});
+
+describe('review summary', () => {
+  it('averages the ratings to one decimal and counts them', () => {
+    expect(summarize([{ rating: 5 }, { rating: 4 }, { rating: 4 }])).toEqual({ count: 3, average: 4.3 });
+  });
+  it('has no average when there are no reviews', () => {
+    expect(summarize([])).toEqual({ count: 0, average: null });
+  });
+});
+
+const deps = (over: Partial<ReviewDeps> = {}): ReviewDeps => ({
+  insert: vi.fn(async () => {}), allow: () => true, now: () => 1_000_000, log: vi.fn(), ...over,
+});
+const post = (body: unknown, headers: Record<string, string> = {}) => new Request('https://www.devfiller.com/api/reviews/', {
+  method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body),
+  headers: { origin: 'https://www.devfiller.com', host: 'www.devfiller.com', 'content-type': 'application/json', ...headers },
+});
+
+describe('review endpoint', () => {
+  it('stores a valid review for approval and says so', async () => {
+    const d = deps();
+    const response = await createReviewHandler(d)(post(valid));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ success: true, data: { received: true }, error: null });
+    expect(d.insert).toHaveBeenCalledWith({ name: 'Amina Test', role: 'QA engineer', rating: 5, comment: valid.comment });
+  });
+  it('explains what to fix when fields are invalid, without storing', async () => {
+    const d = deps();
+    const response = await createReviewHandler(d)(post({ ...valid, rating: 9 }));
+    expect(response.status).toBe(400);
+    expect((await response.json()).errors).toHaveProperty('rating');
+    expect(d.insert).not.toHaveBeenCalled();
+  });
+  it('pretends to accept bots (filled honeypot or instant submit) but stores nothing', async () => {
+    const d = deps();
+    for (const bot of [{ ...valid, leave_empty: 'http://spam.example' }, { ...valid, elapsedMs: 300 }]) expect((await createReviewHandler(d)(post(bot))).status).toBe(200);
+    expect(d.insert).not.toHaveBeenCalled();
+  });
+  it('refuses other sites, other content types and broken JSON', async () => {
+    const handler = createReviewHandler(deps());
+    expect((await handler(post(valid, { origin: 'https://evil.example' }))).status).toBe(403);
+    expect((await handler(post(valid, { 'content-type': 'text/plain' }))).status).toBe(415);
+    expect((await handler(post('{not json'))).status).toBe(400);
+  });
+  it('limits each address and says when to try again', async () => {
+    const response = await createReviewHandler(deps({ allow: () => false }))(post(valid));
+    expect(response.status).toBe(429);
+    expect(response.headers.get('retry-after')).toBeTruthy();
+  });
+  it('fails politely when the database is missing or down, and never leaks its error', async () => {
+    const down = deps({ insert: vi.fn(async () => { throw new Error('password authentication failed for user app_owner'); }) });
+    const response = await createReviewHandler(down)(post(valid));
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(JSON.stringify(body)).not.toContain('app_owner');
+    expect(down.log).toHaveBeenCalled();
+  });
+});

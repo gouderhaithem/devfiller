@@ -37,7 +37,7 @@ const accepted = () => reply(200, { success: true, data: { sent: true }, error: 
 
 // Same-origin only: the form on this site may post, other sites may not. The host is the one the
 // browser reached (Vercel's proxy passes it as x-forwarded-host); request.url can be internal.
-function sameOrigin(request: Request): boolean {
+export function sameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return false;
   try {
@@ -59,7 +59,7 @@ export function clientKey(request: Request): string {
   return `${full.join(":")}::/64`;
 }
 
-async function readJson(request: Request): Promise<{ body?: unknown; status?: number }> {
+export async function readJson(request: Request): Promise<{ body?: unknown; status?: number }> {
   const declared = Number(request.headers.get("content-length") || 0);
   if (declared > MAX_BODY_BYTES) return { status: 413 };
   const raw = await request.text();
