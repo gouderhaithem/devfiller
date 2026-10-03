@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { listApprovedReviews } from "@/lib/reviews-db";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Reviews",
-  description: "What developers and testers say about DevFiller, and a form to write your own review.",
-};
+  description: "What developers and QA testers say about DevFiller, the free form filler Chrome extension, and a form to write your own review.",
+  path: "/reviews/",
+});
 
 // Approved reviews are read again at most every five minutes.
 export const revalidate = 300;

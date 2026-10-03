@@ -2,12 +2,16 @@ import Link from "next/link";
 import { Markdown } from "./Markdown";
 import { docHref, loadDoc, neighbours, type DocPage } from "@/lib/docs";
 import { site } from "@/lib/site";
+import { JsonLd } from "./JsonLd";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
 export async function DocArticle({ page }: { page: DocPage }) {
   const markdown = await loadDoc(page);
   const { previous, next } = neighbours(page);
   return (
     <article>
+      <JsonLd data={breadcrumbJsonLd([{ name: "Docs", path: "/docs/" }, ...(page.slug ? [{ name: page.title, path: docHref(page) }] : [])])} />
+      <JsonLd data={articleJsonLd({ title: page.title, description: page.description, path: docHref(page) })} />
       <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{page.title}</h1>
       <p className="mt-3 max-w-2xl text-lg text-ink-soft">{page.description}</p>
       <div className="mt-10">

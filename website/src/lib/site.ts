@@ -2,7 +2,7 @@ export const site = {
   name: "DevFiller",
   url: "https://www.devfiller.com",
   description:
-    "DevFiller fills the form on the page you're testing with realistic, fictional data in one click. Free Chrome extension for developers and testers.",
+    "Free Chrome extension that fills any web form with realistic test data in one click: names, emails, addresses, dates and more, in English, French and Arabic. Built for developers and QA testers.",
   repo: "https://github.com/gouderhaithem/devfiller",
   issues: "https://github.com/gouderhaithem/devfiller/issues",
   author: { name: "Haithem Gouder", url: "https://github.com/gouderhaithem" },

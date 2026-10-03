@@ -10,16 +10,18 @@ const instrument = Instrument_Sans({ subsets: ["latin"], variable: "--font-instr
 const arabic = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500", "600"], variable: "--font-arabic" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono" });
 
+// Every page sets its own canonical URL and share card (lib/seo.ts); the share image comes from
+// opengraph-image.tsx.
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: "DevFiller: fill forms with test data in one click", template: "%s | DevFiller" },
+  title: { default: "DevFiller: free form filler Chrome extension for test data", template: "%s | DevFiller" },
   description: site.description,
-  openGraph: {
-    type: "website",
-    siteName: site.name,
-    url: site.url,
-    images: [{ url: "/generated/side-panel.jpg", width: 1280, height: 800 }],
-  },
+  applicationName: site.name,
+  authors: [{ name: site.author.name, url: site.author.url }],
+  creator: site.author.name,
+  keywords: ["form filler", "Chrome extension", "test data", "fake data generator", "autofill forms", "QA testing", "web form testing", "dummy data"],
+  openGraph: { type: "website", siteName: site.name, url: "/" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

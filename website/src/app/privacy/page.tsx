@@ -2,11 +2,13 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Metadata } from "next";
 import { Markdown } from "@/components/Markdown";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Privacy policy",
   description: "What DevFiller stores on your device, what it sends when AI is on, and what it never does.",
-};
+  path: "/privacy/",
+});
 
 export default async function PrivacyPage() {
   // PRIVACY.md at the repository root is the single source for the store listing and this page.
