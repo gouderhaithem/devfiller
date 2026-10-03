@@ -4,7 +4,7 @@ import { summarize, type Review } from "@/lib/reviews";
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
-// The reviews people approved for the site: their average, then the reviews themselves, or an
+// The published reviews: their average, then the reviews themselves, or, with none yet, an
 // invitation to write the first one.
 export function ReviewsSection({ reviews, limit, writeHref = "/reviews/#write" }: { reviews: readonly Review[]; limit?: number; writeHref?: string }) {
   const { count, average } = summarize(reviews);

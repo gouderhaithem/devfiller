@@ -11,8 +11,8 @@ const client = () => {
   return url ? neon(url) : undefined;
 };
 
-// The approved reviews, newest first. Without a database, or when it can't be reached, the site
-// shows its empty state rather than failing.
+// The published reviews (approved, the default), newest first. Without a database, or when it can't
+// be reached, the site shows its empty state rather than failing.
 export async function listApprovedReviews(limit = 50): Promise<Review[]> {
   const sql = client();
   if (!sql) return [];
@@ -25,9 +25,9 @@ export async function listApprovedReviews(limit = 50): Promise<Review[]> {
   }
 }
 
-// Stores a review unapproved: it appears once the maintainer approves it.
+// Stores a review, published at once; the maintainer can hide it with approved = false.
 export async function insertReview(review: ReviewInput): Promise<void> {
   const sql = client();
   if (!sql) throw new Error("DATABASE_URL is not set");
-  await sql`INSERT INTO reviews (name, role, rating, comment) VALUES (${review.name}, ${review.role ?? null}, ${review.rating}, ${review.comment})`;
+  await sql`INSERT INTO reviews (name, role, rating, comment, approved) VALUES (${review.name}, ${review.role ?? null}, ${review.rating}, ${review.comment}, true)`;
 }

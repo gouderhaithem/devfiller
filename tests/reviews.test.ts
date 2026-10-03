@@ -42,7 +42,7 @@ describe('review summary', () => {
 });
 
 const deps = (over: Partial<ReviewDeps> = {}): ReviewDeps => ({
-  insert: vi.fn(async () => {}), allow: () => true, now: () => 1_000_000, log: vi.fn(), ...over,
+  insert: vi.fn(async () => {}), published: vi.fn(), allow: () => true, now: () => 1_000_000, log: vi.fn(), ...over,
 });
 const post = (body: unknown, headers: Record<string, string> = {}) => new Request('https://www.devfiller.com/api/reviews/', {
   method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body),
@@ -50,12 +50,19 @@ const post = (body: unknown, headers: Record<string, string> = {}) => new Reques
 });
 
 describe('review endpoint', () => {
-  it('stores a valid review for approval and says so', async () => {
+  it('publishes a valid review and refreshes the pages that show it', async () => {
     const d = deps();
     const response = await createReviewHandler(d)(post(valid));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true, data: { received: true }, error: null });
     expect(d.insert).toHaveBeenCalledWith({ name: 'Amina Test', role: 'QA engineer', rating: 5, comment: valid.comment });
+    expect(d.published).toHaveBeenCalledTimes(1);
+  });
+  it('refreshes nothing when the review was not stored', async () => {
+    const d = deps({ insert: vi.fn(async () => { throw new Error('down'); }) });
+    await createReviewHandler(d)(post(valid));
+    await createReviewHandler(d)(post({ ...valid, leave_empty: 'bot' }));
+    expect(d.published).not.toHaveBeenCalled();
   });
   it('explains what to fix when fields are invalid, without storing', async () => {
     const d = deps();

@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [SITE_CARD] },
 };
 
-// The latest approved reviews are read again at most every five minutes.
+// Reviews are read again at most every five minutes, and at once when one is sent.
 export const revalidate = 300;
 
 export default async function Home() {

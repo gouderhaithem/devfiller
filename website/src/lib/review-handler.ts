@@ -2,11 +2,13 @@ import { validateReview, type ReviewErrors, type ReviewInput } from "./reviews";
 import { clientKey, readJson, sameOrigin } from "./support-handler";
 
 // The /api/reviews endpoint, written against plain Request and Response so it can be tested
-// without a server or a database. route.ts wires it to Neon. A review is stored unapproved and
-// appears on the site only once the maintainer approves it.
+// without a server or a database. route.ts wires it to Neon. A review is published as soon as it is
+// stored; the maintainer can hide one by setting approved = false.
 
 export interface ReviewDeps {
   insert: (review: ReviewInput) => Promise<void>;
+  // Refreshes the pages that list reviews, once one is stored.
+  published: () => void;
   allow: (key: string, now: number) => boolean;
   now: () => number;
   log: (message: string, detail?: unknown) => void;
@@ -54,6 +56,7 @@ export function createReviewHandler(deps: ReviewDeps) {
       deps.log("Review could not be stored", error);
       return failure(503, "Reviews can't be saved right now. Please try again later.");
     }
+    deps.published();
     return received();
   };
 }
