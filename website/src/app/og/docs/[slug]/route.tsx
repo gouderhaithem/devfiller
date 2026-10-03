@@ -11,5 +11,5 @@ export function generateStaticParams() {
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const page = findDoc((await params).slug);
-  return ogCard({ title: page?.title ?? "Documentation", subtitle: page?.description ?? "How DevFiller fills forms with test data." });
+  return ogCard({ eyebrow: "Docs", title: page?.title ?? "Documentation", subtitle: page?.description ?? "How DevFiller fills forms with test data." });
 }
