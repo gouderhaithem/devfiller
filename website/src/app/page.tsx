@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { FillDemo } from "@/components/FillDemo";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { Roadmap } from "@/components/Roadmap";
 import { listApprovedReviews } from "@/lib/reviews-db";
+import { summarize } from "@/lib/reviews";
+import { SITE_CARD, appJsonLd, faqJsonLd, siteJsonLd } from "@/lib/seo";
 import { installHref, installLabel } from "@/lib/site";
 
 const FILLS = [
@@ -31,12 +35,30 @@ const HOW_IT_WORKS = [
   ["Fit the page", "Values follow the field's rules, and a value the site rejects is written another way."],
 ];
 
+// Plain answers to what people ask before installing; also published as FAQ structured data.
+const FAQ = [
+  { question: "Is DevFiller free?", answer: "Yes. DevFiller is a free Chrome extension, open source under the MIT license, with no account, no subscription and no usage limit." },
+  { question: "Does DevFiller submit the form?", answer: "No. It fills the fields and stops, so you can check the values and submit the form yourself when you're ready." },
+  { question: "What test data does it generate?", answer: "Realistic, fictional data for 46 field types: names, usernames, emails at example.com, phone numbers, addresses from one country (the United States, France or Algeria), companies, job titles, dates, numbers and messages. The username and email match the name, and confirmation fields repeat what they confirm." },
+  { question: "Does it work with React, Vue and Angular forms?", answer: "Yes. DevFiller sets each value the way frameworks notice a person typing, and it also fills custom switches, checkboxes, dropdowns and rich-text editors built with ARIA roles." },
+  { question: "Does it recognize French and Arabic forms?", answer: "Yes. It reads labels in English, French and Arabic, generates data in any of the three languages, and knows Algeria's 69 wilayas and its communes." },
+  { question: "What about passwords, credit cards and one-time codes?", answer: "Card fields get sandbox test cards such as 4242 4242 4242 4242, one-time codes get 444444 and bank fields a test IBAN, so anyone can tell they are tests. Password fields stay empty unless you turn on test passwords, and you can exclude any field." },
+  { question: "Does DevFiller send my data anywhere?", answer: "No. There is no DevFiller server, account or analytics, and settings stay in your browser. Only if you turn on AI suggestions with your own Groq or Gemini key are field descriptions (labels, names, placeholders) sent to that provider." },
+  { question: "How accurate is it?", answer: "On about 500 real-world forms from public websites (2,500 hand-labelled fields in English, French and Arabic), DevFiller filled 93.5% of the fields with a value that fits them and got 1.9% wrong." },
+];
+
 const PANEL_POINTS = [
   ["Every field, with a reason", "Filled, skipped, or incompatible, and why."],
   ["What each field was recognized as", "Its type, how sure DevFiller is, and the clues behind it."],
   ["Fix one field", "Set its type, save a custom value, or exclude it for this website."],
   ["Undo last fill", "Restore the previous values, keeping anything you edited since."],
 ];
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/", images: [{ url: SITE_CARD, width: 1200, height: 630, alt: "DevFiller: fill any form with realistic test data in one click" }] },
+  twitter: { card: "summary_large_image", images: [SITE_CARD] },
+};
 
 // The latest approved reviews are read again at most every five minutes.
 export const revalidate = 300;
@@ -45,6 +67,9 @@ export default async function Home() {
   const reviews = await listApprovedReviews();
   return (
     <main>
+      <JsonLd data={appJsonLd(summarize(reviews))} />
+      <JsonLd data={siteJsonLd()} />
+      <JsonLd data={faqJsonLd(FAQ)} />
       <section className="bg-tile text-paper">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:py-24">
           <div>
@@ -172,6 +197,25 @@ export default async function Home() {
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Reviews</h2>
           <p className="mt-4 max-w-2xl text-ink-soft">What developers and testers say after using DevFiller on their own forms.</p>
           <ReviewsSection reviews={reviews} limit={3} />
+        </div>
+      </section>
+
+      <section id="faq" className="scroll-mt-20 border-t border-mist bg-ivory">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Questions about DevFiller</h2>
+          <div className="mt-8 divide-y divide-mist border-y border-mist">
+            {FAQ.map((item) => (
+              <details key={item.question} className="group py-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-medium">
+                  {item.question}
+                  <span aria-hidden="true" className="text-2xl leading-none text-ink-soft transition-transform group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 max-w-3xl text-ink-soft">{item.answer}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 

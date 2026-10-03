@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SupportForm } from "@/components/SupportForm";
+import { pageMeta } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Support",
   description: "Ask a question, report a problem or suggest an idea. DevFiller's maintainer replies by email.",
-};
+  path: "/support/",
+});
 
 const SELF_HELP = [
   { href: "/docs/limits/", title: "Limits and troubleshooting", text: "Pages DevFiller can't fill, and what to try first." },
