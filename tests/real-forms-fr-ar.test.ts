@@ -54,3 +54,52 @@ describe('"الاسم" and "Name"', () => {
     expect(typeOf('#n')).toBe('fullName');
   });
 });
+
+// From the second collection of French and Arabic forms (3 October 2026).
+describe('more French and Arabic wording', () => {
+  const choices = (label: string) => `<label for="f">${label}</label><select id="f" name="f_9"><option value="">--</option><option>Facturation</option><option>Livraison</option><option>Autre</option></select>`;
+  it.each(['Thématique', 'Motif de votre réclamation', 'Nature de la réclamation', 'Votre demande concerne', 'نوع الرسالة', 'نوع الاقتراح'])('reads a select labelled "%s" as the subject', label => {
+    document.body.innerHTML = `<form>${choices(label)}</form>`;
+    expect(typeOf('#f')).toBe('subject');
+  });
+  it('reads "عنوان الرسالة" (the message\'s title) as the subject', () => {
+    document.body.innerHTML = `<form><label for="f">عنوان الرسالة</label><input id="f" name="msg_title"></form>`;
+    expect(typeOf('#f')).toBe('subject');
+  });
+  it.each(['Numéro de client', 'Numéro de colis', "Votre numéro d'abonné", 'N° Contrat', 'Numéro de donateur', 'رقم العميل', 'رقم الاشتراك'])('reads "%s" as a reference', label => {
+    document.body.innerHTML = `<form><label for="f">${label}</label><input id="f" name="ref_9"></form>`;
+    expect(typeOf('#f')).toBe('reference');
+  });
+  it.each([
+    ['<select id="f" name="dialcode"><option>+966</option><option>+973</option><option>+213</option><option>+212</option><option>+33</option></select>', 'a dial-code select'],
+    ['<label for="f">رمز الاتصال</label><select id="f" name="code"><option>+966</option><option>+971</option><option>+20</option><option>+962</option></select>', '"رمز الاتصال"'],
+  ])('reads %s as the country', field => {
+    document.body.innerHTML = `<form>${field}</form>`;
+    expect(typeOf('#f')).toBe('country');
+  });
+  it('keeps a typed "Indicatif" box away from a country name, which the site would reject', () => {
+    document.body.innerHTML = `<form><label for="f">Indicatif</label><input id="f" name="ind" placeholder="+213"></form>`;
+    expect(typeOf('#f')).not.toBe('country');
+  });
+  it('reads a visible "Nom de famille" over name="Name" as the last name', () => {
+    document.body.innerHTML = `<form><input id="f" type="text" name="Name" placeholder="Nom de famille"></form>`;
+    expect(typeOf('#f')).toBe('lastName');
+  });
+  it.each(['<label for="f">Code d\'activation</label><input id="f" name="act">', '<input id="f" type="password" name="QATextActivationCode">', '<label for="f">رمز التفعيل</label><input id="f" name="code">'])('reads %s as a one-time code', field => {
+    document.body.innerHTML = `<form>${field}</form>`;
+    expect(typeOf('#f')).toBe('skip:otp');
+  });
+  it('keeps a field named "client" the client\'s company, not a client number', () => {
+    document.body.innerHTML = `<form><label for="f">Client</label><input id="f" name="client"></form>`;
+    expect(typeOf('#f')).not.toBe('reference');
+  });
+  it('keeps the reason for a medical appointment, and a reason typed at length, out of topics', () => {
+    document.body.innerHTML = `<form><label for="f">Motif</label><select id="f" name="motif"><option>Consultation</option><option>Renouvellement d'ordonnance</option><option>Vaccination</option></select><label for="t">Motif de la demande</label><textarea id="t" name="field_17"></textarea></form>`;
+    expect(typeOf('#f')).not.toBe('subject');
+    expect(typeOf('#t')).not.toBe('subject');
+  });
+  it.each(['Catégorie de produit', 'Code postal'])('leaves "%s" to its own reading', label => {
+    document.body.innerHTML = `<form>${choices(label)}</form>`;
+    expect(typeOf('#f')).not.toBe('subject');
+  });
+});
