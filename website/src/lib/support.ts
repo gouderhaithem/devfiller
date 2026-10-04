@@ -5,7 +5,7 @@ export const TOPICS = [
   { value: "bug", label: "Something doesn’t work" },
   { value: "wrong-field", label: "A field was filled wrong" },
   { value: "feature", label: "Feature idea" },
-  { value: "install", label: "Installing or the Chrome Web Store" },
+  { value: "install", label: "Installing, or the extension stores" },
   { value: "privacy", label: "Privacy or my data" },
   { value: "other", label: "Something else" },
 ] as const;

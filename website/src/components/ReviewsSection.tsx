@@ -18,7 +18,7 @@ export function ReviewsSection({ reviews, limit, writeHref = "/reviews/#write" }
       <div className="mt-8 rounded-2xl border border-dashed border-mist px-6 py-12 text-center">
         <ReviewStars rating={0} size="text-3xl" />
         <p className="mt-4 text-xl font-semibold">No reviews yet</p>
-        <p className="mx-auto mt-2 max-w-md text-ink-soft">DevFiller is new on the Chrome Web Store. If it saved you some typing, be the first to say so.</p>
+        <p className="mx-auto mt-2 max-w-md text-ink-soft">DevFiller is new. If it saved you some typing, be the first to say so.</p>
         <Link href={writeHref} className={`mt-6 ${primaryButton}`}>
           Write the first review
         </Link>

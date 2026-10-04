@@ -5,8 +5,8 @@ type Status = "Available" | "In design" | "Planned";
 const STEPS: { status: Status; title: string; body: string; href?: string; link?: string }[] = [
   {
     status: "Available",
-    title: "Chrome extension",
-    body: "One-click filling, the side panel with undo, custom values, exclusions, English, French and Arabic, and optional AI with your own key. The Chrome Web Store listing is in review.",
+    title: "Chrome, Firefox and Edge extension",
+    body: "One-click filling, the side panel with undo, custom values, exclusions, English, French and Arabic, and optional AI with your own key. In the Chrome Web Store, Firefox Add-ons and Microsoft Edge Add-ons.",
     href: "/docs/install/",
     link: "Install it",
   },

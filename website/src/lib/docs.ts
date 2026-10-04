@@ -17,7 +17,7 @@ export const DOC_GROUPS: { title: string; pages: DocPage[] }[] = [
     title: "Getting started",
     pages: [
       { slug: "", title: "Introduction", description: "What DevFiller does and how a fill works.", source: "website/content/docs/index.md" },
-      { slug: "install", title: "Install", description: "Add DevFiller to Chrome and fill your first form.", source: "website/content/docs/install.md" },
+      { slug: "install", title: "Install", description: "Add DevFiller to Chrome, Firefox or Edge and fill your first form.", source: "website/content/docs/install.md" },
     ],
   },
   {
@@ -66,7 +66,9 @@ function applyStoreLink(markdown: string) {
   const url = site.chromeStoreUrl;
   return markdown
     .replace(/<!-- store-pending -->([\s\S]*?)<!-- \/store-pending -->\n?/g, url ? "" : "$1")
-    .replace(/\{\{chromeStoreUrl\}\}/g, url ?? STORE_SEARCH);
+    .replace(/\{\{chromeStoreUrl\}\}/g, url ?? STORE_SEARCH)
+    .replace(/\{\{firefoxStoreUrl\}\}/g, site.firefoxStoreUrl)
+    .replace(/\{\{edgeStoreUrl\}\}/g, site.edgeStoreUrl);
 }
 
 /** Reads a page's Markdown at build time, dropping its own H1 because the layout renders the title. */

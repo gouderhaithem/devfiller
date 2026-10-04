@@ -31,7 +31,7 @@ export function appJsonLd(rating: { count: number; average: number | null }) {
     url: site.url,
     applicationCategory: "DeveloperApplication",
     applicationSubCategory: "Browser extension",
-    operatingSystem: "Chrome",
+    operatingSystem: "Chrome, Firefox, Edge",
     image: absolute("/generated/icon-256.png"),
     screenshot: absolute("/generated/side-panel.jpg"),
     ...(site.chromeStoreUrl ? { downloadUrl: site.chromeStoreUrl, installUrl: site.chromeStoreUrl } : {}),
@@ -39,7 +39,7 @@ export function appJsonLd(rating: { count: number; average: number | null }) {
     inLanguage: ["en", "fr", "ar"],
     license: "https://opensource.org/licenses/MIT",
     author,
-    sameAs: [site.repo, ...(site.chromeStoreUrl ? [site.chromeStoreUrl] : [])],
+    sameAs: [site.repo, ...(site.chromeStoreUrl ? [site.chromeStoreUrl] : []), site.firefoxStoreUrl, site.edgeStoreUrl],
     // Only real, approved reviews: no rating is claimed before there is one.
     ...(rating.count && rating.average !== null
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: rating.average, reviewCount: rating.count, bestRating: 5, worstRating: 1 } }
