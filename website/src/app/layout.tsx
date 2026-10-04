@@ -14,12 +14,12 @@ const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], var
 // opengraph-image.tsx.
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: "DevFiller: free form filler Chrome extension for test data", template: "%s | DevFiller" },
+  title: { default: "DevFiller: free form filler for Chrome, Firefox and Edge", template: "%s | DevFiller" },
   description: site.description,
   applicationName: site.name,
   authors: [{ name: site.author.name, url: site.author.url }],
   creator: site.author.name,
-  keywords: ["form filler", "Chrome extension", "test data", "fake data generator", "autofill forms", "QA testing", "web form testing", "dummy data"],
+  keywords: ["form filler", "Chrome extension", "Firefox add-on", "Edge extension", "test data", "fake data generator", "autofill forms", "QA testing", "web form testing", "dummy data"],
   openGraph: { type: "website", siteName: site.name, url: "/" },
   twitter: { card: "summary_large_image" },
 };

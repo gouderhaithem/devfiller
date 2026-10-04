@@ -7,7 +7,8 @@ import { Roadmap } from "@/components/Roadmap";
 import { listApprovedReviews } from "@/lib/reviews-db";
 import { summarize } from "@/lib/reviews";
 import { SITE_CARD, appJsonLd, faqJsonLd, siteJsonLd } from "@/lib/seo";
-import { installHref, installLabel } from "@/lib/site";
+import { InstallButton } from "@/components/InstallButton";
+import { STORES } from "@/lib/site";
 
 const FILLS = [
   ["Identity", "Names, usernames, date of birth, age, gender, nationality"],
@@ -37,7 +38,8 @@ const HOW_IT_WORKS = [
 
 // Plain answers to what people ask before installing; also published as FAQ structured data.
 const FAQ = [
-  { question: "Is DevFiller free?", answer: "Yes. DevFiller is a free Chrome extension, open source under the MIT license, with no account, no subscription and no usage limit." },
+  { question: "Is DevFiller free?", answer: "Yes. DevFiller is a free browser extension, open source under the MIT license, with no account, no subscription and no usage limit." },
+  { question: "Which browsers does DevFiller work in?", answer: "Chrome, Firefox and Microsoft Edge, each from its own extension store. Brave, Opera, Vivaldi and other Chromium browsers install it from the Chrome Web Store. In Firefox, the panel opens in the sidebar." },
   { question: "Does DevFiller submit the form?", answer: "No. It fills the fields and stops, so you can check the values and submit the form yourself when you're ready." },
   { question: "What test data does it generate?", answer: "Realistic, fictional data for 46 field types: names, usernames, emails at example.com, phone numbers, addresses from one country (the United States, France or Algeria), companies, job titles, dates, numbers and messages. The username and email match the name, and confirmation fields repeat what they confirm." },
   { question: "Does it work with React, Vue and Angular forms?", answer: "Yes. DevFiller sets each value the way frameworks notice a person typing, and it also fills custom switches, checkboxes, dropdowns and rich-text editors built with ARIA roles." },
@@ -81,14 +83,23 @@ export default async function Home() {
               and it works without an account.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={installHref} className="rounded-lg bg-paper px-5 py-3 font-medium text-ink hover:bg-ivory">
-                {installLabel}
-              </Link>
+              <InstallButton className="rounded-lg bg-paper px-5 py-3 font-medium text-ink hover:bg-ivory" />
               <Link href="/docs/" className="rounded-lg px-5 py-3 font-medium text-paper ring-1 ring-paper/40 hover:ring-paper">
                 Read the docs
               </Link>
             </div>
-            <p className="mt-6 text-paper/75">Free for Chrome. Recognizes English, French and Arabic labels.</p>
+            <p className="mt-6 text-paper/75">
+              Free for{" "}
+              {STORES.map((store, i) => (
+                <span key={store.id}>
+                  {i ? (i === STORES.length - 1 ? " and " : ", ") : ""}
+                  <a href={store.url} rel="noopener" className="font-medium text-paper underline decoration-paper/40 underline-offset-4 hover:decoration-paper">
+                    {store.browser}
+                  </a>
+                </span>
+              ))}
+              . Recognizes English, French and Arabic labels.
+            </p>
           </div>
           <FillDemo />
         </div>

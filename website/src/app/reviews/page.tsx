@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
   title: "Reviews",
-  description: "What developers and QA testers say about DevFiller, the free form filler Chrome extension, and a form to write your own review.",
+  description: "What developers and QA testers say about DevFiller, the free form filler for Chrome, Firefox and Edge, and a form to write your own review.",
   path: "/reviews/",
 });
 

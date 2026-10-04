@@ -11,9 +11,10 @@ describe('page metadata', () => {
 });
 
 describe('structured data', () => {
-  it('describes DevFiller as a free Chrome extension by its author', () => {
+  it('describes DevFiller as a free extension for Chrome, Firefox and Edge, by its author', () => {
     const app = appJsonLd({ count: 0, average: null });
-    expect(app).toMatchObject({ '@type': 'SoftwareApplication', applicationCategory: 'DeveloperApplication', operatingSystem: 'Chrome', offers: { price: '0' } });
+    expect(app).toMatchObject({ '@type': 'SoftwareApplication', applicationCategory: 'DeveloperApplication', operatingSystem: 'Chrome, Firefox, Edge', offers: { price: '0' } });
+    expect(app.sameAs).toEqual(expect.arrayContaining(['https://addons.mozilla.org/en-US/firefox/addon/devfiller/']));
     expect(app.author).toMatchObject({ '@type': 'Person', name: 'Haithem Gouder' });
     expect(app).not.toHaveProperty('aggregateRating');
   });

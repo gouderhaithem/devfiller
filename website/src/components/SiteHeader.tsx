@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
-import { installHref, installLabel, site } from "@/lib/site";
+import { InstallButton } from "./InstallButton";
+import { site } from "@/lib/site";
 
 const links = [
   { href: "/docs/", label: "Docs" },
@@ -31,14 +32,10 @@ export function SiteHeader() {
           <Link href="/docs/" className="rounded-md px-3 py-2 text-[0.95rem] text-ink-soft hover:text-ink sm:hidden">
             Docs
           </Link>
-          <Link
-            href={installHref}
+          <InstallButton
+            shortLabel="Install"
             className="rounded-lg bg-linear-to-b from-tile-light to-tile-deep px-4 py-2 text-[0.95rem] font-medium text-paper shadow-[0_2px_10px_-3px_rgb(60_96_220/0.6)] transition-[filter,transform] hover:brightness-110 active:translate-y-px whitespace-nowrap"
-          >
-            {/* Phones keep the header on one line with the short label. */}
-            <span className="sm:hidden">Install</span>
-            <span className="hidden sm:inline">{installLabel}</span>
-          </Link>
+          />
         </nav>
       </div>
     </header>

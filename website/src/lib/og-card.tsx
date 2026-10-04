@@ -12,7 +12,7 @@ const asset = (file: string) => readFile(path.join(root, file));
 const font = (name: string) => asset(`node_modules/geist/dist/fonts/geist-sans/Geist-${name}.ttf`);
 const dataUrl = async (file: string, type: string) => `data:${type};base64,${(await asset(file)).toString("base64")}`;
 
-const TAGS = ["Free", "Chrome extension", "EN · FR · AR"];
+const TAGS = ["Free", "Chrome · Firefox · Edge", "EN · FR · AR"];
 
 export async function ogCard({ title, subtitle, eyebrow }: { title: string; subtitle: string; eyebrow?: string }) {
   const [regular, semibold, bold, icon, panel] = await Promise.all([

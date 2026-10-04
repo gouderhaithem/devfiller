@@ -44,9 +44,13 @@ DevFiller is a browser extension for developers and QA testers who repeatedly fi
 
 ## Install
 
-Install DevFiller from the **[Chrome Web Store](https://chromewebstore.google.com/detail/devfiller-%E2%80%94-test-data-for/neodjaolegipdhfjgjbdlgfehenmeofj)**. Chrome keeps it up to date.
+Install DevFiller from your browser's store, which keeps it up to date:
 
-1. Open [DevFiller on the Chrome Web Store](https://chromewebstore.google.com/detail/devfiller-%E2%80%94-test-data-for/neodjaolegipdhfjgjbdlgfehenmeofj) and click **Add to Chrome**.
+- **Chrome** (and Brave, Opera, Vivaldi): [Chrome Web Store](https://chromewebstore.google.com/detail/devfiller-%E2%80%94-test-data-for/neodjaolegipdhfjgjbdlgfehenmeofj)
+- **Firefox** 140+: [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/devfiller/)
+- **Microsoft Edge**: [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/devfiller-%E2%80%94-test-data-for/gkckfnfhjapogjbnjllcpacobeolibga)
+
+1. Open DevFiller in your browser's store above and add it.
 2. Pin DevFiller to your toolbar and follow the welcome guide.
 3. Open a page with a form and click the DevFiller icon.
 
