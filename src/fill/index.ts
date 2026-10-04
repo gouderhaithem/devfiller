@@ -20,6 +20,7 @@ import { controlReport, finalizeReport, finishFill } from './report';
 import { normalize } from './normalize';
 import { findCustomRule } from './rules';
 import { fieldLocale, valuesIn } from './language';
+import { uid } from './uid';
 
 export type { ClassifiedField, FillRequest, FillResult, SuggestedField, UnknownField } from './types';
 export { panelPageAction } from './panel';
@@ -307,7 +308,7 @@ function tally(result: FillResult, outcome: Outcome) {
 // never submits a form or sends anything off the page.
 export function fillPage(request: FillRequest): FillResult {
   const pageState = globalThis as PageState;
-  pageState.__devfillerDocumentId ||= crypto.randomUUID();
+  pageState.__devfillerDocumentId ||= uid();
   const result: FillResult = { filled: 0, preserved: 0, unmatched: 0, invalid: 0, documentId: pageState.__devfillerDocumentId, origin: location.origin };
   if (request.expectedDocument && request.expectedDocument !== result.documentId) return { ...result, stale: true };
   if (request.mode === 'scan') result.unknown = [];

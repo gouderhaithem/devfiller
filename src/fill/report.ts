@@ -8,6 +8,7 @@ import { controlSignals, displayLabel, fieldSignals, isChoice, isDatePicker, isV
 import { findCustomRule } from './rules';
 import { exclusionCause, shouldExclude } from './exclude';
 import { snapshot } from './apply';
+import { uid } from './uid';
 
 const EXCLUDED = 'Excluded by your settings';
 const UNSURE = 'Not sure this is';
@@ -52,7 +53,7 @@ export function detection(classification: Classification): Detection {
 export function reportFor(ctx: FillContext, el: Control): FieldReport {
   const panel = ctx.panel!;
   let id = panel.ids.get(el);
-  if (!id) { id = crypto.randomUUID(); panel.ids.set(el, id); }
+  if (!id) { id = uid(); panel.ids.set(el, id); }
   panel.elements.set(id, el);
   const reason = skipReason(ctx, el);
   // Say up front when a fill will leave the field alone, but keep it open for a custom rule.
