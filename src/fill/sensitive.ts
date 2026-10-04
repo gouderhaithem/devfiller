@@ -1,6 +1,6 @@
 import type { Control, ControlRun, FillContext } from './types';
 import { CONSENT } from './dictionary';
-import { isChoice, isInput } from './extract';
+import { composedText, isChoice, isInput } from './extract';
 import { normalize } from './normalize';
 import { setNativeChecked, setNativeValue } from './apply';
 
@@ -78,7 +78,7 @@ export function fillSensitive(ctx: FillContext, el: Control, kind: TestKind): Co
     if (el.type === 'radio') {
       const group = el.name ? Array.from((el.form ?? el.ownerDocument).querySelectorAll<HTMLInputElement>('input[type="radio"]')).filter(radio => radio.name === el.name && radio.form === el.form) : [el];
       if (!request.overwrite && group.some(radio => radio.checked)) return run('preserved', reason);
-      const target = agreeing(group.filter(radio => !radio.disabled), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')].join(' '));
+      const target = agreeing(group.filter(radio => !radio.disabled), radio => [radio.value, ...Array.from(radio.labels || [], composedText)].join(' '));
       if (!target) return run('none', reason);
       if (!target.checked) setNativeChecked(target, true);
       for (const radio of group) ctx.touched.add(radio);

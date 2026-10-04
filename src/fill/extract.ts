@@ -19,6 +19,29 @@ export function listControls(includeShadow = true): Control[] {
   return roots.flatMap(root => Array.from(root.querySelectorAll<Control>('input, textarea, select')));
 }
 
+// Shadow roots don't stop these: a component's field still belongs to the page's form and fieldset
+// around the component.
+export function composedClosest(el: Element, selector: string): Element | null {
+  for (let node: Element | null = el; node; ) {
+    const found = node.closest(selector);
+    if (found) return found;
+    const root = node.getRootNode();
+    node = root instanceof ShadowRoot ? root.host : null;
+  }
+  return null;
+}
+// A form="…" attribute speaks for itself, even when it names no form.
+export const formOf = (el: Control): HTMLFormElement | null => el.form ?? (el.hasAttribute('form') ? null : composedClosest(el, 'form') as HTMLFormElement | null);
+
+// The component a field lives in, when that component holds no other field: it names the field
+// (<x-input label="Company" name="company">) when the field inside has no words of its own.
+export function soleHost(el: Control): Element | undefined {
+  const root = el.getRootNode();
+  if (!(root instanceof ShadowRoot)) return undefined;
+  const fields = Array.from(root.querySelectorAll<Control>('input, textarea, select')).filter(other => !(other instanceof HTMLInputElement && other.type === 'hidden'));
+  return fields.length === 1 ? root.host : undefined;
+}
+
 // An id is looked up in the element's own tree: a label inside a shadow root points inside it.
 function byId(el: Element, id: string): Element | null {
   const root = el.getRootNode();
@@ -61,12 +84,12 @@ export function isDatePicker(el: Control): boolean {
 export const isFillable = (el: Control, visible = isVisible(el)) => !isDisabled(el) && (!isReadOnly(el) || isDatePicker(el)) && !el.closest('[inert]') && visible;
 export const isEditableChoice = (el: HTMLInputElement, visible = isVisible(el)) => !isDisabled(el) && !el.closest('[inert]') && visible;
 
-export const labelText = (el: Control) => Array.from(el.labels || []).map(label => label.textContent || '').join(' ');
+export const labelText = (el: Control) => Array.from(el.labels || []).map(composedText).join(' ');
 export const labelledByText = (el: Control) => idsText(el, el.getAttribute('aria-labelledby'));
-export const legendText = (el: Control) => normalize(el.closest('fieldset')?.querySelector('legend')?.textContent || '');
+export const legendText = (el: Control) => normalize(composedClosest(el, 'fieldset')?.querySelector('legend')?.textContent || '');
 
 // The last autocomplete token names the field: "shipping postal-code" → "postal-code".
-export const autocompleteToken = (el: Control) => el.autocomplete?.trim().split(/\s+/).filter(token => token !== 'webauthn').at(-1) || '';
+export const autocompleteToken = (el: Control) => (el.autocomplete || soleHost(el)?.getAttribute('autocomplete') || '').trim().split(/\s+/).filter(token => token !== 'webauthn').at(-1) || '';
 
 export interface ControlSignals { ac: string; label: string; labelledBy: string; signals: string[] }
 
@@ -96,14 +119,20 @@ const CONTROLS = 'input, select, textarea, button';
 const clip = (text: string) => text.replace(/\s+/g, ' ').trim().slice(0, 120);
 
 // A label's own words, without the text of a select or textarea it wraps.
-function ownText(root: Element): string {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+// A <slot> shows the page's own text: "<fluent-text-field>Company</fluent-text-field>" labels the
+// field inside through its label's slot.
+export function composedText(root: Element): string {
   const parts: string[] = [];
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (!node.parentElement?.closest('select, textarea, option, script, style')) parts.push(node.textContent || '');
-  }
-  return clip(parts.join(' '));
+  const visit = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) { parts.push(node.textContent || ''); return; }
+    if (!(node instanceof Element) || node.matches('select, textarea, option, script, style')) return;
+    const assigned = node instanceof HTMLSlotElement ? node.assignedNodes({ flatten: true }) : [];
+    for (const child of assigned.length ? assigned : Array.from(node.childNodes)) visit(child);
+  };
+  for (const child of Array.from(root.childNodes)) visit(child);
+  return parts.join(' ');
 }
+const ownText = (root: Element) => clip(composedText(root));
 
 const holdsControl = (node: Node) => node instanceof Element && (node.matches(CONTROLS) || !!node.querySelector(CONTROLS));
 
@@ -125,10 +154,12 @@ export function nearbyText(el: Control): string {
   let anchor: Element = el;
   // A checkbox's words often sit a few wrappers out (an empty label inside framework spans).
   const levels = isChoice(el) ? 5 : 3;
-  for (let depth = 0; depth < levels && anchor.parentElement; depth++) {
+  // A field at the top of a shadow root still has neighbours there, though no parent element.
+  for (let depth = 0; depth < levels && anchor.parentNode; depth++) {
     const text = (isChoice(el) && siblingText(anchor, true)) || siblingText(anchor, false);
     if (text) return text;
-    const parent: Element = anchor.parentElement;
+    const parent = anchor.parentElement;
+    if (!parent) return '';
     if (parent.matches('td, th')) {
       // A checkbox's words are in the next cell; a text field's in the previous one.
       const cell = (isChoice(el) && parent.nextElementSibling) || parent.previousElementSibling;
@@ -247,6 +278,7 @@ export function describeSignals(el: Control): Signal[] {
   const choice = isChoice(el);
   const radio = choice && el.type === 'radio';
   // A radio's own label is one of the answers ("Male"), so its group names the field.
+  const host = soleHost(el);
   if (!radio) {
     for (const label of Array.from(el.labels || [])) add('label', ownText(label));
     add('aria-label', el.getAttribute('aria-label'));
@@ -255,6 +287,8 @@ export function describeSignals(el: Control): Signal[] {
   // "e.g. State Farm" shows a sample answer, not what the field is; its format still counts.
   const placeholder = el.getAttribute('placeholder');
   if (!EXAMPLE_PREFIX.test((placeholder || '').trim())) add('placeholder', placeholder);
+  const hostPlaceholder = !placeholder && host?.getAttribute('placeholder');
+  if (hostPlaceholder && !EXAMPLE_PREFIX.test(hostPlaceholder.trim())) add('placeholder', hostPlaceholder);
   // A select's empty first option ("Select country") works as its placeholder, read without its
   // "choose" word: "Choisir fonction", "اختر الخبرة" name a job title and an experience.
   if (el instanceof HTMLSelectElement && el.options[0] && !el.options[0].value) add('placeholder', (el.options[0].textContent || '').replace(PROMPT, ''));
@@ -263,16 +297,19 @@ export function describeSignals(el: Control): Signal[] {
   const naming = signals.filter(signal => signal.source === 'label' || signal.source === 'aria-label' || signal.source === 'aria-labelledby');
   const thin = choice && !radio && naming.every(signal => !signal.text.includes(' '));
   if (!naming.length || thin) add('nearby', radio ? '' : nearbyText(el));
+  // A component's label comes last, so the field's own caption ("I agree to…") is still read.
+  if (host && !radio && !naming.length) add('label', host.getAttribute('label') || host.getAttribute('aria-label'));
   if (!isMeaningless(el.name)) add('name', el.name);
+  else if (host && !isMeaningless(host.getAttribute('name') || '')) add('name', host.getAttribute('name'));
   if (!isMeaningless(el.id)) add('id', el.id);
   // Angular, Vue and form builders name the field in their own attribute when name and id are generated.
   const bound = FRAMEWORK_NAMES.map(name => el.getAttribute(name)).find(value => value && !isMeaningless(value));
   if (bound && isMeaningless(el.name) && isMeaningless(el.id)) add('name', bound);
   // A radio group's question, else the heading just above it. A checkbox reads its fieldset's legend
   // and the heading just above its own group, which may sit inside that larger fieldset.
-  add('legend', radio ? groupText(el) || choiceCaption(el) : el.closest('fieldset')?.querySelector('legend')?.textContent);
+  add('legend', radio ? groupText(el) || choiceCaption(el) : composedClosest(el, 'fieldset')?.querySelector('legend')?.textContent);
   if (choice && !radio) add('legend', choiceCaption(el));
   if (isInput(el)) { add('type', el.type); add('inputmode', el.getAttribute('inputmode')); }
-  add('autocomplete', el.getAttribute('autocomplete'));
+  add('autocomplete', el.getAttribute('autocomplete') || host?.getAttribute('autocomplete'));
   return signals;
 }

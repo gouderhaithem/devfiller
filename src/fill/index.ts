@@ -2,7 +2,7 @@ import type { ControlSnapshot } from '../panel-types';
 import type { FieldKey, Values } from '../data';
 import type { Control, ControlRun, FillContext, FillRequest, FillResult, Outcome, PageState, UnknownField } from './types';
 import { ARABIC_NAMES, CONSENT, CONTEXTUAL_KEYS, COUNTRY_CODES, MACHINE_ID, PASSWORD, PERSON_ROLE_PHRASES } from './dictionary';
-import { controlSignals, isChoice, isDatePicker, isEditableChoice, isFillable, pickerTarget, isInput, isScale, isTrap, isVisible, legendText, listControls, optionTexts, radioScope, type ControlSignals } from './extract';
+import { composedText, controlSignals, formOf, isChoice, isDatePicker, isEditableChoice, isFillable, pickerTarget, isInput, isScale, isTrap, isVisible, legendText, listControls, optionTexts, radioScope, type ControlSignals } from './extract';
 import { shouldExclude } from './exclude';
 import { classificationOf, isSensitive, SOURCE_GROUP, usableKey, type Classification } from './classify';
 import { analyzePage } from './context';
@@ -46,13 +46,13 @@ function fillRadioGroup(ctx: FillContext, el: HTMLInputElement): ControlRun {
   if (!request.overwrite && members.some(c => c.checked)) return run('preserved');
   // "Strongly agree" on a scale is an opinion, not consent: every answer on a scale may be chosen.
   const scale = !!isScale(optionTexts(el));
-  const candidates = members.filter(c => isEditableChoice(c, ctx.visible.get(c)) && !isSensitive(classificationOf(ctx.classifications, c).type) && (scale || !CONSENT.test(normalize([c.name, c.id, c.getAttribute('aria-label') || '', ...Array.from(c.labels || []).map(l => l.textContent || '')].join(' ')))));
+  const candidates = members.filter(c => isEditableChoice(c, ctx.visible.get(c)) && !isSensitive(classificationOf(ctx.classifications, c).type) && (scale || !CONSENT.test(normalize([c.name, c.id, c.getAttribute('aria-label') || '', ...Array.from(c.labels || []).map(composedText)].join(' ')))));
   const different = candidates.filter(c => !c.checked);
   const choices = ctx.fresh && different.length ? different : candidates;
   if (!choices.length) return run('none', { reason: 'No option in this group can be selected' });
   // A recognized group ("Male / Female") picks the answer that matches the generated value.
   const key = usableKey(classificationOf(ctx.classifications, el), request.fillUnknown);
-  const matching = key ? matchChoice(candidates, spellingsFor(valuesFor(ctx, el)[key], key), radio => [radio.value, ...Array.from(radio.labels || [], label => label.textContent || '')]) : undefined;
+  const matching = key ? matchChoice(candidates, spellingsFor(valuesFor(ctx, el)[key], key), radio => [radio.value, ...Array.from(radio.labels || [], composedText)]) : undefined;
   const target = matching ?? choices[ctx.random(el)(choices.length)];
   for (const member of controls) if (member === target || (target.name && member instanceof HTMLInputElement && member.type === 'radio' && member.form === target.form && member.name === target.name)) ctx.touched.add(member);
   setNativeChecked(target, true);
@@ -263,7 +263,7 @@ function processControl(ctx: FillContext, el: Control, index: number): ControlRu
   if (isInput(el) && ['hidden', 'file', 'submit', 'button', 'reset', 'image'].includes(el.type)) return NONE;
   if (ctx.traps.has(el)) return run('none', { reason: 'Hidden trap for bots' });
   // When the page keeps its fields in forms, a checkbox outside them is a page setting, not data.
-  if (isChoice(el) && !el.form && ctx.inForms) return run('none', { reason: 'Outside the page\'s forms' });
+  if (isChoice(el) && !formOf(el) && ctx.inForms) return run('none', { reason: 'Outside the page\'s forms' });
   // Sensitive fields get values that read as tests: test cards (masked CVC boxes included), a
   // one-time code of 4s, a bank account of 4s, consent and "remember me" ticked.
   const { type } = classificationOf(ctx.classifications, el);
@@ -325,7 +325,7 @@ export function fillPage(request: FillRequest): FillResult {
   }
   const exclusions = request.exclusions || { skipSearch: true, skipHeader: true, rules: [] };
   const panel = request.mode === 'scan' ? undefined : (pageState.__devfillerPanel ||= { elements: new Map(), ids: new WeakMap(), reports: new Map(), undo: [] });
-  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map(), inForms: controls.some(el => el.form), traps: new Set(controls.filter(isTrap)) };
+  const base = { request, controls, exclusions, panel, result, radioGroups: new Set<string>(), usedText: new Set<string>(), touched: new Set<Control>(), classifications: analysis.fields, visible, random: fieldRandom(request.seed, controls), fresh: request.overwrite && !request.seed?.trim(), filled: new Map(), inForms: controls.some(el => formOf(el)), traps: new Set(controls.filter(isTrap)) };
   if (request.mode === 'inspect') { finalizeReport({ ...base, ...people(request, pageValues(request, controls, exclusions, analysis.fields)) }); return result; }
   const before: Map<Control, ControlSnapshot> | undefined = panel ? new Map(controls.map(el => [el, snapshot(el)])) : undefined;
   if (panel) { panel.reports.clear(); panel.undo = []; }
