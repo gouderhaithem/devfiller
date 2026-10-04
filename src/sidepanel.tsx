@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Check, ChevronRight, CircleMinus, Download, ExternalLink, Eye, EyeOff, ListFilter, PanelRight, RefreshCw, RotateCcw, Settings2, ShieldCheck, Sparkles, Tags, Undo2, X } from 'lucide-react';
+import { Check, ChevronRight, CircleMinus, Download, ExternalLink, Eye, EyeOff, Frame, ListFilter, PanelRight, RefreshCw, RotateCcw, Settings2, ShieldCheck, Sparkles, Tags, Undo2, X } from 'lucide-react';
 import { fields as FIELD_TYPES } from './fields';
 import { isExtension } from './storage';
 import type { Detection, FieldReport, PanelReply } from './panel-types';
@@ -104,6 +104,20 @@ function SidePanel() {
     } catch(e){setActionError(e instanceof Error?e.message:'The action failed.');}
     finally{working.current=false;setBusy('');void refresh();}
   }
+  // Access to the embedded form's service (all its addresses), asked from this click. Once given,
+  // DevFiller remembers that the person chose it, and fills that service's frames from then on.
+  async function allowEmbed(embed:{origin:string;site:string}) {
+    setActionError('');
+    try {
+      const granted=await chrome.permissions.request({origins:[`${new URL(embed.origin).protocol}//*.${embed.site}/*`]});
+      if(!granted){setActionError(`Access to ${embed.site} was not given. The rest of the page is filled as usual.`);return;}
+      const {embedSites:saved}=await chrome.storage.local.get('embedSites');
+      const sites=Array.isArray(saved)?saved:[];
+      if(!sites.includes(embed.site))await chrome.storage.local.set({embedSites:[...sites,embed.site]});
+      await action('fill');
+    } catch(e){setActionError(e instanceof Error?e.message:'Could not ask for access.');}
+  }
+  const embeds=page?.embeds || [];
   const fields=page?.fields || [];
   const filled=fields.filter(field=>field.status==='filled').length;
   const skipped=fields.filter(field=>field.status==='skipped' || field.status==='incompatible').length;
@@ -121,6 +135,7 @@ function SidePanel() {
       <div className="primary-actions"><button className="primary" disabled={!page || !!busy || loading} onClick={()=>void action('fill')}><Sparkles size={17}/>{busy==='fill'?'Filling your form…':filled?'Fill again':'Fill this page'}</button><button className="icon-button refresh" title="Refresh field list" aria-label="Refresh field list" disabled={!!busy} onClick={()=>void refresh(true)}><RefreshCw size={17}/></button></div>
       <button className="undo" disabled={!page?.canUndo || !!busy} onClick={()=>void action('undo')}><Undo2 size={15}/>{busy==='undo'?'Restoring…':'Undo last fill'}</button>
       {notice&&<p className="message success" role="status">{notice}</p>}
+      {embeds.length>0&&<div className="message embed" role="note"><strong><Frame size={13}/>{embeds.length===1?'An embedded form was not filled':`${embeds.length} embedded forms were not filled`}</strong><p>{embeds.length===1?'It comes from another website.':'They come from other websites.'} DevFiller can fill {embeds.length===1?'it':'them'} once you allow that site. Chrome asks you first.</p>{embeds.map(embed=><button key={embed.origin} className="secondary" disabled={!!busy} onClick={()=>void allowEmbed(embed)}>Allow on {embed.site}</button>)}</div>}
       {(error||actionError)&&<div className="message error" role="alert"><strong>{page?"Could not complete this action":"Page access needed"}</strong><p>{error||actionError}</p></div>}
       {!installed&&<div className="empty"><PanelRight size={28}/><h2>Your form, in view</h2><p>Install the extension, then right-click its toolbar icon and choose <strong>Open DevFiller panel</strong>.</p><p>You can also press <strong>Alt + Shift + F</strong>.</p></div>}
       {installed&&loading&&<p className="empty" role="status">Looking for fields…</p>}

@@ -39,4 +39,6 @@ export interface PanelReply {
   overlay?: boolean;
   forms?: Array<{ index: number; type: string; confidence: number; fields: number }>;
   fixture?: { html: string; filename: string };
+  // Forms embedded from another site that DevFiller may not reach until the person allows that site.
+  embeds?: Array<{ origin: string; host: string; site: string }>;
 }

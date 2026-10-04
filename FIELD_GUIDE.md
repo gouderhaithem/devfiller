@@ -69,7 +69,7 @@ Choose the result to test under **Fill settings → Test cards**. Every card wor
 | Expired card | 4000 0000 0000 0069 |
 | Incorrect CVC | 4000 0000 0000 0127 |
 
-The number is written the way the field takes it: spaced, digits only, or one group of four per box. **Leave card fields empty** turns this off. A coupon or gift-card box, a card PIN and any field that doesn't say which part of the card it is stay empty. Payment forms inside a provider's iframe (Stripe Elements, for example) can't be reached, because DevFiller fills the page's own frame only. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/devfiller/blob/main/benchmark/RESULTS.md).
+The number is written the way the field takes it: spaced, digits only, or one group of four per box. **Leave card fields empty** turns this off. A coupon or gift-card box, a card PIN and any field that doesn't say which part of the card it is stay empty. Payment forms inside a provider's iframe (Stripe Elements, for example) are never filled: DevFiller fills the page's own frames, and a form embedded from a form service (HubSpot, Typeform, Google Forms…) only after you allow that service in the panel. [How recognition works](https://www.devfiller.com/docs/how-it-works/) explains each step and how accurate it is, measured by the [benchmark](https://github.com/gouderhaithem/devfiller/blob/main/benchmark/RESULTS.md).
 
 ## Generic control coverage
 
@@ -95,7 +95,7 @@ The number is written the way the field takes it: spaced, digits only, or one gr
 | Recruiting | Experience years, availability date, skills, portfolio, employment type |
 | Technical | UUID, slug, hostname, IP fixtures, semantic version, JSON payload, regular-expression-based strings |
 | Testing | Seeded repeatable data, invalid/boundary-value scenarios, per-site presets, import/export |
-| Advanced widgets | React/ARIA comboboxes, searchable selects, date-picker widgets, rich text, frames, shadow roots |
+| Advanced widgets | React/ARIA comboboxes, searchable selects, date-picker widgets, rich text |
 | Files and payments | Explicit fixture-file selection and sandbox-only payment fixtures |
 
 These suggestions are not implemented. Custom rules insert the exact configured value without added prefixes or suffixes. Generated defaults use readable words and phrases; they never append random IDs.

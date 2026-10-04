@@ -61,7 +61,7 @@ Use the field list to inspect filled/skipped results, highlight a control, save 
 
 **Undo last fill** restores the last fill for the current document and preserves controls changed since then. Reloading clears undo. Original values stay in the isolated extension context of the page, never in Gemini prompts or extension storage. Undo cannot reverse other website actions triggered by change events.
 
-The list refreshes after tab changes and periodically while open. On a new website, click DevFiller or reopen its panel from the icon’s menu if access is needed. Restricted browser pages, frames, and custom widgets retain the existing limitations.
+The list refreshes after tab changes and periodically while open. On a new website, click DevFiller or reopen its panel from the icon’s menu if access is needed. Restricted browser pages and some custom widgets retain the existing limitations. Fields inside frames are filled but not listed. When the page embeds a form from a form service (HubSpot, Typeform, Google Forms…), the panel offers **Allow on** that service, and the browser asks you before DevFiller gets access.
 
 The panel needs Chrome 118+ or a compatible Edge version. Customize the shortcut in your browser’s extension shortcuts page.
 
@@ -148,7 +148,7 @@ Generated fields use readable words and phrases, with no appended random identif
 
 Data is fictional and intended for testing. Emails and websites use `example.com`; phone samples use the fictional US 202-555-01xx range. Address and phone regions are not necessarily tied to the selected language. Website-specific validation may still reject generated data.
 
-DevFiller works in the active page’s **top-level document**. Frames, shadow DOM, rich-text editors, and custom JavaScript controls need separate adapters. File uploads and hidden/disabled/read-only controls are skipped; detected consent, payment, bank and one-time-code fields get test values. Some frameworks require trusted user input that a script cannot reproduce.
+DevFiller works in the active page, its same-site frames and inside web components. A form embedded from another site is filled only once you allow that form service from the panel; payment, cookie-banner and other frames are never filled, and Undo restores the main page only. Rich-text editors and custom JavaScript controls need separate adapters. File uploads and hidden/disabled/read-only controls are skipped; detected consent, payment, bank and one-time-code fields get test values. Some frameworks require trusted user input that a script cannot reproduce.
 
 ## Privacy & permissions
 

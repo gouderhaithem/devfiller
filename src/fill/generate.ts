@@ -91,7 +91,8 @@ export function fallbackValue(ctx: FillContext, el: Control): { value: string; g
 export function coherentValues(request: FillRequest, controls: readonly Control[], exclusions: Exclusions): Values {
   let values = request.values;
   // A seed promises the same values every time, so there is nothing to vary.
-  if (request.mode === 'scan' || !request.overwrite || request.seed?.trim() || !(request.identities?.length || request.samples)) return values;
+  // keepValues: a frame filled after its page uses the person the page used.
+  if (request.keepValues || request.mode === 'scan' || !request.overwrite || request.seed?.trim() || !(request.identities?.length || request.samples)) return values;
   const pick = <T>(list: readonly T[]) => pickWith(secureRandom, list);
   const current = controls.filter(el => !el.disabled && !('readOnly' in el && el.readOnly) && el.getClientRects().length && !shouldExclude(el, exclusions))
     .map(el => ({ value: el.value.trim(), maxLength: 'maxLength' in el ? el.maxLength : -1 })).filter(el => el.value);

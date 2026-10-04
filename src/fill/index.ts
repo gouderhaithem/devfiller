@@ -332,6 +332,7 @@ export function fillPage(request: FillRequest): FillResult {
   if (panel) { panel.reports.clear(); panel.undo = []; }
   if (request.mode !== 'scan') forgetAlternatives();
   const ctx: FillContext = { ...base, ...people(request, pageValues(request, controls, exclusions, analysis.fields)) };
+  if (request.mode !== 'scan') result.values = ctx.values;
   controls.forEach((el, index) => {
     let outcome: ControlRun = NONE;
     try {

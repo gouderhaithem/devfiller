@@ -130,7 +130,7 @@ New to DevFiller? **[docs/getting-started.html](docs/getting-started.html)** is 
 - Settings, custom values, and exclusions stay in local extension storage. There is no browser sync or DevFiller backend.
 - Gemini is optional. Its prompt contains field metadata, including labels and placeholders, plus the selected language. Entered form values, page URLs, and whole-page HTML are excluded. Labels can still contain website-specific information.
 - Your Gemini key stays in local extension storage, which is **not encrypted**, and is sent to Google for API authentication. No shared key is bundled.
-- DevFiller fills the **top-level document**. Frames, shadow DOM, rich-text editors, and custom widgets need additional adapters.
+- DevFiller fills the page, its same-site frames and fields inside web components (open shadow roots). A form embedded from another site (HubSpot, Typeform, Google Forms…) is filled only after you allow that form service from the panel; payment, cookie-banner and other third-party frames are never filled. Undo restores the main page only. Rich-text editors and some custom widgets need additional adapters.
 - File uploads and hidden/disabled/read-only controls are skipped. Detected one-time-code, bank and consent fields get test values; exclude a field to leave it alone. Filling never submits forms automatically.
 - Generated data is fictional. Finite sample pools can repeat, and website-specific validation may reject values. Choose the region for addresses and phones in the options; French and Algerian phone numbers follow the real format and may be in use.
 
