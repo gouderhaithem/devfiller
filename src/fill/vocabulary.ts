@@ -18,6 +18,21 @@ const COUNTRIES = [
   'China', 'Chine', 'الصين', 'Japan', 'Japon', 'اليابان', 'South Korea', 'Corée du Sud', 'Indonesia', 'Indonésie', 'Australia', 'Australie', 'New Zealand', 'Nouvelle-Zélande',
   'Senegal', 'Sénégal', 'Mali', 'Niger', 'Nigeria', 'Côte d’Ivoire', "Côte d'Ivoire", 'Ivory Coast', 'Cameroon', 'Cameroun', 'South Africa', 'Afrique du Sud', 'Kenya', 'Ethiopia', 'Éthiopie',
 ];
+// Every country's name in English, French and Arabic, from the browser's own list, so a full
+// country select ("Afghanistan, Albanie…", "أثيوبيا، أذربيجان…") is known beyond the names above.
+const ISO_COUNTRIES = 'AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HN HR HT HU ID IE IL IM IN IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW'.split(' ');
+// A browser without the list, or a code it doesn't know, only loses those names.
+function displayedCountries(): string[] {
+  const names: string[] = [];
+  for (const locale of ['en', 'fr', 'ar']) {
+    let display: Intl.DisplayNames;
+    try { display = new Intl.DisplayNames([locale], { type: 'region', fallback: 'none' }); } catch { continue; }
+    for (const code of ISO_COUNTRIES) {
+      try { const name = display.of(code); if (name) names.push(name); } catch { /* an unknown code: skip it */ }
+    }
+  }
+  return names;
+}
 const NATIONALITIES = [
   'Algerian', 'Algérien', 'Algérienne', 'جزائري', 'جزائرية', 'Moroccan', 'Marocain', 'Marocaine', 'مغربي', 'مغربية', 'Tunisian', 'Tunisien', 'Tunisienne', 'تونسي', 'تونسية',
   'Egyptian', 'Égyptien', 'Égyptienne', 'مصري', 'مصرية', 'Libyan', 'Libyen', 'Libyenne', 'French', 'Français', 'Française', 'فرنسي', 'فرنسية', 'Belgian', 'Belge',
@@ -85,9 +100,18 @@ const index = (words: readonly string[]) => new Set(words.map(normalize));
 // the city list: otherwise every wilaya select would look like a city select too.
 const WILAYA_KEYS = index(WILAYA_NAMES);
 const COMMUNE_NAMES = COMMUNE_LIST.split('|').filter(name => !WILAYA_KEYS.has(normalize(name)));
-export const OPTION_LISTS: ReadonlyArray<readonly [FieldKey, ReadonlySet<string>]> = [
-  ['country', index(COUNTRIES)], ['nationality', index(NATIONALITIES)], ['state', index([...WILAYA_NAMES, ...REGION_NAMES])], ['gender', index(GENDERS)],
-  ['city', index(COMMUNE_NAMES)], ['material', index(MATERIALS)],
-];
+// Built on first use: the country names come from the browser, which costs a few milliseconds
+// that a page without a select never needs to pay.
+let optionListsCache: ReadonlyArray<readonly [FieldKey, ReadonlySet<string>]> | undefined;
+export function optionLists(): ReadonlyArray<readonly [FieldKey, ReadonlySet<string>]> {
+  optionListsCache ??= [
+    ['country', index([...COUNTRIES, ...displayedCountries()])], ['nationality', index(NATIONALITIES)], ['state', index([...WILAYA_NAMES, ...REGION_NAMES])], ['gender', index(GENDERS)],
+    ['city', index(COMMUNE_NAMES)], ['material', index(MATERIALS)],
+  ];
+  return optionListsCache;
+}
+// An option's name as the lists hold it: "16 - Alger" and "Alger (16)" lose the code, and
+// "Albania (Shqipëri)" or "Algérie (+213)" lose what follows the name.
+export const optionName = (text: string): string => normalize(text.replace(/\s*\(\D[^)]*\).*$/u, '')).replace(/^\d+ | \d+$/g, '');
 // Recognizes a month list by any of these names, full or abbreviated ("janv.", "Sept").
 export const MONTH_SET: ReadonlySet<string> = new Set([...index(MONTHS), ...MONTH_NAMES.flatMap(names => [...names])]);

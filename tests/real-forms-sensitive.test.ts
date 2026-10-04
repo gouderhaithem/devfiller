@@ -134,3 +134,114 @@ describe('not consent', () => {
     expect(types()).toEqual(Array(13).fill('skip:consent'));
   });
 });
+
+// Topic radios a contact form asks for, read as consent on 4 of 1,000 real forms (4 October 2026)
+// because one answer or the group's name held a consent word.
+describe('a topic question in radios', () => {
+  const radios = (name: string, answers: readonly string[], ids = false) => answers.map((t, i) => `<label><input type="radio" name="${name}"${ids ? ` id="edit-${name}-${t.toLowerCase().replace(/ /g, '-')}"` : ''} value="${t}"> ${t}</label>`).join('');
+  const typeOf = (name: string) => { const fields = analyzePage(listControls()).fields; return fields.get(document.querySelector<HTMLInputElement>(`input[name="${name}"]`)!)?.type; };
+  it.each([
+    ['an answer that names a policy', 'topic', ['Medicines', 'Grants', 'Public Policy', 'Research']],
+    ['an answer that names a subscription', 'topic', ['Feedback', 'Billing', 'Cancel Subscription', 'Other']],
+    ['an answer whose id names a newsletter', 'topic', ['Newsletter', 'Store', 'Content', 'Other']],
+  ])('reads a topic group with %s as the subject', (_, name, answers) => {
+    document.body.innerHTML = `<form><label for="e">Email</label><input id="e" type="email"><fieldset><legend>Topic</legend>${radios(name, answers, true)}</fieldset></form>`;
+    expect(typeOf(name)).toBe('subject');
+  });
+  it('reads "How can we help you?" as the subject though the group\'s name holds a brand\'s "News"', () => {
+    document.body.innerHTML = `<form><label for="e">Email</label><input id="e" type="email"><fieldset><legend>How can we help you?</legend>${radios('whatbringsyoutoEENews', ['Request Pricing', 'Request a Trial', 'Trial Questions', 'Other'])}</fieldset></form>`;
+    expect(typeOf('whatbringsyoutoEENews')).toBe('subject');
+  });
+  it('still skips a consent question asked in radios', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Subscribe to our newsletter?</legend>${radios('news', ['Yes', 'No'])}</fieldset>
+      <fieldset><legend>Topics you'd like our newsletter about</legend>${radios('nl', ['Yes, all of them', 'Only product news', 'Only events'])}</fieldset>
+      <fieldset><legend>Subject</legend>${radios('agree', ['I agree to the terms', 'I do not agree', 'Ask me later'])}</fieldset></form>`;
+    expect([typeOf('news'), typeOf('nl'), typeOf('agree')]).toEqual(['skip:consent', 'skip:consent', 'skip:consent']);
+  });
+  // Found in review: a topic word in the question, or a group named "subject", must not hide a
+  // question that asks permission, however its answers agree.
+  it.each([
+    ['Do you consent to marketing? Reason', ['Sure', 'Absolutely', 'No']],
+    ['Terms and conditions regarding use', ['Accepter', 'Refuser', 'Plus tard']],
+    ['Subject: Terms and conditions', ['Agreed', 'Disagreed', 'Pending']],
+    ['Regarding marketing communications, I would like to receive', ['Email', 'SMS', 'Post']],
+    ['Which topics would you like to hear about in our newsletter?', ['Products', 'Events', 'Offers']],
+    ['هل ترغب في الاشتراك في النشرة؟ الموضوع', ['أوافق', 'لا أوافق', 'لاحقا']],
+    ["Objet : conditions générales d'utilisation", ["D'accord", "Pas d'accord", 'Je ne sais pas']],
+    ['الموضوع: الشروط والأحكام', ['أوافق', 'لا أوافق', 'لاحقا']],
+    ['Inquiry: marketing emails', ['Enabled', 'Disabled', 'Default']],
+    ['Request type: I consent to be contacted', ['Ok', 'Sure', 'No']],
+  ])('still skips "%s"', (question, answers) => {
+    document.body.innerHTML = `<form><fieldset><legend>${question}</legend>${radios('q', answers)}</fieldset></form>`;
+    expect(typeOf('q')).toBe('skip:consent');
+  });
+  it.each([
+    ['Newsletter frequency', 'topic', ['Daily', 'Weekly', 'Monthly']],
+    ['Newsletter subscription', 'subject', ['Weekly', 'Monthly', 'Never']],
+  ])('still skips "%s" though the group is named "%s"', (question, name, answers) => {
+    document.body.innerHTML = `<form><fieldset><legend>${question}</legend>${radios(name, answers)}</fieldset></form>`;
+    expect(typeOf(name)).toBe('skip:consent');
+  });
+  // Found in a second review: permission asked only by the answers, under a topic-looking question.
+  it.each([
+    ['Subject', ['Email me', 'Text me', "Don't contact me"]],
+    ['Topic', ['Send me offers', 'Send me news', 'Nothing']],
+    ['Subject', ['Share my data with partners', 'Keep it private', 'Ask me later']],
+    ['Inquiry', ['Share my details with third parties', 'Keep my details private', 'Undecided']],
+    ['Reason', ['I am over 18', 'I am under 18', 'Prefer not to say']],
+    ['Regarding the statement above', ['I certify this is true', 'I cannot certify', 'Not applicable']],
+    ['Topic: how would you like to be contacted?', ['Email', 'SMS', 'Post', "Don't contact me"]],
+    ['Topic', ['Email', 'SMS', 'Post', 'Unsubscribe me']],
+    ['Sujet', ['Envoyez-moi les offres', 'Ne rien envoyer', 'Plus tard']],
+    ['Sujet', ['Recevoir les offres', 'Recevoir les actualités', 'Ne rien recevoir']],
+    ['Motif', ["J'autorise la diffusion", 'Je refuse', 'Sans avis']],
+    ['الموضوع', ['أرسلوا لي العروض', 'لا ترسلوا لي', 'لاحقا']],
+    ['الموضوع', ['اشتراك في النشرة', 'العروض', 'لا شيء']],
+  ])('still skips "%s" when its answers ask permission: %j', (question, answers) => {
+    document.body.innerHTML = `<form><fieldset><legend>${question}</legend>${radios('q', answers)}</fieldset></form>`;
+    expect(typeOf('q')).toBe('skip:consent');
+  });
+  // Found in a third review: other forms of the same words.
+  it.each([
+    ['Topic', ['Subscribed', 'Unsubscribed', 'Pending']],
+    ['Topic', ['Accepting', 'Rejecting', 'Undecided']],
+    ['Subject', ['Authorize', 'Deny', 'Skip']],
+    ['Subject', ['Give permission', 'Deny permission', 'Later']],
+    ['Topic', ['Receive emails', 'Receive SMS', 'Receive nothing']],
+    ['Topic', ['Optin', 'Optout', 'Later']],
+    ['Sujet', ['Autoriser', 'Refuser', 'Plus tard']],
+    ['Sujet', ["S'abonner", 'Ne pas changer', 'Plus tard']],
+    ['Sujet', ['Consentement donné', 'Consentement refusé', 'Plus tard']],
+    ['الموضوع', ['أسمح', 'لا أسمح', 'لاحقا']],
+    ['الموضوع', ['تلقي الرسائل', 'عدم تلقي الرسائل', 'لاحقا']],
+    ['الموضوع', ['أقر بذلك', 'لا أقر', 'لاحقا']],
+  ])('still skips "%s" over %j', (question, answers) => {
+    document.body.innerHTML = `<form><fieldset><legend>${question}</legend>${radios('q', answers)}</fieldset></form>`;
+    expect(typeOf('q')).toBe('skip:consent');
+  });
+  it.each([
+    ['Billing', 'Cancel Subscription', 'Technical support', 'Other'],
+    ['Partnership', 'Press', 'Careers'],
+    ["Demande de partenariat", 'Réclamation', 'Autre'],
+    ['Send feedback', 'Report a bug', 'Contact sales'],
+    ['Marketing', 'Sales', 'Press'],
+  ])('reads a topic group of %s… as the subject', (...answers) => {
+    document.body.innerHTML = `<form><fieldset><legend>Topic</legend>${radios('q', answers)}</fieldset></form>`;
+    expect(typeOf('q')).toBe('subject');
+  });
+  it('still skips a group whose only topic word is its name', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Frequency</legend>${radios('newsletter_subject', ['Daily', 'Weekly', 'Never'])}</fieldset>
+      <div role="radiogroup" aria-label="Subject">${radios('contact', ['Phone me', 'Email me', 'Never contact me'])}</div></form>`;
+    expect([typeOf('newsletter_subject'), typeOf('contact')]).toEqual(['skip:consent', 'skip:consent']);
+  });
+  it('still skips value-only answers under "Regarding our privacy policy"', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Regarding our privacy policy</legend>${[1, 2, 3].map(v => `<input type="radio" name="p" value="${v}">`).join('')}</fieldset></form>`;
+    expect(typeOf('p')).toBe('skip:consent');
+  });
+  it('never ticks an answer of these questions in a real fill', () => {
+    document.body.innerHTML = `<form><fieldset><legend>Do you consent to marketing? Reason</legend>${radios('a', ['Sure', 'Absolutely', 'No'])}</fieldset>
+      <fieldset><legend>Newsletter frequency</legend>${radios('topic', ['Daily', 'Weekly', 'Monthly'])}</fieldset></form>`;
+    fillPage(request);
+    expect(checked()).toEqual([]);
+  });
+});

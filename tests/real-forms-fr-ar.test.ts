@@ -103,3 +103,61 @@ describe('more French and Arabic wording', () => {
     expect(typeOf('#f')).not.toBe('subject');
   });
 });
+
+// From the French and Arabic training forms (4 October 2026): fields the rules left unknown.
+describe('French and Arabic forms, third pass', () => {
+  const field = (label: string, name = 'f_12') => `<label for="f">${label}</label><input id="f" name="${name}">`;
+  it.each([
+    ['a request kind', ['Demander un renseignement', 'Déposer une réclamation', 'Suggérer une idée']],
+    ['a request kind', ["Demande d'information", 'Demande de devis', 'Réclamation', 'Service après vente']],
+    ['a request kind', ['استفسار', 'شكوى', 'اقتراح']],
+    ['a request kind', ['General inquiry', 'Complaint', 'Partnership', 'Feedback']],
+  ])('reads an unlabelled select whose answers are %s as the subject', (_, options) => {
+    document.body.innerHTML = `<form><label for="e">Email</label><input id="e" type="email">${select('--', options)}</form>`;
+    expect(typeOf('#s')).toBe('subject');
+  });
+  it('keeps a select of products or services away from the subject', () => {
+    document.body.innerHTML = `<form>${select('--', ['Ordinateurs', 'Téléphones', 'Accessoires', 'Imprimantes'])}</form>`;
+    expect(typeOf('#s')).not.toBe('subject');
+  });
+  it.each(['Pourquoi voulez-vous nous contacter ?', 'Why are you contacting us?', 'Full Email Subject', "Objet de l'e-mail", 'الخدمة المطلوبة'])('reads "%s" as the subject', label => {
+    document.body.innerHTML = `<form><label for="s">${label}</label>${select('--', ['Facturation', 'Livraison', 'Autre'])}</form>`;
+    expect(typeOf('#s')).toBe('subject');
+  });
+  it.each(['Numéro de la transaction', 'N° de billet', 'N° Billet de voyage', 'Numéro de formalité', 'رقم مرجع الداخلية', 'Numéro de suivi'])('reads "%s" as a reference', label => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).toBe('reference');
+  });
+  it.each(['الرقم المدني', 'Civil ID'])('keeps "%s", an ID number, away from a reference though its name says ref', label => {
+    document.body.innerHTML = `<form><label for="f">${label}</label><input id="f" name="reference_number" maxlength="12"></form>`;
+    expect(typeOf('#f')).not.toBe('reference');
+  });
+  it.each(['Passagers', 'Nombre de voyageurs', 'Nombre de passagers', 'À combien de voyageurs ?', 'عدد الاشتراكات'])('reads "%s" as a quantity', label => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).toBe('quantity');
+  });
+  it.each(['Votre région', 'Gouvernorat', 'Choisissez un gouvernorat'])('reads "%s" as the state', label => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).toBe('state');
+  });
+  it.each([['Nom du passager', 'quantity'], ['Nom du voyageur', 'quantity'], ['Passager 1', 'quantity'], ['Type de passager', 'quantity'], ['المنطقة الزمنية', 'state'], ['منطقة التوصيل', 'state']])('keeps "%s" away from %s', (label, type) => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).not.toBe(type);
+  });
+  it.each([['Prénom du passager', 'firstName'], ['المنطقة الصناعية', 'industry']])('still reads "%s" as %s', (label, type) => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).toBe(type);
+  });
+  it.each(['Lieu de départ', "Lieu d'arrivée", 'Ville de destination'])('reads "%s" as a city', label => {
+    document.body.innerHTML = `<form>${field(label)}</form>`;
+    expect(typeOf('#f')).toBe('city');
+  });
+  it.each([
+    ['in French', ['Afghanistan', 'Afrique du Sud', 'Albanie', 'Algérie', 'Allemagne', 'Andorre', 'Angola']],
+    ['in Arabic', ['أثيوبيا', 'أذربيجان', 'أرمينيا', 'أروبا', 'أستراليا', 'أفغانستان']],
+    ['with their own names beside them', ['Afghanistan (افغانستان)', 'Albania (Shqipëri)', 'Algeria (الجزائر)', 'American Samoa', 'Andorra']],
+  ])('reads a full list of countries %s as the country', (_, options) => {
+    document.body.innerHTML = `<form>${select('*', options)}</form>`;
+    expect(typeOf('#s')).toBe('country');
+  });
+});

@@ -2,12 +2,12 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import { fields } from '../fields';
 import {
-  AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
-  BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, WEAK_CARD_PHRASES, WORDS, YES_NO,
+  AGREEING_ANSWER, AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
+  BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, TOPIC_QUESTION, TOPIC_NOUNS, PERMISSION_ANSWER, REQUEST_KIND, OTHER_ANSWER, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
 import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
-import { MONTH_SET, OPTION_LISTS } from './vocabulary';
+import { MONTH_SET, optionLists, optionName } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
 import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
 import { normalize } from './normalize';
@@ -201,11 +201,29 @@ function listSize(el: HTMLInputElement): number {
   const scope = el.form ?? el.ownerDocument;
   return Array.from(scope.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')).filter(other => other.name && stem(other.name) === stem(el.name)).length;
 }
+// What the person reads as a radio group's question: its legend, label or the text beside it, not
+// its name or id.
+const QUESTION_SOURCES: ReadonlySet<SignalSource> = new Set(['legend', 'label', 'aria-label', 'aria-labelledby', 'nearby', 'title', 'placeholder']);
+// "Topic: Medicines / Grants / Public Policy": three or more answers that name topics, none
+// agreeing or asking permission, under a visible question about the message's topic that asks no
+// permission itself. Only then may an answer ("Cancel Subscription"), an id
+// ("edit-topic-newsletter") or a name ("whatbringsyoutoEENews") hold a consent word without making
+// the group consent.
+function isTopicQuestion(el: HTMLInputElement, signals: readonly Signal[]): boolean {
+  const answers = radioGroup(el).map(radio => normalize(`${Array.from(radio.labels || [], label => label.textContent || '').join(' ')} ${radio.value}`));
+  // Every consent word counts in an answer, once its topic nouns are set aside.
+  const asksPermission = (answer: string) => AGREEING_ANSWER.test(answer) || PERMISSION_ANSWER.test(answer) || DECLARATION.test(answer) || CHECKBOX_CONSENT.test(answer) || CONSENT.test(answer.replace(TOPIC_NOUNS, ' '));
+  if (answers.length < 3 || answers.some(asksPermission)) return false;
+  const question = signals.filter(signal => QUESTION_SOURCES.has(signal.source));
+  if (question.some(signal => CONSENT.test(signal.text) || DECLARATION.test(signal.text) || CHECKBOX_CONSENT.test(signal.text))) return false;
+  return question.some(signal => TOPIC_QUESTION.test(signal.text));
+}
 function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | undefined {
   // A scale ("Strongly disagree … Strongly agree") is an opinion, whatever its question says.
   if (isChoice(el) && el.type === 'radio' && isScale(optionTexts(el))) return undefined;
   // A radio's own label is left out of its signals, but "I agree" on any answer in the group
   // makes the whole group a consent question.
+  if (isChoice(el) && el.type === 'radio' && isTopicQuestion(el, signals)) return undefined;
   const own: Signal[] = isChoice(el) && el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
   // In a radio group, words that describe ("Returns accepted?", "Oui, notification reçue") aren't
   // asking for permission; everything else still counts, answers included ("Yes, send me offers").
@@ -376,14 +394,17 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   if (texts.length < 2) return [];
   const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
   const found: Array<[FieldKey, Evidence]> = [];
-  // "16 - Alger", "Alger (16)": the code isn't part of the name.
-  const names = texts.map(text => normalize(text).replace(/^\d+ | \d+$/g, ''));
-  for (const [type, list] of OPTION_LISTS) {
+  const names = texts.map(optionName);
+  for (const [type, list] of optionLists()) {
     const hits = names.filter(name => list.has(name)).length;
     const ratio = hits / names.length;
     if (aboutLanguage && type === 'nationality') continue;
     if (hits >= 2 && ratio >= 0.5) found.push([type, { source: 'options', signal: `${hits} of ${names.length} options`, weight: Math.min(THRESHOLDS.medium - 0.02, 0.5 + 0.2 * ratio), match: 'options' }]);
   }
+  // "Demande d'information, Réclamation, Autre": the kinds of request a contact form offers.
+  const answers = names.filter(name => name && !PLACEHOLDER_OPTION.test(name) && !OTHER_ANSWER.test(name));
+  const requests = answers.filter(name => REQUEST_KIND.test(name)).length;
+  if (requests >= 2 && requests / answers.length >= 0.5) found.push(['subject', { source: 'options', signal: `${requests} kinds of request`, weight: Math.min(THRESHOLDS.medium - 0.02, 0.5 + 0.2 * requests / answers.length), match: 'options' }]);
   const part = datePart(texts);
   if (part) found.push(['date', { source: 'options', signal: `${part} options`, weight: 0.55, match: 'options' }]);
   // "08:00, 08:30…" are times; "maya@example.com…" are the person's addresses.
