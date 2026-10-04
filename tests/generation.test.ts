@@ -248,3 +248,17 @@ describe('Phase E review regressions', () => {
     expect(boundaryValues({ maxLength: 0, required: true }).map(c => c.label)).toEqual(['empty', 'one character too long']);
   });
 });
+
+// Frames are filled after the main page, with the person the main page used: a repeat fill that
+// picked another identity there must not pick a third one in a frame.
+describe('values kept for frames', async () => {
+  const { coherentValues } = await import('../src/fill/generate');
+  const { generateIdentities, generateValues } = await import('../src/data');
+  it('keeps the given values when asked to, even on a repeat fill', () => {
+    const values = generateValues('en');
+    document.body.innerHTML = `<input id="e" value="${values.email}">`;
+    const request = { values, identities: generateIdentities('en'), custom: [], overwrite: true, fillUnknown: true, passwords: false };
+    expect(coherentValues(request, [document.querySelector('input')!], { skipSearch: true, skipHeader: true, rules: [] }).email).not.toBe(values.email);
+    expect(coherentValues({ ...request, keepValues: true }, [document.querySelector('input')!], { skipSearch: true, skipHeader: true, rules: [] }).email).toBe(values.email);
+  });
+});

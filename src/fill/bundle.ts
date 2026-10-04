@@ -4,6 +4,7 @@ import { fillPage, panelPageAction } from './index';
 import { exportFixture } from './export';
 import { revalidate } from './validation';
 import { fillWidgets } from './widgets';
+import { embeddedForms, frameAllowed } from './frames';
 import type { EngineGlobal } from './inject';
 
-(globalThis as EngineGlobal).__devfiller = { fillPage, panelPageAction, exportFixture, revalidate, fillWidgets };
+(globalThis as EngineGlobal).__devfiller = { fillPage, panelPageAction, exportFixture, revalidate, fillWidgets, embeddedForms, frameAllowed };

@@ -6,7 +6,7 @@ import {
   BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, TOPIC_QUESTION, TOPIC_NOUNS, PERMISSION_ANSWER, REQUEST_KIND, OTHER_ANSWER, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
-import { autocompleteToken, describeSignals, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
+import { autocompleteToken, composedText, describeSignals, formOf, isChoice, isDatePicker, isInput, isScale, optionTexts, radioGroup, type Signal, type SignalSource } from './extract';
 import { MONTH_SET, optionLists, optionName } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
 import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
@@ -210,7 +210,7 @@ const QUESTION_SOURCES: ReadonlySet<SignalSource> = new Set(['legend', 'label', 
 // ("edit-topic-newsletter") or a name ("whatbringsyoutoEENews") hold a consent word without making
 // the group consent.
 function isTopicQuestion(el: HTMLInputElement, signals: readonly Signal[]): boolean {
-  const answers = radioGroup(el).map(radio => normalize(`${Array.from(radio.labels || [], label => label.textContent || '').join(' ')} ${radio.value}`));
+  const answers = radioGroup(el).map(radio => normalize(`${Array.from(radio.labels || [], composedText).join(' ')} ${radio.value}`));
   // Every consent word counts in an answer, once its topic nouns are set aside.
   const asksPermission = (answer: string) => AGREEING_ANSWER.test(answer) || PERMISSION_ANSWER.test(answer) || DECLARATION.test(answer) || CHECKBOX_CONSENT.test(answer) || CONSENT.test(answer.replace(TOPIC_NOUNS, ' '));
   if (answers.length < 3 || answers.some(asksPermission)) return false;
@@ -224,7 +224,7 @@ function consentEvidence(el: Control, signals: readonly Signal[]): Evidence | un
   // A radio's own label is left out of its signals, but "I agree" on any answer in the group
   // makes the whole group a consent question.
   if (isChoice(el) && el.type === 'radio' && isTopicQuestion(el, signals)) return undefined;
-  const own: Signal[] = isChoice(el) && el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => ({ source: 'label' as const, raw: (label.textContent || '').trim().slice(0, 120), text: normalize(label.textContent || '') }))) : [];
+  const own: Signal[] = isChoice(el) && el.type === 'radio' ? radioGroup(el).flatMap(radio => Array.from(radio.labels || [], label => { const text = composedText(label); return { source: 'label' as const, raw: text.trim().slice(0, 120), text: normalize(text) }; })) : [];
   // In a radio group, words that describe ("Returns accepted?", "Oui, notification reçue") aren't
   // asking for permission; everything else still counts, answers included ("Yes, send me offers").
   const radio = isChoice(el) && el.type === 'radio';
@@ -555,7 +555,7 @@ function subscriptionEvidence(el: HTMLInputElement): Evidence | undefined {
     place = [node.id, typeof node.className === 'string' ? node.className : '', node.getAttribute('data-editorblocktype') || ''].find(text => text && LIST_PLACE.test(text));
     if (node.tagName === 'FORM') break;
   }
-  const button = el.form?.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
+  const button = formOf(el)?.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
   const pressed = [button?.textContent || '', button?.getAttribute('value') || ''].find(text => SUBSCRIBE_BUTTON.test(text));
   const found = own ?? place ?? pressed;
   return found ? { source: 'form', signal: `a sign-up list (${found.trim().slice(0, 40)})`, weight: 1, match: 'sensitive' } : undefined;

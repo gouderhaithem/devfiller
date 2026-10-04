@@ -2,7 +2,7 @@ import type { FieldKey, TypeRule } from '../data';
 import type { Control, FormInsight } from './types';
 import { classifyField, datePart, isSensitive, SOURCE_GROUP, THRESHOLDS, type Classification, type Evidence, type FieldRole } from './classify';
 import { AUTOCOMPLETE, CONFIRMABLE_TYPES, DATE_FIELD_TYPES, PAIR_PHRASES } from './dictionary';
-import { autocompleteToken, describeSignals, displayLabel, indexRadios, isChoice, isVisible, OMITTED_TYPES, optionTexts, type Signal } from './extract';
+import { autocompleteToken, describeSignals, displayLabel, formOf, indexRadios, isChoice, isVisible, OMITTED_TYPES, optionTexts, type Signal } from './extract';
 import { normalize } from './normalize';
 import { secondOpinion } from './model';
 
@@ -346,7 +346,7 @@ export function analyzePage(controls: readonly Control[], visible?: ReadonlyMap<
   const first = new Map(fields);
   const signals = (el: Control) => fields.get(el)?.signals ?? describeSignals(el);
   const groups = new Map<HTMLFormElement | null, Control[]>();
-  for (const el of fields.keys()) { const members = groups.get(el.form) ?? []; members.push(el); groups.set(el.form, members); }
+  for (const el of fields.keys()) { const form = formOf(el); const members = groups.get(form) ?? []; members.push(el); groups.set(form, members); }
   const forms: FormInsight[] = [];
   for (const [form, members] of groups) {
     // Split day/month/year selects are one date, handled when filling; they don't take part here.

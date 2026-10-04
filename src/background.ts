@@ -3,7 +3,7 @@ import { hasAiConsent, openPanel } from './browser';
 import { fields, generateIdentities, generatePhones, generateValues, localizedValues, validateSettings, type Settings, type TypeRule } from './data';
 import { generateSamples } from './samples';
 import type { FillRequest, FillResult, SuggestedField } from './fill';
-import { fixRejected, runExport, runFillPage, runPanelAction } from './fill/inject';
+import { fixRejected, missedEmbeds, runExport, runFillPage, runFrameFills, runPanelAction } from './fill/inject';
 import { GeminiQuotaError, providerSpec, digest, generateSuggestions, listModels, liveBatch, validateGemini, validCacheMinutes, type CachedBatch, type GeminiConfig } from './gemini';
 
 const filling = new Set<number>();
@@ -192,7 +192,13 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     const result:FillResult | undefined=await runFillPage({tabId},request,true);
     if(!result) throw new Error('The page did not respond. Click to try again.');
     if(result.stale) throw new Error('The page changed while generating data. Click DevFiller again.');
-    checkValidation=result.filled>0;
+    // Then every frame DevFiller may reach, and the embedded forms from other sites it may not.
+    const sites=await embedSites();
+    const noFrames={filled:0,preserved:0,unmatched:0,invalid:0,frames:0};
+    const frames=result.origin?await withTimeout(runFrameFills(tabId,{...request,values:result.values ?? request.values},result.origin,sites),FRAME_TIMEOUT,noFrames).catch(()=>noFrames):noFrames;
+    const missed=await withTimeout(missedEmbeds(tabId,sites),FRAME_TIMEOUT,[]).catch(()=>[]);
+    const total={filled:result.filled+frames.filled,preserved:result.preserved+frames.preserved,unmatched:result.unmatched+frames.unmatched,invalid:result.invalid+frames.invalid};
+    checkValidation=total.filled>0;
     if(batch && cacheKey && signatures && epoch===cacheEpoch && batch.expiresAt>Date.now()) {
       await withCacheWrite(cacheKey,async()=>{
         const latest=liveBatch((await chrome.storage.session.get(cacheKey!))[cacheKey!]);
@@ -205,9 +211,11 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
         await chrome.storage.session.set({[cacheKey!]:latest});
       });
     }
-    await chrome.action.setBadgeBackgroundColor({tabId,color:result.filled?'#5370ce':'#80704d'});
-    await chrome.action.setBadgeText({tabId,text:String(result.filled)});
-    await chrome.action.setTitle({tabId,title:`DevFiller: ${result.filled} filled, ${result.preserved} kept, ${result.unmatched} unrecognized, ${result.invalid} incompatible. ${note} Click to fill again. Right-click → Open DevFiller panel for details.`});
+    const inFrames=frames.filled?` (${frames.filled} inside ${frames.frames===1?'a frame':`${frames.frames} frames`}; Undo restores the main page only)`:'';
+    const embeds=missed.length?` ${missed.length===1?'An embedded form':`${missed.length} embedded forms`} from ${missed.map(form=>form.host).join(', ')} ${missed.length===1?'was':'were'} not filled: allow ${missed.length===1?'it':'them'} from the DevFiller panel.`:'';
+    await chrome.action.setBadgeBackgroundColor({tabId,color:total.filled?'#5370ce':'#80704d'});
+    await chrome.action.setBadgeText({tabId,text:String(total.filled)});
+    await chrome.action.setTitle({tabId,title:`DevFiller: ${total.filled} filled${inFrames}, ${total.preserved} kept, ${total.unmatched} unrecognized, ${total.invalid} incompatible.${embeds} ${note} Click to fill again. Right-click → Open DevFiller panel for details.`});
   } catch(error) {
     const message=error instanceof Error?error.message:'Could not fill this page.';
     const reason=/cannot access|extensions gallery|chrome:\/\/|edge:\/\//i.test(message)?'This page restricts extensions. Open a regular website with a form.':message;
@@ -217,7 +225,7 @@ async function fillClickedTab(tab: chrome.tabs.Tab, expectedDocument?:string) {
     throw new Error(reason);
   } finally {filling.delete(tabId);}
   // The page's own validation is checked after the fill is done, so a second click is never blocked.
-  if(checkValidation) void fixRejected({tabId},()=>fillGenerations.get(tabId)===generation).catch(()=>0);
+  if(checkValidation) void fixRejected({tabId,allFrames:true},()=>fillGenerations.get(tabId)===generation).catch(()=>0);
 }
 
 chrome.runtime.onInstalled.addListener(details=>{
@@ -290,11 +298,22 @@ chrome.contextMenus.onClicked.addListener((info,tab)=>{
 chrome.commands.onCommand.addListener((command,tab)=>{
   if(command==='open-panel' && tab?.windowId!==undefined) openPanel(tab.windowId);
 });
+// Form services the person allowed from the panel ("Allow on hsforms.com"): only their frames, and
+// the page's own, are filled.
+async function embedSites():Promise<string[]> {
+  const {embedSites:sites}=await chrome.storage.local.get('embedSites');
+  return Array.isArray(sites)?sites.filter((site):site is string=>typeof site==='string'):[];
+}
+// A frame that never answers must not hold the fill: the main page's result is shown regardless.
+const FRAME_TIMEOUT=4000;
+function withTimeout<T>(work:Promise<T>,ms:number,fallback:T):Promise<T> {
+  return Promise.race([work,new Promise<T>(resolve=>setTimeout(()=>resolve(fallback),ms))]);
+}
 async function inspectTab(tabId:number) {
   const settings=validateSettings((await chrome.storage.local.get('settings')).settings);
   const reply=await runFillPage({tabId},{...settings,values:generateValues(settings.locale,settings),mode:'inspect'});
   if(!reply) throw new Error('The page did not respond. Refresh to try again.');
-  return {tabId,...reply};
+  return {tabId,...reply,embeds:await withTimeout(missedEmbeds(tabId,await embedSites()),FRAME_TIMEOUT,[]).catch(()=>[])};
 }
 chrome.runtime.onMessage.addListener((message:unknown,sender,sendResponse)=>{
   if(sender.id!==chrome.runtime.id || sender.url?.split('?')[0]!==chrome.runtime.getURL('sidepanel.html') || !message || typeof message!=='object') return;

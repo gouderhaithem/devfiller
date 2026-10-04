@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Frames</title></head>
+<body>
+<!-- A page with a form, a same-site frame holding a form and a nested frame, a form embedded from a
+     form service and a cookie banner from another site, both at addresses given by tests/frames.spec.ts. -->
+<form id="main"><label for="name">Full name</label><input id="name" autocomplete="name"><label for="email">Email</label><input id="email" type="email"></form>
+<iframe id="inner" src="inner.html" width="500" height="260"></iframe>
+<iframe id="embed" width="500" height="200"></iframe>
+<iframe id="banner" title="Cookie preferences" width="500" height="120"></iframe>
+<script>
+const query = new URLSearchParams(location.search);
+document.getElementById('embed').src = query.get('embed');
+document.getElementById('banner').src = query.get('banner');
+</script>
+</body></html>
