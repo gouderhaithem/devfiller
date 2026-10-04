@@ -4,6 +4,7 @@
 // disk with every network request blocked. Used for sealed sets kept outside the repository.
 import { chromium, type Page } from 'playwright';
 import { isTestValue, TEST_TEXT, testKind } from '../../src/fill/sensitive';
+import { fillSummary } from './acceptable';
 import { build } from 'esbuild';
 import { readdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -61,7 +62,7 @@ function summary(pairs: readonly Pair[]) {
   const typed = pairs.filter(p => p.predicted !== U), expected = pairs.filter(p => p.expected !== U);
   const right = typed.filter(p => p.predicted === p.expected).length;
   const P = right / Math.max(1, typed.length), R = right / Math.max(1, expected.length);
-  return { fields: pairs.length, precision: P, recall: R, f1: 2 * P * R / Math.max(1e-9, P + R), missed: expected.filter(p => p.predicted === U).length, wrong: typed.length - right };
+  return { fields: pairs.length, precision: P, recall: R, f1: 2 * P * R / Math.max(1e-9, P + R), missed: expected.filter(p => p.predicted === U).length, wrong: typed.length - right, fill: fillSummary(pairs) };
 }
 
 const engine = (await build({ entryPoints: [resolve('benchmark/engine-entry.ts')], bundle: true, write: false, format: 'iife', target: 'chrome118', loader: { '.json': 'json' } })).outputFiles[0].text;
@@ -88,4 +89,7 @@ if (outArg) writeFileSync(resolve(outArg), JSON.stringify({ ...report, pairs: ru
 const pct = (x: number) => `${(100 * x).toFixed(1)}%`;
 console.log(`${files.length} pages, ${runs.rules.length} labelled fields${unlabelled ? `, ${unlabelled} unlabelled` : ''}`);
 for (const side of ['rules', 'model'] as const) { const s = report[side]; console.log(`${side.padEnd(6)} precision ${pct(s.precision)}  recall ${pct(s.recall)}  F1 ${pct(s.f1)}  missed ${s.missed}  wrong ${s.wrong}  sensitive filled ${leaks[side].length}`); }
+// Strict F1 counts a sentence in a notes box labelled message as wrong; "fine" doesn't (acceptable.ts).
+for (const side of ['rules', 'model'] as const) { const f = report[side].fill; console.log(`${side.padEnd(6)} fine fills ${pct(f.fine)}  real mistakes ${f.mistakes}`); }
+console.log(`real mistakes with the model: ${report.model.fill.top.map(([pair, n]) => `${pair} ${n}`).join(', ')}`);
 console.log(`model vs rules: ${report.better} better, ${report.worse} worse, ${changed.length - report.better - report.worse} changed between two wrong answers`);

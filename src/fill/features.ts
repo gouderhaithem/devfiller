@@ -4,7 +4,7 @@ import { isScale, optionTexts, type Signal } from './extract';
 import { normalize } from './normalize';
 import { placeholderOf, placeholderShape } from './placeholder';
 import { unitOf } from './units';
-import { OPTION_LISTS } from './vocabulary';
+import { optionLists, optionName } from './vocabulary';
 
 // What the learned second opinion reads about a field. Two steps, so training can't drift from the
 // extension: fieldInfo() reads the page (run in the browser, for the extension and for the
@@ -32,8 +32,8 @@ const TIME_TEXT = /^\d{1,2}[:h]\d{2}/i;
 
 function optionSummary(texts: readonly string[]): FieldInfo['options'] {
   const share = (test: (text: string) => boolean) => texts.length ? Math.round(10 * texts.filter(test).length / texts.length) / 10 : 0;
-  const names = texts.map(text => normalize(text).replace(/^\d+ | \d+$/g, ''));
-  const lists = OPTION_LISTS.filter(([, list]) => names.filter(name => list.has(name)).length >= Math.max(2, names.length / 2)).map(([type]) => type);
+  const names = texts.map(optionName);
+  const lists = optionLists().filter(([, list]) => names.filter(name => list.has(name)).length >= Math.max(2, names.length / 2)).map(([type]) => type);
   return { count: texts.length, numbers: share(text => /^\s*-?\d+(?:[.,]\d+)?\s*$/.test(text)), dates: share(text => DATE_TEXT.test(text)), times: share(text => TIME_TEXT.test(text.trim())), lists, scale: isScale(texts) ?? '' };
 }
 
