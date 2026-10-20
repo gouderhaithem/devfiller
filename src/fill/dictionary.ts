@@ -176,7 +176,12 @@ export const SCALE_ANSWER = /(?:^| )(?:strongly|somewhat|disagree|neutral|agree|
 export const YES_NO = /^(?:yes|no|y|n|oui|non|نعم|لا|yes please|no thanks|opt in|opt out)$/u;
 // Honeypots: fields a page hides from people to catch bots.
 // The whole hint must say so: "Leave blank if same as billing" is a real field.
-export const TRAP = /^(?:please )?(?:leave (?:this |it )?(?:field )?(?:empty|blank)|do not (?:fill|fill in|fill this|change)|don t (?:fill|fill in|fill this)(?: in)?|ne pas remplir|laisser vide|laissez vide|laissez ce champ vide|honeypot|اترك (?:هذا )?(?:الحقل )?فارغا)$/u;
+export const TRAP = /^(?:please )?(?:leave (?:this |it |the )?(?:field )?(?:empty|blank)|do not (?:fill(?: in| out)?|change)(?: (?:this|the) field)?|don t (?:fill(?: in| out)?)(?: (?:this|the) field)?(?: in)?|ne pas remplir(?: ce champ)?|ne rien (?:saisir|ecrire|remplir)(?: dans ce champ| ici)?|laisser vide|laissez vide|laisser ce champ vide|laissez ce champ vide|honeypot|اترك (?:هذا )?(?:الحقل )?فارغا)$/u;
+// The frames sites put around that wording: "If you are human, leave this field blank.",
+// "Veuillez laisser ce champ vide", "Leave this field blank (required)".
+export const TRAP_FRAME = /^(?:(?:if you (?:are|re) (?:a )?human|veuillez|merci de|svp|kindly) )+| (?:required|obligatoire|requis|if you (?:are|re) (?:a )?human|to prove (?:you (?:are|re) (?:a )?human|your humanity))$/gu;
+// Form plugins' trap names: WPForms "wpforms[hp]", Mailchimp for WordPress "_mc4wp_honeypot", Formspree "_gotcha", WP Anti-Spam "wantispam_e" (its "wantispam_q" is a question people answer).
+export const TRAP_NAME = /\[hp\]|(?:^|_)hp$|honeypot|hpot|^_gotcha$|wantispam_e/i;
 // Codes and personal or legal ID numbers have no generator: "Passport number" is neither a count nor a reference.
 export const ID_NUMBER_WORDS = ['promo code', 'promotional code', 'coupon', 'coupon code', 'discount code', 'voucher', 'voucher code', 'code promo', 'رمز العرض', 'رمز الخصم', 'كود الخصم', 'employee id', 'employee number', 'staff id', 'passport number', 'passport no', 'numéro de passeport', 'national id', 'national id number', 'identifiant national', 'numéro national', 'id number', 'identity number', 'social security number', 'ssn', 'nin', "numéro d'identification", "numéro de carte d'identité", 'sécurité sociale', 'tax id', 'vat number', 'numéro de tva', 'رقم جواز السفر', 'رقم التعريف الوطني', 'civil id', 'civil number', 'الرقم المدني', 'رقم الهوية', 'رقم البطاقة المدنية'];
 // A slug or permalink is part of a path, not a website.
