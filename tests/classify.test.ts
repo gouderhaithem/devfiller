@@ -428,3 +428,47 @@ describe('a years question about a job', () => {
     expect(typeOf('<input placeholder="Combien d\'années dans ce poste ?">')).toBe('experience');
   });
 });
+
+// Real French and Arabic pages (web-forms-fr-ar-3): location searches, travel questions,
+// destination lists, calling codes and split names.
+describe('places and split names', () => {
+  it('reads a box offering several kinds of place as a location search', () => {
+    expect(typeOf('<input role="combobox" aria-autocomplete="list" placeholder="Ville, code postal…">')).toBe('search');
+    expect(typeOf('<input role="combobox" placeholder="City or zip code">')).toBe('search');
+    expect(typeOf('<input placeholder="Adresse, ville ou code postal">')).toBe('search');
+    expect(typeOf('<label for="e">Emplacement</label><input id="e" placeholder="Ville, province ou territoire">')).toBe('search');
+  });
+
+  it('keeps a combined postcode and city box an address part', () => {
+    expect(typeOf('<label for="c">Code postal / Ville</label><input id="c">')).not.toBe('search');
+    expect(typeOf('<label for="c">City, State</label><input id="c">')).not.toBe('search');
+  });
+
+  it('reads a travel question as a city', () => {
+    for (const text of ["D'où partez-vous ?", 'Où allez-vous ?', 'Where are you flying from?', 'Where are you going?', 'إلى أين تسافر؟']) expect(typeOf(`<input placeholder="${text}">`), text).toBe('city');
+  });
+
+  it('never takes a list of destinations for the person\'s country', () => {
+    const options = ['Allemagne', 'Argentine', 'Australie', 'Brésil', 'Canada', 'Espagne', 'Italie', 'Japon'].map(o => `<option>${o}</option>`).join('');
+    expect(typeOf(`<label for="d">La destination qui vous intéresse</label><select id="d"><option value="">Choisir</option>${options}</select>`)).not.toBe('country');
+    expect(typeOf(`<select name="SelectedDestination"><option value="">Choisir</option>${options}</select>`)).not.toBe('country');
+    expect(typeOf(`<label for="p">Pays</label><select id="p"><option value="">Choisir</option>${options}</select>`)).toBe('country');
+  });
+
+  it('reads calling codes written with 00', () => {
+    const codes = ['0033', '0032', '0041', '00213', '0049', '0044'].map(o => `<option>${o}</option>`).join('');
+    expect(typeOf(`<select name="prefix_x"><option>Ind. tél.</option>${codes}</select>`)).toBe('country');
+  });
+
+  it('lets the label name each part of a split name that claims to be the full name', () => {
+    document.body.innerHTML = `<form>
+      <label for="a">Prénom *</label><input id="a" name="name-1" autocomplete="name">
+      <label for="b">Nom *</label><input id="b" name="name-2" autocomplete="name"></form>`;
+    expect(classifyField(input('a')).type).toBe('firstName');
+    expect(classifyField(input('b')).type).toBe('lastName');
+  });
+
+  it('still believes autocomplete="name" on a single name field', () => {
+    expect(typeOf('<label for="n">Nom</label><input id="n" name="author" autocomplete="name">')).toBe('fullName');
+  });
+});

@@ -437,15 +437,26 @@ export function moneyShare(texts: readonly string[]): number {
   return sums >= 2 && sums / answers.length >= 0.6 ? sums : 0;
 }
 
+// "La destination qui vous intéresse", name="SelectedDestination": a list of places to visit, not
+// where the person lives. "Pays de destination" still names a country.
+const DESTINATION = /(?:^| )(?:destination|destinations|وجهة|الوجهة|وجهتك)(?= |$)/;
+const PLACE_TYPES: ReadonlySet<FieldKey> = new Set(['city', 'postalCode', 'state', 'address', 'country', 'district', 'nationality']);
+function aboutDestination(signals: readonly Signal[]): boolean {
+  const said = signals.filter(signal => TEXT_SOURCES.has(signal.source));
+  return said.some(signal => DESTINATION.test(signal.text)) && !said.some(signal => matchText(signal.text).some(([entry]) => entry.key === 'country'));
+}
+
 function optionEvidence(texts: readonly string[], signals: readonly Signal[]): Array<[FieldKey, Evidence]> {
   if (texts.length < 2) return [];
   const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
+  const destination = aboutDestination(signals);
   const found: Array<[FieldKey, Evidence]> = [];
   const names = texts.map(optionName);
   for (const [type, list] of optionLists()) {
     const hits = names.filter(name => list.has(name)).length;
     const ratio = hits / names.length;
     if (aboutLanguage && type === 'nationality') continue;
+    if (destination && PLACE_TYPES.has(type)) continue;
     if (hits >= 2 && ratio >= 0.5) found.push([type, { source: 'options', signal: `${hits} of ${names.length} options`, weight: Math.min(THRESHOLDS.medium - 0.02, 0.5 + 0.2 * ratio), match: 'options' }]);
   }
   // "Demande d'information, Réclamation, Autre": the kinds of request a contact form offers.
@@ -458,8 +469,8 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   const share = (pattern: RegExp) => texts.filter(text => pattern.test(text.trim())).length / texts.length;
   if (share(/^\d{1,2}[:h]\d{2}(?:\s?[ap]\.?m\.?)?$/i) >= 0.6) found.push(['time', { source: 'options', signal: 'clock times', weight: 0.7, match: 'options' }]);
   if (share(/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i) >= 0.5) found.push(['email', { source: 'options', signal: 'email addresses', weight: 0.7, match: 'options' }]);
-  // "+213", "+33 France", "Algérie (+213)": calling codes pick the country of a phone number.
-  if (share(/^\+\d{1,4}\b|\(\+\d{1,4}\)$/) >= 0.6) found.push(['country', { source: 'options', signal: 'calling codes', weight: 0.7, match: 'options' }]);
+  // "+213", "+33 France", "Algérie (+213)", "00213": calling codes pick the country of a phone number.
+  if (share(/^\+\d{1,4}\b|\(\+\d{1,4}\)$|^00\d{1,4}$/) >= 0.6) found.push(['country', { source: 'options', signal: 'calling codes', weight: 0.7, match: 'options' }]);
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
   if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);
@@ -467,6 +478,25 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   if (money) found.push(['amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' }]);
   return found;
 }
+
+// "Ville, code postal…", "City or zip code", "Adresse, ville ou code postal": a box taking any of
+// several kinds of place is a location search when it acts like one (an autocomplete list), names
+// three kinds, or is labelled a location. "Code postal / Ville" or "City, State" alone stays an address part.
+const LOCATION_WORDS = /(?:^| )(?:emplacement|localisation)(?= |$)/;
+const PLACE_LIST = /,|\/| (?:or|ou|او|أو) /iu;
+function placeSearch(el: Control, signals: readonly Signal[]): Signal | undefined {
+  const combobox = el.getAttribute('role') === 'combobox' || el.getAttribute('aria-autocomplete') === 'list';
+  const located = signals.some(signal => SOURCE_GROUP[signal.source] === 'visible' && LOCATION_WORDS.test(signal.text));
+  return signals.find(signal => {
+    if (!ASKING_SOURCES.has(signal.source) || !PLACE_LIST.test(signal.raw)) return false;
+    const kinds = new Set(matchAsked(signal.source, signal.text).map(([entry]) => entry.key).filter(key => PLACE_TYPES.has(key)));
+    return kinds.size >= 3 || (kinds.size >= 2 && (combobox || located));
+  });
+}
+
+// Form builders (Forminator) put autocomplete="name" on each part of a split name: when two fields
+// of a form claim the full name, each is a part, and its label says which.
+const sharesFullName = (el: Control) => (formOf(el)?.querySelectorAll('[autocomplete="name" i]').length ?? 0) > 1;
 
 // Positive evidence from every signal, grouped by type.
 function collectEvidence(el: Control, signals: readonly Signal[], answers?: readonly string[], grouped = false): Map<FieldKey, Evidence[]> {
@@ -492,12 +522,16 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   const visibleBoost = signals.some(signal => signal.source === 'name' || signal.source === 'id') ? 1 : 1.06;
   // With no label, accessible name or placeholder, the title is the field's name (as for screen readers).
   const titleIsName = !signals.some(signal => NAMING_SOURCES.has(signal.source));
+  const search = placeSearch(el, signals);
   for (const signal of signals) {
-    if (signal.source === 'autocomplete') {
+    if (signal === search) {
+      add('search', { source: signal.source, signal: signal.raw, weight: Math.min(0.95, SOURCE_WEIGHT[signal.source] * visibleBoost * MATCH_STRENGTH.phrase!), match: 'phrase' });
+    } else if (signal.source === 'autocomplete') {
       const token = autocompleteToken(el).toLowerCase();
       // autocomplete="new-password" on a text field is a common way to turn browser autofill
       // off, not a password: only a password input is believed.
       if (PASSWORD_TOKENS.has(token) && isInput(el) && el.type !== 'password') continue;
+      if (token === 'name' && sharesFullName(el)) continue;
       if (Object.hasOwn(AUTOCOMPLETE, token)) add(AUTOCOMPLETE[token], { source: 'autocomplete', signal: token, weight: SOURCE_WEIGHT.autocomplete, match: 'autocomplete' });
     } else if (signal.source === 'type' || signal.source === 'inputmode') {
       const hints = signal.source === 'type' ? INPUT_TYPE_HINTS : INPUT_MODE_HINTS;
