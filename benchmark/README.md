@@ -290,6 +290,52 @@ Two of the first wordings broke benchmark fixtures and were taken out before the
 "client", a company). The one sensitive field the training forms still filled, an activation code,
 no longer is. This sealed set is now retired.
 
+### A third collection of French and Arabic forms, and settled labels
+
+1,282 more websites (France and francophone Europe, the Maghreb, the Gulf and the Levant,
+francophone Africa) gave 385 forms from 281 of them, labelled blind and split by website: 220
+training forms (187 French, 33 Arabic) and 165 sealed (142 French, 23 Arabic, 1,331 fields). Two
+labelling disagreements between agents were settled before the split: a budget is a `price`, and the
+search box inside a country or dialling-code picker is a `search`.
+
+The labels of every round were then checked again (`scripts/uci-sealed/consistency.mjs`, which now
+also reads a field's title, the text before a select and its first option, and treats `-` and `_` in
+names as spaces): 82 fields in 56 pages changed, 75 of them topics picked from a list ("Reason for
+Contact", "Type of Request", "Message Type", "I need help with…") that were `unknown` although the
+guide settles them as `subject`. 47 of these were in round 4, which is why round 4's numbers below
+differ from earlier sections. The guide gained one settled case: spam traps and fields the site fills
+itself (page, referrer and redirect URLs) are `unknown`.
+
+Rules, tuned on training forms only: Arabic travel questions no longer catch "من أين سمعت عنا"
+(how did you hear about us); "combien d'années" is experience only beside a job word (not years at
+an address or a loan's length); "Max" is not a sample first name; link fields are read from more
+English, French and Arabic wording (GitHub, Facebook, "Profil LinkedIn", "Site personnel", "رابط
+الموقع", "حساب فيسبوك"…, but not "Lien de parenté" or "موقع الشركة", a company's location as often as
+its website) and a link naming a network gets a profile there for the form's fictional person. The
+model was retrained on the rebuilt dataset.
+
+| Same rules under both models | Old model | **Retrained model** |
+| --- | --- | --- |
+| English round 4 (1,000 forms, settled labels) | 91.8% (P 92.0%, 864 mistakes) | 91.7% (P 91.6%, 867 mistakes) |
+| **165 sealed French and Arabic forms** | 87.1% (P 88.4%, 159 mistakes) | **88.1%** (P 89.1%, 149 mistakes) |
+
+English is a tie (three fields apart) and French and Arabic gain a point, so the retrained model is
+kept. A stricter answer threshold (target precision 0.92) was tried and dropped: on round 4 it raised
+precision to 92.0% but cut recall to 90.9% (F1 91.4%). No sensitive field is filled in English; the
+one French field filled by every version is unchanged. The sealed forms were measured more than once
+while comparing models, with no rule tuned on them; they are now retired.
+
+Spam traps are now read in more ways: their wording inside a frame ("If you are human, leave this
+field blank.", "Veuillez laisser ce champ vide", "… (required)", "… to prove your humanity"), more
+French wording, the trap names of form plugins (`wpforms[hp]`, `_mc4wp_honeypot`, `_gotcha`,
+`*honeypot*`) and a `website` or `url` box no one can tab to with autofill turned off. Field
+precision can't show this, since it scores types and a trap is skipped at fill time, so the trap
+check was run over every labelled field of round 4 and the three French and Arabic training sets:
+40 more fields are now left empty, all of them labelled spam traps (WP Anti-Spam's `wantispam_q`,
+a question people answer, is deliberately not one of them), and no field the old check left empty
+is filled now. Still filled: unlabelled boxes named `url` with nothing else to
+tell them apart from a real website field.
+
 ## Against other form fillers
 
 `node scripts/model/run.mjs compare <out.json> <folders…>` runs DevFiller's shipped engine and other fillers' Chrome extensions on the same labelled pages,
