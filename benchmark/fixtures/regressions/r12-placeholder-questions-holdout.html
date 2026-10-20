@@ -1,0 +1,90 @@
+<!doctype html>
+<!--
+  former sealed holdout (n16), retired to regressions once tuned on: question-style and conversational placeholders.
+  Written 2026-10-20. No labels, no aria-labels, meaningless or absent names/ids:
+  the placeholder is the only clue.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Placeholder Questions</title>
+<style>
+body{font:14px/1.4 sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem}
+input,select,textarea{display:block;width:100%;padding:.4rem;margin:.5rem 0;box-sizing:border-box}
+section{margin:2rem 0}
+</style>
+</head>
+<body>
+
+<section>
+<h2>Join the beta</h2>
+<form data-form-type="signup" action="#" method="post">
+  <input name="f_1" placeholder="What should we call you?" data-expect="firstName">
+  <input type="email" name="f_2" placeholder="Where can we email you?" data-expect="email">
+  <input name="f_3" placeholder="Where do you work?" data-expect="company">
+  <input name="f_4" placeholder="What's your role there?" data-expect="jobTitle">
+  <input name="f_5" type="number" placeholder="How many people work at your company?" data-expect="employeeCount" data-value-pattern="^\d+$">
+  <input name="f_6" type="number" placeholder="How many years have you been coding?" data-expect="experience" data-value-pattern="^\d+$">
+  <input name="f_7" placeholder="Your LinkedIn profile, e.g. linkedin.com/in/jane (optional)" data-expect="website">
+  <input type="tel" name="f_8" placeholder="Best number to reach you?" data-expect="phone">
+  <input name="f_9" placeholder="Which city are you based in?" data-expect="city">
+  <input name="f_10" placeholder="Got a referral code?" data-expect="unknown">
+  <textarea name="f_11" placeholder="Anything else you'd like us to know?" data-expect="unknown"></textarea>
+</form>
+</section>
+
+<section lang="fr">
+<h2>Candidature spontanée</h2>
+<form data-form-type="other" action="#" method="post">
+  <input id="input_12" placeholder="Comment vous appelez-vous ? (prénom et nom)" data-expect="fullName">
+  <input id="input_13" placeholder="Quel âge avez-vous ?" type="number" data-expect="age" data-value-pattern="^\d+$">
+  <input id="input_14" placeholder="Quand êtes-vous né(e) ? jj/mm/aaaa" data-expect="birthDate">
+  <input id="input_15" placeholder="Où habitez-vous ? (n° et rue)" data-expect="address">
+  <input id="input_16" placeholder="Votre code postal, ex. 69003" data-expect="postalCode" data-value-pattern="^\d{5}$">
+  <input id="input_17" placeholder="Où travaillez-vous actuellement ?" data-expect="company">
+  <input id="input_18" placeholder="Quel est votre poste ?" data-expect="jobTitle">
+  <input id="input_19" placeholder="Depuis combien d'années exercez-vous ce métier ?" data-expect="experience">
+  <input id="input_20" placeholder="Quelles sont vos prétentions salariales ?" data-expect="salary">
+  <input id="input_21" placeholder="Lien vers votre portfolio (facultatif)" data-expect="website">
+  <input id="input_22" placeholder="À partir de quand êtes-vous disponible ?" data-expect="startDate">
+  <input id="input_23" placeholder="Dans quelle école avez-vous étudié ?" data-expect="unknown">
+  <textarea id="input_24" placeholder="Dites-nous en plus…" data-expect="unknown"></textarea>
+</form>
+</section>
+
+<section lang="ar" dir="rtl">
+<h2>استمارة التسجيل</h2>
+<form data-form-type="signup" action="#" method="post">
+  <input name="field-1" placeholder="ما هو اسمك الأول؟" data-expect="firstName">
+  <input name="field-2" placeholder="ما هو لقبك؟" data-expect="lastName">
+  <input name="field-3" placeholder="تاريخ ميلادك" data-expect="birthDate">
+  <input name="field-4" placeholder="كم عمرك؟" data-expect="age">
+  <input name="field-5" placeholder="عنوان سكنك" data-expect="address">
+  <input name="field-6" placeholder="في أي ولاية تقيم؟" data-expect="state">
+  <input name="field-7" placeholder="أين تعمل حاليا؟" data-expect="company">
+  <input name="field-8" placeholder="ما هي وظيفتك؟" data-expect="jobTitle">
+  <input name="field-9" placeholder="كم سنة من الخبرة لديك؟" data-expect="experience">
+  <input name="field-10" type="tel" placeholder="رقم هاتفك المحمول، مثال 0555 12 34 56" data-expect="phone" data-phone-region="dz">
+  <input name="field-11" type="email" placeholder="ما هو بريدك الإلكتروني؟" data-expect="email">
+  <input name="field-12" placeholder="اختر اسم مستخدم (اختياري)" data-expect="username">
+  <input name="field-13" type="password" placeholder="كلمة السر الخاصة بك" data-expect="password">
+  <input name="field-14" placeholder="هل لديك رمز ترويجي؟" data-expect="unknown">
+</form>
+</section>
+
+<section>
+<h2>Quick quote / Devis rapide</h2>
+<form data-form-type="contact" action="#" method="post">
+  <input placeholder="Your name / Votre nom complet" data-expect="fullName">
+  <input type="email" placeholder="Work email, e.g. sam@acme.io" data-expect="email">
+  <input placeholder="Company website? (optional)" data-expect="website">
+  <input placeholder="Which country are you in? / Dans quel pays êtes-vous ?" data-expect="country">
+  <input type="number" placeholder="How many units do you need?" data-expect="quantity" data-value-pattern="^\d+$">
+  <input placeholder="What's your budget? (€)" data-expect="amount">
+  <textarea placeholder="How can we help? / Comment pouvons-nous vous aider ?" data-expect="message"></textarea>
+  <input placeholder="Anything else? (optional)" data-expect="unknown">
+</form>
+</section>
+
+</body>
+</html>

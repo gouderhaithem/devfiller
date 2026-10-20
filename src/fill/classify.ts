@@ -2,7 +2,7 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import { fields } from '../fields';
 import {
-  AGREEING_ANSWER, AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
+  AGREEING_ANSWER, ALIAS_ENTRIES, AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
   BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, TOPIC_QUESTION, TOPIC_NOUNS, PERMISSION_ANSWER, REQUEST_KIND, OTHER_ANSWER, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
@@ -157,23 +157,28 @@ export function matchText(text: string): Match[] {
   return found;
 }
 
-// "Enter your email", "Saisissez votre ville", "أدخل بريدك", "Website (optional)": the instruction and
-// the remark around the field's name. "Type of vehicle" keeps its "type".
-const INSTRUCTION = /^(?:(?:please|kindly|veuillez|merci de|svp|من فضلك|الرجاء|يرجي) )?(?:(?:enter|type|input|insert|provide|add|write|fill in|put|give|specify|choose|select|pick|saisir|saisissez|entrer|entrez|taper|tapez|indiquer|indiquez|renseigner|renseignez|ecrire|ecrivez|inserer|inserez|choisir|choisissez|selectionner|selectionnez|preciser|precisez|ادخل|ادخلي|اكتب|اكتبي|اختر|اختاري|حدد|حددي|ادخال)(?! (?:of|de|du|des|d) )(?: (?:in|here|ici))? )?(?:(?:your|the|a|an|votre|vos|ton|ta|tes|le|la|les|l|un|une) )?/;
+// "Enter your email", "What's your role?", "Quel est votre poste ?", "ما هي وظيفتك", "Website (optional)":
+// the instruction or question and the remark around the field's name. "Type of vehicle" keeps its "type".
+const INSTRUCTION = /^(?:(?:please|kindly|veuillez|merci de|svp|من فضلك|الرجاء|يرجي) )?(?:(?:what s|whats|what is|what are|which is|quel est|quelle est|quels sont|quelles sont|ما هو|ما هي|ماهو|ماهي) |(?:enter|type|input|insert|provide|add|write|fill in|put|give|specify|choose|select|pick|saisir|saisissez|entrer|entrez|taper|tapez|indiquer|indiquez|renseigner|renseignez|ecrire|ecrivez|inserer|inserez|choisir|choisissez|selectionner|selectionnez|preciser|precisez|ادخل|ادخلي|اكتب|اكتبي|اختر|اختاري|حدد|حددي|ادخال)(?! (?:of|de|du|des|d) )(?: (?:in|here|ici))? )?(?:(?:your|the|a|an|votre|vos|ton|ta|tes|le|la|les|l|un|une) )?/;
 const REMARK = / (?:optional|required|facultatif|facultative|optionnel|optionnelle|obligatoire|requis|اختياري|اجباري|here|ici)$/;
-const known = (text: string) => EXACT.has(text) || WORDS.has(text) || PHRASES.has(text);
+// "Pick a username, e.g. jdoe_92", "Votre ville, ex : Lyon": the sample after the name.
+const TRAILING_EXAMPLE = / (?:e g|eg|ex|par ex|par exemple|for example|such as|exemple|مثال|مثلا)(?: .*)?$/;
+// Every word of every alias, so "ميلادك" is read as the "الميلاد" of "تاريخ الميلاد".
+const ALIAS_TOKENS: ReadonlySet<string> = new Set(ALIAS_ENTRIES.flatMap(entry => entry.tokens));
+const known = (text: string) => EXACT.has(text) || WORDS.has(text) || ALIAS_TOKENS.has(text);
 
-// "بريدك", "رسالتك", "هاتفكم": the reader's own noun, which the dictionary holds with its article.
+// "بريدك", "رسالتك", "موظفيك": the reader's own noun, which the dictionary holds with its article
+// ("البريد", "الرسالة", "الموظفين").
 function withoutPossessive(token: string): string {
   const stem = token.match(/^(\p{Script=Arabic}{2,}?)(?:كم|كن|ك)$/u)?.[1];
   if (!stem || stem.startsWith('ال') || known(token)) return token;
-  const noun = `ال${stem.replace(/ت$/, 'ة')}`;
-  return known(noun) ? noun : token;
+  const nouns = [`ال${stem.replace(/ت$/, 'ة')}`, ...(stem.endsWith('ي') ? [`ال${stem}ن`] : [])];
+  return nouns.find(known) ?? token;
 }
 
 // The field's name inside an instruction, or the text itself when there is no instruction.
 export function askedFor(text: string): string {
-  return text.replace(INSTRUCTION, '').replace(REMARK, '').split(' ').map(withoutPossessive).join(' ');
+  return text.replace(INSTRUCTION, '').replace(TRAILING_EXAMPLE, '').replace(REMARK, '').split(' ').map(withoutPossessive).join(' ');
 }
 
 // Sources a person reads, where an instruction can surround the field's name.

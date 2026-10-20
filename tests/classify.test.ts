@@ -389,3 +389,42 @@ describe('placeholders without a label', () => {
     }
   });
 });
+
+// Placeholders that ask a question, or say the field's name inside a sentence.
+describe('placeholders that ask', () => {
+  const placeholder = (text: string) => classify(`<input type="text" placeholder="${text}">`);
+
+  it('reads the question for what it asks', () => {
+    for (const [text, type] of [
+      ['Where do you work?', 'company'], ['Who do you work for?', 'company'], ['Où travaillez-vous ?', 'company'], ['أين تعمل؟', 'company'],
+      ["What's your role?", 'jobTitle'], ['What is your job title?', 'jobTitle'], ['Quel est votre poste ?', 'jobTitle'], ['ما هي وظيفتك؟', 'jobTitle'],
+      ['How many employees do you have?', 'employeeCount'], ['Combien de salariés ?', 'employeeCount'], ['كم عدد موظفيك؟', 'employeeCount'],
+      ['How many years of experience?', 'experience'], ["Combien d'années d'expérience ?", 'experience'], ['كم سنة من الخبرة لديك؟', 'experience'],
+      ['Where do you live?', 'city'], ['Où habitez-vous ?', 'city'], ['When were you born?', 'birthDate'], ['كم عمرك؟', 'age'],
+    ] as const) expect(placeholder(text).type, text).toBe(type);
+  });
+
+  it('reads an Arabic possessive inside a phrase', () => {
+    expect(placeholder('تاريخ ميلادك').type).toBe('birthDate');
+    expect(placeholder('رقم جوالك').type).toBe('phone');
+    expect(placeholder('اكتب اسمك الثلاثي').type).toBe('fullName');
+    expect(placeholder('جهة العمل (اختياري)').type).toBe('company');
+    expect(placeholder('رابط حسابك على لينكدإن').type).toBe('website');
+  });
+
+  it('reads the name before a mid-sentence example', () => {
+    expect(placeholder('Pick a username, e.g. jdoe_92').type).toBe('username');
+    expect(placeholder('Votre ville, ex : Lyon').type).toBe('city');
+  });
+
+  it('keeps an open question unknown', () => {
+    for (const text of ['Is there anything else?', 'What brings you here?', 'Any special requests?']) expect(placeholder(text).type, text).not.toMatch(/^(company|jobTitle|city|employeeCount|experience)$/);
+  });
+});
+
+describe('a years question about a job', () => {
+  it('asks for experience, not the job', () => {
+    expect(typeOf('<input placeholder="Depuis combien d’années faites-vous ce métier ?">')).toBe('experience');
+    expect(typeOf('<input placeholder="Combien d\'années dans ce poste ?">')).toBe('experience');
+  });
+});
