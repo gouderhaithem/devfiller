@@ -104,14 +104,14 @@ describe('placeholders', () => {
       <input id="n" name="f2" placeholder="e.g. 5">
       <input id="z" name="f3" placeholder="12345">
       <input id="m" name="f4" placeholder="0.00">
-      <input id="w" name="f5" placeholder="e.g. Software Engineer">
+      <input id="w" name="f5" placeholder="e.g. State Farm">
       <input id="d" name="f6" placeholder="DD/MM/YYYY">
     </form>`);
     expect(field('y').value).toMatch(/^(19|20)\d{2}$/);
     expect(field('n').value).toMatch(/^\d{1,2}$/);
     expect(field('z').value).toMatch(/^\d{5}$/);
     expect(field('m').value).toMatch(/^\d+\.\d{2}$/);
-    expect(field('w').value).toBe('Software Engineer');
+    expect(field('w').value).toBe('State Farm');
     expect(field('d').value).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
   });
 });

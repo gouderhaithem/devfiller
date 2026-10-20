@@ -4,6 +4,7 @@ import { classifyField, matchText, THRESHOLDS, usableKey } from '../src/fill/cla
 import { ALIAS_ENTRIES } from '../src/fill/dictionary';
 import { isMeaningless, nearbyText } from '../src/fill/extract';
 import { normalize } from '../src/fill/normalize';
+import { sampleType } from '../src/fill/examples';
 import { fillPage, panelPageAction, type FillRequest } from '../src/fill';
 import { TEST_IBAN } from '../src/fill/sensitive';
 import { generateIdentities, generateValues } from '../src/data';
@@ -253,7 +254,7 @@ describe('explainability', () => {
     expect(result.fields!.find(f => f.label === 'mystery')!.detected).toMatchObject({ type: 'unknown', label: 'Unknown' });
   });
   it('explains low-confidence skips when guessing is off', () => {
-    document.body.innerHTML = '<input id="x" placeholder="Company (optional)">';
+    document.body.innerHTML = '<input id="x" placeholder="Company you work for">';
     const result = fillPage({ ...request, fillUnknown: false });
     expect(input('x').value).toBe('');
     expect(result.fields![0].reason).toMatch(/^Not sure this is company \(\d+%\)/);
@@ -333,5 +334,58 @@ describe('real-world fields', () => {
     expect(typeOf('<label for="n">Name</label><input type="text" id="n">')).not.toBe('unknown');
     expect(typeOf('<label for="c">Contact Name *</label><input type="text" id="c">')).toBe('fullName');
     expect(typeOf('<label for="h">Account holder name</label><input type="text" id="h">')).toBe('fullName');
+  });
+});
+
+// A label-less field described only by its placeholder, the way many sites build forms.
+describe('placeholders without a label', () => {
+  const placeholder = (text: string) => classify(`<input type="text" placeholder="${text}">`);
+
+  it('reads an instruction the way it reads the bare name', () => {
+    for (const [text, type] of [
+      ['Enter your email', 'email'], ['Please type your phone number', 'phone'], ['Your phone', 'phone'], ['Website (optional)', 'website'],
+      ['Votre prénom', 'firstName'], ['Saisissez votre ville', 'city'], ['Entrez votre nom', 'lastName'], ['Ville (facultatif)', 'city'],
+      ['أدخل بريدك الإلكتروني', 'email'], ['أدخل اسمك', 'fullName'], ['اكتب رسالتك', 'message'], ['رقم هاتفك', 'phone'], ['أدخل مدينتك', 'city'],
+    ] as const) {
+      const found = placeholder(text);
+      expect(found.type, text).toBe(type);
+      expect(found.confidence, text).toBeGreaterThanOrEqual(THRESHOLDS.medium);
+    }
+  });
+
+  it('keeps an alias that already starts with "your"', () => {
+    expect(typeOf('<input placeholder="Your message">')).toBe('message');
+    expect(typeOf('<input placeholder="Your name">')).toBe('fullName');
+  });
+
+  it('leaves Arabic words that only end like a possessive alone', () => {
+    expect(typeOf('<input placeholder="اسم البنك">')).not.toBe('fullName');
+  });
+
+  it('recognizes a sample answer by what it looks like', () => {
+    for (const [text, type] of [
+      ['John', 'firstName'], ['Doe', 'lastName'], ['John Doe', 'fullName'], ['Jean Dupont', 'fullName'], ['e.g. Paris', 'city'], ['Oran', 'city'],
+      ['Acme Inc.', 'company'], ['Ex : Sonatrach SPA', 'company'], ['12 rue de la Paix', 'address'], ['221B Baker Street', 'address'],
+      ['jean.dupont', 'username'], ['@johndoe', 'username'], ['ex: Développeur web', 'jobTitle'], ['مثال: محمد', 'firstName'], ['France', 'country'],
+    ] as const) {
+      const found = placeholder(text);
+      expect(found.type, text).toBe(type);
+      expect(found.confidence, text).toBeGreaterThanOrEqual(THRESHOLDS.low);
+    }
+  });
+
+  it('lets a real label outrank a sample answer', () => {
+    expect(typeOf('<label for="x">Company</label><input id="x" placeholder="John">')).toBe('company');
+    expect(typeOf('<label for="x">Last name</label><input id="x" placeholder="e.g. Martin">')).toBe('lastName');
+  });
+
+  it('reads nothing into an ordinary word or sentence', () => {
+    for (const text of ['Search…', 'Anything else?', 'Hello', 'Type here', 'Optional']) expect(placeholder(text).type, text).toMatch(/^(unknown|search|message)$/);
+  });
+
+  it('takes no ordinary phrase for a sample answer', () => {
+    for (const text of ['file.pdf', 'v1.2', 'example.com', 'first_name', 'e.g.', 'Select manager', 'Assign to assistant', 'Max price', 'Sales Co', 'Choose a plan SA', 'Total 2 way', 'Table 4 Dr', 'Place 2']) {
+      expect(sampleType(text), text).toBeUndefined();
+    }
   });
 });

@@ -1,22 +1,22 @@
 {
   "summary": {
-    "fields": 876,
-    "precision": 0.9916897506925207,
-    "recall": 0.9821673525377229,
-    "f1": 0.9869055823569951,
-    "accuracy": 0.980593607305936,
-    "unknownRate": 0.17579908675799086,
-    "falsePositiveRate": 0.027210884353741496,
-    "wrongRate": 0.00684931506849315
+    "fields": 900,
+    "precision": 0.9932975871313673,
+    "recall": 0.9840637450199203,
+    "f1": 0.9886591060707138,
+    "accuracy": 0.9833333333333333,
+    "unknownRate": 0.1711111111111111,
+    "falsePositiveRate": 0.02040816326530612,
+    "wrongRate": 0.005555555555555556
   },
   "types": {
     "address": {
-      "support": 22,
-      "predicted": 21,
-      "correct": 21,
+      "support": 24,
+      "predicted": 23,
+      "correct": 23,
       "precision": 1,
-      "recall": 0.9545454545454546,
-      "f1": 0.9767441860465117
+      "recall": 0.9583333333333334,
+      "f1": 0.9787234042553191
     },
     "address2": {
       "support": 5,
@@ -59,9 +59,9 @@
       "f1": 1
     },
     "city": {
-      "support": 28,
-      "predicted": 28,
-      "correct": 28,
+      "support": 31,
+      "predicted": 31,
+      "correct": 31,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -75,12 +75,12 @@
       "f1": 1
     },
     "company": {
-      "support": 15,
-      "predicted": 13,
-      "correct": 13,
+      "support": 17,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
-      "recall": 0.8666666666666667,
-      "f1": 0.9285714285714286
+      "recall": 0.8823529411764706,
+      "f1": 0.9375
     },
     "country": {
       "support": 21,
@@ -123,9 +123,9 @@
       "f1": 1
     },
     "email": {
-      "support": 51,
-      "predicted": 51,
-      "correct": 51,
+      "support": 53,
+      "predicted": 53,
+      "correct": 53,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -155,17 +155,17 @@
       "f1": 1
     },
     "firstName": {
-      "support": 21,
-      "predicted": 21,
-      "correct": 21,
+      "support": 24,
+      "predicted": 24,
+      "correct": 24,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "fullName": {
-      "support": 32,
-      "predicted": 32,
-      "correct": 32,
+      "support": 34,
+      "predicted": 34,
+      "correct": 34,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -187,20 +187,20 @@
       "f1": 0.6666666666666666
     },
     "jobTitle": {
-      "support": 10,
-      "predicted": 9,
-      "correct": 9,
+      "support": 11,
+      "predicted": 11,
+      "correct": 11,
       "precision": 1,
-      "recall": 0.9,
-      "f1": 0.9473684210526316
+      "recall": 1,
+      "f1": 1
     },
     "lastName": {
-      "support": 22,
-      "predicted": 21,
-      "correct": 21,
+      "support": 24,
+      "predicted": 23,
+      "correct": 23,
       "precision": 1,
-      "recall": 0.9545454545454546,
-      "f1": 0.9767441860465117
+      "recall": 0.9583333333333334,
+      "f1": 0.9787234042553191
     },
     "material": {
       "support": 3,
@@ -219,9 +219,9 @@
       "f1": 1
     },
     "message": {
-      "support": 14,
-      "predicted": 14,
-      "correct": 14,
+      "support": 15,
+      "predicted": 15,
+      "correct": 15,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -259,9 +259,9 @@
       "f1": 1
     },
     "phone": {
-      "support": 48,
-      "predicted": 48,
-      "correct": 48,
+      "support": 50,
+      "predicted": 50,
+      "correct": 50,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -331,12 +331,12 @@
       "f1": 1
     },
     "skip:consent": {
-      "support": 65,
+      "support": 66,
       "predicted": 67,
-      "correct": 65,
-      "precision": 0.9701492537313433,
+      "correct": 66,
+      "precision": 0.9850746268656716,
       "recall": 1,
-      "f1": 0.9848484848484849
+      "f1": 0.9924812030075187
     },
     "skip:iban": {
       "support": 8,
@@ -403,17 +403,17 @@
       "f1": 1
     },
     "username": {
-      "support": 8,
-      "predicted": 8,
-      "correct": 8,
+      "support": 10,
+      "predicted": 10,
+      "correct": 10,
       "precision": 1,
       "recall": 1,
       "f1": 1
     },
     "website": {
-      "support": 10,
-      "predicted": 10,
-      "correct": 10,
+      "support": 11,
+      "predicted": 11,
+      "correct": 11,
       "precision": 1,
       "recall": 1,
       "f1": 1
@@ -434,12 +434,12 @@
   },
   "relations": {
     "accepted by the page": {
-      "correct": 578,
-      "total": 578
+      "correct": 602,
+      "total": 602
     },
     "seeded repeat": {
-      "correct": 63,
-      "total": 63
+      "correct": 64,
+      "total": 64
     },
     "confirmation": {
       "correct": 14,
@@ -458,12 +458,12 @@
       "total": 3
     },
     "value shape": {
-      "correct": 47,
-      "total": 47
+      "correct": 49,
+      "total": 49
     }
   },
   "forms": {
-    "correct": 73,
-    "total": 80
+    "correct": 76,
+    "total": 83
   }
 }

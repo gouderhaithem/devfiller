@@ -10,6 +10,7 @@ import { autocompleteToken, composedText, describeSignals, formOf, isChoice, isD
 import { MONTH_SET, optionLists, optionName } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
 import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
+import { sampleType } from './examples';
 import { normalize } from './normalize';
 
 export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
@@ -156,6 +157,37 @@ export function matchText(text: string): Match[] {
   return found;
 }
 
+// "Enter your email", "Saisissez votre ville", "أدخل بريدك", "Website (optional)": the instruction and
+// the remark around the field's name. "Type of vehicle" keeps its "type".
+const INSTRUCTION = /^(?:(?:please|kindly|veuillez|merci de|svp|من فضلك|الرجاء|يرجي) )?(?:(?:enter|type|input|insert|provide|add|write|fill in|put|give|specify|choose|select|pick|saisir|saisissez|entrer|entrez|taper|tapez|indiquer|indiquez|renseigner|renseignez|ecrire|ecrivez|inserer|inserez|choisir|choisissez|selectionner|selectionnez|preciser|precisez|ادخل|ادخلي|اكتب|اكتبي|اختر|اختاري|حدد|حددي|ادخال)(?! (?:of|de|du|des|d) )(?: (?:in|here|ici))? )?(?:(?:your|the|a|an|votre|vos|ton|ta|tes|le|la|les|l|un|une) )?/;
+const REMARK = / (?:optional|required|facultatif|facultative|optionnel|optionnelle|obligatoire|requis|اختياري|اجباري|here|ici)$/;
+const known = (text: string) => EXACT.has(text) || WORDS.has(text) || PHRASES.has(text);
+
+// "بريدك", "رسالتك", "هاتفكم": the reader's own noun, which the dictionary holds with its article.
+function withoutPossessive(token: string): string {
+  const stem = token.match(/^(\p{Script=Arabic}{2,}?)(?:كم|كن|ك)$/u)?.[1];
+  if (!stem || stem.startsWith('ال') || known(token)) return token;
+  const noun = `ال${stem.replace(/ت$/, 'ة')}`;
+  return known(noun) ? noun : token;
+}
+
+// The field's name inside an instruction, or the text itself when there is no instruction.
+export function askedFor(text: string): string {
+  return text.replace(INSTRUCTION, '').replace(REMARK, '').split(' ').map(withoutPossessive).join(' ');
+}
+
+// Sources a person reads, where an instruction can surround the field's name.
+const ASKING_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'title', 'nearby']);
+const WHOLE_MATCHES: ReadonlySet<MatchKind> = new Set(['exact', 'joined', 'plural']);
+// "Your message" is an alias as written; "Enter your email" is matched once the instruction is gone.
+function matchAsked(source: SignalSource, text: string): Match[] {
+  const found = matchText(text);
+  if (!ASKING_SOURCES.has(source) || found.some(([, kind]) => WHOLE_MATCHES.has(kind))) return found;
+  const asked = askedFor(text);
+  const plain = asked && asked !== text ? matchText(asked) : [];
+  return plain.length ? plain : found;
+}
+
 // Card, one-time-code and bank fields, found before any scoring so they can never be filled.
 // `weak` marks a card word other documents share ("Expiry", "PIN"): the form must confirm it.
 export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: SensitiveKind; evidence: Evidence; weak?: boolean } | undefined {
@@ -264,6 +296,7 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   const shape = placeholderShape(placeholder);
   const hinted = shape && SHAPE_TYPES[shape.kind];
   const picker = !hinted && isDatePicker(el) ? ['date', 0.8] as const : undefined;
+  if (!hinted && !picker) return sampleEvidence(placeholder, byType, add);
   const [type, weight] = hinted ?? picker ?? [];
   if (!type || !weight) return;
   // Phone shapes are only digits and dashes, which an order or reference number shares: when the
@@ -272,6 +305,15 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   const evidence: Evidence = { source: 'format', signal: picker ? 'date picker' : placeholder, weight, match: 'type' };
   const named = type === 'date' ? [...byType.keys()].filter(key => DATE_FIELD_TYPES.has(key)) : [];
   for (const key of named.length ? named : [type]) add(key, evidence);
+}
+
+// A sample answer ("John", "Acme Inc.", "e.g. Paris") names the field only when its words don't:
+// beside a "Company" label, "John" is just a contact's example.
+const SAMPLE_WEIGHT = 0.65;
+function sampleEvidence(placeholder: string, byType: Map<FieldKey, Evidence[]>, add: (type: FieldKey, evidence: Evidence) => void) {
+  if ([...byType.values()].some(items => items.some(item => TEXT_SOURCES.has(item.source) && item.weight >= THRESHOLDS.medium))) return;
+  const type = sampleType(placeholder);
+  if (type) add(type, { source: 'format', signal: placeholder, weight: SAMPLE_WEIGHT, match: 'type' });
 }
 
 // An option that is a date: "2026-05-01", "01/05/2026", or a year on its own ("2000 sq ft" isn't).
@@ -465,7 +507,7 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
       const aside = signal.source === 'legend' && signal.text.split(' ').length > 6 ? 0.7 : 1;
       // "Manager's name", "Name of host": a generic "name" beside a person's role is that person's name.
       const person = PERSON_ROLE_PHRASES.some(phrase => contains(signal.text, phrase));
-      for (const [entry, found] of matchText(signal.text)) {
+      for (const [entry, found] of matchAsked(signal.source, signal.text)) {
         const kind: MatchKind = found === 'generic' && entry.key === 'fullName' && person ? 'word' : found;
         const strength = (MATCH_STRENGTH[kind] ?? 0) * (kind === 'exact' ? 1 : either) * (WORD_MATCHES.has(kind) ? aside : 1);
         add(entry.key, { source: signal.source, signal: signal.raw, weight: Math.min(0.95, base * boost * strength), match: kind });
