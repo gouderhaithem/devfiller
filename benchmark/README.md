@@ -336,6 +336,17 @@ a question people answer, is deliberately not one of them), and no field the old
 is filled now. Still filled: unlabelled boxes named `url` with nothing else to
 tell them apart from a real website field.
 
+Words were then mined from the labelled training forms: words in fields the rules left unknown that
+name one type on at least three websites. Kept: "your job", "current job", "what do you do" and
+"ما هو عملك" (job title; "Job" alone stays unknown, since "Job ID", "Job location" and "Job type" share
+it), "job function" (department), "middle initial", "anything else", "additional details",
+"explanation" (message), "birthdate", "membership", "policy" and "contract number" (reference),
+"pincode", "honoree name", "sender name", "contact person", "am pm", "village" and "مبلغ" (amount).
+Three fixture fields ("Anything else…?" in r11 and r12) were relabelled `message`, like the 19 real
+fields and n13 with that wording. On round 4, which the mining never read: rules 90.9% → 91.1% F1
+(985 → 959 mistakes, 27 fixed, 1 broken: a text area no longer read as the message once its form's
+AM/PM select made the form a booking), rules + model 91.7% → 91.8% (867 → 862).
+
 ## Against other form fillers
 
 `node scripts/model/run.mjs compare <out.json> <folders…>` runs DevFiller's shipped engine and other fillers' Chrome extensions on the same labelled pages,
