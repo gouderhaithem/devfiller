@@ -384,7 +384,7 @@ describe('placeholders without a label', () => {
   });
 
   it('takes no ordinary phrase for a sample answer', () => {
-    for (const text of ['file.pdf', 'v1.2', 'example.com', 'first_name', 'e.g.', 'Select manager', 'Assign to assistant', 'Max price', 'Sales Co', 'Choose a plan SA', 'Total 2 way', 'Table 4 Dr', 'Place 2']) {
+    for (const text of ['file.pdf', 'v1.2', 'example.com', 'first_name', 'e.g.', 'Select manager', 'Assign to assistant', 'Max price', 'Sales Co', 'Choose a plan SA', 'Total 2 way', 'Table 4 Dr', 'Place 2', 'Max', 'Min']) {
       expect(sampleType(text), text).toBeUndefined();
     }
   });
@@ -427,6 +427,12 @@ describe('a years question about a job', () => {
     expect(typeOf('<input placeholder="Depuis combien d’années faites-vous ce métier ?">')).toBe('experience');
     expect(typeOf('<input placeholder="Combien d\'années dans ce poste ?">')).toBe('experience');
   });
+
+  it('reads a years question about anything else as no experience', () => {
+    for (const text of ["Depuis combien d'années habitez-vous à cette adresse ?", "Sur combien d'années souhaitez-vous emprunter ?", "Depuis combien d'années êtes-vous client ?"]) {
+      expect(typeOf(`<input placeholder="${text}">`), text).not.toBe('experience');
+    }
+  });
 });
 
 // Real French and Arabic pages (web-forms-fr-ar-3): location searches, travel questions,
@@ -445,7 +451,11 @@ describe('places and split names', () => {
   });
 
   it('reads a travel question as a city', () => {
-    for (const text of ["D'où partez-vous ?", 'Où allez-vous ?', 'Where are you flying from?', 'Where are you going?', 'إلى أين تسافر؟']) expect(typeOf(`<input placeholder="${text}">`), text).toBe('city');
+    for (const text of ["D'où partez-vous ?", 'Où allez-vous ?', 'Where are you flying from?', 'Where are you going?', 'إلى أين تسافر؟', 'من أين تسافر؟']) expect(typeOf(`<input placeholder="${text}">`), text).toBe('city');
+  });
+
+  it('keeps "how did you hear about us" in Arabic away from the city', () => {
+    for (const text of ['من أين سمعت عنا؟', 'من أين تعرفت علينا؟']) expect(typeOf(`<label for="h">${text}</label><input id="h">`), text).not.toBe('city');
   });
 
   it('never takes a list of destinations for the person\'s country', () => {
