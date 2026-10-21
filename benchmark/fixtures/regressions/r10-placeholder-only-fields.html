@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Regression: fields described only by their placeholder</title></head>
+<body>
+<main>
+  <!-- Found on 20 October 2026: with no label, an instruction ("Enter your email", "Entrez votre
+       nom", "أدخل بريدك الإلكتروني") lost confidence or went unknown, and a sample answer ("John",
+       "Acme Inc.", "e.g. Paris") was never read as the kind of value it shows. -->
+  <form action="/signup" method="post" data-form-type="other">
+    <input name="f_1" placeholder="Enter your email" data-expect="email" data-value-pattern="@">
+    <input name="f_2" placeholder="Please type your phone number" data-expect="phone">
+    <input name="f_3" placeholder="Website (optional)" data-expect="website">
+    <input name="f_4" placeholder="John" data-expect="firstName">
+    <input name="f_5" placeholder="Doe" data-expect="lastName">
+    <input name="f_6" placeholder="Acme Inc." data-expect="company">
+    <input name="f_7" placeholder="221B Baker Street" data-expect="address">
+    <input name="f_8" placeholder="e.g. London" data-expect="city">
+    <input name="f_9" placeholder="@johndoe" data-expect="username">
+    <input name="f_10" placeholder="How did you hear about us?" data-expect="unknown">
+    <button type="submit">Sign up</button>
+  </form>
+  <form action="/inscription" method="post" lang="fr" data-form-type="other">
+    <input name="c1" placeholder="Votre prénom" data-expect="firstName">
+    <input name="c2" placeholder="Entrez votre nom" data-expect="lastName">
+    <input name="c3" placeholder="Saisissez votre ville" data-expect="city">
+    <input name="c4" placeholder="Jean Dupont" data-expect="fullName">
+    <input name="c5" placeholder="12 rue de la Paix" data-expect="address">
+    <input name="c6" placeholder="Ex : Sonatrach SPA" data-expect="company">
+    <input name="c7" placeholder="ex: Développeur web" data-expect="jobTitle">
+    <input name="c8" placeholder="jean.dupont" data-expect="username">
+    <button type="submit">Envoyer</button>
+  </form>
+  <form action="/ar" method="post" dir="rtl" lang="ar" data-form-type="contact">
+    <input name="a1" placeholder="أدخل اسمك" data-expect="fullName">
+    <input name="a2" placeholder="أدخل بريدك الإلكتروني" data-expect="email" data-value-pattern="@">
+    <input name="a3" placeholder="رقم هاتفك" data-expect="phone">
+    <input name="a4" placeholder="أدخل مدينتك" data-expect="city">
+    <input name="a5" placeholder="مثال: محمد" data-expect="firstName">
+    <textarea name="a6" placeholder="اكتب رسالتك" data-expect="message"></textarea>
+    <button type="submit">إرسال</button>
+  </form>
+</main>
+</body>
+</html>

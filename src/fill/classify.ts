@@ -2,7 +2,7 @@ import type { FieldKey } from '../data';
 import type { Control } from './types';
 import { fields } from '../fields';
 import {
-  AGREEING_ANSWER, AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
+  AGREEING_ANSWER, ALIAS_ENTRIES, AUTOCOMPLETE, COMPOUND_PARTS, CONFIRMABLE_TYPES, CONFIRM_PHRASES, CONSENT, DATE_FIELD_TYPES, EXACT, FUZZY_POOL, INPUT_MODE_HINTS, INPUT_TYPE_HINTS,
   BARE_CODE_PHRASES, CHECKBOX_CONSENT, OTHER_CODES, TOPIC_ONLY, CIVILITY, DECLARATION, DESCRIBING, DESCRIBING_ANSWER, DOCUMENT_PHRASES, NAMED_THING_ENDINGS, NAMED_THING_PHRASES, NOT_TYPOS, PERSON_ROLE_PHRASES, GLUE_WORDS, ID_NUMBER_PHRASES, PLAIN_CARD_PHRASES, LANGUAGE_PHRASES, OTHER_CARD_PHRASES, PLACEHOLDER_OPTION, SESSION, JOINED, MULTILINE_TYPES, NUMERIC_TYPES, PHRASES, QUALIFIERS, SEARCH_PHRASES, SELECT_TYPES, SENSITIVE_GLUED, SENSITIVE_PHRASES, SENSITIVE_SECTION_PHRASES, SLUG_PHRASES, TOPIC_QUESTION, TOPIC_NOUNS, PERMISSION_ANSWER, REQUEST_KIND, OTHER_ANSWER, WEAK_CARD_PHRASES, WORDS, YES_NO,
   type AliasEntry, type SensitiveKind,
 } from './dictionary';
@@ -10,6 +10,7 @@ import { autocompleteToken, composedText, describeSignals, formOf, isChoice, isD
 import { MONTH_SET, optionLists, optionName } from './vocabulary';
 import { unitOf, type UnitKind } from './units';
 import { placeholderOf, placeholderShape, SHAPE_TYPES } from './placeholder';
+import { sampleType } from './examples';
 import { normalize } from './normalize';
 
 export type FieldType = FieldKey | 'unknown' | `skip:${SensitiveKind | 'consent' | 'session'}`;
@@ -156,6 +157,42 @@ export function matchText(text: string): Match[] {
   return found;
 }
 
+// "Enter your email", "What's your role?", "Quel est votre poste ?", "ما هي وظيفتك", "Website (optional)":
+// the instruction or question and the remark around the field's name. "Type of vehicle" keeps its "type".
+const INSTRUCTION = /^(?:(?:please|kindly|veuillez|merci de|svp|من فضلك|الرجاء|يرجي) )?(?:(?:what s|whats|what is|what are|which is|quel est|quelle est|quels sont|quelles sont|ما هو|ما هي|ماهو|ماهي) |(?:enter|type|input|insert|provide|add|write|fill in|put|give|specify|choose|select|pick|saisir|saisissez|entrer|entrez|taper|tapez|indiquer|indiquez|renseigner|renseignez|ecrire|ecrivez|inserer|inserez|choisir|choisissez|selectionner|selectionnez|preciser|precisez|ادخل|ادخلي|اكتب|اكتبي|اختر|اختاري|حدد|حددي|ادخال)(?! (?:of|de|du|des|d) )(?: (?:in|here|ici))? )?(?:(?:your|the|a|an|votre|vos|ton|ta|tes|le|la|les|l|un|une) )?/;
+const REMARK = / (?:optional|required|facultatif|facultative|optionnel|optionnelle|obligatoire|requis|اختياري|اجباري|here|ici)$/;
+// "Pick a username, e.g. jdoe_92", "Votre ville, ex : Lyon": the sample after the name.
+const TRAILING_EXAMPLE = / (?:e g|eg|ex|par ex|par exemple|for example|such as|exemple|مثال|مثلا)(?: .*)?$/;
+// Every word of every alias, so "ميلادك" is read as the "الميلاد" of "تاريخ الميلاد".
+const ALIAS_TOKENS: ReadonlySet<string> = new Set(ALIAS_ENTRIES.flatMap(entry => entry.tokens));
+const known = (text: string) => EXACT.has(text) || WORDS.has(text) || ALIAS_TOKENS.has(text);
+
+// "بريدك", "رسالتك", "موظفيك": the reader's own noun, which the dictionary holds with its article
+// ("البريد", "الرسالة", "الموظفين").
+function withoutPossessive(token: string): string {
+  const stem = token.match(/^(\p{Script=Arabic}{2,}?)(?:كم|كن|ك)$/u)?.[1];
+  if (!stem || stem.startsWith('ال') || known(token)) return token;
+  const nouns = [`ال${stem.replace(/ت$/, 'ة')}`, ...(stem.endsWith('ي') ? [`ال${stem}ن`] : [])];
+  return nouns.find(known) ?? token;
+}
+
+// The field's name inside an instruction, or the text itself when there is no instruction.
+export function askedFor(text: string): string {
+  return text.replace(INSTRUCTION, '').replace(TRAILING_EXAMPLE, '').replace(REMARK, '').split(' ').map(withoutPossessive).join(' ');
+}
+
+// Sources a person reads, where an instruction can surround the field's name.
+const ASKING_SOURCES: ReadonlySet<SignalSource> = new Set(['label', 'aria-label', 'aria-labelledby', 'placeholder', 'title', 'nearby']);
+const WHOLE_MATCHES: ReadonlySet<MatchKind> = new Set(['exact', 'joined', 'plural']);
+// "Your message" is an alias as written; "Enter your email" is matched once the instruction is gone.
+function matchAsked(source: SignalSource, text: string): Match[] {
+  const found = matchText(text);
+  if (!ASKING_SOURCES.has(source) || found.some(([, kind]) => WHOLE_MATCHES.has(kind))) return found;
+  const asked = askedFor(text);
+  const plain = asked && asked !== text ? matchText(asked) : [];
+  return plain.length ? plain : found;
+}
+
 // Card, one-time-code and bank fields, found before any scoring so they can never be filled.
 // `weak` marks a card word other documents share ("Expiry", "PIN"): the form must confirm it.
 export function sensitiveKind(el: Control, signals: readonly Signal[]): { kind: SensitiveKind; evidence: Evidence; weak?: boolean } | undefined {
@@ -264,6 +301,7 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   const shape = placeholderShape(placeholder);
   const hinted = shape && SHAPE_TYPES[shape.kind];
   const picker = !hinted && isDatePicker(el) ? ['date', 0.8] as const : undefined;
+  if (!hinted && !picker) return sampleEvidence(placeholder, byType, add);
   const [type, weight] = hinted ?? picker ?? [];
   if (!type || !weight) return;
   // Phone shapes are only digits and dashes, which an order or reference number shares: when the
@@ -272,6 +310,15 @@ function formatEvidence(el: Control, byType: Map<FieldKey, Evidence[]>, add: (ty
   const evidence: Evidence = { source: 'format', signal: picker ? 'date picker' : placeholder, weight, match: 'type' };
   const named = type === 'date' ? [...byType.keys()].filter(key => DATE_FIELD_TYPES.has(key)) : [];
   for (const key of named.length ? named : [type]) add(key, evidence);
+}
+
+// A sample answer ("John", "Acme Inc.", "e.g. Paris") names the field only when its words don't:
+// beside a "Company" label, "John" is just a contact's example.
+const SAMPLE_WEIGHT = 0.65;
+function sampleEvidence(placeholder: string, byType: Map<FieldKey, Evidence[]>, add: (type: FieldKey, evidence: Evidence) => void) {
+  if ([...byType.values()].some(items => items.some(item => TEXT_SOURCES.has(item.source) && item.weight >= THRESHOLDS.medium))) return;
+  const type = sampleType(placeholder);
+  if (type) add(type, { source: 'format', signal: placeholder, weight: SAMPLE_WEIGHT, match: 'type' });
 }
 
 // An option that is a date: "2026-05-01", "01/05/2026", or a year on its own ("2000 sq ft" isn't).
@@ -390,15 +437,26 @@ export function moneyShare(texts: readonly string[]): number {
   return sums >= 2 && sums / answers.length >= 0.6 ? sums : 0;
 }
 
+// "La destination qui vous intéresse", name="SelectedDestination": a list of places to visit, not
+// where the person lives. "Pays de destination" still names a country.
+const DESTINATION = /(?:^| )(?:destination|destinations|وجهة|الوجهة|وجهتك)(?= |$)/;
+const PLACE_TYPES: ReadonlySet<FieldKey> = new Set(['city', 'postalCode', 'state', 'address', 'country', 'district', 'nationality']);
+function aboutDestination(signals: readonly Signal[]): boolean {
+  const said = signals.filter(signal => TEXT_SOURCES.has(signal.source));
+  return said.some(signal => DESTINATION.test(signal.text)) && !said.some(signal => matchText(signal.text).some(([entry]) => entry.key === 'country'));
+}
+
 function optionEvidence(texts: readonly string[], signals: readonly Signal[]): Array<[FieldKey, Evidence]> {
   if (texts.length < 2) return [];
   const aboutLanguage = signals.some(signal => TEXT_SOURCES.has(signal.source) && LANGUAGE_PHRASES.some(phrase => contains(signal.text, phrase)));
+  const destination = aboutDestination(signals);
   const found: Array<[FieldKey, Evidence]> = [];
   const names = texts.map(optionName);
   for (const [type, list] of optionLists()) {
     const hits = names.filter(name => list.has(name)).length;
     const ratio = hits / names.length;
     if (aboutLanguage && type === 'nationality') continue;
+    if (destination && PLACE_TYPES.has(type)) continue;
     if (hits >= 2 && ratio >= 0.5) found.push([type, { source: 'options', signal: `${hits} of ${names.length} options`, weight: Math.min(THRESHOLDS.medium - 0.02, 0.5 + 0.2 * ratio), match: 'options' }]);
   }
   // "Demande d'information, Réclamation, Autre": the kinds of request a contact form offers.
@@ -411,8 +469,8 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   const share = (pattern: RegExp) => texts.filter(text => pattern.test(text.trim())).length / texts.length;
   if (share(/^\d{1,2}[:h]\d{2}(?:\s?[ap]\.?m\.?)?$/i) >= 0.6) found.push(['time', { source: 'options', signal: 'clock times', weight: 0.7, match: 'options' }]);
   if (share(/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i) >= 0.5) found.push(['email', { source: 'options', signal: 'email addresses', weight: 0.7, match: 'options' }]);
-  // "+213", "+33 France", "Algérie (+213)": calling codes pick the country of a phone number.
-  if (share(/^\+\d{1,4}\b|\(\+\d{1,4}\)$/) >= 0.6) found.push(['country', { source: 'options', signal: 'calling codes', weight: 0.7, match: 'options' }]);
+  // "+213", "+33 France", "Algérie (+213)", "00213": calling codes pick the country of a phone number.
+  if (share(/^\+\d{1,4}\b|\(\+\d{1,4}\)$|^00\d{1,4}$/) >= 0.6) found.push(['country', { source: 'options', signal: 'calling codes', weight: 0.7, match: 'options' }]);
   // Worded answers ("Strongly agree") are a scale; plain numbers (1 to 4) may just be a count.
   const scale = isScale(texts);
   if (scale) found.push(['rating', { source: 'options', signal: `a scale of ${texts.length}`, weight: scale === 'words' ? 0.65 : 0.4, match: 'options' }]);
@@ -420,6 +478,25 @@ function optionEvidence(texts: readonly string[], signals: readonly Signal[]): A
   if (money) found.push(['amount', { source: 'options', signal: `${money} sums of money`, weight: 0.6, match: 'options' }]);
   return found;
 }
+
+// "Ville, code postal…", "City or zip code", "Adresse, ville ou code postal": a box taking any of
+// several kinds of place is a location search when it acts like one (an autocomplete list), names
+// three kinds, or is labelled a location. "Code postal / Ville" or "City, State" alone stays an address part.
+const LOCATION_WORDS = /(?:^| )(?:emplacement|localisation)(?= |$)/;
+const PLACE_LIST = /,|\/| (?:or|ou|او|أو) /iu;
+function placeSearch(el: Control, signals: readonly Signal[]): Signal | undefined {
+  const combobox = el.getAttribute('role') === 'combobox' || el.getAttribute('aria-autocomplete') === 'list';
+  const located = signals.some(signal => SOURCE_GROUP[signal.source] === 'visible' && LOCATION_WORDS.test(signal.text));
+  return signals.find(signal => {
+    if (!ASKING_SOURCES.has(signal.source) || !PLACE_LIST.test(signal.raw)) return false;
+    const kinds = new Set(matchAsked(signal.source, signal.text).map(([entry]) => entry.key).filter(key => PLACE_TYPES.has(key)));
+    return kinds.size >= 3 || (kinds.size >= 2 && (combobox || located));
+  });
+}
+
+// Form builders (Forminator) put autocomplete="name" on each part of a split name: when two fields
+// of a form claim the full name, each is a part, and its label says which.
+const sharesFullName = (el: Control) => (formOf(el)?.querySelectorAll('[autocomplete="name" i]').length ?? 0) > 1;
 
 // Positive evidence from every signal, grouped by type.
 function collectEvidence(el: Control, signals: readonly Signal[], answers?: readonly string[], grouped = false): Map<FieldKey, Evidence[]> {
@@ -445,12 +522,16 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
   const visibleBoost = signals.some(signal => signal.source === 'name' || signal.source === 'id') ? 1 : 1.06;
   // With no label, accessible name or placeholder, the title is the field's name (as for screen readers).
   const titleIsName = !signals.some(signal => NAMING_SOURCES.has(signal.source));
+  const search = placeSearch(el, signals);
   for (const signal of signals) {
-    if (signal.source === 'autocomplete') {
+    if (signal === search) {
+      add('search', { source: signal.source, signal: signal.raw, weight: Math.min(0.95, SOURCE_WEIGHT[signal.source] * visibleBoost * MATCH_STRENGTH.phrase!), match: 'phrase' });
+    } else if (signal.source === 'autocomplete') {
       const token = autocompleteToken(el).toLowerCase();
       // autocomplete="new-password" on a text field is a common way to turn browser autofill
       // off, not a password: only a password input is believed.
       if (PASSWORD_TOKENS.has(token) && isInput(el) && el.type !== 'password') continue;
+      if (token === 'name' && sharesFullName(el)) continue;
       if (Object.hasOwn(AUTOCOMPLETE, token)) add(AUTOCOMPLETE[token], { source: 'autocomplete', signal: token, weight: SOURCE_WEIGHT.autocomplete, match: 'autocomplete' });
     } else if (signal.source === 'type' || signal.source === 'inputmode') {
       const hints = signal.source === 'type' ? INPUT_TYPE_HINTS : INPUT_MODE_HINTS;
@@ -465,7 +546,7 @@ function collectEvidence(el: Control, signals: readonly Signal[], answers?: read
       const aside = signal.source === 'legend' && signal.text.split(' ').length > 6 ? 0.7 : 1;
       // "Manager's name", "Name of host": a generic "name" beside a person's role is that person's name.
       const person = PERSON_ROLE_PHRASES.some(phrase => contains(signal.text, phrase));
-      for (const [entry, found] of matchText(signal.text)) {
+      for (const [entry, found] of matchAsked(signal.source, signal.text)) {
         const kind: MatchKind = found === 'generic' && entry.key === 'fullName' && person ? 'word' : found;
         const strength = (MATCH_STRENGTH[kind] ?? 0) * (kind === 'exact' ? 1 : either) * (WORD_MATCHES.has(kind) ? aside : 1);
         add(entry.key, { source: signal.source, signal: signal.raw, weight: Math.min(0.95, base * boost * strength), match: kind });

@@ -1,5 +1,5 @@
 import type { Control } from './types';
-import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP } from './dictionary';
+import { NOT_SCALE_ANSWER, SCALE_ANSWER, TRAP, TRAP_FRAME, TRAP_NAME } from './dictionary';
 import { normalize } from './normalize';
 import { EXAMPLE_PREFIX, placeholderShape } from './placeholder';
 
@@ -252,7 +252,10 @@ export function isTrap(el: Control): boolean {
   // Gravity Forms' honeypot, hidden by its stylesheet, which a page may load late or not at all.
   if (el.closest('.gform_validation_container, .gfield--type-honeypot')) return true;
   const hints = [el.getAttribute('placeholder'), labelText(el), el.getAttribute('aria-label'), el.getAttribute('title')];
-  if (hints.some(hint => TRAP.test(normalize(hint || '')))) return true;
+  if (hints.some(hint => TRAP.test(normalize(hint || '').replace(TRAP_FRAME, '')))) return true;
+  if ([el.getAttribute('name'), el.id].some(name => name && TRAP_NAME.test(name))) return true;
+  // A website box no one can tab to and the browser is told not to fill: a classic hidden trap.
+  if (el.getAttribute('tabindex') === '-1' && /^(?:off|nope|new-password)$/i.test(el.getAttribute('autocomplete') || '') && /^(?:website|url|homepage|site|web)$/i.test(el.getAttribute('name') || '')) return true;
   const box = el.getBoundingClientRect();
   return box.width > 0 && (box.right + scrollX <= 0 || box.bottom + scrollY <= 0);
 }

@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  former sealed holdout (n15), retired to regressions once tuned on fixture: label-less fields where the placeholder is the only clue.
+  No <label>, no aria-label, meaningless or absent name/id on every text field.
+  Written 2026-10-20. Do not tune the engine against this file.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Placeholder-only forms</title>
+<style>
+body{font:14px/1.4 sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem}
+input,select,textarea{display:block;width:100%;padding:.4rem;margin:.45rem 0;box-sizing:border-box}
+section{border:1px solid #ddd;padding:1rem;margin:1.5rem 0}
+.row{display:flex;gap:.5rem}.row>*{flex:1}
+</style>
+</head>
+<body>
+
+<section>
+<h2>Start your free trial</h2>
+<form data-form-type="signup" action="#" method="post">
+  <div class="row">
+    <input name="f_1" placeholder="Jane" data-expect="firstName">
+    <input name="f_2" placeholder="Doe" data-expect="lastName">
+  </div>
+  <input name="f_3" type="email" placeholder="Enter your work email" data-value-pattern="@" data-expect="email">
+  <input name="f_4" placeholder="Where do you work?" data-expect="company">
+  <input name="f_5" placeholder="What's your role? (optional)" data-expect="jobTitle">
+  <input name="f_6" type="tel" placeholder="Best number to reach you *" data-expect="phone">
+  <input name="f_7" placeholder="e.g. acme-corp.com" data-expect="website">
+  <input name="f_8" placeholder="Pick a handle, e.g. jdoe_92" data-expect="username">
+  <input name="f_9" type="password" placeholder="Choose a password (8+ characters)" data-expect="password">
+  <input name="f_10" placeholder="How many people on your team?" inputmode="numeric" data-expect="employeeCount">
+  <input name="f_11" placeholder="Promo code (optional)" data-expect="unknown">
+  <textarea name="f_12" placeholder="Anything else we should know?" data-expect="message"></textarea>
+  <button type="submit">Create account</button>
+</form>
+</section>
+
+<section lang="fr">
+<h2>Demande de devis</h2>
+<form data-form-type="contact" action="#" method="post">
+  <input placeholder="Tapez votre prénom" data-expect="firstName">
+  <input placeholder="Et votre nom de famille" data-expect="lastName">
+  <input name="input_3" placeholder="ex : Menuiserie Dubois SARL" data-expect="company">
+  <input name="input_4" placeholder="Votre adresse e-mail *" data-value-pattern="@" data-expect="email">
+  <input name="input_5" placeholder="06 12 34 56 78" data-expect="phone">
+  <input name="input_6" placeholder="12 rue des Lilas" data-expect="address">
+  <input name="input_7" placeholder="Bâtiment, étage (facultatif)" data-expect="address2">
+  <div class="row">
+    <input name="input_8" placeholder="Code postal" data-expect="postalCode">
+    <input name="input_9" placeholder="Indiquez votre ville" data-expect="city">
+  </div>
+  <input name="input_10" placeholder="JJ/MM/AAAA" data-expect="date">
+  <input name="input_11" placeholder="Objet de votre demande" data-expect="subject">
+  <textarea name="input_12" placeholder="Décrivez votre projet en quelques lignes…" data-expect="message"></textarea>
+  <input name="input_13" placeholder="Rechercher sur le site" type="search" data-expect="search">
+  <button type="submit">Envoyer</button>
+</form>
+</section>
+
+<section lang="ar" dir="rtl">
+<h2>التسجيل في الدورة</h2>
+<form data-form-type="signup" action="#" method="post">
+  <input name="field-1" placeholder="اكتب اسمك الثلاثي" data-expect="fullName">
+  <input name="field-2" placeholder="مثال: name@example.com" data-value-pattern="@" data-expect="email">
+  <input name="field-3" placeholder="رقم الجوال *" data-expect="phone">
+  <input name="field-4" placeholder="المدينة التي تقيم فيها" data-expect="city">
+  <input name="field-5" placeholder="رمز الدعوة إن وُجد" data-expect="unknown">
+  <input name="field-6" placeholder="تاريخ ميلادك (يوم/شهر/سنة)" data-expect="birthDate">
+  <input name="field-7" placeholder="جهة العمل (اختياري)" data-expect="company">
+  <input name="field-8" placeholder="المسمى الوظيفي" data-expect="jobTitle">
+  <input name="field-9" placeholder="كم سنة من الخبرة لديك؟" inputmode="numeric" data-expect="experience">
+  <input name="field-10" placeholder="رابط حسابك على لينكدإن" data-expect="website">
+  <input name="field-11" placeholder="..." data-expect="unknown">
+  <textarea name="field-12" placeholder="ملاحظات إضافية (اختياري)" data-expect="notes"></textarea>
+  <button type="submit">تسجيل</button>
+</form>
+</section>
+
+<section>
+<h2>Quick checkout / Livraison</h2>
+<form data-form-type="checkout" action="#" method="post">
+  <input placeholder="Full name / Nom complet" data-expect="fullName">
+  <input placeholder="221B Baker Street" data-expect="address">
+  <input placeholder="Apt, suite, unit" data-expect="address2">
+  <input placeholder="Lyon" data-expect="city">
+  <input placeholder="69003" data-expect="postalCode">
+  <input placeholder="+33 6 00 00 00 00" data-expect="phone">
+  <input placeholder="you@domain.fr" data-value-pattern="@" data-expect="email">
+  <input placeholder="Gift message (optional)" data-expect="unknown">
+  <button type="submit">Pay</button>
+</form>
+</section>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ import { classifyField, matchText, THRESHOLDS, usableKey } from '../src/fill/cla
 import { ALIAS_ENTRIES } from '../src/fill/dictionary';
 import { isMeaningless, nearbyText } from '../src/fill/extract';
 import { normalize } from '../src/fill/normalize';
+import { sampleType } from '../src/fill/examples';
 import { fillPage, panelPageAction, type FillRequest } from '../src/fill';
 import { TEST_IBAN } from '../src/fill/sensitive';
 import { generateIdentities, generateValues } from '../src/data';
@@ -253,7 +254,7 @@ describe('explainability', () => {
     expect(result.fields!.find(f => f.label === 'mystery')!.detected).toMatchObject({ type: 'unknown', label: 'Unknown' });
   });
   it('explains low-confidence skips when guessing is off', () => {
-    document.body.innerHTML = '<input id="x" placeholder="Company (optional)">';
+    document.body.innerHTML = '<input id="x" placeholder="Company you work for">';
     const result = fillPage({ ...request, fillUnknown: false });
     expect(input('x').value).toBe('');
     expect(result.fields![0].reason).toMatch(/^Not sure this is company \(\d+%\)/);
@@ -333,5 +334,151 @@ describe('real-world fields', () => {
     expect(typeOf('<label for="n">Name</label><input type="text" id="n">')).not.toBe('unknown');
     expect(typeOf('<label for="c">Contact Name *</label><input type="text" id="c">')).toBe('fullName');
     expect(typeOf('<label for="h">Account holder name</label><input type="text" id="h">')).toBe('fullName');
+  });
+});
+
+// A label-less field described only by its placeholder, the way many sites build forms.
+describe('placeholders without a label', () => {
+  const placeholder = (text: string) => classify(`<input type="text" placeholder="${text}">`);
+
+  it('reads an instruction the way it reads the bare name', () => {
+    for (const [text, type] of [
+      ['Enter your email', 'email'], ['Please type your phone number', 'phone'], ['Your phone', 'phone'], ['Website (optional)', 'website'],
+      ['Votre prénom', 'firstName'], ['Saisissez votre ville', 'city'], ['Entrez votre nom', 'lastName'], ['Ville (facultatif)', 'city'],
+      ['أدخل بريدك الإلكتروني', 'email'], ['أدخل اسمك', 'fullName'], ['اكتب رسالتك', 'message'], ['رقم هاتفك', 'phone'], ['أدخل مدينتك', 'city'],
+    ] as const) {
+      const found = placeholder(text);
+      expect(found.type, text).toBe(type);
+      expect(found.confidence, text).toBeGreaterThanOrEqual(THRESHOLDS.medium);
+    }
+  });
+
+  it('keeps an alias that already starts with "your"', () => {
+    expect(typeOf('<input placeholder="Your message">')).toBe('message');
+    expect(typeOf('<input placeholder="Your name">')).toBe('fullName');
+  });
+
+  it('leaves Arabic words that only end like a possessive alone', () => {
+    expect(typeOf('<input placeholder="اسم البنك">')).not.toBe('fullName');
+  });
+
+  it('recognizes a sample answer by what it looks like', () => {
+    for (const [text, type] of [
+      ['John', 'firstName'], ['Doe', 'lastName'], ['John Doe', 'fullName'], ['Jean Dupont', 'fullName'], ['e.g. Paris', 'city'], ['Oran', 'city'],
+      ['Acme Inc.', 'company'], ['Ex : Sonatrach SPA', 'company'], ['12 rue de la Paix', 'address'], ['221B Baker Street', 'address'],
+      ['jean.dupont', 'username'], ['@johndoe', 'username'], ['ex: Développeur web', 'jobTitle'], ['مثال: محمد', 'firstName'], ['France', 'country'],
+    ] as const) {
+      const found = placeholder(text);
+      expect(found.type, text).toBe(type);
+      expect(found.confidence, text).toBeGreaterThanOrEqual(THRESHOLDS.low);
+    }
+  });
+
+  it('lets a real label outrank a sample answer', () => {
+    expect(typeOf('<label for="x">Company</label><input id="x" placeholder="John">')).toBe('company');
+    expect(typeOf('<label for="x">Last name</label><input id="x" placeholder="e.g. Martin">')).toBe('lastName');
+  });
+
+  it('reads nothing into an ordinary word or sentence', () => {
+    for (const text of ['Search…', 'Anything else?', 'Hello', 'Type here', 'Optional']) expect(placeholder(text).type, text).toMatch(/^(unknown|search|message)$/);
+  });
+
+  it('takes no ordinary phrase for a sample answer', () => {
+    for (const text of ['file.pdf', 'v1.2', 'example.com', 'first_name', 'e.g.', 'Select manager', 'Assign to assistant', 'Max price', 'Sales Co', 'Choose a plan SA', 'Total 2 way', 'Table 4 Dr', 'Place 2', 'Max', 'Min']) {
+      expect(sampleType(text), text).toBeUndefined();
+    }
+  });
+});
+
+// Placeholders that ask a question, or say the field's name inside a sentence.
+describe('placeholders that ask', () => {
+  const placeholder = (text: string) => classify(`<input type="text" placeholder="${text}">`);
+
+  it('reads the question for what it asks', () => {
+    for (const [text, type] of [
+      ['Where do you work?', 'company'], ['Who do you work for?', 'company'], ['Où travaillez-vous ?', 'company'], ['أين تعمل؟', 'company'],
+      ["What's your role?", 'jobTitle'], ['What is your job title?', 'jobTitle'], ['Quel est votre poste ?', 'jobTitle'], ['ما هي وظيفتك؟', 'jobTitle'],
+      ['How many employees do you have?', 'employeeCount'], ['Combien de salariés ?', 'employeeCount'], ['كم عدد موظفيك؟', 'employeeCount'],
+      ['How many years of experience?', 'experience'], ["Combien d'années d'expérience ?", 'experience'], ['كم سنة من الخبرة لديك؟', 'experience'],
+      ['Where do you live?', 'city'], ['Où habitez-vous ?', 'city'], ['When were you born?', 'birthDate'], ['كم عمرك؟', 'age'],
+    ] as const) expect(placeholder(text).type, text).toBe(type);
+  });
+
+  it('reads an Arabic possessive inside a phrase', () => {
+    expect(placeholder('تاريخ ميلادك').type).toBe('birthDate');
+    expect(placeholder('رقم جوالك').type).toBe('phone');
+    expect(placeholder('اكتب اسمك الثلاثي').type).toBe('fullName');
+    expect(placeholder('جهة العمل (اختياري)').type).toBe('company');
+    expect(placeholder('رابط حسابك على لينكدإن').type).toBe('website');
+  });
+
+  it('reads the name before a mid-sentence example', () => {
+    expect(placeholder('Pick a username, e.g. jdoe_92').type).toBe('username');
+    expect(placeholder('Votre ville, ex : Lyon').type).toBe('city');
+  });
+
+  it('keeps an open question unknown', () => {
+    for (const text of ['Is there anything else?', 'What brings you here?', 'Any special requests?']) expect(placeholder(text).type, text).not.toMatch(/^(company|jobTitle|city|employeeCount|experience)$/);
+  });
+});
+
+describe('a years question about a job', () => {
+  it('asks for experience, not the job', () => {
+    expect(typeOf('<input placeholder="Depuis combien d’années faites-vous ce métier ?">')).toBe('experience');
+    expect(typeOf('<input placeholder="Combien d\'années dans ce poste ?">')).toBe('experience');
+  });
+
+  it('reads a years question about anything else as no experience', () => {
+    for (const text of ["Depuis combien d'années habitez-vous à cette adresse ?", "Sur combien d'années souhaitez-vous emprunter ?", "Depuis combien d'années êtes-vous client ?"]) {
+      expect(typeOf(`<input placeholder="${text}">`), text).not.toBe('experience');
+    }
+  });
+});
+
+// Real French and Arabic pages (web-forms-fr-ar-3): location searches, travel questions,
+// destination lists, calling codes and split names.
+describe('places and split names', () => {
+  it('reads a box offering several kinds of place as a location search', () => {
+    expect(typeOf('<input role="combobox" aria-autocomplete="list" placeholder="Ville, code postal…">')).toBe('search');
+    expect(typeOf('<input role="combobox" placeholder="City or zip code">')).toBe('search');
+    expect(typeOf('<input placeholder="Adresse, ville ou code postal">')).toBe('search');
+    expect(typeOf('<label for="e">Emplacement</label><input id="e" placeholder="Ville, province ou territoire">')).toBe('search');
+  });
+
+  it('keeps a combined postcode and city box an address part', () => {
+    expect(typeOf('<label for="c">Code postal / Ville</label><input id="c">')).not.toBe('search');
+    expect(typeOf('<label for="c">City, State</label><input id="c">')).not.toBe('search');
+  });
+
+  it('reads a travel question as a city', () => {
+    for (const text of ["D'où partez-vous ?", 'Où allez-vous ?', 'Where are you flying from?', 'Where are you going?', 'إلى أين تسافر؟', 'من أين تسافر؟']) expect(typeOf(`<input placeholder="${text}">`), text).toBe('city');
+  });
+
+  it('keeps "how did you hear about us" in Arabic away from the city', () => {
+    for (const text of ['من أين سمعت عنا؟', 'من أين تعرفت علينا؟']) expect(typeOf(`<label for="h">${text}</label><input id="h">`), text).not.toBe('city');
+  });
+
+  it('never takes a list of destinations for the person\'s country', () => {
+    const options = ['Allemagne', 'Argentine', 'Australie', 'Brésil', 'Canada', 'Espagne', 'Italie', 'Japon'].map(o => `<option>${o}</option>`).join('');
+    expect(typeOf(`<label for="d">La destination qui vous intéresse</label><select id="d"><option value="">Choisir</option>${options}</select>`)).not.toBe('country');
+    expect(typeOf(`<select name="SelectedDestination"><option value="">Choisir</option>${options}</select>`)).not.toBe('country');
+    expect(typeOf(`<label for="p">Pays</label><select id="p"><option value="">Choisir</option>${options}</select>`)).toBe('country');
+  });
+
+  it('reads calling codes written with 00', () => {
+    const codes = ['0033', '0032', '0041', '00213', '0049', '0044'].map(o => `<option>${o}</option>`).join('');
+    expect(typeOf(`<select name="prefix_x"><option>Ind. tél.</option>${codes}</select>`)).toBe('country');
+  });
+
+  it('lets the label name each part of a split name that claims to be the full name', () => {
+    document.body.innerHTML = `<form>
+      <label for="a">Prénom *</label><input id="a" name="name-1" autocomplete="name">
+      <label for="b">Nom *</label><input id="b" name="name-2" autocomplete="name"></form>`;
+    expect(classifyField(input('a')).type).toBe('firstName');
+    expect(classifyField(input('b')).type).toBe('lastName');
+  });
+
+  it('still believes autocomplete="name" on a single name field', () => {
+    expect(typeOf('<label for="n">Nom</label><input id="n" name="author" autocomplete="name">')).toBe('fullName');
   });
 });

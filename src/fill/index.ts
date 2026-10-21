@@ -13,6 +13,7 @@ import { fillCard } from './cards';
 import { fillSensitive, looksLikeConsent, testKind } from './sensitive';
 import { classifyWidget, listWidgets, WIDGET_SELECTOR } from './widgets';
 import { DECIMAL_KEYS, localizeDecimal, measurementValue, referenceValue } from './specific';
+import { profileLink } from './links';
 import { alternatives, firstValid, forgetAlternatives, formatDateText, rememberAlternatives } from './validation';
 import { DATE_FIELD_TYPES } from './dictionary';
 import { setNativeChecked, setNativeValue, snapshot } from './apply';
@@ -125,8 +126,9 @@ function aboutSomeoneElse(found: Classification, key: FieldKey): boolean {
 }
 
 // Measurements and references are shaped by their field; numbers get the page's decimal separator.
-function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey): string {
+function shapedValue(ctx: FillContext, el: Control, found: Classification, key: FieldKey, sig: ControlSignals): string {
   const values = valuesFor(ctx, el);
+  if (key === 'website') return profileLink(sig.signals, values.username) ?? values.website;
   if (key === 'measurement') return measurementValue(el, found, ctx.random(el));
   const arabicText = !(el instanceof HTMLSelectElement) && localeOf(ctx, el) === 'ar';
   if (key === 'country') { const code = countryCode(el, values.country); return arabicText && code === values.country ? ARABIC_NAMES[code] ?? code : code; }
@@ -169,7 +171,7 @@ function resolveValue(ctx: FillContext, el: Control, index: number, sig: Control
     const related = key && relatedValue(ctx, found, key);
     const someoneElse = !!key && !related && aboutSomeoneElse(found, key);
     if (someoneElse) ctx.others.add(el);
-    if (key) resolved = { value: related ? related.value : someoneElse ? ctx.other[key] : shapedValue(ctx, el, found, key), key, literal: !!related?.literal, generic: false, ai: false };
+    if (key) resolved = { value: related ? related.value : someoneElse ? ctx.other[key] : shapedValue(ctx, el, found, key, sig), key, literal: !!related?.literal, generic: false, ai: false };
   }
   // Contextual text must reach AI even when a familiar label matched a local sample.
   // Explicit rules and coherent identity/contact fields keep their existing generators.
